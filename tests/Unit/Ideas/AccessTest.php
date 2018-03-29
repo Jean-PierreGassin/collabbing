@@ -6,5 +6,18 @@ use Tests\TestCase;
 
 class AccessTest extends TestCase
 {
+    public function testThatAUserCanAccessAnOpenIdea()
+    {
 
+    }
+
+    public function testThatAUserCannotAccessAClosedIdea()
+    {
+
+    }
+
+    public function testThatAUserCannotApplyToTheirOwnIdea()
+    {
+
+    }
 }
