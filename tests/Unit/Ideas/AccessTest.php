@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Tests\Unit\Ideas;
 
+use Tests\TestCase;
 
-class AccessTest
+class AccessTest extends TestCase
 {
 
 }

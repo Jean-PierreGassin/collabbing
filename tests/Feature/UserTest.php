@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Tests\Feature;
 
+use Tests\TestCase;
 
-class UserTest
+class UserTest extends TestCase
 {
 
 }

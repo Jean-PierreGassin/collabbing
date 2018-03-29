@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Tests\Unit\Frontend;
 
+use Tests\TestCase;
 
-class DisplayTest
+class DisplayTest extends TestCase
 {
 
 }
