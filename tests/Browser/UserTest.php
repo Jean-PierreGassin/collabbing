@@ -3,22 +3,20 @@
 namespace Tests\Browser;
 
 use Tests\DuskTestCase;
-use Tests\Browser\Traits\SeedsDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserTest extends DuskTestCase
 {
-    use RefreshDatabase, SeedsDatabase;
+    protected $user;
 
     public function testThatAUserCanSeeTheirDashboard()
     {
         $this->browse(function ($first) {
-            $this->createUserWithClosedIdea();
+            $this->user = \App\User::inRandomOrder()->first();
 
-            $first->loginAs(\App\User::find(1));
+            $first->loginAs($this->user);
         });
 
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/dashboard')
                 ->assertSee('Dashboard');
         });
@@ -26,7 +24,7 @@ class UserTest extends DuskTestCase
 
     public function testThatAUserCanSeeTheirProfile()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/users/me')
                 ->assertSee('Your Profile');
         });
@@ -34,9 +32,9 @@ class UserTest extends DuskTestCase
 
     public function testThatAUserCanSeeAnotherUsersProfile()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/users/john.smith')
-                ->assertSee('John Smith\'s Profile');
+                ->assertSee($this->user . '\'s Profile');
         });
     }
 }

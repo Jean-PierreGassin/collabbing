@@ -3,16 +3,12 @@
 namespace Tests\Browser\Feature;
 
 use Tests\DuskTestCase;
-use Tests\Browser\Traits\SeedsDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class UserActionTest extends DuskTestCase
+class UserTest extends DuskTestCase
 {
-    use RefreshDatabase, SeedsDatabase;
-
     public function testThatAGuestCanRegister()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/users/register')
                 ->type('first_name', 'John')
                 ->type('last_name', 'Smith')
@@ -25,7 +21,7 @@ class UserActionTest extends DuskTestCase
 
     public function testThatAGuestCanLogin()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/users/login')
                 ->type('email', 'john.smith@apples.com')
                 ->type('password', 'unbreakable')
@@ -37,12 +33,10 @@ class UserActionTest extends DuskTestCase
     public function testThatAUserCanUpdateTheirProfile()
     {
         $this->browse(function ($first) {
-            $this->createUserWithClosedIdea();
-
-            $first->loginAs(\App\User::find(1));
+            $first->loginAs(\App\User::inRandomOrder()->first());
         });
 
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/users/me/edit')
                 ->type('first_name', 'James')
                 ->type('last_name', 'Jones')
@@ -53,7 +47,7 @@ class UserActionTest extends DuskTestCase
 
     public function testThatAUserCanLogout()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/')
                 ->press('Logout')
                 ->assertPathIs('/');

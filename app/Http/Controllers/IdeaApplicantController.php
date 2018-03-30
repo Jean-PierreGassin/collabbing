@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\IdeaApplicant;
+use App\IdeaApplication;
 use Illuminate\Http\Request;
 
-class IdeaApplicantController extends Controller
+class IdeaApplicationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class IdeaApplicantController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaApplicant  $ideaApplicant
+     * @param  \App\IdeaApplication  $ideaApplication
      * @return \Illuminate\Http\Response
      */
-    public function show(IdeaApplicant $ideaApplicant)
+    public function show(IdeaApplication $ideaApplication)
     {
         //
     }
@@ -52,10 +52,10 @@ class IdeaApplicantController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaApplicant  $ideaApplicant
+     * @param  \App\IdeaApplication  $ideaApplication
      * @return \Illuminate\Http\Response
      */
-    public function edit(IdeaApplicant $ideaApplicant)
+    public function edit(IdeaApplication $ideaApplication)
     {
         //
     }
@@ -64,10 +64,10 @@ class IdeaApplicantController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\IdeaApplicant  $ideaApplicant
+     * @param  \App\IdeaApplication  $ideaApplication
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, IdeaApplicant $ideaApplicant)
+    public function update(Request $request, IdeaApplication $ideaApplication)
     {
         //
     }
@@ -75,10 +75,10 @@ class IdeaApplicantController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\IdeaApplicant  $ideaApplicant
+     * @param  \App\IdeaApplication  $ideaApplication
      * @return \Illuminate\Http\Response
      */
-    public function destroy(IdeaApplicant $ideaApplicant)
+    public function destroy(IdeaApplication $ideaApplication)
     {
         //
     }

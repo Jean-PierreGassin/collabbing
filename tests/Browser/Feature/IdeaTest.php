@@ -3,22 +3,16 @@
 namespace Tests\Browser\Feature;
 
 use Tests\DuskTestCase;
-use Tests\Browser\Traits\SeedsDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class IdeaActionTest extends DuskTestCase
+class IdeaTest extends DuskTestCase
 {
-    use RefreshDatabase, SeedsDatabase;
-
     public function testThatAUserCanCreateAnIdea()
     {
         $this->browse(function ($first) {
-            $this->createUserWithClosedIdea();
-
-            $first->loginAs(\App\User::find(2));
+            $first->loginAs(\App\User::inRandomOrder()->first());
         });
 
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/create')
                 ->type('title', 'My Amazing Idea!')
                 ->type('description', 'It\'s about toasters.')
@@ -30,7 +24,7 @@ class IdeaActionTest extends DuskTestCase
 
     public function testThatAUserCanCommentOnAnIdea()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/1')
                 ->type('comment', 'What a great idea!')
                 ->press('Submit Comment')
@@ -40,7 +34,7 @@ class IdeaActionTest extends DuskTestCase
 
     public function testThatAUserCanSupportAnIdea()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/1')
                 ->press('Support Idea')
                 ->assertSee('Supported');
@@ -49,7 +43,7 @@ class IdeaActionTest extends DuskTestCase
 
     public function testThatAUserCanApplyToCollaborateOnAnIdea()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/1/apply')
                 ->type('description', 'I\'m super good at this, accept me!')
                 ->press('Submit Application')
@@ -57,21 +51,21 @@ class IdeaActionTest extends DuskTestCase
         });
     }
 
-    public function testThatAUserCanApproveIdeaApplicants()
+    public function testThatAUserCanApproveIdeaApplications()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/4/manage')
-                ->press('Approve Applicant')
+                ->press('Approve Application')
                 ->assertPathIs('/ideas/3/manage')
                 ->assertSee('Approved');
         });
     }
 
-    public function testThatAUserCanDeclineIdeaApplicants()
+    public function testThatAUserCanDeclineIdeaApplications()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/4/manage')
-                ->press('Decline Applicant')
+                ->press('Decline Application')
                 ->assertPathIs('/ideas/3/manage')
                 ->assertSee('Declined');
         });
@@ -79,7 +73,7 @@ class IdeaActionTest extends DuskTestCase
 
     public function testThatAUserCanCloseAnIdea()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/ideas/4/manage')
                 ->press('Close Idea')
                 ->assertPathIs('/ideas/3')

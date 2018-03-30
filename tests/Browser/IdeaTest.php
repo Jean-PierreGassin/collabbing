@@ -3,22 +3,20 @@
 namespace Tests\Browser;
 
 use Tests\DuskTestCase;
-use Tests\SeedsDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class IdeaTest extends DuskTestCase
 {
-    use RefreshDatabase, SeedsDatabase;
+    protected $idea;
 
     public function testThatAUserCanSeeAListOfIdeas()
     {
         $this->browse(function ($first) {
-            $this->createUserWithClosedIdea();
+            $user = \App\User::inRandomOrder()->first();
 
-            $first->loginAs(\App\User::find(1));
+            $first->loginAs($user);
         });
 
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/')
                 ->assertSee('Ideas');
         });
@@ -26,7 +24,7 @@ class IdeaTest extends DuskTestCase
 
     public function testThatAUserCanSeeHighlightedIdeas()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function ($browser) {
             $browser->visit('/')
                 ->assertSee('Trending Ideas');
         });
@@ -34,49 +32,51 @@ class IdeaTest extends DuskTestCase
 
     public function testThatAUserCanSeeAnIdeasComments()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->idea = \App\Idea::inRandomOrder()->first();
+
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertSee('Comments');
         });
     }
 
     public function testThatAUserCanSeeAnIdeasSupporters()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertSee('Supporters');
         });
     }
 
     public function testThatAUserCanSeeAnIdeasCollaborators()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertSee('Collaborators');
         });
     }
 
-    public function testThatAUserCanSeeTheirIdeasPendingApplicants()
+    public function testThatAUserCanSeeTheirIdeasPendingApplications()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1/manage')
-                ->assertSee('Pending Applicants');
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                ->assertSee('Pending Applications');
         });
     }
 
-    public function testThatAUserCanSeeTheirIdeasApprovedApplicants()
+    public function testThatAUserCanSeeTheirIdeasApprovedApplications()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1/manage')
-                ->assertSee('Approved Applicants');
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                ->assertSee('Approved Applications');
         });
     }
 
-    public function testThatAUserCanSeeTheirIdeasDeclinedApplicants()
+    public function testThatAUserCanSeeTheirIdeasDeclinedApplications()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1/manage')
-                ->assertSee('Declined Applicants');
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                ->assertSee('Declined Applications');
         });
     }
 }

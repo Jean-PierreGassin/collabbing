@@ -21,8 +21,8 @@ class Idea extends Model
         return $this->hasMany(IdeaComment::class);
     }
 
-    public function applicants()
+    public function applications()
     {
-        return $this->hasMany(IdeaApplicant::class);
+        return $this->hasMany(IdeaApplication::class);
     }
 }

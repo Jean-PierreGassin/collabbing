@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIdeaApplicantsTable extends Migration
+class CreateIdeaApplicationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateIdeaApplicantsTable extends Migration
      */
     public function up()
     {
-        Schema::create('idea_applicants', function (Blueprint $table) {
+        Schema::create('idea_applications', function (Blueprint $table) {
             $table->increments('id');
 
             $table->unsignedInteger('user_id');
@@ -28,6 +28,7 @@ class CreateIdeaApplicantsTable extends Migration
                 ->on('ideas')
                 ->onDelete('cascade');
 
+            $table->mediumText('content');
             $table->timestamps();
         });
     }
@@ -39,6 +40,6 @@ class CreateIdeaApplicantsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('idea_applicants');
+        Schema::dropIfExists('idea_applications');
     }
 }

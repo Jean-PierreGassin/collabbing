@@ -3,71 +3,71 @@
 namespace Tests\Browser;
 
 use Tests\DuskTestCase;
-use Tests\Browser\Traits\SeedsDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AccessTest extends DuskTestCase
 {
-    use RefreshDatabase, SeedsDatabase;
+    protected $idea;
 
     public function testThatAGuestCannotSeeTheApplyButtonOnAnIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->idea = \App\Idea::inRandomOrder()->first();
+
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Apply to Collaborate');
         });
     }
 
-    public function testThatAGuestCannotSeeTheSupportButtonOnAClosedIdea()
+    public function testThatAGuestCannotSeeTheSupportButtonOnAnIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Support Idea 👍');
         });
     }
 
-    public function testThatAGuestCannotSeeTheCommentCreationBoxOnAClosedIdea()
+    public function testThatAGuestCannotSeeTheCommentCreationBoxOnAnIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Submit Comment');
         });
     }
 
     public function testThatAUserCannotSeeTheApplyButtonOnTheirOwnIdea()
     {
-        $this->browse(function ($first) {
-            $this->createUserWithClosedIdea();
+        $user = $this->idea->user;
 
-            $first->loginAs(\App\User::find(1));
+        $this->browse(function ($first) use ($user) {
+            $first->loginAs($user);
         });
 
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Apply to Collaborate');
         });
     }
 
     public function testThatAUserCannotSeeTheApplyButtonOnAClosedIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Apply to Collaborate');
         });
     }
 
     public function testThatAUserCannotSeeTheSupportButtonOnAClosedIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Support Idea 👍');
         });
     }
 
     public function testThatAUserCannotSeeTheCommentSubmitButtonOnAClosedIdea()
     {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/ideas/1')
+        $this->browse(function ($browser) {
+            $browser->visit('/ideas/' . $this->idea->id)
                 ->assertDontSee('Submit Comment');
         });
     }

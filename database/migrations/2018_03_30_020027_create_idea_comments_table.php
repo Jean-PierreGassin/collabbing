@@ -28,7 +28,7 @@ class CreateIdeaCommentsTable extends Migration
                 ->on('ideas')
                 ->onDelete('cascade');
 
-            $table->mediumText('data');
+            $table->mediumText('content');
             $table->timestamps();
         });
     }
