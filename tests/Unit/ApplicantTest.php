@@ -8,7 +8,7 @@ class ApplicantTest extends TestCase
 {
     public function testThatAnIdeaHasManyApplicants()
     {
-        $this->assertInstanceOf(App\Idea::class, $this->applicant->idea);
+        $this->assertInstanceOf(\App\Idea::class, $this->applicant->idea);
     }
 
     public function testThatAnApplicantHasOneIdea()
@@ -19,6 +19,6 @@ class ApplicantTest extends TestCase
     public function testThatAnApplicantHasOneOwner()
     {
         $this->assertCount(1, $this->applicant->user);
-        $this->assertInstanceOf(App\User::class, $this->applicant->user);
+        $this->assertInstanceOf(\App\User::class, $this->applicant->user);
     }
 }

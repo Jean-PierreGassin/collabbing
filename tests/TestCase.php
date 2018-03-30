@@ -21,6 +21,7 @@ abstract class TestCase extends BaseTestCase
 
     public function __construct()
     {
+        parent::setUp();
         parent::__construct();
 
         $this->createUserAndIdeas();

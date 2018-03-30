@@ -15,7 +15,7 @@ class IdeaActionTest extends DuskTestCase
         $this->browse(function ($first) {
             $this->createUserWithClosedIdea();
 
-            $first->loginAs(User::find(2));
+            $first->loginAs(\App\User::find(2));
         });
 
         $this->browse(function (Browser $browser) {

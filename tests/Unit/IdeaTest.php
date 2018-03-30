@@ -8,7 +8,7 @@ class IdeaTest extends TestCase
 {
     public function testThatAUserHasAnIdea()
     {
-        $this->assertInstanceOf(App\Idea::class, $this->idea);
+        $this->assertInstanceOf(\App\Idea::class, $this->idea);
     }
 
     public function testThatAUserHasManyIdeas()
@@ -19,6 +19,6 @@ class IdeaTest extends TestCase
     public function testThatAnIdeaHasOneUser()
     {
         $this->assertCount(1, $this->idea->user);
-        $this->assertInstanceOf(App\User::class, $this->idea->user);
+        $this->assertInstanceOf(\App\User::class, $this->idea->user);
     }
 }

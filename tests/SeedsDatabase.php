@@ -6,9 +6,13 @@ trait SeedsDatabase
 {
     public function createUserAndIdeas()
     {
-        $this->user = factory(\App\User::class)->make();
-
-        $this->user->ideas()->save(factory(\App\Idea::class, 3)->make());
+        $this->user = factory(\App\User::class)
+            ->create()
+            ->each(function ($user) {
+                $user->ideas()->save(
+                    factory(\App\Idea::class, 2)->create(['user_id' => $user->id])->make()
+                );
+            });
 
         $this->idea = $this->user->ideas->first();
         $this->comment = $this->user->comments->first();

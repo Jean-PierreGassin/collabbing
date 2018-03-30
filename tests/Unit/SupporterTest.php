@@ -8,7 +8,7 @@ class SupporterTest extends TestCase
 {
     public function testThatASupporterHasOneIdea()
     {
-        $this->assertInstanceOf(App\Idea::class, $this->supporter->idea);
+        $this->assertInstanceOf(\App\Idea::class, $this->supporter->idea);
     }
 
     public function testThatAnIdeaHasManySupporters()
@@ -19,6 +19,6 @@ class SupporterTest extends TestCase
     public function testThatASupporterHasOneUser()
     {
         $this->assertCount(1, $this->supporter->user);
-        $this->assertInstanceOf(App\User::class, $this->supporter->user);
+        $this->assertInstanceOf(\App\User::class, $this->supporter->user);
     }
 }

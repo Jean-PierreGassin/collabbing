@@ -39,7 +39,7 @@ class UserActionTest extends DuskTestCase
         $this->browse(function ($first) {
             $this->createUserWithClosedIdea();
 
-            $first->loginAs(User::find(1));
+            $first->loginAs(\App\User::find(1));
         });
 
         $this->browse(function (Browser $browser) {
