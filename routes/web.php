@@ -26,7 +26,7 @@ Route::prefix('users')->group(function () {
 });
 
 Route::resource('users', 'UserController')->only(['show'])
-    ->middleware(['web', 'guest']);
+    ->middleware(['web']);
 
 /**
  * Resources for Ideas
@@ -42,7 +42,7 @@ Route::resource('ideas', 'IdeaController')->only([
 Route::resource('ideas', 'IdeaController')->only([
     'show',
     'index',
-])->middleware(['web', 'guest']);
+])->middleware(['web']);
 
 /**
  * Resources for Idea Comments
@@ -57,7 +57,7 @@ Route::resource('ideas.comments', 'IdeaCommentController')->only([
 Route::resource('ideas.comments', 'IdeaCommentController')->only([
     'index',
     'show',
-])->middleware(['web', 'guest']);
+])->middleware(['web']);
 
 /**
  * Resources for Idea Supporters
@@ -72,7 +72,7 @@ Route::resource('ideas.supporters', 'IdeaSupporterController')->only([
 Route::resource('ideas.supporters', 'IdeaSupporterController')->only([
     'index',
     'show',
-])->middleware(['web', 'guest']);
+])->middleware(['web']);
 
 /**
  * Resources for Idea Applications
@@ -87,4 +87,4 @@ Route::resource('ideas.applications', 'IdeaApplicationController')->only([
 Route::resource('ideas.applications', 'IdeaApplicationController')->only([
     'index',
     'show',
-])->middleware(['web', 'guest']);
+])->middleware(['web']);
