@@ -2,9 +2,27 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    use CreatesApplication, RefreshDatabase, SeedsDatabase;
+
+    protected $user;
+
+    protected $idea;
+
+    protected $comment;
+
+    protected $supporter;
+
+    protected $applicant;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->createUserAndIdeas();
+    }
 }
