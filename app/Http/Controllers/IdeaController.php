@@ -14,7 +14,7 @@ class IdeaController extends Controller
      */
     public function index()
     {
-        //
+        return view('idea.list', compact('ideas', Idea::all()));
     }
 
     /**
@@ -24,7 +24,7 @@ class IdeaController extends Controller
      */
     public function create()
     {
-        //
+        return view('idea.edit-add');
     }
 
     /**
@@ -46,7 +46,7 @@ class IdeaController extends Controller
      */
     public function show(Idea $idea)
     {
-        //
+        return view('idea.single', compact('idea', $idea));
     }
 
     /**
@@ -57,7 +57,7 @@ class IdeaController extends Controller
      */
     public function edit(Idea $idea)
     {
-        //
+        return view('idea.edit-add', compact('idea', $idea));
     }
 
     /**
