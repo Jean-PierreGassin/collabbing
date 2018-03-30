@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('github');
-            $table->mediumText('description');
+            $table->mediumText('bio');
             $table->rememberToken();
             $table->timestamps();
         });
