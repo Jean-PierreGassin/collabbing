@@ -34,7 +34,6 @@
                         </div>
 
                         <hr>
-
                         <small>Status: {{ ucfirst($idea->status) }}</small>
                     </div>
 
@@ -43,14 +42,44 @@
                     </div>
 
                     @auth
-                        @if (Auth::user()->id !== $idea->user_id)
+                        @if (Auth::user()->id === $idea->user_id)
                             <div class="card-footer">
-                                <a class="btn btn-success btn-sm" href="{{ route('ideas.applications.create', $idea) }}">
-                                    Apply to Collaborate
-                                </a>
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <a class="btn btn-outline-dark btn-sm"
+                                           href="{{ route('ideas.applications.create', $idea) }}">
+                                            Support this Idea 👍
+                                        </a>
+                                    </div>
+
+                                    <div class="col-sm text-sm-right">
+                                        <a class="btn btn-outline-success btn-sm"
+                                           href="{{ route('ideas.applications.create', $idea) }}">
+                                            Apply to Collaborate 📝
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     @endauth
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header">Collaborators</div>
+
+                    <div class="card-body">
+                        {{ count($idea->collaborators) }}
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">Supporters</div>
+
+                    <div class="card-body">
+                        {{ count($idea->supporters) }}
+                    </div>
                 </div>
             </div>
         </div>
