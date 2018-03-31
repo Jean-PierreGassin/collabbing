@@ -6,7 +6,10 @@
 
                 <div class="col-sm text-sm-right">
                     <a class="btn btn-outline-info btn-sm" href="{{ route('ideas.show', $idea) }}">View</a>
-                    <a class="btn btn-outline-warning btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit</a>
+
+                    @if (Auth::user() && ($idea->user_id === Auth::user()->id))
+                        <a class="btn btn-outline-warning btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit</a>
+                    @endif
                 </div>
             </div>
         </div>
