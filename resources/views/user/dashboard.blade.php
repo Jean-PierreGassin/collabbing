@@ -35,7 +35,7 @@
                 <div class="card mb-3">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-sm">Ideas I'm Collaborating On</div>
+                            <div class="col-sm">Ideas I'm collaborating on</div>
                         </div>
                     </div>
 
