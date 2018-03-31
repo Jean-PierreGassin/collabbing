@@ -23,10 +23,19 @@ Route::get('/dashboard', 'DashboardController@index')
 
 Route::prefix('users')->group(function () {
     Auth::routes();
-});
 
-Route::resource('users', 'UserController')->only(['show'])
-    ->middleware(['web']);
+    Route::get('{username}', 'UserController@show')
+        ->name('users.show')
+        ->middleware(['web']);
+
+    Route::put('{username}', 'UserController@update')
+        ->name('users.update')
+        ->middleware(['web', 'auth']);
+
+    Route::get('{username}/edit', 'UserController@edit')
+        ->name('users.edit')
+        ->middleware(['web', 'auth']);
+});
 
 /**
  * Resources for Ideas

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUser;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -14,47 +16,76 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('idea.list', compact('ideas', User::all()));
+        return view('user.list', compact('users', User::all()));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\User  $user
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show(Request $request)
     {
+        $user = User::where('username', $request->username)->first();
+
+        if (!$user) {
+            return view('errors.404');
+        }
+
         return view('user.single', compact('user', $user));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\User  $user
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit(Request $request)
     {
+        $user = User::where('username', $request->username)->first();
+
+        if (!$user) {
+            return view('errors.404');
+        }
+
         return view('user.edit-add', compact('user', $user));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\User  $user
+     * @param  \App\Http\Requests\StoreUser $request
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(StoreUser $request)
     {
-        //
+        $user = User::where('username', $request->username)->first();
+
+        if (!$user) {
+            return view('errors.404');
+        }
+
+        foreach ($request->validated() as $key => $value) {
+            if ($key === 'password') {
+                $value = Hash::make($value);
+            }
+
+            $user->{$key} = $value;
+        }
+
+        $user->save();
+
+        return redirect()
+            ->back()
+            ->with('status', 'User successfully edited');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\User  $user
+     * @param  \App\User $user
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
