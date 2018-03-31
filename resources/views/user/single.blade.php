@@ -15,12 +15,14 @@
                         <div class="row">
                             <div class="col-sm">
                                 {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}
+                                <a href="{{ route('users.show', $user->username) }}">({{ '@' . $user->username }})</a>
                             </div>
 
                             <div class="col-sm text-sm-right">
                                 @auth
                                     @if (Auth::user()->id === $user->id)
-                                        <a class="btn btn-dark btn-sm" href="{{ route('users.edit', $user->username) }}">
+                                        <a class="btn btn-dark btn-sm"
+                                           href="{{ route('users.edit', $user->username) }}">
                                             Edit Profile
                                         </a>
                                     @endif
