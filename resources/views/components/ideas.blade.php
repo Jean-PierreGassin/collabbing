@@ -12,6 +12,12 @@
                     @endif
                 </div>
             </div>
+
+            @if (Auth::user() && ($idea->user_id === Auth::user()->id))
+                <hr>
+
+                <small>Status: {{ ucfirst($idea->status) }}</small>
+            @endif
         </div>
 
         <div class="card-body">
