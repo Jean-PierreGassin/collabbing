@@ -28,7 +28,7 @@
                             {!! Form::open(['route' => 'ideas.store', 'method' => 'POST']) !!}
                         @endif
 
-                        <div class="row">
+                        <div class="form-group row">
                             <div class="col">
                                 {!! Form::label('title', 'Title') !!}
                                 {!! Form::text('title', null, [
