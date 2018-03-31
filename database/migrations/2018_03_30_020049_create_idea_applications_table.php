@@ -29,6 +29,7 @@ class CreateIdeaApplicationsTable extends Migration
                 ->onDelete('cascade');
 
             $table->mediumText('content');
+            $table->enum('status', ['pending', 'declined', 'approved'])->default('pending');
             $table->timestamps();
         });
     }
