@@ -10,6 +10,10 @@
                     @if (Auth::user() && ($idea->user_id === Auth::user()->id))
                         <a class="btn btn-outline-warning btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit</a>
                     @endif
+
+                    @if (Auth::user() && ($idea->user_id === Auth::user()->id))
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('ideas.applications.index', $idea) }}">Manage Applications</a>
+                    @endif
                 </div>
             </div>
 

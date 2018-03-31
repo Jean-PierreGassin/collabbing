@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Idea;
+use App\IdeaApplication;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -28,6 +29,19 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('user.dashboard', compact('ideas'));
+        $applications = IdeaApplication::where('user_id', Auth::user()->id)
+            ->where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $collaborations = [];
+
+        foreach ($applications as $application) {
+            $collaborations[] = $application->idea()
+                ->where('status', 'open')
+                ->first();
+        }
+
+        return view('user.dashboard', compact('ideas', 'collaborations'));
     }
 }
