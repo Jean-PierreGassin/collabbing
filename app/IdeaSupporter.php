@@ -8,11 +8,11 @@ class IdeaSupporter extends Model
 {
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->hasOne(User::class, 'id');
     }
 
     public function idea()
     {
-        return $this->hasOne(Idea::class);
+        return $this->hasOne(Idea::class, 'id');
     }
 }
