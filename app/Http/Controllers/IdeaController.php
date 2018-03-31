@@ -43,7 +43,7 @@ class IdeaController extends Controller
         $idea = $user->ideas()->create($request->validated());
 
         return redirect()
-            ->route('ideas.show', compact('idea', $idea))
+            ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully created');
     }
 
@@ -55,7 +55,7 @@ class IdeaController extends Controller
      */
     public function show(Idea $idea)
     {
-        return view('idea.single', compact('idea', $idea));
+        return view('idea.single', compact('idea'));
     }
 
     /**
@@ -66,7 +66,7 @@ class IdeaController extends Controller
      */
     public function edit(Idea $idea)
     {
-        return view('idea.edit-add', compact('idea', $idea));
+        return view('idea.edit-add', compact('idea'));
     }
 
     /**
@@ -82,7 +82,7 @@ class IdeaController extends Controller
         $idea->save();
 
         return redirect()
-            ->route('ideas.show', compact('idea', $idea))
+            ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully edited');
     }
 

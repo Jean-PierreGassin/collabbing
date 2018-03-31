@@ -16,7 +16,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('user.list', compact('users', User::all()));
+        $users = User::all();
+
+        return view('user.list', compact('users'));
     }
 
     /**
@@ -33,7 +35,7 @@ class UserController extends Controller
             return view('errors.404');
         }
 
-        return view('user.single', compact('user', $user));
+        return view('user.single', compact('user'));
     }
 
     /**
@@ -50,7 +52,7 @@ class UserController extends Controller
             return view('errors.404');
         }
 
-        return view('user.edit-add', compact('user', $user));
+        return view('user.edit-add', compact('user'));
     }
 
     /**
