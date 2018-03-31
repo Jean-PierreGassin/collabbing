@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Idea;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -23,6 +24,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('user.dashboard');
+        $ideas = Idea::where('user_id', Auth::user()->id)->get();
+
+        return view('user.dashboard', compact('ideas'));
     }
 }
