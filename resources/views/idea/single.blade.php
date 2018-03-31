@@ -24,7 +24,8 @@
                                             Edit Idea
                                         </a>
 
-                                        <a class="btn btn-dark btn-sm" href="{{ route('ideas.applications.index', $idea) }}">
+                                        <a class="btn btn-dark btn-sm"
+                                           href="{{ route('ideas.applications.index', $idea) }}">
                                             Manage Collaborators
                                         </a>
                                     @endif
@@ -40,6 +41,16 @@
                     <div class="card-body">
                         {!!  nl2br($idea->content) !!}
                     </div>
+
+                    @auth
+                        @if (Auth::user()->id !== $idea->user_id)
+                            <div class="card-footer">
+                                <a class="btn btn-success btn-sm" href="{{ route('ideas.applications.create', $idea) }}">
+                                    Apply to Collaborate
+                                </a>
+                            </div>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>
