@@ -24,7 +24,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $ideas = Idea::where('user_id', Auth::user()->id)->get();
+        $ideas = Idea::orderBy('created_at', 'desc')
+            ->get();
 
         return view('user.dashboard', compact('ideas'));
     }
