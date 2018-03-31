@@ -57,10 +57,8 @@ Route::resource('ideas', 'IdeaController')->only([
  * Resources for Idea Comments
  */
 Route::resource('ideas.comments', 'IdeaCommentController')->only([
-    'create',
     'store',
-    'edit',
-    'update',
+    'destroy',
 ])->middleware(['web', 'auth']);
 
 Route::resource('ideas.comments', 'IdeaCommentController')->only([
@@ -72,10 +70,8 @@ Route::resource('ideas.comments', 'IdeaCommentController')->only([
  * Resources for Idea Supporters
  */
 Route::resource('ideas.supporters', 'IdeaSupporterController')->only([
-    'create',
     'store',
-    'edit',
-    'update',
+    'destroy',
 ])->middleware(['web', 'auth']);
 
 Route::resource('ideas.supporters', 'IdeaSupporterController')->only([

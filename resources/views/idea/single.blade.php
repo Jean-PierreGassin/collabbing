@@ -5,8 +5,16 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 @if (session('status'))
-                    <div class="alert alert-success">
+                    <div class="alert alert-info">
                         {{ session('status') }}
+                    </div>
+                @endif
+
+                @if (session('errors'))
+                    <div class="alert alert-danger">
+                        @foreach (session('errors')->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
                     </div>
                 @endif
 
@@ -46,10 +54,21 @@
                             <div class="card-footer">
                                 <div class="row">
                                     <div class="col-sm">
-                                        <a class="btn btn-outline-dark btn-sm"
-                                           href="{{ route('ideas.applications.create', $idea) }}">
-                                            Support this Idea 👍
-                                        </a>
+                                        @php $userSupports = $idea->supporters->contains('user_id', Auth::user()->id); @endphp
+
+                                        @if ($userSupports)
+                                            @php $supporter = $idea->supporters->where('user_id', Auth::user()->id)->first(); @endphp
+                                            {!! Form::open([
+                                                'route' => ['ideas.supporters.destroy', $idea, $supporter],
+                                                'method' => 'DELETE'
+                                            ]) !!}
+                                            {!! Form::submit('Un-Support this Idea 👎', ['class' => 'btn btn-dark btn-sm']) !!}
+                                        @else
+                                            {!! Form::open(['route' => ['ideas.supporters.store', $idea], 'method' => 'POST']) !!}
+                                            {!! Form::submit('Support this Idea 👍', ['class' => 'btn btn-outline-dark btn-sm']) !!}
+                                        @endif
+
+                                        {!! Form::close() !!}
                                     </div>
 
                                     <div class="col-sm text-sm-right">
