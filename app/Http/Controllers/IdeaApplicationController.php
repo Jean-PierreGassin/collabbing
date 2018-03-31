@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreIdeaApplication;
 use App\Idea;
 use App\IdeaApplication;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreIdeaApplication;
 
 class IdeaApplicationController extends Controller
 {
@@ -34,7 +34,7 @@ class IdeaApplicationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreIdeaApplication $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreIdeaApplication $request)
@@ -55,7 +55,7 @@ class IdeaApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaApplication  $ideaApplication
+     * @param  \App\IdeaApplication $ideaApplication
      * @return \Illuminate\Http\Response
      */
     public function show(IdeaApplication $ideaApplication)
@@ -66,7 +66,7 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaApplication  $ideaApplication
+     * @param  \App\IdeaApplication $ideaApplication
      * @return \Illuminate\Http\Response
      */
     public function edit(IdeaApplication $ideaApplication)
@@ -77,8 +77,8 @@ class IdeaApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\IdeaApplication  $ideaApplication
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\IdeaApplication $ideaApplication
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, IdeaApplication $ideaApplication)
@@ -89,7 +89,7 @@ class IdeaApplicationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\IdeaApplication  $ideaApplication
+     * @param  \App\IdeaApplication $ideaApplication
      * @return \Illuminate\Http\Response
      */
     public function destroy(IdeaApplication $ideaApplication)
