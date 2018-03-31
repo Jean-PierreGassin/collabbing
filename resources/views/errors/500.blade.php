@@ -2,6 +2,10 @@
 
 @section('content')
     <div class="title m-b-md">
-        Welcome to Collabbing
+        500
+    </div>
+
+    <div class="title m-b-md">
+        You broke it!
     </div>
 @stop
