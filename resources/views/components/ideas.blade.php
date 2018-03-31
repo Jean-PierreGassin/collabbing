@@ -1,5 +1,5 @@
 @foreach ($ideas as $idea)
-    <div class="card">
+    <div class="card mb-3">
         <div class="card-header">
             <div class="row">
                 <div class="col-sm">{{ $idea->title }}</div>

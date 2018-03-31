@@ -14,7 +14,11 @@ class IdeaController extends Controller
      */
     public function index()
     {
-        return view('idea.list', compact('ideas', Idea::all()));
+        $ideas = Idea::where('status', 'open')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('idea.list', compact('ideas'));
     }
 
     /**

@@ -19,9 +19,19 @@
                 @endif
 
                 <div class="card">
-                    <div class="card-header"></div>
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm">
+                                Recent Ideas
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="card-body"></div>
+                    <div class="card-body">
+                        @if (isset($ideas))
+                            @include('components.ideas')
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
