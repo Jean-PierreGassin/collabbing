@@ -68,13 +68,12 @@
 <div class="flex-center position-ref full-height">
     @if (Route::has('login'))
         <div class="top-right links">
-            @auth
-                <a href="{{ route('ideas.index') }}">Ideas</a>
-                <a href="{{ route('dashboard') }}">Dashboard</a>
-            @else
+            <a href="{{ route('ideas.index') }}">View Ideas</a>
+
+            @guest
                 <a href="{{ route('login') }}">Login</a>
                 <a href="{{ route('register') }}">Register</a>
-            @endauth
+            @endguest
         </div>
     @endif
 

@@ -20,8 +20,12 @@
                             <div class="col-sm text-sm-right">
                                 @auth
                                     @if (Auth::user()->id === $idea->user_id)
-                                        <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">
+                                        <a class="btn btn-warning btn-sm" href="{{ route('ideas.edit', $idea) }}">
                                             Edit Idea
+                                        </a>
+
+                                        <a class="btn btn-dark btn-sm" href="{{ route('ideas.applications.index', $idea) }}">
+                                            Manage Collaborators
                                         </a>
                                     @endif
                                 @endauth

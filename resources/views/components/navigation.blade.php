@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
     <div class="container">
-        <a class="navbar-brand" href="{{ url('/') }}">
+        <a class="navbar-brand" href="{{ route('ideas.index') }}">
             {{ config('app.name', 'Laravel') }}
         </a>
 
@@ -11,11 +11,13 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item {{ Route::currentRouteName() === 'ideas.index' ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('ideas.index') }}">Ideas</a>
-                </li>
-            </ul>
+            @auth
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                    </li>
+                </ul>
+            @endauth
 
             <!-- Right Side Of Navbar -->
             <ul class="navbar-nav ml-auto">
@@ -31,9 +33,8 @@
                         </a>
 
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}"
-                               href="{{ route('dashboard') }}">
-                                Dashboard
+                            <a class="dropdown-item" href="{{ route('users.update', Auth::user()->username) }}">
+                                View Profile
                             </a>
 
                             <a class="dropdown-item" href="{{ route('logout') }}" onclick="
