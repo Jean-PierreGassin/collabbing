@@ -34,4 +34,9 @@ class Idea extends Model
     {
         return $this->hasMany(IdeaApplication::class);
     }
+
+    public function collaborators()
+    {
+        return $this->applications()->where('status', 'approved');
+    }
 }
