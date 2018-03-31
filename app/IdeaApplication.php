@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class IdeaApplication extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'content',
+    ];
+
     public function user()
     {
         return $this->hasOne(User::class);

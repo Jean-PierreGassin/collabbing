@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Idea;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreIdea;
 
 class IdeaController extends Controller
 {
@@ -30,12 +30,17 @@ class IdeaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreIdea  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreIdea $request)
     {
-        //
+        $user = $request->user();
+        $idea = $user->ideas()->create($request->validated());
+
+        return redirect()
+            ->route('ideas.show', compact('idea', $idea))
+            ->with('status', 'Idea successfully created');
     }
 
     /**
@@ -63,13 +68,18 @@ class IdeaController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\StoreIdea  $request
      * @param  \App\Idea  $idea
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Idea $idea)
+    public function update(StoreIdea $request, Idea $idea)
     {
-        //
+        $idea->update($request->validated());
+        $idea->save();
+
+        return redirect()
+            ->route('ideas.show', compact('idea', $idea))
+            ->with('status', 'Idea successfully edited');
     }
 
     /**
