@@ -24,8 +24,10 @@
                     </div>
 
                     <div class="card-body">
-                        @if (isset($ideas))
+                        @if (isset($ideas) && count($ideas) > 0)
                             @include('components.ideas', ['ideas' => $ideas])
+                        @else
+                            You're fresh out, why not <a href="{{ route('ideas.create') }}">create one?</a>
                         @endif
                     </div>
                 </div>
@@ -38,8 +40,10 @@
                     </div>
 
                     <div class="card-body">
-                        @if (isset($collaborations))
+                        @if (isset($collaborations) && count($collaborations) > 0)
                             @include('components.ideas', ['ideas' => $collaborations])
+                        @else
+                            Don't be shy, <a href="{{ route('ideas.index') }}">start applying!</a>
                         @endif
                     </div>
                 </div>

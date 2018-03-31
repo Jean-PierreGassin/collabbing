@@ -28,8 +28,10 @@
                     </div>
 
                     <div class="card-body">
-                        @if (isset($ideas))
+                        @if (isset($ideas) && count($ideas) > 0)
                             @include('components.ideas')
+                        @else
+                            There doesn't seem to be anything here yet...
                         @endif
                     </div>
                 </div>
