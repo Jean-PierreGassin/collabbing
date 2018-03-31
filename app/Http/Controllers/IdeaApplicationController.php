@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreIdeaApplication;
+use App\Idea;
 use App\IdeaApplication;
 use Illuminate\Http\Request;
 
@@ -22,9 +24,11 @@ class IdeaApplicationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $idea = Idea::find($request->route()->parameter('idea'));
+
+        return view('idea.apply', compact('idea'));
     }
 
     /**
@@ -33,9 +37,19 @@ class IdeaApplicationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreIdeaApplication $request)
     {
-        //
+        $idea = Idea::find($request->route()->parameter('idea'));
+
+        $input = $request->validated();
+        $input['user_id'] = $request->user()->id;
+        $application = $idea->applications()->create($input);
+
+        $application->save();
+
+        return redirect()
+            ->route('ideas.show', $request->route()->parameter('idea'))
+            ->with('status', 'Application successfully submitted');
     }
 
     /**

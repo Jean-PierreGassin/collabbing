@@ -50,7 +50,7 @@
                     </div>
 
                     @auth
-                        @if (Auth::user()->id === $idea->user_id)
+                        @if (Auth::user()->id !== $idea->user_id)
                             <div class="card-footer">
                                 <div class="row">
                                     <div class="col-sm">
