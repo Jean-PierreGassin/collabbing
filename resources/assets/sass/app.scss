@@ -5,8 +5,14 @@
 // Variables
 @import "variables";
 
+// Bootswatch Variables for your chosen theme
+@import "node_modules/bootswatch/dist/darkly/variables";
+
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+// Bootswatch theme main CSS files
+@import "node_modules/bootswatch/dist/darkly/bootswatch";
 
 .navbar-laravel {
   background-color: #fff;
