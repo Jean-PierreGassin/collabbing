@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Idea;
-use App\IdeaApplication;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -29,8 +28,8 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'ideas');
 
-        $collaborations = Auth::user()->collaborations()
-            ->with('idea')
+        $collaborations = Auth::user()->collaborations()->pluck('idea_id');
+        $collaborations = Idea::whereIn('id', $collaborations)
             ->paginate(5, ['*'], 'collaborations');
 
         return view('user.dashboard', compact('ideas', 'collaborations'));
