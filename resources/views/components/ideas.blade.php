@@ -31,4 +31,6 @@
     </div>
 @endforeach
 
-@include('components.pagination', ['data' => $ideas])
+@if (isset($single) && !$single)
+    @include('components.pagination', ['data' => $ideas])
+ @endif
