@@ -3,27 +3,21 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            @if (session('status'))
-                <div class="alert alert-success">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             <div class="col-md-8">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-sm">My Ideas</div>
-
-                            <div class="col-sm text-sm-right">
-                                <a class="btn btn-outline-success btn-sm" href="{{ route('ideas.create') }}">
-                                    Create an Idea
-                                </a>
-                            </div>
-                        </div>
+                @if (session('status'))
+                    <div class="alert alert-success">
+                        {{ session('status') }}
                     </div>
+                @endif
 
-                    <div class="card-body">
+                <h3>My Ideas
+                    <a class="btn btn-outline-success btn-sm float-right" href="{{ route('ideas.create') }}">
+                        Create an Idea
+                    </a>
+                </h3>
+
+                <div class="row">
+                    <div class="col-sm">
                         @if (isset($ideas) && count($ideas) > 0)
                             @include('components.ideas', ['ideas' => $ideas])
                         @else
@@ -32,14 +26,14 @@
                     </div>
                 </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-sm">Ideas I'm collaborating on</div>
-                        </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <h3>Ideas I'm collaborating on</h3>
                     </div>
+                </div>
 
-                    <div class="card-body">
+                <div class="row">
+                    <div class="col-sm">
                         @if (isset($collaborations) && count($collaborations) > 0)
                             @include('components.ideas', ['ideas' => $collaborations])
                         @else

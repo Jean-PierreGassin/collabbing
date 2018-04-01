@@ -18,21 +18,12 @@
                     </div>
                 @endif
 
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-sm">Recent Ideas</div>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        @if (isset($ideas) && count($ideas) > 0)
-                            @include('components.ideas')
-                        @else
-                            There doesn't seem to be anything here yet...
-                        @endif
-                    </div>
-                </div>
+                <h3>Recent Ideas</h3>
+                @if (isset($ideas) && count($ideas) > 0)
+                    @include('components.ideas')
+                @else
+                    There doesn't seem to be anything here yet...
+                @endif
             </div>
         </div>
     </div>

@@ -21,9 +21,9 @@
 
         @if (Auth::user() && ($idea->user_id === Auth::user()->id))
             <div class="card-footer">
-                <a class="btn btn-secondary btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit Idea</a>
+                <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit Idea</a>
 
-                <a class="btn btn-dark btn-sm" href="{{ route('ideas.applications.index', $idea) }}">
+                <a class="btn btn-warning btn-sm float-right" href="{{ route('ideas.applications.index', $idea) }}">
                     Manage Collaborators
                 </a>
             </div>

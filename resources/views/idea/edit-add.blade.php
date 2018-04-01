@@ -19,7 +19,7 @@
                 @endif
 
                 <div class="card">
-                    <div class="card-header">{{ isset($idea) ? 'Edit' : 'Share' }} an Idea</div>
+                    <div class="card-header">{{ isset($idea) ? 'Edit' : 'Share' }} your Idea</div>
 
                     <div class="card-body">
                         @if (isset($idea))
@@ -61,19 +61,22 @@
                                 short and sweet is the best way to get an idea across.
                             </small>
                         </div>
+                    </div>
 
+                    <div class="card-footer">
                         @if (isset($idea))
-                            <div class="form-group">
+                            <div class="float-left">
                                 {!! Form::label('status', 'Status:') !!}
                                 {!! Form::select('status', [
                                     'open' => 'Open',
                                     'closed' => 'Closed',
                                 ]) !!}
-                                <small id="statusHelp" class="form-text text-muted"></small>
                             </div>
                         @endif
 
-                        {!! Form::submit(isset($idea) ? 'Edit Idea 💡' : 'Share Idea 💡', ['class' => 'btn btn-primary']) !!}
+                        {!! Form::submit(isset($idea) ? 'Edit Idea 💡' : 'Share Idea 💡', [
+                            'class' => isset($idea) ? 'btn btn-dark btn-sm float-right' : 'btn btn-success btn-sm float-right',
+                        ]) !!}
                         {!! Form::close() !!}
                     </div>
                 </div>

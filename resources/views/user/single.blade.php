@@ -10,45 +10,48 @@
                     </div>
                 @endif
 
+                @if (session('errors'))
+                    <div class="alert alert-danger">
+                        @foreach (session('errors')->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="card">
                     <div class="card-header">
-                        <div class="row">
-                            <div class="col-sm">
-                                {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}
-                                <a href="{{ route('users.show', $user->username) }}">({{ '@' . $user->username }})</a>
-                            </div>
+                        <h5>
+                            <a href="{{ route('users.show', $user->username) }}">{{ '@' . $user->username }}</a>
 
-                            <div class="col-sm text-sm-right">
-                                @auth
-                                    @if (Auth::user()->id === $user->id)
-                                        <a class="btn btn-dark btn-sm"
-                                           href="{{ route('users.edit', $user->username) }}">
-                                            Edit Profile
-                                        </a>
-                                    @endif
-                                @endauth
-                            </div>
-                        </div>
+                            @auth
+                                @if (Auth::user()->id === $user->id)
+                                    <a class="btn btn-dark btn-sm float-right"
+                                       href="{{ route('users.edit', $user->username) }}">
+                                        Edit Profile
+                                    </a>
+                                @endif
+                            @endauth
+                        </h5>
 
-                        <hr>
-
-                        <div class="row">
-                            <div class="col-sm">
-                                <small>Member since: {{ date('d M - Y', $user->created_at->timestamp) }}</small>
-
-                            </div>
+                        <h6 class="card-subtitle text-muted">
+                            Member since: {{ date('d M - Y', $user->created_at->timestamp) }}
 
                             @if ($user->github)
-                                <div class="col-sm">
-                                    GitHub: <a href="{{ $user->github }}">GitHub</a>
-                                </div>
+                                - <a href="{{ $user->github }}">GitHub</a>
                             @endif
-                        </div>
+                        </h6>
                     </div>
 
                     <div class="card-body">
                         @if ($user->bio)
-                            Bio: {{ $user->bio }}
+                            <blockquote class="blockquote">
+                                <p class="mb-0">{{ $user->bio }}</p>
+                                <footer class="blockquote-footer">Someone called
+                                    <cite title="Source Title">
+                                        {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}
+                                    </cite>
+                                </footer>
+                            </blockquote>
                         @endif
                     </div>
                 </div>
