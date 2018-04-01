@@ -14,10 +14,16 @@
         </div>
 
         <div class="card-body">
-            <div class="@if (!isset($single))text-truncate @endif mb-3">{{ $idea->content }}</div>
+            <div class="mb-3">
+                @if (!isset($single))
+                    {!!  str_limit(nl2br($idea->content), 200) !!}
+                @else
+                    {!!  nl2br($idea->content) !!}
+                @endif
+            </div>
         </div>
 
-        <h6 class="text-muted text-right mr-2">Created: {{ date('d M - Y', $idea->created_at->timestamp) }}</h6>
+        <h6 class="text-muted text-right mr-2">Created {{ $idea->created_at->diffForHumans() }}</h6>
 
         @if (Auth::user() && ($idea->user_id === Auth::user()->id))
             <div class="card-footer">
