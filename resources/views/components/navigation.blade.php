@@ -16,6 +16,10 @@
                     <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-success" href="{{ route('ideas.create') }}">Create an Idea</a>
+                    </li>
                 </ul>
             @endauth
 

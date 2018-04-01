@@ -1,3 +1,7 @@
 <div class="row justify-content-center mb-3">
-    {{ $data->fragment($container)->links() }}
+    @if (isset($container))
+        {{ $data->fragment($container)->links() }}
+    @else
+        {{ $data->links() }}
+    @endif
 </div>
