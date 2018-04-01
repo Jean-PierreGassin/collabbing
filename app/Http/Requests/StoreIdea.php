@@ -13,7 +13,6 @@ class StoreIdea extends FormRequest
      * Determine if the user is authorized to make this request.
      *
      * @param Request $request
-     * @param Idea $idea
      * @return bool
      */
     public function authorize(Request $request)
