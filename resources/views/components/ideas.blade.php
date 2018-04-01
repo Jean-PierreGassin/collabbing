@@ -14,7 +14,7 @@
         </div>
 
         <div class="card-body">
-            <div class="@if (isset($single) && !$single)text-truncate @endif mb-3">{{ $idea->content }}</div>
+            <div class="@if (!isset($single))text-truncate @endif mb-3">{{ $idea->content }}</div>
         </div>
 
         <h6 class="text-muted text-right mr-2">Created: {{ date('d M - Y', $idea->created_at->timestamp) }}</h6>
@@ -31,6 +31,6 @@
     </div>
 @endforeach
 
-@if (isset($single) && !$single)
+@if (!isset($single))
     @include('components.pagination', ['data' => $ideas])
  @endif
