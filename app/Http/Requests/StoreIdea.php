@@ -16,9 +16,9 @@ class StoreIdea extends FormRequest
      * @param Idea $idea
      * @return bool
      */
-    public function authorize(Request $request, Idea $idea)
+    public function authorize(Request $request)
     {
-        $idea = Idea::find($idea->id);
+        $idea = Idea::find($request->idea->id);
 
         if ($idea && $idea->user_id) {
             if ($request->user()->id === $idea->user_id) {
