@@ -25,22 +25,13 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $ideas = Idea::where('user_id', Auth::user()->id)
+        $ideas = Auth::user()->ideas()
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5, ['*'], 'ideas');
 
-        $applications = IdeaApplication::where('user_id', Auth::user()->id)
-            ->where('status', 'approved')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $collaborations = [];
-
-        foreach ($applications as $application) {
-            $collaborations[] = $application->idea()
-                ->where('status', 'open')
-                ->first();
-        }
+        $collaborations = Auth::user()->collaborations()
+            ->with('idea')
+            ->paginate(5, ['*'], 'collaborations');
 
         return view('user.dashboard', compact('ideas', 'collaborations'));
     }

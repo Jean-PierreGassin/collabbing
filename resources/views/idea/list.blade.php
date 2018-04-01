@@ -18,12 +18,14 @@
                     </div>
                 @endif
 
-                <h3>Recent Ideas</h3>
-                @if (isset($ideas) && count($ideas) > 0)
-                    @include('components.ideas')
-                @else
-                    There doesn't seem to be anything here yet...
-                @endif
+                <div id="ideas">
+                    <h3>Recent Ideas</h3>
+                    @if (isset($ideas) && count($ideas) > 0)
+                        @include('components.ideas', ['container' => 'ideas'])
+                    @else
+                        There doesn't seem to be anything here yet...
+                    @endif
+                </div>
             </div>
         </div>
     </div>

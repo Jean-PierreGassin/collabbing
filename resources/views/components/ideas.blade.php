@@ -30,3 +30,5 @@
         @endif
     </div>
 @endforeach
+
+@include('components.pagination', ['data' => $ideas])

@@ -41,4 +41,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(IdeaApplication::class);
     }
+
+    public function collaborations()
+    {
+        return $this->applications()->where('status', 'approved');
+    }
 }

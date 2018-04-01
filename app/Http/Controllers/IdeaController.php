@@ -16,7 +16,7 @@ class IdeaController extends Controller
     {
         $ideas = Idea::where('status', 'open')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('idea.list', compact('ideas'));
     }
