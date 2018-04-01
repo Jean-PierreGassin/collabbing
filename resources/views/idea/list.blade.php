@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mb-3">
             <div class="col-md-8">
                 @if (session('status'))
                     <div class="alert alert-success">
@@ -21,9 +21,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-sm">
-                                Recent Ideas
-                            </div>
+                            <div class="col-sm">Recent Ideas</div>
                         </div>
                     </div>
 
