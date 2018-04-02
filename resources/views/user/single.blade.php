@@ -43,7 +43,16 @@
                     <div class="card-body">
                         @if ($user->bio)
                             <blockquote class="blockquote">
-                                <p class="mb-0">{{ $user->bio }}</p>
+                                <p class="mb-0">{!! nl2br(e($user->bio)) !!}</p>
+                                <footer class="blockquote-footer">Someone called
+                                    <cite title="Source Title">
+                                        {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}
+                                    </cite>
+                                </footer>
+                            </blockquote>
+                        @else
+                            <blockquote class="blockquote">
+                                <p class="mb-0">I've got nothing good to say</p>
                                 <footer class="blockquote-footer">Someone called
                                     <cite title="Source Title">
                                         {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}

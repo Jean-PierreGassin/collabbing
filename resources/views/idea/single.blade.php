@@ -39,7 +39,7 @@
                     </div>
 
                     <div class="card-body">
-                        {{ count($idea->collaborators) }}
+                        {{ count($idea->approvedApplications) }}
                     </div>
                 </div>
 

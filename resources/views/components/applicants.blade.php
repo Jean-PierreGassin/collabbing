@@ -16,7 +16,7 @@
              aria-labelledby="{{ $application->user_id }}-header"
              data-parent="#accordion">
             <div class="card-body">
-                {!! nl2br($application->content) !!}
+                {!! nl2br(e($application->content)) !!}
             </div>
 
             <h6 class="text-muted text-right mr-2">Submitted {{ $idea->created_at->diffForHumans() }}</h6>

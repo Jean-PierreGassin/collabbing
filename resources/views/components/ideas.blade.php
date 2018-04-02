@@ -9,16 +9,16 @@
                 @endcan
 
                 Supporters: {{ count($idea->supporters) }},&nbsp;
-                Collaborators: {{ count($idea->collaborators) }}
+                Collaborators: {{ count($idea->approvedApplications) }}
             </h6>
         </div>
 
         <div class="card-body">
             <div class="mb-3">
                 @if (!isset($single))
-                    {!! str_limit(nl2br($idea->content), 200) !!}
+                    {!! str_limit(nl2br(e($idea->content)), 300) !!}
                 @else
-                    {!! nl2br($idea->content) !!}
+                    {!! nl2br(e($idea->content)) !!}
                 @endif
             </div>
         </div>
