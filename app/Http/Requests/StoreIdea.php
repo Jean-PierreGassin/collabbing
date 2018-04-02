@@ -26,8 +26,8 @@ class StoreIdea extends FormRequest
     {
         return [
             'title' => 'required|max:100',
-            'communication' => 'required|max:30',
-            'content' => 'required|max:500',
+            'communication' => 'required|max:50',
+            'content' => 'required|max:1500',
         ];
     }
 
