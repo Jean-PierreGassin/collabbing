@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Idea;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreIdea extends FormRequest
@@ -12,21 +10,10 @@ class StoreIdea extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      *
-     * @param Request $request
      * @return bool
      */
-    public function authorize(Request $request)
+    public function authorize()
     {
-        $idea = Idea::find($request->idea->id);
-
-        if ($idea && $idea->user_id) {
-            if ($request->user()->id === $idea->user_id) {
-                return true;
-            }
-
-            return false;
-        }
-
         return true;
     }
 

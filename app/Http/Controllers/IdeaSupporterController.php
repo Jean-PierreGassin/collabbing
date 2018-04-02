@@ -34,27 +34,17 @@ class IdeaSupporterController extends Controller
      *
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(Request $request)
     {
-        try {
-            $idea = Idea::find($request->route()->parameter('idea'));
+        $idea = Idea::find($request->route()->parameter('idea'));
+        $this->authorize('storeSupporter', $idea);
 
-            if ($idea->user_id === $request->user()->id) {
-                return redirect()
-                    ->back()
-                    ->with('status', 'You cannot support your own Idea.');
-            }
-
-            $idea->supporters()->firstOrCreate([
-                'user_id' => $request->user()->id,
-                'idea_id' => $idea->id,
-            ]);
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('status', '🤕 Something went wrong, try again.');
-        }
+        $idea->supporters()->firstOrCreate([
+            'user_id' => $request->user()->id,
+            'idea_id' => $idea->id,
+        ]);
 
         return redirect()
             ->back();
@@ -99,18 +89,14 @@ class IdeaSupporterController extends Controller
      *
      * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy(Idea $idea)
     {
-        try {
-            $supporter = $idea->supporters->where('user_id', Auth::user()->id)->first();
+        $supporter = $idea->supporters->where('user_id', Auth::user()->id)->first();
+        $this->authorize('delete', $supporter);
 
-            $supporter->delete();
-        } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('status', '🤕 Something went wrong, try again.');
-        }
+        $supporter->delete();
 
         return redirect()
             ->back();

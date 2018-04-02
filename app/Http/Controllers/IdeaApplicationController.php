@@ -22,11 +22,14 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create(Request $request)
     {
         $idea = Idea::find($request->route()->parameter('idea'));
+        $this->authorize('createApplication', $idea);
 
         return view('idea.apply', compact('idea'));
     }
@@ -36,10 +39,12 @@ class IdeaApplicationController extends Controller
      *
      * @param  \App\Http\Requests\StoreIdeaApplication $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(StoreIdeaApplication $request)
     {
         $idea = Idea::find($request->route()->parameter('idea'));
+        $this->authorize('storeApplication', $idea);
 
         $input = $request->validated();
         $input['user_id'] = $request->user()->id;

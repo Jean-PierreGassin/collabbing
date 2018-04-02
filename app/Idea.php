@@ -39,4 +39,9 @@ class Idea extends Model
     {
         return $this->applications()->where('status', 'approved');
     }
+
+    public function hasSupportFromUser($userId)
+    {
+        return $this->supporters()->where('user_id', $userId)->first();
+    }
 }

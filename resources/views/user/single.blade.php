@@ -23,14 +23,12 @@
                         <h5>
                             <a href="{{ route('users.show', $user->username) }}">{{ '@' . $user->username }}</a>
 
-                            @auth
-                                @if (Auth::user()->id === $user->id)
-                                    <a class="btn btn-dark btn-sm float-right"
-                                       href="{{ route('users.edit', $user->username) }}">
-                                        Edit Profile
-                                    </a>
-                                @endif
-                            @endauth
+                            @can('update', $user)
+                                <a class="btn btn-dark btn-sm float-right"
+                                   href="{{ route('users.edit', $user->username) }}">
+                                    Edit Profile
+                                </a>
+                            @endcan
                         </h5>
 
                         <h6 class="card-subtitle text-muted">

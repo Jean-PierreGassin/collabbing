@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUser;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -43,10 +44,12 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function edit(Request $request)
     {
         $user = User::where('username', $request->username)->first();
+        $this->authorizeForUser(Auth::user(), 'manage', $user);
 
         if (!$user) {
             return view('errors.404');
@@ -60,10 +63,12 @@ class UserController extends Controller
      *
      * @param  \App\Http\Requests\StoreUser $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(StoreUser $request)
     {
         $user = User::where('username', $request->username)->first();
+        $this->authorizeForUser(Auth::user(), 'update', $user);
 
         if (!$user) {
             return view('errors.404');

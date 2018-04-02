@@ -63,9 +63,12 @@ class IdeaController extends Controller
      *
      * @param  \App\Idea  $idea
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function edit(Idea $idea)
     {
+        $this->authorize('manage', $idea);
+
         return view('idea.edit-add', compact('idea'));
     }
 
@@ -75,9 +78,12 @@ class IdeaController extends Controller
      * @param  \App\Http\Requests\StoreIdea  $request
      * @param  \App\Idea  $idea
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(StoreIdea $request, Idea $idea)
     {
+        $this->authorize('update', $idea);
+
         $idea->update($request->validated());
         $idea->save();
 

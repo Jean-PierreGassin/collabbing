@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,16 +11,11 @@ class StoreUser extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      *
-     * @param Request $request
      * @return bool
      */
-    public function authorize(Request $request)
+    public function authorize()
     {
-        if (strcasecmp(Auth::user()->username, $request->username) === 0) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**

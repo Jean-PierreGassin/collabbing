@@ -23,7 +23,20 @@
 
             <div class="col-md-4">
                 <div class="card mb-3">
-                    <div class="card-header">Collaborators</div>
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm">Collaborators</div>
+
+                            @can('storeApplication', $idea)
+                                <div class="col-sm text-sm-right">
+                                    <a class="btn btn-outline-success btn-sm"
+                                       href="{{ route('ideas.applications.create', $idea) }}">
+                                        Apply to Collaborate 📝
+                                    </a>
+                                </div>
+                            @endcan
+                        </div>
+                    </div>
 
                     <div class="card-body">
                         {{ count($idea->collaborators) }}
@@ -31,7 +44,30 @@
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header">Supporters</div>
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm">Supporters</div>
+
+                            @can('storeSupporter', $idea)
+                                <div class="col-sm text-sm-right">
+                                    @php $supporter = $idea->hasSupportFromUser(Auth::user()->id); @endphp
+
+                                    @if ($supporter)
+                                        {!! Form::open([
+                                            'route' => ['ideas.supporters.destroy', $idea, $supporter],
+                                            'method' => 'DELETE'
+                                        ]) !!}
+                                        {!! Form::submit('Un-Support this Idea 👎', ['class' => 'btn btn-info btn-sm']) !!}
+                                    @else
+                                        {!! Form::open(['route' => ['ideas.supporters.store', $idea], 'method' => 'POST']) !!}
+                                        {!! Form::submit('Support this Idea 👍', ['class' => 'btn btn-outline-info btn-sm']) !!}
+                                    @endif
+
+                                    {!! Form::close() !!}
+                                </div>
+                            @endcan
+                        </div>
+                    </div>
 
                     <div class="card-body">
                         {{ count($idea->supporters) }}
