@@ -17,11 +17,11 @@ class IdeaComment extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class, 'id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function idea()
     {
-        return $this->hasOne(Idea::class, 'id');
+        return $this->belongsTo(Idea::class, 'idea_id');
     }
 }

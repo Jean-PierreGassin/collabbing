@@ -35,7 +35,12 @@ class Idea extends Model
         return $this->hasMany(IdeaApplication::class);
     }
 
-    public function collaborators()
+    public function pendingApplications()
+    {
+        return $this->applications()->where('status', 'pending');
+    }
+
+    public function approvedApplications()
     {
         return $this->applications()->where('status', 'approved');
     }

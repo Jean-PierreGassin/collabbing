@@ -29,17 +29,17 @@ class User extends Authenticatable
 
     public function ideas()
     {
-        return $this->hasMany(Idea::class);
+        return $this->hasMany(Idea::class, 'user_id');
     }
 
     public function comments()
     {
-        return $this->hasMany(IdeaComment::class);
+        return $this->hasMany(IdeaComment::class, 'user_id');
     }
 
     public function applications()
     {
-        return $this->hasMany(IdeaApplication::class);
+        return $this->hasMany(IdeaApplication::class, 'user_id');
     }
 
     public function collaborations()
