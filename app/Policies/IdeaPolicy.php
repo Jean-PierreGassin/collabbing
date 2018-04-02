@@ -40,6 +40,16 @@ class IdeaPolicy
         return ($user->id !== $idea->user_id);
     }
 
+    public function updateApplication(User $user, Idea $idea)
+    {
+        return ($user->id === $idea->user_id);
+    }
+
+    public function deleteApplication(User $user, Idea $idea)
+    {
+        return ($user->id === $idea->user_id);
+    }
+
     public function storeApplication(User $user, Idea $idea)
     {
         return ($user->id !== $idea->user_id);

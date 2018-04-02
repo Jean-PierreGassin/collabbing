@@ -53,10 +53,10 @@ class IdeaSupporterController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaSupporter $ideaSupporter
+     * @param  \App\IdeaSupporter $supporter
      * @return \Illuminate\Http\Response
      */
-    public function show(IdeaSupporter $ideaSupporter)
+    public function show(IdeaSupporter $supporter)
     {
         //
     }
@@ -64,10 +64,10 @@ class IdeaSupporterController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaSupporter $ideaSupporter
+     * @param  \App\IdeaSupporter $supporter
      * @return \Illuminate\Http\Response
      */
-    public function edit(IdeaSupporter $ideaSupporter)
+    public function edit(IdeaSupporter $supporter)
     {
         //
     }
@@ -76,10 +76,10 @@ class IdeaSupporterController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  \App\IdeaSupporter $ideaSupporter
+     * @param  \App\IdeaSupporter $supporter
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, IdeaSupporter $ideaSupporter)
+    public function update(Request $request, IdeaSupporter $supporter)
     {
         //
     }

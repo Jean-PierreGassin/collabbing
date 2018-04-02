@@ -17,22 +17,22 @@ class Idea extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function supporters()
     {
-        return $this->hasMany(IdeaSupporter::class);
+        return $this->hasMany(IdeaSupporter::class, 'idea_id');
     }
 
     public function comments()
     {
-        return $this->hasMany(IdeaComment::class);
+        return $this->hasMany(IdeaComment::class, 'idea_id');
     }
 
     public function applications()
     {
-        return $this->hasMany(IdeaApplication::class);
+        return $this->hasMany(IdeaApplication::class, 'idea_id');
     }
 
     public function pendingApplications()

@@ -20,13 +20,23 @@ class IdeaApplicationPolicy
         //
     }
 
-    public function manage(User $user, IdeaApplication $applicationToEdit)
+
+    public function update(User $user, IdeaApplication $application)
     {
-        return ($user->id === $applicationToEdit->user_id);
+        if ($user->id === $application->idea->user_id) {
+            return true;
+        }
+
+        return ($user->id === $application->user_id);
     }
 
-    public function update(User $user, IdeaApplication $applicationToEdit)
+    public function delete(User $user, IdeaApplication $application)
     {
-        return ($user->id === $applicationToEdit->user_id);
+        return ($user->id === $application->user_id);
+    }
+
+    public function manage(User $user, IdeaApplication $application)
+    {
+        return ($user->id === $application->user_id);
     }
 }

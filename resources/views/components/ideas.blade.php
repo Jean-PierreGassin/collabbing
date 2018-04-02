@@ -29,8 +29,8 @@
             <div class="card-footer">
                 <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit Idea</a>
 
-                <a class="btn btn-warning btn-sm float-right" href="{{ route('ideas.applications.index', $idea) }}">
-                    Manage Collaborators
+                <a class="btn btn-info btn-sm float-right" href="{{ route('ideas.dashboard', $idea) }}">
+                    Idea Dashboard
                 </a>
             </div>
         @endcan

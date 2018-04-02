@@ -41,10 +41,10 @@ class IdeaCommentController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaComment $ideaComment
+     * @param  \App\IdeaComment $comment
      * @return \Illuminate\Http\Response
      */
-    public function show(IdeaComment $ideaComment)
+    public function show(IdeaComment $comment)
     {
         //
     }
@@ -52,10 +52,10 @@ class IdeaCommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaComment $ideaComment
+     * @param  \App\IdeaComment $comment
      * @return \Illuminate\Http\Response
      */
-    public function edit(IdeaComment $ideaComment)
+    public function edit(IdeaComment $comment)
     {
         //
     }
@@ -64,10 +64,10 @@ class IdeaCommentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  \App\IdeaComment $ideaComment
+     * @param  \App\IdeaComment $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, IdeaComment $ideaComment)
+    public function update(Request $request, IdeaComment $comment)
     {
         //
     }
@@ -75,10 +75,10 @@ class IdeaCommentController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\IdeaComment $ideaComment
+     * @param  \App\IdeaComment $comment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(IdeaComment $ideaComment)
+    public function destroy(IdeaComment $comment)
     {
         //
     }

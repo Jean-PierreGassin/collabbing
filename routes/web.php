@@ -53,6 +53,10 @@ Route::resource('ideas', 'IdeaController')->only([
     'index',
 ])->middleware(['web']);
 
+Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
+    ->name('ideas.dashboard')
+    ->middleware(['web', 'auth']);
+
 /**
  * Resources for Idea Comments
  */
@@ -87,9 +91,14 @@ Route::resource('ideas.applications', 'IdeaApplicationController')->only([
     'store',
     'edit',
     'update',
+    'destroy',
 ])->middleware(['web', 'auth']);
 
 Route::resource('ideas.applications', 'IdeaApplicationController')->only([
     'index',
     'show',
 ])->middleware(['web']);
+
+Route::put('ideas/{idea}/applications/{application}', 'IdeaApplicationController@approveApplication')
+    ->name('ideas.applications.approve')
+    ->middleware(['web', 'auth']);

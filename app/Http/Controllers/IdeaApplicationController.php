@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Idea;
 use App\IdeaApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreIdeaApplication;
 
 class IdeaApplicationController extends Controller
@@ -60,10 +61,10 @@ class IdeaApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaApplication $ideaApplication
+     * @param  \App\IdeaApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function show(IdeaApplication $ideaApplication)
+    public function show(IdeaApplication $application)
     {
         //
     }
@@ -71,10 +72,10 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaApplication $ideaApplication
+     * @param  \App\IdeaApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function edit(IdeaApplication $ideaApplication)
+    public function edit(IdeaApplication $application)
     {
         //
     }
@@ -83,22 +84,54 @@ class IdeaApplicationController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  \App\IdeaApplication $ideaApplication
+     * @param  \App\IdeaApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, IdeaApplication $ideaApplication)
+    public function update(Request $request, IdeaApplication $application)
     {
         //
     }
 
     /**
+     * Approve the application.
+     *
+     * @param  \App\Idea $idea
+     * @param  \App\IdeaApplication $application
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function approveApplication(Idea $idea, IdeaApplication $application)
+    {
+        $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
+
+        $applicantName = $application->user->first_name . ' ' . $application->user->last_name;
+
+        $application->status = 'approved';
+        $application->save();
+
+        return redirect()
+            ->back()
+            ->with('status', "You have approved $applicantName");
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\IdeaApplication $ideaApplication
+     * @param  \App\Idea $idea
+     * @param  \App\IdeaApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(IdeaApplication $ideaApplication)
+    public function destroy(Idea $idea, IdeaApplication $application)
     {
-        //
+        $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
+
+        $applicantName = $application->user->first_name . ' ' . $application->user->last_name;
+
+        $application->delete();
+
+        return redirect()
+            ->back()
+            ->with('status', "$applicantName is the weakest link, good bye!");
     }
 }
