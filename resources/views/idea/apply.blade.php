@@ -19,13 +19,13 @@
                 @endif
 
                 <div class="card">
-                    <div class="card-header">Application for: <b>{{ $idea->title }}</b></div>
+                    <div class="card-header"><h5>{{ $idea->title }}</h5></div>
 
                     <div class="card-body">
                         {!! Form::open(['route' => ['ideas.applications.store', $idea], 'method' => 'POST']) !!}
 
                         <div class="form-group">
-                            {!! Form::label('content', 'Description') !!}
+                            {!! Form::label('content', 'Application') !!}
                             {!! Form::textarea('content', null, [
                             'class' => 'form-control',
                             'placeholder' => 'I\'m really good at water sports even though it has nothing to do with this project.' ,
