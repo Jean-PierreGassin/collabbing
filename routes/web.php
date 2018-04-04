@@ -61,8 +61,11 @@ Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
  * Resources for Idea Comments
  */
 Route::resource('ideas.comments', 'IdeaCommentController')->only([
+    'create',
     'store',
+    'edit',
     'destroy',
+    'update',
 ])->middleware(['web', 'auth']);
 
 Route::resource('ideas.comments', 'IdeaCommentController')->only([

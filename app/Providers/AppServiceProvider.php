@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\User;
 use App\Idea;
+use App\IdeaComment;
 use App\IdeaSupporter;
 use App\IdeaApplication;
 use App\Policies\UserPolicy;
 use App\Policies\IdeaPolicy;
+use App\Policies\IdeaCommentPolicy;
 use App\Policies\IdeaSupporterPolicy;
 use App\Policies\IdeaApplicationPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     protected $policies = [
         User::class => UserPolicy::class,
         Idea::class => IdeaPolicy::class,
+        IdeaComment::class => IdeaCommentPolicy::class,
         IdeaSupporter::class => IdeaSupporterPolicy::class,
         IdeaApplication::class => IdeaApplicationPolicy::class,
     ];

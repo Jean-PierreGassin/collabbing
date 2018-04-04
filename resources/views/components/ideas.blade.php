@@ -35,6 +35,11 @@
             </div>
         @endcan
     </div>
+
+    @if (isset($single) && $idea->comments()->count() > 0 && (Gate::check('update', $idea) || Gate::check('manage', $idea->comments)))
+        @include('components.comments')
+        @include('comment.add')
+    @endif
 @endforeach
 
 @if (!isset($single))

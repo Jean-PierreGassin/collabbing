@@ -70,10 +70,12 @@ class IdeaController extends Controller
      */
     public function show(Idea $idea)
     {
-        $collaborator = $idea->hasApplicationFromUser(Auth::user()->id, 'approved');
-        $applicant = $idea->hasApplicationFromUser(Auth::user()->id, 'pending');
-        $supporter = $idea->hasSupportFromUser(Auth::user()->id);
-
+        if (Auth::user()) {
+            $collaborator = $idea->hasApplicationFromUser(Auth::user()->id, 'approved');
+            $applicant = $idea->hasApplicationFromUser(Auth::user()->id, 'pending');
+            $supporter = $idea->hasSupportFromUser(Auth::user()->id);
+        }
+        
         return view('idea.single', compact(
                 'idea',
                 'collaborator',
