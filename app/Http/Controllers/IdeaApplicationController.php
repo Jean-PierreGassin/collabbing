@@ -44,7 +44,9 @@ class IdeaApplicationController extends Controller
      */
     public function store(StoreIdeaApplication $request)
     {
-        $idea = Idea::find($request->route()->parameter('idea'));
+        $ideaId = $request->route()->parameter('idea');
+        $idea = Idea::find($ideaId);
+
         $this->authorize('storeApplication', $idea);
 
         $input = $request->validated();
@@ -54,7 +56,7 @@ class IdeaApplicationController extends Controller
         $application->save();
 
         return redirect()
-            ->route('ideas.show', $request->route()->parameter('idea'))
+            ->route('ideas.show', $ideaId)
             ->with('status', 'Application successfully submitted');
     }
 
