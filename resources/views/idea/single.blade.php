@@ -29,10 +29,22 @@
 
                             @can('storeApplication', $idea)
                                 <div class="col-sm text-sm-right">
-                                    <a class="btn btn-outline-success btn-sm"
-                                       href="{{ route('ideas.applications.create', $idea) }}">
-                                        Apply to Collaborate 📝
-                                    </a>
+                                    @if ($collaborator)
+                                        <a class="btn btn-success btn-sm"
+                                           href="#">
+                                            You're a Collaborator 🤟
+                                        </a>
+                                    @elseif ($applicant)
+                                        <a class="btn btn-success btn-sm"
+                                           href="#">
+                                            You're an Applicant ✅
+                                        </a>
+                                    @else
+                                        <a class="btn btn-outline-success btn-sm"
+                                           href="{{ route('ideas.applications.create', $idea) }}">
+                                            Apply to Collaborate 📝
+                                        </a>
+                                    @endif
                                 </div>
                             @endcan
                         </div>
@@ -50,8 +62,6 @@
 
                             @can('storeSupporter', $idea)
                                 <div class="col-sm text-sm-right">
-                                    @php $supporter = $idea->hasSupportFromUser(Auth::user()->id); @endphp
-
                                     @if ($supporter)
                                         {!! Form::open([
                                             'route' => ['ideas.supporters.destroy', $idea, $supporter],

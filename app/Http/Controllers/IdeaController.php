@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Idea;
 use App\Http\Requests\StoreIdea;
+use Illuminate\Support\Facades\Auth;
 
 class IdeaController extends Controller
 {
@@ -24,7 +25,7 @@ class IdeaController extends Controller
     /**
      * Display the dashboard for an idea
      *
-     * @param  \App\Idea  $idea
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      */
     public function dashboard(Idea $idea)
@@ -48,7 +49,7 @@ class IdeaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIdea  $request
+     * @param  \App\Http\Requests\StoreIdea $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreIdea $request)
@@ -64,18 +65,28 @@ class IdeaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Idea  $idea
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      */
     public function show(Idea $idea)
     {
-        return view('idea.single', compact('idea'));
+        $collaborator = $idea->hasApplicationFromUser(Auth::user()->id, 'approved');
+        $applicant = $idea->hasApplicationFromUser(Auth::user()->id, 'pending');
+        $supporter = $idea->hasSupportFromUser(Auth::user()->id);
+
+        return view('idea.single', compact(
+                'idea',
+                'collaborator',
+                'applicant',
+                'supporter'
+            )
+        );
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Idea  $idea
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
@@ -89,8 +100,8 @@ class IdeaController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIdea  $request
-     * @param  \App\Idea  $idea
+     * @param  \App\Http\Requests\StoreIdea $request
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
@@ -109,7 +120,7 @@ class IdeaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Idea  $idea
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      */
     public function destroy(Idea $idea)
