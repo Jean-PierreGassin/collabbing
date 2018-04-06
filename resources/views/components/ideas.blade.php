@@ -8,8 +8,8 @@
                     Status: {{ ucfirst($idea->status) }},&nbsp;
                 @endcan
 
-                Supporters: {{ count($idea->supporters) }},&nbsp;
-                Collaborators: {{ count($idea->approvedApplications) }}
+                Supporters: {{ number_format(count($idea->supporters)) }},&nbsp;
+                Collaborators: {{ number_format(count($idea->approvedApplications)) }}
             </h6>
         </div>
 

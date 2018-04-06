@@ -80,7 +80,9 @@
                     </div>
 
                     <div class="card-body">
-                        {{ count($idea->supporters) }}
+                        There {{ count($idea) > 1 ? 'are' : 'is' }}
+                        {{ number_format(count($idea->supporters)) }}
+                        {{ count($idea) > 1 ? 'people' : 'person' }} supporting this idea.
                     </div>
                 </div>
             </div>
