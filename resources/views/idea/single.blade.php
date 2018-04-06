@@ -80,9 +80,13 @@
                     </div>
 
                     <div class="card-body">
-                        There {{ count($idea) > 1 ? 'are' : 'is' }}
-                        {{ number_format(count($idea->supporters)) }}
-                        {{ count($idea) > 1 ? 'people' : 'person' }} supporting this idea.
+                        @if (count($idea->supporters) > 0)
+                            There {{ count($idea->supporters) > 1 ? 'are' : 'is' }}
+                            {{ number_format(count($idea->supporters)) }}
+                            {{ count($idea->supporters) > 1 ? 'people' : 'person' }} supporting this idea.
+                        @else
+                            Ain't nobody supportin' this here idea yet.
+                        @endif
                     </div>
                 </div>
             </div>
