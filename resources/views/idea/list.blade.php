@@ -18,10 +18,25 @@
                     </div>
                 @endif
 
+                <div id="trending-ideas" class="mb-4">
+                    <h3>Trending Ideas</h3>
+                    @if (isset($trendingIdeas) && count($trendingIdeas) > 0)
+                        @include('components.ideas', [
+                            'container' => 'trending-ideas',
+                            'ideas' => $trendingIdeas,
+                        ])
+                    @else
+                        That's unusual, nothing seems to be trending 😔
+                    @endif
+                </div>
+
                 <div id="ideas">
                     <h3>Recent Ideas</h3>
                     @if (isset($ideas) && count($ideas) > 0)
-                        @include('components.ideas', ['container' => 'ideas'])
+                        @include('components.ideas', [
+                            'container' => 'ideas',
+                            'ideas' => $ideas,
+                        ])
                     @else
                         There doesn't seem to be anything here yet...
                     @endif

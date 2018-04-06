@@ -15,11 +15,21 @@ class IdeaController extends Controller
      */
     public function index()
     {
+        $trendingIdeas = Idea::where('status', 'open')
+            ->withCount('supporters')
+            ->orderBy('supporters_count', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->paginate();
+
+        $trendingIds = $trendingIdeas->pluck('id');
+
         $ideas = Idea::where('status', 'open')
             ->orderBy('created_at', 'desc')
+            ->whereNotIn('id', $trendingIds->all())
             ->paginate(10);
 
-        return view('idea.list', compact('ideas'));
+        return view('idea.list', compact('trendingIdeas', 'ideas'));
     }
 
     /**
