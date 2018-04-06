@@ -24,12 +24,12 @@ class IdeaApplicationController extends Controller
      * Show the form for creating a new resource.
      *
      * @param  \Illuminate\Http\Request $request
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create(Request $request)
+    public function create(Request $request, Idea $idea)
     {
-        $idea = Idea::find($request->route()->parameter('idea'));
         $this->authorize('createApplication', $idea);
 
         return view('idea.apply', compact('idea'));
@@ -39,14 +39,12 @@ class IdeaApplicationController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreIdeaApplication $request
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(StoreIdeaApplication $request)
+    public function store(StoreIdeaApplication $request, Idea $idea)
     {
-        $ideaId = $request->route()->parameter('idea');
-        $idea = Idea::find($ideaId);
-
         $this->authorize('storeApplication', $idea);
 
         $input = $request->validated();
@@ -106,7 +104,7 @@ class IdeaApplicationController extends Controller
     {
         $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
 
-        $applicantName = $application->user->first_name . ' ' . $application->user->last_name;
+        $applicantName = "{$application->user->first_name} {$application->user->last_name}";
 
         $application->status = 'approved';
         $application->save();
@@ -128,7 +126,7 @@ class IdeaApplicationController extends Controller
     {
         $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
 
-        $applicantName = $application->user->first_name . ' ' . $application->user->last_name;
+        $applicantName = "{$application->user->first_name} {$application->user->last_name}";
 
         $application->delete();
 

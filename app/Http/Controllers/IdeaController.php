@@ -33,7 +33,12 @@ class IdeaController extends Controller
         $applications = $idea->pendingApplications()->get();
         $collaborators = $idea->approvedApplications()->get();
 
-        return view('idea.manage', compact('idea', 'applications', 'collaborators'));
+        return view('idea.manage', compact(
+                'idea',
+                'applications',
+                'collaborators'
+            )
+        );
     }
 
     /**
@@ -75,7 +80,7 @@ class IdeaController extends Controller
             $applicant = $idea->hasApplicationFromUser(Auth::user()->id, 'pending');
             $supporter = $idea->hasSupportFromUser(Auth::user()->id);
         }
-        
+
         return view('idea.single', compact(
                 'idea',
                 'collaborator',

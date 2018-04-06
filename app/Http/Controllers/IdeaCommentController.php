@@ -22,13 +22,12 @@ class IdeaCommentController extends Controller
     /**
      * Show the form for creating a new resource.
      *
+     * @param \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create(Request $request)
+    public function create(Request $request, Idea $idea)
     {
-        $idea = Idea::find($request->route()->parameter('idea'));
-
         $this->authorize('storeComment', $idea);
 
         return view('comment.add');
@@ -38,13 +37,12 @@ class IdeaCommentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreIdeaComment $request
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(StoreIdeaComment $request)
+    public function store(StoreIdeaComment $request, Idea $idea)
     {
-        $idea = Idea::find($request->route()->parameter('idea'));
-
         $this->authorize('storeComment', $idea);
 
         $input = $request->validated();
@@ -87,6 +85,7 @@ class IdeaCommentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\StoreIdeaComment $request
+     * @param  \App\Idea $idea
      * @param  \App\IdeaComment $comment
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException

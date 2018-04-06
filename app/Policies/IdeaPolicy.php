@@ -30,24 +30,6 @@ class IdeaPolicy
         return ($user->id === $ideaToEdit->user_id);
     }
 
-    public function storeComment(User $user, Idea $idea)
-    {
-        if ($idea->hasApplicationFromUser($user->id, 'approved')) {
-            return true;
-        }
-
-        if ($idea->user_id === $user->id) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function storeSupporter(User $user, Idea $idea)
-    {
-        return ($user->id !== $idea->user_id);
-    }
-
     public function createApplication(User $user, Idea $idea)
     {
         return ($user->id !== $idea->user_id);
@@ -66,5 +48,23 @@ class IdeaPolicy
     public function storeApplication(User $user, Idea $idea)
     {
         return ($user->id !== $idea->user_id);
+    }
+
+    public function storeSupporter(User $user, Idea $idea)
+    {
+        return ($user->id !== $idea->user_id);
+    }
+
+    public function storeComment(User $user, Idea $idea)
+    {
+        if ($idea->hasApplicationFromUser($user->id, 'approved')) {
+            return true;
+        }
+
+        if ($idea->user_id === $user->id) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -33,12 +33,12 @@ class IdeaSupporterController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
+     * @param  \App\Idea $idea
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(Request $request)
+    public function store(Request $request, Idea $idea)
     {
-        $idea = Idea::find($request->route()->parameter('idea'));
         $this->authorize('storeSupporter', $idea);
 
         $idea->supporters()->firstOrCreate([
@@ -88,15 +88,19 @@ class IdeaSupporterController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Idea $idea
+     * @param  \App\IdeaSupporter $supporter
      * @return \Illuminate\Http\Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(Idea $idea)
+    public function destroy(Idea $idea, IdeaSupporter $supporter)
     {
-        $supporter = $idea->supporters->where('user_id', Auth::user()->id)->first();
         $this->authorize('delete', $supporter);
 
-        $supporter->delete();
+        try {
+            $supporter->delete();
+        } catch (\Exception $e) {
+            //
+        }
 
         return redirect()
             ->back();
