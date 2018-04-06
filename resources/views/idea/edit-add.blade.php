@@ -40,7 +40,7 @@
                             </div>
 
                             <div class="col">
-                                {!! Form::label('communication', 'Preferred Communication') !!}
+                                {!! Form::label('communication', 'Communication') !!}
                                 {!! Form::text('communication', null, [
                                 'class' => 'form-control',
                                 'placeholder' => 'e.g Slack, Telegram, KettleChat...',
@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="form-group">
-                            {!! Form::label('content', 'Description') !!}
+                            {!! Form::label('content', 'The Pitch') !!}
                             {!! Form::textarea('content', null, [
                             'class' => 'form-control',
                             'placeholder' => 'A platform that brings people together to create bangin\' ideas.' ,

@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">Share your Comment</div>
 
     <div class="card-body">

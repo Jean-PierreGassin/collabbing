@@ -1,7 +1,7 @@
 <h4 class="mt-4">Collaborator Comments</h4>
 
 @foreach ($idea->comments()->paginate(10) as $comment)
-    <div class="card mb-3">
+    <div class="card mb-2">
         <div class="card-header">
             <h6 class="d-inline">
                 <a href="{{ route('users.show', $comment->user->username) }}">

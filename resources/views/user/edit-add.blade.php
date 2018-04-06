@@ -79,7 +79,7 @@
                             </div>
 
                             <div class="col">
-                                {!! Form::label('password_confirmation', 'Confirm New Password:') !!}
+                                {!! Form::label('password_confirmation', 'Confirm Password:') !!}
                                 {!! Form::password('password_confirmation', [
                                     'class' => 'form-control',
                                 ]) !!}
