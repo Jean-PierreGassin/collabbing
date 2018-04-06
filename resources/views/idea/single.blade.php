@@ -25,10 +25,10 @@
                 <div class="card mb-3">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-sm">Collaborators</div>
+                            <div class="col">Collaborators</div>
 
                             @can('storeApplication', $idea)
-                                <div class="col-sm text-sm-right">
+                                <div class="col text-sm-right">
                                     @if ($collaborator)
                                         <a class="btn btn-success btn-sm"
                                            href="#">
@@ -58,10 +58,10 @@
                 <div class="card mb-3">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-sm">Supporters</div>
+                            <div class="col">Supporters</div>
 
                             @can('storeSupporter', $idea)
-                                <div class="col-sm text-sm-right">
+                                <div class="col text-sm-right">
                                     @if ($supporter)
                                         {!! Form::open([
                                             'route' => ['ideas.supporters.destroy', $idea, $supporter],
