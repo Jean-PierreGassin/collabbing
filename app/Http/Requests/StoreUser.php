@@ -31,7 +31,7 @@ class StoreUser extends FormRequest
             'email' => 'required|string|email|max:255|unique:users,email,' . Auth::user()->id,
             'github' => 'nullable|string|max:100',
             'bio' => 'nullable|string|max:500',
-            'password' => 'required|string|confirmed',
+            'password' => 'nullable|string|confirmed',
         ];
     }
 }

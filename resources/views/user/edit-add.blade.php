@@ -72,14 +72,14 @@
 
                         <div class="form-group row">
                             <div class="col">
-                                {!! Form::label('password', 'Password:') !!}
+                                {!! Form::label('password', 'New Password:') !!}
                                 {!! Form::password('password', [
                                     'class' => 'form-control',
                                 ]) !!}
                             </div>
 
                             <div class="col">
-                                {!! Form::label('password_confirmation', 'Confirm Password:') !!}
+                                {!! Form::label('password_confirmation', 'Confirm New Password:') !!}
                                 {!! Form::password('password_confirmation', [
                                     'class' => 'form-control',
                                 ]) !!}

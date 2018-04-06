@@ -75,7 +75,12 @@ class UserController extends Controller
         }
 
         foreach ($request->validated() as $key => $value) {
-            if ($key === 'password') {
+            if ($key === 'password' && is_null($value)) {
+                unset($key);
+                continue;
+            }
+
+            if ($key === 'password' && !is_null($value)) {
                 $value = Hash::make($value);
             }
 
