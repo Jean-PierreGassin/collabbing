@@ -5,10 +5,15 @@
 
             <h6 class="card-subtitle text-muted">
                 @can('update', $idea)
-                    Status: {{ ucfirst($idea->status) }},&nbsp;
+                    <div class="float-right">
+                        Status:&nbsp;
+                        <span class="float-right {{ $idea->status === 'open' ? 'text-success' : 'text-danger' }}">
+                            {{ ucfirst($idea->status) }}
+                        </span>
+                    </div>
                 @endcan
 
-                Supporters: {{ number_format(count($idea->supporters)) }},&nbsp;
+                Supporters: {{ number_format(count($idea->supporters)) }},
                 Collaborators: {{ number_format(count($idea->approvedApplications)) }}
             </h6>
         </div>
