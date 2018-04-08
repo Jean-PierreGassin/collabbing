@@ -56,8 +56,10 @@
                             'class' => 'form-control',
                             'placeholder' => 'kettle-catastrophe' ,
                             'aria-describedby' => 'contentHelp',
+                            $idea->repository ? 'disabled' : '',
                             ]) !!}
-                            <small id="contentHelp" class="form-text text-muted">This will be the name of your repository once you're ready to create it.
+                            <small id="contentHelp" class="form-text text-muted">
+                                This will be the name of your repository once you're ready to create it.
                             </small>
                         </div>
 
@@ -68,7 +70,8 @@
                             'placeholder' => 'A platform that brings people together to create bangin\' ideas.' ,
                             'aria-describedby' => 'contentHelp',
                             ]) !!}
-                            <small id="contentHelp" class="form-text text-muted">Make it meaningful and to the point,
+                            <small id="contentHelp" class="form-text text-muted">
+                                Make it meaningful and to the point,
                                 short and sweet is the best way to get an idea across.
                             </small>
                         </div>
