@@ -26,6 +26,8 @@ class CreateIdeasTable extends Migration
             $table->string('communication');
             $table->mediumText('content');
             $table->enum('status', ['open', 'closed', 'suspended', 'expired'])->default('open');
+            $table->integer('repository')->default(0);
+            $table->string('repository_name');
             $table->timestamps();
         });
     }

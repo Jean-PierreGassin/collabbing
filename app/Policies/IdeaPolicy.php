@@ -30,6 +30,16 @@ class IdeaPolicy
         return ($user->id === $ideaToEdit->user_id);
     }
 
+    public function createRepository(User $user, Idea $idea)
+    {
+        return ($user->id === $idea->user_id);
+    }
+
+    public function inviteUsersToRepository(User $user, Idea $idea)
+    {
+        return ($user->id === $idea->user_id);
+    }
+
     public function createApplication(User $user, Idea $idea)
     {
         return ($user->id !== $idea->user_id);

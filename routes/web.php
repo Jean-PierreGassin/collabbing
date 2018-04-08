@@ -57,6 +57,14 @@ Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
     ->name('ideas.dashboard')
     ->middleware(['web', 'auth']);
 
+Route::get('ideas/{idea}/repository-create', 'IdeaController@createRepository')
+    ->name('ideas.repository-create')
+    ->middleware(['web', 'auth']);
+
+Route::get('ideas/{idea}/repository-invite/{user?}', 'IdeaController@inviteUsersToRepository')
+    ->name('ideas.repository-invite')
+    ->middleware(['web', 'auth']);
+
 /**
  * Resources for Idea Comments
  */
@@ -104,4 +112,19 @@ Route::resource('ideas.applications', 'IdeaApplicationController')->only([
 
 Route::put('ideas/{idea}/applications/{application}', 'IdeaApplicationController@approveApplication')
     ->name('ideas.applications.approve')
+    ->middleware(['web', 'auth']);
+
+/**
+ * Social integrations
+ */
+Route::get('auth/github', 'Auth\SocialController@redirectToProvider')
+    ->name('auth.github.login')
+    ->middleware(['web', 'auth']);
+
+Route::get('auth/github/callback', 'Auth\SocialController@handleProviderCallback')
+    ->name('auth.github.callback')
+    ->middleware(['web', 'auth']);
+
+Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
+    ->name('auth.github.revoke')
     ->middleware(['web', 'auth']);

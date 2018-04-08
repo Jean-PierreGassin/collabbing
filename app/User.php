@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Github\Client;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -15,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'username', 'first_name', 'last_name', 'github', 'bio', 'email', 'password',
+        'username', 'first_name', 'last_name', 'bio', 'email', 'password',
     ];
 
     /**
@@ -45,5 +46,14 @@ class User extends Authenticatable
     public function collaborations()
     {
         return $this->applications()->where('status', 'approved');
+    }
+
+    public function createGithubClient($token = null): Client
+    {
+        $client = new Client();
+
+        $client->authenticate($this->github_token ?? $token, 'http_token');
+
+        return $client;
     }
 }

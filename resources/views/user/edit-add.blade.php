@@ -54,13 +54,25 @@
                             ]) !!}
                         </div>
 
-                        <div class="form-group">
-                            {!! Form::label('github', 'GitHub Profile') !!}
-                            {!! Form::url('github', null, [
-                            'class' => 'form-control',
-                            'placeholder' => 'https://github.com/' . $user->first_name,
-                            ]) !!}
-                        </div>
+                        @if (isset($user))
+                            <div class="form-group">
+                                <h4>Integrations</h4>
+                                <p>
+                                    <small>
+                                        Linking your GitHub account will allow for seamless integration between your
+                                        ideas and repositories - view your access to Collabbing
+                                        <a href="https://github.com/settings/connections/applications/{{ env('GITHUB_CLIENT_ID') }}">
+                                            here
+                                        </a>
+                                    </small>
+                                </p>
+                                <a href="{{ $user->github_token ? route('auth.github.revoke') : route('auth.github.login') }}"
+                                   class="btn btn-sm {{ $user->github_token ? 'btn-success' : 'btn-outline-success' }}">
+                                    <i class="fab fa-github"></i>
+                                    {{ $user->github_token ? 'Un-link GitHub' : 'Link GitHub' }}
+                                </a>
+                            </div>
+                        @endif
 
                         <div class="form-group">
                             {!! Form::label('bio', 'Bio') !!}

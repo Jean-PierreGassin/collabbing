@@ -51,6 +51,17 @@
                         </div>
 
                         <div class="form-group">
+                            {!! Form::label('repository_name', 'Repository Name') !!}
+                            {!! Form::text('repository_name', null, [
+                            'class' => 'form-control',
+                            'placeholder' => 'kettle-catastrophe' ,
+                            'aria-describedby' => 'contentHelp',
+                            ]) !!}
+                            <small id="contentHelp" class="form-text text-muted">This will be the name of your repository once you're ready to create it.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
                             {!! Form::label('content', 'The Pitch') !!}
                             {!! Form::textarea('content', null, [
                             'class' => 'form-control',

@@ -26,6 +26,7 @@ class StoreIdea extends FormRequest
     {
         return [
             'title' => 'required|max:100',
+            'repository_name' => 'required|alpha_dash|max:50',
             'communication' => 'required|max:50',
             'content' => 'required|max:1500',
         ];
