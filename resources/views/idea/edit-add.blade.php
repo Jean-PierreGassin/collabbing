@@ -56,7 +56,7 @@
                             'class' => 'form-control',
                             'placeholder' => 'kettle-catastrophe' ,
                             'aria-describedby' => 'contentHelp',
-                            $idea->repository ? 'disabled' : '',
+                            (isset($idea->repository)) ? 'disabled' : '',
                             ]) !!}
                             <small id="contentHelp" class="form-text text-muted">
                                 This will be the name of your repository once you're ready to create it.
