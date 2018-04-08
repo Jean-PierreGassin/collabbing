@@ -1,6 +1,6 @@
 @foreach ($ideas as $idea)
     <div class="card mb-3">
-        <div class="card-header">
+        <div class="card-header border-0">
             <h5 class="mb-3"><a href="{{ route('ideas.show', $idea) }}">{{ $idea->title }}</a></h5>
 
             <h6 class="card-subtitle text-muted">
@@ -15,23 +15,25 @@
 
                 Supporters: {{ number_format(count($idea->supporters)) }},
                 Collaborators: {{ number_format(count($idea->approvedApplications)) }}
+
+                @if (!isset($single))
+                    - <i>Created {{ $idea->created_at->diffForHumans() }}</i>
+                @endif
             </h6>
         </div>
 
-        <div class="card-body">
-            <div class="mb-3">
-                @if (!isset($single))
-                    {!! str_limit(nl2br(e($idea->content)), 300) !!}
-                @else
-                    {!! nl2br(e($idea->content)) !!}
-                @endif
+        @if (isset($single))
+            <div class="card-body">
+                <div>
+                    {!! \GrahamCampbell\Markdown\Facades\Markdown::convertToHtml($idea->content) !!}
+                </div>
             </div>
-        </div>
 
-        <h6 class="text-muted text-right mr-2">Created {{ $idea->created_at->diffForHumans() }}</h6>
+            <h6 class="text-muted text-right mr-2 mt-3">Created {{ $idea->created_at->diffForHumans() }}</h6>
+        @endif
 
         @can('update', $idea)
-            <div class="card-footer">
+            <div class="card-footer border-0">
                 <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit Idea</a>
 
                 <a class="btn btn-info btn-sm float-right" href="{{ route('ideas.dashboard', $idea) }}">

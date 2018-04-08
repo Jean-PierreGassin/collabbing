@@ -56,7 +56,6 @@
                             'class' => 'form-control',
                             'placeholder' => 'kettle-catastrophe' ,
                             'aria-describedby' => 'contentHelp',
-                            (isset($idea->repository)) ? 'disabled' : '',
                             ]) !!}
                             <small id="contentHelp" class="form-text text-muted">
                                 This will be the name of your repository once you're ready to create it.
@@ -72,7 +71,7 @@
                             ]) !!}
                             <small id="contentHelp" class="form-text text-muted">
                                 Make it meaningful and to the point,
-                                short and sweet is the best way to get an idea across.
+                                short and sweet is the best way to get an idea across (supports markdown).
                             </small>
                         </div>
                     </div>

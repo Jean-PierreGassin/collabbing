@@ -43,7 +43,9 @@
                     <div class="card-body">
                         @if ($user->bio)
                             <blockquote class="blockquote">
-                                <p class="mb-0">{!! nl2br(e($user->bio)) !!}</p>
+                                <p class="mb-0">
+                                    {!! \GrahamCampbell\Markdown\Facades\Markdown::convertToHtml($user->bio) !!}
+                                </p>
                                 <footer class="blockquote-footer">Someone called
                                     <cite title="Source Title">
                                         {{ ucwords($user->first_name) . ' ' . ucwords($user->last_name) }}
