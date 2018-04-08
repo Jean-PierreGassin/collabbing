@@ -27,7 +27,19 @@
     </div>
 
     <div class="card-body">
-        {{ count($idea->approvedApplications) }}
+        @if (count($idea->approvedApplications) === 0)
+            It's quite... too quite.
+        @else
+            @foreach ($idea->approvedApplications as $collaborator)
+                <a href="{{ route('users.show', $collaborator->user->username) }}">
+                    <img class="border border-secondary"
+                         width="40" height="40"
+                         src="{{ $collaborator->user->profilePicture() }}"
+                         alt="{{ $collaborator->user->first_name }} {{ $collaborator->user->last_name }}"
+                    >
+                </a>
+            @endforeach
+        @endif
     </div>
 </div>
 

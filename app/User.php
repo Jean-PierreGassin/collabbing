@@ -3,6 +3,7 @@
 namespace App;
 
 use Github\Client;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -55,5 +56,18 @@ class User extends Authenticatable
         $client->authenticate($this->github_token ?? $token, 'http_token');
 
         return $client;
+    }
+
+    public function profilePicture()
+    {
+        if ($this->github_token) {
+            return Cache::remember('users.profile-picture', 60, function () {
+                $gitHub = $this->createGithubClient();
+
+                return $gitHub->currentUser()->show()['avatar_url'];
+            });
+        }
+
+        return 'https://www.gravatar.com/avatar/' . md5($this->email);
     }
 }
