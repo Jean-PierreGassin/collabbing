@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Idea;
-use App\Http\Requests\StoreIdea;
 use App\User;
+use App\Http\Requests\StoreIdea;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class IdeaController extends Controller
@@ -14,8 +15,15 @@ class IdeaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->get('search')) {
+            $searchResults = Idea::where('status', 'open')
+                ->orderBy('created_at', 'desc')
+                ->where('title', 'like', '%' . $request->get('search') . '%')
+                ->paginate();
+        }
+
         $trendingIdeas = Idea::where('status', 'open')
             ->withCount('supporters')
             ->orderBy('supporters_count', 'desc')
@@ -30,7 +38,7 @@ class IdeaController extends Controller
             ->whereNotIn('id', $trendingIds->all())
             ->paginate(10);
 
-        return view('idea.list', compact('trendingIdeas', 'ideas'));
+        return view('idea.list', compact('searchResults', 'trendingIdeas', 'ideas'));
     }
 
     /**

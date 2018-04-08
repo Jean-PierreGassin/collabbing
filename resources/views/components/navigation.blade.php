@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             @auth
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav mr-auto order-1">
                     <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
@@ -24,7 +24,7 @@
             @endauth
 
             <!-- Right Side Of Navbar -->
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto order-3">
                 <!-- Authentication Links -->
                 @guest
                     <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
@@ -54,6 +54,21 @@
                     </li>
                 @endguest
             </ul>
+
+            <div class="col-12 mt-3 mt-sm-0 col-md-6 order-sm-2">
+                {!! Form::open(['route' => 'ideas.index', 'method' => 'GET']) !!}
+
+                <div class="input-group">
+                    {!! Form::search('search', null, [
+                        'class' => 'form-control py-2',
+                        'placeholder' => 'a robot that sings karaoke...' ,
+                        'aria-describedby' => 'contentHelp',
+                    ]) !!}
+                    {!! Form::submit('Search Ideas', ['class' => 'btn btn-secondary']) !!}
+                </div>
+
+                {!! Form::close() !!}
+            </div>
         </div>
     </div>
 </nav>

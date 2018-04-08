@@ -53,6 +53,10 @@ Route::resource('ideas', 'IdeaController')->only([
     'index',
 ])->middleware(['web']);
 
+Route::get('ideas', 'IdeaController@index')
+    ->name('ideas.index')
+    ->middleware(['web']);
+
 Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
     ->name('ideas.dashboard')
     ->middleware(['web', 'auth']);
