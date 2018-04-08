@@ -34,8 +34,8 @@
                         <h6 class="card-subtitle text-muted">
                             Member since: {{ date('d M - Y', $user->created_at->timestamp) }}
 
-                            @if ($user->github)
-                                - <a href="{{ $user->github }}">GitHub</a>
+                            @if ($user->github_username)
+                                - <a href="https://github.com/{{ $user->github_username }}">GitHub Profile</a>
                             @endif
                         </h6>
                     </div>
