@@ -60,7 +60,7 @@
 
                 <div class="input-group">
                     {!! Form::search('search', null, [
-                        'class' => 'form-control py-2 bg-light border border-secondary border-right-0',
+                        'class' => 'form-control py-2 bg-light text-white border border-secondary border-right-0',
                         'placeholder' => 'a robot that sings karaoke...' ,
                         'aria-describedby' => 'contentHelp',
                     ]) !!}
