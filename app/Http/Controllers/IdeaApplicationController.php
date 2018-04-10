@@ -54,7 +54,7 @@ class IdeaApplicationController extends Controller
         $application->save();
 
         return redirect()
-            ->route('ideas.show', $ideaId)
+            ->route('ideas.show', $idea->id)
             ->with('status', 'Application successfully submitted');
     }
 
