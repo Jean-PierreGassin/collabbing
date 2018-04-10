@@ -1,3 +1,4 @@
+@section('title', 'Edit Profile')
 @extends('layouts.app')
 
 @section('content')

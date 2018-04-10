@@ -1,3 +1,4 @@
+@section('title', 'Ideas - Dashboard')
 @extends('layouts.app')
 
 @section('content')

@@ -1,3 +1,4 @@
+@section('title', '403')
 @extends('layouts.errors')
 
 @section('content')

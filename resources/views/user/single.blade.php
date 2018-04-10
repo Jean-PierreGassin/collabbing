@@ -1,3 +1,4 @@
+@section('title', '@' . $user->username)
 @extends('layouts.app')
 
 @section('content')

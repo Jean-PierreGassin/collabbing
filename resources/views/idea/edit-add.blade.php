@@ -1,3 +1,4 @@
+@section('title', 'Ideas - Manage')
 @extends('layouts.app')
 
 @section('content')

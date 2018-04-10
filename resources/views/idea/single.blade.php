@@ -1,3 +1,4 @@
+@section('title', 'Ideas - ' . $idea->title)
 @extends('layouts.app')
 
 @section('content')
