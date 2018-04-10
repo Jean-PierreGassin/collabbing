@@ -31,5 +31,24 @@
         @yield('content')
     </main>
 </div>
+
+<div class="container">
+    <footer class="pt-4 my-md-5 pt-md-5 border-top border-dark">
+        <div class="row">
+            <div class="col-6 col-md-6">
+                <h5>Resources</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="{{ route('resources.feedback') }}">Feedback</a></li>
+                    <li><a class="text-muted" href="{{ route('resources.pricing') }}">Pricing</a></li>
+                </ul>
+            </div>
+            <div class="col-12 col-md-6 text-right">
+                <small class="d-block mb-3 text-muted">
+                    <a href="https://github.com/Jean-PierreGassin">Created by Jean-Pierre Gassin</a>
+                </small>
+            </div>
+        </div>
+    </footer>
+</div>
 </body>
 </html>

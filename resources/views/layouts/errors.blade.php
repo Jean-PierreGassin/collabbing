@@ -50,7 +50,7 @@
         }
 
         .links > a {
-            color: #636b6f;
+            color: #ffffff;
             padding: 0 25px;
             font-size: 12px;
             font-weight: 600;
@@ -68,7 +68,7 @@
 <div class="flex-center position-ref full-height">
     @if (Route::has('login'))
         <div class="top-right links">
-            <a href="{{ route('ideas.index') }}">View Ideas</a>
+            <a href="{{ route('ideas.index') }}">Browse Ideas</a>
 
             @guest
                 <a href="{{ route('login') }}">Login</a>

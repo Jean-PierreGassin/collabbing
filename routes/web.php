@@ -132,3 +132,16 @@ Route::get('auth/github/callback', 'Auth\SocialController@handleProviderCallback
 Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
     ->name('auth.github.revoke')
     ->middleware(['web', 'auth']);
+
+/**
+ * Resource Links
+ */
+Route::prefix('resources')->group(function () {
+    Route::get('feedback', 'Resources\FeedbackController@index')
+        ->name('resources.feedback')
+        ->middleware('web');
+
+    Route::get('pricing', 'Resources\PricingController@index')
+        ->name('resources.pricing')
+        ->middleware('web');
+});
