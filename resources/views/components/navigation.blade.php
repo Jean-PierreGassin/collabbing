@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light navbar-laravel">
+<nav class="navbar navbar-expand-md navbar-light bg-light">
     <div class="container">
         <a class="navbar-brand" href="{{ route('ideas.index') }}">
             {{ config('app.name', 'Laravel') }}
@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             @auth
-                <ul class="navbar-nav mr-auto order-1">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
@@ -55,16 +55,16 @@
                 @endguest
             </ul>
 
-            <div class="col-12 mt-3 mt-sm-0 col-md-6 order-sm-2">
+            <div class="col-12 mt-3 mt-sm-0 col-md-6 ml-auto order-sm-2">
                 {!! Form::open(['route' => 'ideas.index', 'method' => 'GET']) !!}
 
                 <div class="input-group">
                     {!! Form::search('search', null, [
-                        'class' => 'form-control py-2',
+                        'class' => 'form-control py-2 bg-light border border-secondary border-right-0',
                         'placeholder' => 'a robot that sings karaoke...' ,
                         'aria-describedby' => 'contentHelp',
                     ]) !!}
-                    {!! Form::submit('Search Ideas', ['class' => 'btn btn-secondary']) !!}
+                    {!! Form::submit('Search Ideas', ['class' => 'btn btn-secondary rounded-0']) !!}
                 </div>
 
                 {!! Form::close() !!}
