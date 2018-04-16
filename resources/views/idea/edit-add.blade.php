@@ -64,7 +64,7 @@
                         </div>
 
                         <div class="form-group">
-                            {!! Form::label('content', 'The Pitch') !!}
+                            {!! Form::label('content', 'The Pitch (supports markdown)') !!}
                             {!! Form::textarea('content', null, [
                             'class' => 'form-control',
                             'placeholder' => 'A platform that brings people together to create bangin\' ideas.' ,
@@ -72,7 +72,7 @@
                             ]) !!}
                             <small id="contentHelp" class="form-text text-muted">
                                 Make it meaningful and to the point,
-                                short and sweet is the best way to get an idea across (supports markdown).
+                                short and sweet is the best way to get an idea across.
                             </small>
                         </div>
                     </div>
