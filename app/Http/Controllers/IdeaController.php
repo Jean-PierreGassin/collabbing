@@ -179,32 +179,51 @@ class IdeaController extends Controller
             ->with('status', 'Repository created 🔥');
     }
 
+    /**
+     * @param Idea $idea
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function inviteUsersToRepository(Idea $idea)
     {
         $this->authorize('inviteUsersToRepository', $idea);
 
-        try {
-            $gitHub = Auth::user()->createGithubClient();
-            $user = User::find(Auth::user()->id);
-
-            foreach ($idea->approvedApplications()->get() as $collaborator) {
-                $gitHub->repo()
-                    ->collaborators()
-                    ->add(
-                        $user->github_username,
-                        $idea->repository_name,
-                        $collaborator->user->github_username
-                    );
-            }
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-            return redirect()
-                ->route('ideas.dashboard', $idea)
-                ->with('status', 'Something went wrong, try again 🙉');
+        foreach ($idea->approvedApplications()->get() as $collaborator) {
+            $this->inviteUserToRepository($idea, $collaborator);
         }
 
         return redirect()
             ->route('ideas.dashboard', $idea)
             ->with('status', 'All Collaborators has been invited 🤟');
+    }
+
+    /**
+     * @param Idea $idea
+     * @param $collaborator
+     * @return bool|\Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function inviteUserToRepository(Idea $idea, $collaborator)
+    {
+        $this->authorize('inviteUsersToRepository', $idea);
+
+        $user = User::find(Auth::user()->id);
+
+        try {
+            $gitHub = Auth::user()->createGithubClient();
+
+            $gitHub->repo()->collaborators()->add(
+                $user->github_username,
+                $idea->repository_name,
+                $collaborator->user->github_username
+            );
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('ideas.dashboard', $idea)
+                ->with('status', 'Something went wrong, try again 🙉');
+        }
+
+
+        return true;
     }
 }

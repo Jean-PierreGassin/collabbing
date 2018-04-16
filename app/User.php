@@ -29,6 +29,13 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * The GitHub client used to authenticate users.
+     *
+     * @var \Github\Client
+     */
+    protected $githubClient;
+
     public function ideas()
     {
         return $this->hasMany(Idea::class, 'user_id');
@@ -51,11 +58,13 @@ class User extends Authenticatable
 
     public function createGithubClient($token = null): Client
     {
-        $client = new Client();
+        if (!$this->githubClient) {
+            $this->githubClient = new Client();
 
-        $client->authenticate($this->github_token ?? $token, 'http_token');
+            $this->githubClient->authenticate($this->github_token ?? $token, 'http_token');
+        }
 
-        return $client;
+        return $this->githubClient;
     }
 
     public function profilePicture()
