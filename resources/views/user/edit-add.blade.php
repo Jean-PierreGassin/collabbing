@@ -76,7 +76,7 @@
                         @endif
 
                         <div class="form-group">
-                            {!! Form::label('bio', 'Bio') !!}
+                            {!! Form::label('bio', 'Bio (supports markdown)') !!}
                             {!! Form::textarea('bio', null, [
                             'class' => 'form-control',
                             'placeholder' => 'Tell us what you\'re good at and what you enjoy...' ,
