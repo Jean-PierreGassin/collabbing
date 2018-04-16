@@ -28,7 +28,7 @@
 
     <div class="card-body">
         @if (count($idea->approvedApplications) === 0)
-            It's quite... too quite.
+            It's quiet... too quiet.
         @else
             @foreach ($idea->approvedApplications as $collaborator)
                 <a href="{{ route('users.show', $collaborator->user->username) }}">
