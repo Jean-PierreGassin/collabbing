@@ -6,9 +6,3 @@
  */
 
 require('./bootstrap');
-
-$(document).keyup(function(e) {
-    if (e.which === 115 || e.which === 83) {
-        $('input[name="search"]').get(0).focus();
-    }
-});

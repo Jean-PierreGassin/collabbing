@@ -13684,12 +13684,6 @@ module.exports = __webpack_require__(36);
 
 __webpack_require__(12);
 
-$(document).keyup(function (e) {
-    if (e.which === 115 || e.which === 83) {
-        $('input[name="search"]').get(0).focus();
-    }
-});
-
 /***/ }),
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
