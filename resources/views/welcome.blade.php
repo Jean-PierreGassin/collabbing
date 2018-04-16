@@ -2,11 +2,13 @@
 @extends('layouts.errors')
 
 @section('content')
-    <div class="title m-b-md">
-        Collabbing
+    <div class="m-b-md">
+        <h1>Collabbing</h1>
     </div>
 
-    <div class="subcopy m-b-md">
-        Collaborate Better.
+    <div class="m-b-md">
+        <p class="lead">Collaborate Better.</p>
     </div>
+
+    <a class="btn btn-outline-success" href="{{ route('ideas.index') }}">Browse Ideas</a>
 @stop
