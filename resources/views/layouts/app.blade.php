@@ -5,6 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- SEO things -->
+    <meta name="description" content="Bringing people together to collaborate on projects, one idea at a time.">
+    <meta name="keywords" content="collaborate,ideas,development,software,programming">
+
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -20,12 +24,15 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-117140602-1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
         gtag('js', new Date());
 
         gtag('config', 'UA-117140602-1');
     </script>
-
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
