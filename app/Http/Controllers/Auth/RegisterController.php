@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\User;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Hash;
 
+/**
+ * Class RegisterController
+ * @package App\Http\Controllers\Auth
+ */
 class RegisterController extends Controller
 {
     /*
@@ -43,34 +47,39 @@ class RegisterController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array $data
-     * @return \Illuminate\Contracts\Validation\Validator
+     * @param array $data
+     * @return Validator
      */
-    protected function validator(array $data)
+    protected function validator(array $data): Validator
     {
-        return Validator::make($data, [
-            'username' => 'required|string|min:3|max:20|regex:/^[a-zA-Z,0-9]+$/|unique:users',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|confirmed',
-        ]);
+        return Validator::make(
+            $data,
+            [
+                'username' => 'required|string|min:3|max:20|regex:/^[a-zA-Z,0-9]+$/|unique:users',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|confirmed',
+            ]
+        );
     }
 
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array $data
-     * @return \App\User
+     * @param array $data
+     * @return User
      */
-    protected function create(array $data)
+    protected function create(array $data): User
     {
-        return User::create([
-            'username' => ucfirst($data['username']),
-            'first_name' => ucwords($data['first_name']),
-            'last_name' => ucwords($data['last_name']),
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return User::create(
+            [
+                'username' => ucfirst($data['username']),
+                'first_name' => ucwords($data['first_name']),
+                'last_name' => ucwords($data['last_name']),
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]
+        );
     }
 }

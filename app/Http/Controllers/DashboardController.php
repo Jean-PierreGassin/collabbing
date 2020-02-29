@@ -3,8 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Idea;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
+/**
+ * Class DashboardController
+ * @package App\Http\Controllers
+ */
 class DashboardController extends Controller
 {
     /**
@@ -20,7 +26,7 @@ class DashboardController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Http\Response
+     * @return Factory|View
      */
     public function index()
     {

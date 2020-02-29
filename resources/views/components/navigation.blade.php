@@ -21,9 +21,9 @@
                         <a class="nav-link text-success" href="{{ route('ideas.create') }}">Create an Idea</a>
                     </li>
                 </ul>
-            @endauth
+        @endauth
 
-            <!-- Right Side Of Navbar -->
+        <!-- Right Side Of Navbar -->
             <ul class="navbar-nav ml-auto order-3">
                 <!-- Authentication Links -->
                 @guest

@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreIdea;
 use App\Idea;
 use App\User;
-use App\Http\Requests\StoreIdea;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
+/**
+ * Class IdeaController
+ * @package App\Http\Controllers
+ */
 class IdeaController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Factory|View
      */
     public function index(Request $request)
     {
@@ -44,15 +55,17 @@ class IdeaController extends Controller
     /**
      * Display the dashboard for an idea
      *
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
+     * @param Idea $idea
+     * @return Factory|View
      */
     public function dashboard(Idea $idea)
     {
         $applications = $idea->pendingApplications()->get();
         $collaborators = $idea->approvedApplications()->get();
 
-        return view('idea.manage', compact(
+        return view(
+            'idea.manage',
+            compact(
                 'idea',
                 'applications',
                 'collaborators'
@@ -63,7 +76,7 @@ class IdeaController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Factory|View
      */
     public function create()
     {
@@ -73,10 +86,10 @@ class IdeaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIdea $request
-     * @return \Illuminate\Http\Response
+     * @param StoreIdea $request
+     * @return RedirectResponse
      */
-    public function store(StoreIdea $request)
+    public function store(StoreIdea $request): RedirectResponse
     {
         $user = $request->user();
         $idea = $user->ideas()->create($request->validated());
@@ -89,8 +102,8 @@ class IdeaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
+     * @param Idea $idea
+     * @return Factory|View
      */
     public function show(Idea $idea)
     {
@@ -100,7 +113,9 @@ class IdeaController extends Controller
             $supporter = $idea->hasSupportFromUser(Auth::user()->id);
         }
 
-        return view('idea.single', compact(
+        return view(
+            'idea.single',
+            compact(
                 'idea',
                 'collaborator',
                 'applicant',
@@ -112,9 +127,9 @@ class IdeaController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Idea $idea
+     * @return Factory|View
+     * @throws AuthorizationException
      */
     public function edit(Idea $idea)
     {
@@ -126,12 +141,12 @@ class IdeaController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIdea $request
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param StoreIdea $request
+     * @param Idea $idea
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function update(StoreIdea $request, Idea $idea)
+    public function update(StoreIdea $request, Idea $idea): RedirectResponse
     {
         $this->authorize('update', $idea);
 
@@ -146,14 +161,19 @@ class IdeaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
+     * @param Idea $idea
+     * @return Response
      */
-    public function destroy(Idea $idea)
+    public function destroy(Idea $idea): ?Response
     {
         //
     }
 
+    /**
+     * @param Idea $idea
+     * @return RedirectResponse|string
+     * @throws AuthorizationException
+     */
     public function createRepository(Idea $idea)
     {
         $this->authorize('createRepository', $idea);
@@ -168,7 +188,7 @@ class IdeaController extends Controller
             $gitHub->repo()->create($idea->repository_name);
             $idea->repository = 1;
             $idea->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
                 ->with('status', 'Something went wrong, try again 🙉');
@@ -181,10 +201,10 @@ class IdeaController extends Controller
 
     /**
      * @param Idea $idea
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function inviteUsersToRepository(Idea $idea)
+    public function inviteUsersToRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('inviteUsersToRepository', $idea);
 
@@ -200,8 +220,8 @@ class IdeaController extends Controller
     /**
      * @param Idea $idea
      * @param $collaborator
-     * @return bool|\Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @return bool|RedirectResponse
+     * @throws AuthorizationException
      */
     public function inviteUserToRepository(Idea $idea, $collaborator)
     {
@@ -217,7 +237,7 @@ class IdeaController extends Controller
                 $idea->repository_name,
                 $collaborator->user->github_username
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
                 ->with('status', 'Something went wrong, try again 🙉');

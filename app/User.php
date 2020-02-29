@@ -3,10 +3,15 @@
 namespace App;
 
 use Github\Client;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
+/**
+ * Class User
+ * @package App
+ */
 class User extends Authenticatable
 {
     use Notifiable;
@@ -17,7 +22,12 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'username', 'first_name', 'last_name', 'bio', 'email', 'password',
+        'username',
+        'first_name',
+        'last_name',
+        'bio',
+        'email',
+        'password',
     ];
 
     /**
@@ -26,36 +36,73 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     /**
      * The GitHub client used to authenticate users.
      *
-     * @var \Github\Client
+     * @var Client
      */
     protected $githubClient;
 
-    public function ideas()
+    /**
+     * @return HasMany
+     */
+    public function ideas(): HasMany
     {
         return $this->hasMany(Idea::class, 'user_id');
     }
 
-    public function comments()
+    /**
+     * @return HasMany
+     */
+    public function comments(): HasMany
     {
         return $this->hasMany(IdeaComment::class, 'user_id');
     }
 
-    public function applications()
-    {
-        return $this->hasMany(IdeaApplication::class, 'user_id');
-    }
-
+    /**
+     * @return HasMany
+     */
     public function collaborations()
     {
         return $this->applications()->where('status', 'approved');
     }
 
+    /**
+     * @return HasMany
+     */
+    public function applications(): HasMany
+    {
+        return $this->hasMany(IdeaApplication::class, 'user_id');
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function profilePicture()
+    {
+        if ($this->github_token) {
+            return Cache::remember(
+                'users.profile-picture',
+                60,
+                function () {
+                    $gitHub = $this->createGithubClient();
+
+                    return $gitHub->currentUser()->show()['avatar_url'];
+                }
+            );
+        }
+
+        return 'https://www.gravatar.com/avatar/' . md5($this->email);
+    }
+
+    /**
+     * @param null $token
+     * @return Client
+     */
     public function createGithubClient($token = null): Client
     {
         if (!$this->githubClient) {
@@ -65,18 +112,5 @@ class User extends Authenticatable
         }
 
         return $this->githubClient;
-    }
-
-    public function profilePicture()
-    {
-        if ($this->github_token) {
-            return Cache::remember('users.profile-picture', 60, function () {
-                $gitHub = $this->createGithubClient();
-
-                return $gitHub->currentUser()->show()['avatar_url'];
-            });
-        }
-
-        return 'https://www.gravatar.com/avatar/' . md5($this->email);
     }
 }

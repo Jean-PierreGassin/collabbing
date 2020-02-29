@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class StoreIdeaComment
+ * @package App\Http\Requests
+ */
 class StoreIdeaComment extends FormRequest
 {
     /**
@@ -11,7 +15,7 @@ class StoreIdeaComment extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,7 +25,7 @@ class StoreIdeaComment extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'content' => 'required|max:1500',

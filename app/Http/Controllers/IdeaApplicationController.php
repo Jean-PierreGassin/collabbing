@@ -2,20 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreIdeaApplication;
 use App\Idea;
 use App\IdeaApplication;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreIdeaApplication;
+use Illuminate\View\View;
 
+/**
+ * Class IdeaApplicationController
+ * @package App\Http\Controllers
+ */
 class IdeaApplicationController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index()
+    public function index(): ?Response
     {
         //
     }
@@ -23,10 +32,10 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Request $request
+     * @param Idea $idea
+     * @return Factory|View
+     * @throws AuthorizationException
      */
     public function create(Request $request, Idea $idea)
     {
@@ -38,10 +47,10 @@ class IdeaApplicationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIdeaApplication $request
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param StoreIdeaApplication $request
+     * @param Idea $idea
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
     public function store(StoreIdeaApplication $request, Idea $idea)
     {
@@ -61,10 +70,10 @@ class IdeaApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaApplication $application
-     * @return \Illuminate\Http\Response
+     * @param IdeaApplication $application
+     * @return Response
      */
-    public function show(IdeaApplication $application)
+    public function show(IdeaApplication $application): ?Response
     {
         //
     }
@@ -72,10 +81,10 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaApplication $application
-     * @return \Illuminate\Http\Response
+     * @param IdeaApplication $application
+     * @return Response
      */
-    public function edit(IdeaApplication $application)
+    public function edit(IdeaApplication $application): ?Response
     {
         //
     }
@@ -83,11 +92,11 @@ class IdeaApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\IdeaApplication $application
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param IdeaApplication $application
+     * @return Response
      */
-    public function update(Request $request, IdeaApplication $application)
+    public function update(Request $request, IdeaApplication $application): ?Response
     {
         //
     }
@@ -95,12 +104,12 @@ class IdeaApplicationController extends Controller
     /**
      * Approve the application.
      *
-     * @param  \App\Idea $idea
-     * @param  \App\IdeaApplication $application
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Idea $idea
+     * @param IdeaApplication $application
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function approveApplication(Idea $idea, IdeaApplication $application)
+    public function approveApplication(Idea $idea, IdeaApplication $application): RedirectResponse
     {
         $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
 
@@ -117,12 +126,12 @@ class IdeaApplicationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Idea $idea
-     * @param  \App\IdeaApplication $application
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Idea $idea
+     * @param IdeaApplication $application
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function destroy(Idea $idea, IdeaApplication $application)
+    public function destroy(Idea $idea, IdeaApplication $application): RedirectResponse
     {
         $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
 

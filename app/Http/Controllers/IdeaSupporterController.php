@@ -4,17 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Idea;
 use App\IdeaSupporter;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 
+/**
+ * Class IdeaSupporterController
+ * @package App\Http\Controllers
+ */
 class IdeaSupporterController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function index()
+    public function index(): ?Response
     {
         //
     }
@@ -22,9 +29,9 @@ class IdeaSupporterController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function create()
+    public function create(): ?Response
     {
         //
     }
@@ -32,19 +39,21 @@ class IdeaSupporterController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\Idea $idea
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Request $request
+     * @param Idea $idea
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function store(Request $request, Idea $idea)
+    public function store(Request $request, Idea $idea): RedirectResponse
     {
         $this->authorize('storeSupporter', $idea);
 
-        $idea->supporters()->firstOrCreate([
-            'user_id' => $request->user()->id,
-            'idea_id' => $idea->id,
-        ]);
+        $idea->supporters()->firstOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'idea_id' => $idea->id,
+            ]
+        );
 
         return redirect()
             ->back();
@@ -53,10 +62,10 @@ class IdeaSupporterController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\IdeaSupporter $supporter
-     * @return \Illuminate\Http\Response
+     * @param IdeaSupporter $supporter
+     * @return Response
      */
-    public function show(IdeaSupporter $supporter)
+    public function show(IdeaSupporter $supporter): ?Response
     {
         //
     }
@@ -64,10 +73,10 @@ class IdeaSupporterController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\IdeaSupporter $supporter
-     * @return \Illuminate\Http\Response
+     * @param IdeaSupporter $supporter
+     * @return Response
      */
-    public function edit(IdeaSupporter $supporter)
+    public function edit(IdeaSupporter $supporter): ?Response
     {
         //
     }
@@ -75,11 +84,11 @@ class IdeaSupporterController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \App\IdeaSupporter $supporter
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param IdeaSupporter $supporter
+     * @return Response
      */
-    public function update(Request $request, IdeaSupporter $supporter)
+    public function update(Request $request, IdeaSupporter $supporter): ?Response
     {
         //
     }
@@ -87,18 +96,18 @@ class IdeaSupporterController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Idea $idea
-     * @param  \App\IdeaSupporter $supporter
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Idea $idea
+     * @param IdeaSupporter $supporter
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function destroy(Idea $idea, IdeaSupporter $supporter)
+    public function destroy(Idea $idea, IdeaSupporter $supporter): RedirectResponse
     {
         $this->authorize('delete', $supporter);
 
         try {
             $supporter->delete();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //
         }
 

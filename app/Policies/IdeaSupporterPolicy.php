@@ -2,10 +2,14 @@
 
 namespace App\Policies;
 
-use App\User;
 use App\IdeaSupporter;
+use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Class IdeaSupporterPolicy
+ * @package App\Policies
+ */
 class IdeaSupporterPolicy
 {
     use HandlesAuthorization;
@@ -20,7 +24,12 @@ class IdeaSupporterPolicy
         //
     }
 
-    public function delete(User $user, IdeaSupporter $supportToEdit)
+    /**
+     * @param User $user
+     * @param IdeaSupporter $supportToEdit
+     * @return bool
+     */
+    public function delete(User $user, IdeaSupporter $supportToEdit): bool
     {
         return ($user->id === $supportToEdit->user_id);
     }

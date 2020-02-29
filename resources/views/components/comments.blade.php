@@ -26,7 +26,8 @@
 
         @can('update', $comment)
             <div class="card-footer">
-                <a class="btn btn-dark btn-sm" href="{{ route('ideas.comments.edit', [$idea, $comment]) }}">Edit Comment</a>
+                <a class="btn btn-dark btn-sm" href="{{ route('ideas.comments.edit', [$idea, $comment]) }}">Edit
+                    Comment</a>
             </div>
         @endcan
     </div>

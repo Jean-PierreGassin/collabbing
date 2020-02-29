@@ -3,7 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Class IdeaApplication
+ * @package App
+ */
 class IdeaApplication extends Model
 {
     /**
@@ -12,15 +17,24 @@ class IdeaApplication extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'idea_id', 'content', 'status',
+        'user_id',
+        'idea_id',
+        'content',
+        'status',
     ];
 
-    public function user()
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function idea()
+    /**
+     * @return BelongsTo
+     */
+    public function idea(): BelongsTo
     {
         return $this->belongsTo(Idea::class, 'idea_id');
     }

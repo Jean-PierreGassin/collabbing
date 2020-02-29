@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class StoreIdea
+ * @package App\Http\Requests
+ */
 class StoreIdea extends FormRequest
 {
 
@@ -12,7 +16,7 @@ class StoreIdea extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +26,7 @@ class StoreIdea extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => 'required|max:100',
@@ -37,7 +41,7 @@ class StoreIdea extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
             'content.required' => 'The description field is required',

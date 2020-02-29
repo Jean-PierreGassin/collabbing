@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
 use App\Http\Controllers\Controller;
+use App\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
+/**
+ * Class SocialController
+ * @package App\Http\Controllers\Auth
+ */
 class SocialController extends Controller
 {
     /**
@@ -22,9 +27,9 @@ class SocialController extends Controller
     /**
      * Redirect the user to the GitHub authentication page.
      *
-     * @return \Illuminate\Http\Response
+     * @return RedirectResponse
      */
-    public function redirectToProvider()
+    public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver('github')
             ->scopes(['repo'])
@@ -34,9 +39,9 @@ class SocialController extends Controller
     /**
      * Obtain the user information from GitHub.
      *
-     * @return \Illuminate\Http\Response
+     * @return RedirectResponse
      */
-    public function handleProviderCallback()
+    public function handleProviderCallback(): RedirectResponse
     {
         $providerUser = Socialite::driver('github')->user();
         $user = User::find(Auth::user()->id);
@@ -55,9 +60,9 @@ class SocialController extends Controller
     /**
      * Remove the provider token for this user.
      *
-     * @return \Illuminate\Http\Response
+     * @return RedirectResponse
      */
-    public function revokeProvider()
+    public function revokeProvider(): RedirectResponse
     {
         $user = User::find(Auth::user()->id);
 

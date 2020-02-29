@@ -2,29 +2,37 @@
 
 namespace Tests\Traits;
 
+use App\Idea;
+use App\IdeaApplication;
+use App\IdeaComment;
+use App\IdeaSupporter;
+use App\User;
+
 trait SeedsDatabase
 {
     public function createUsersWithClosedIdea()
     {
-        factory(\App\User::class, 2)
+        factory(User::class, 2)
             ->create()
-            ->each(function ($user) {
-                $user->ideas()->save(factory(\App\Idea::class)->make());
-            });
+            ->each(
+                function ($user) {
+                    $user->ideas()->save(factory(Idea::class)->make());
+                }
+            );
 
-        $this->createIdeaRelations(\App\User::find(1));
-        $this->createIdeaRelations(\App\User::find(2));
+        $this->createIdeaRelations(User::find(1));
+        $this->createIdeaRelations(User::find(2));
     }
 
     protected function createIdeaRelations($user)
     {
         foreach ($user->ideas->all() as $idea) {
             $idea->comments()
-                ->save(factory(\App\IdeaComment::class)->make(['user_id' => $user->id]));
+                ->save(factory(IdeaComment::class)->make(['user_id' => $user->id]));
             $idea->supporters()
-                ->save(factory(\App\IdeaSupporter::class)->make(['user_id' => $user->id]));
+                ->save(factory(IdeaSupporter::class)->make(['user_id' => $user->id]));
             $idea->applications()
-                ->save(factory(\App\IdeaApplication::class)->make(['user_id' => $user->id]));
+                ->save(factory(IdeaApplication::class)->make(['user_id' => $user->id]));
         }
 
         // 'close' the first idea for each user

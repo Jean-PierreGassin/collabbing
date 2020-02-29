@@ -14,15 +14,18 @@ use Illuminate\Support\Str;
 |
 */
 
-$factory->define(App\User::class, function (Faker $faker) {
-    return [
-        'username' => $faker->userName,
-        'first_name' => $faker->firstName,
-        'last_name' => $faker->lastName,
-        'email' => $faker->unique()->safeEmail,
-        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
-        'github_token' => $faker->md5,
-        'bio' => $faker->text,
-        'remember_token' => Str::random(10),
-    ];
-});
+$factory->define(
+    App\User::class,
+    function (Faker $faker) {
+        return [
+            'username' => $faker->userName,
+            'first_name' => $faker->firstName,
+            'last_name' => $faker->lastName,
+            'email' => $faker->unique()->safeEmail,
+            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+            'github_token' => $faker->md5,
+            'bio' => $faker->text,
+            'remember_token' => Str::random(10),
+        ];
+    }
+);

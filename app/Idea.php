@@ -3,7 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class Idea
+ * @package App
+ */
 class Idea extends Model
 {
     /**
@@ -12,39 +18,59 @@ class Idea extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'communication', 'content', 'status', 'repository', 'repository_name',
+        'title',
+        'communication',
+        'content',
+        'status',
+        'repository',
+        'repository_name',
     ];
 
-    public function user()
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function supporters()
-    {
-        return $this->hasMany(IdeaSupporter::class, 'idea_id');
-    }
-
-    public function comments()
+    /**
+     * @return HasMany
+     */
+    public function comments(): HasMany
     {
         return $this->hasMany(IdeaComment::class, 'idea_id');
     }
 
-    public function applications()
-    {
-        return $this->hasMany(IdeaApplication::class, 'idea_id');
-    }
-
+    /**
+     * @return HasMany
+     */
     public function pendingApplications()
     {
         return $this->applications()->where('status', 'pending');
     }
 
-    public function approvedApplications()
+    /**
+     * @return HasMany
+     */
+    public function applications(): HasMany
+    {
+        return $this->hasMany(IdeaApplication::class, 'idea_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function approvedApplications(): HasMany
     {
         return $this->applications()->where('status', 'approved');
     }
 
+    /**
+     * @param $userId
+     * @param $type
+     * @return Model|HasMany|object|null
+     */
     public function hasApplicationFromUser($userId, $type)
     {
         return $this->applications()
@@ -53,8 +79,20 @@ class Idea extends Model
             ->first();
     }
 
+    /**
+     * @param $userId
+     * @return Model|HasMany|object|null
+     */
     public function hasSupportFromUser($userId)
     {
         return $this->supporters()->where('user_id', $userId)->first();
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function supporters(): HasMany
+    {
+        return $this->hasMany(IdeaSupporter::class, 'idea_id');
     }
 }

@@ -24,7 +24,8 @@
                             <i class="fas fa-comments m-auto text-primary" style="font-size:3em;"></i>
                         </div>
                         <h3>Pitch an idea</h3>
-                        <p class="lead mb-0">Market yourself and your idea to the community and get real-time feedback.</p>
+                        <p class="lead mb-0">Market yourself and your idea to the community and get real-time
+                            feedback.</p>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -33,7 +34,8 @@
                             <i class="fas fa-users m-auto text-primary" style="font-size:3em;"></i>
                         </div>
                         <h3>Be part of a team</h3>
-                        <p class="lead mb-0">Find collaborators to work on your idea with you, or apply to other ideas that you're interested in.</p>
+                        <p class="lead mb-0">Find collaborators to work on your idea with you, or apply to other ideas
+                            that you're interested in.</p>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -42,7 +44,8 @@
                             <i class="fas fa-flask m-auto text-primary" style="font-size:3em;"></i>
                         </div>
                         <h3>Automatic project flows</h3>
-                        <p class="lead mb-0">Once your project is ready, don't worry about creating a repository - we've got that sorted with our automatic integrations.</p>
+                        <p class="lead mb-0">Once your project is ready, don't worry about creating a repository - we've
+                            got that sorted with our automatic integrations.</p>
                     </div>
                 </div>
             </div>

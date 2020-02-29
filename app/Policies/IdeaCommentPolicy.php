@@ -2,10 +2,14 @@
 
 namespace App\Policies;
 
-use App\User;
 use App\IdeaComment;
+use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Class IdeaCommentPolicy
+ * @package App\Policies
+ */
 class IdeaCommentPolicy
 {
     use HandlesAuthorization;
@@ -20,17 +24,32 @@ class IdeaCommentPolicy
         //
     }
 
-    public function update(User $user, IdeaComment $comment)
+    /**
+     * @param User $user
+     * @param IdeaComment $comment
+     * @return bool
+     */
+    public function update(User $user, IdeaComment $comment): bool
     {
         return ($user->id === $comment->user_id);
     }
 
-    public function delete(User $user, IdeaComment $comment)
+    /**
+     * @param User $user
+     * @param IdeaComment $comment
+     * @return bool
+     */
+    public function delete(User $user, IdeaComment $comment): bool
     {
         return ($user->id === $comment->user_id);
     }
 
-    public function manage(User $user, IdeaComment $comment)
+    /**
+     * @param User $user
+     * @param IdeaComment $comment
+     * @return bool
+     */
+    public function manage(User $user, IdeaComment $comment): bool
     {
         return ($user->id === $comment->user_id);
     }

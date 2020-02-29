@@ -2,18 +2,22 @@
 
 namespace App\Providers;
 
-use App\User;
 use App\Idea;
+use App\IdeaApplication;
 use App\IdeaComment;
 use App\IdeaSupporter;
-use App\IdeaApplication;
-use App\Policies\UserPolicy;
-use App\Policies\IdeaPolicy;
-use App\Policies\IdeaCommentPolicy;
-use App\Policies\IdeaSupporterPolicy;
 use App\Policies\IdeaApplicationPolicy;
+use App\Policies\IdeaCommentPolicy;
+use App\Policies\IdeaPolicy;
+use App\Policies\IdeaSupporterPolicy;
+use App\Policies\UserPolicy;
+use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
+/**
+ * Class AppServiceProvider
+ * @package App\Providers
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -34,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
     }
@@ -44,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }

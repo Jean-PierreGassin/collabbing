@@ -2,18 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreUser;
+use App\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
+/**
+ * Class UserController
+ * @package App\Http\Controllers
+ */
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Factory|View
      */
     public function index()
     {
@@ -25,8 +34,8 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Factory|View
      */
     public function show(Request $request)
     {
@@ -42,9 +51,9 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param Request $request
+     * @return Factory|View
+     * @throws AuthorizationException
      */
     public function edit(Request $request)
     {
@@ -61,11 +70,11 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\StoreUser $request
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param StoreUser $request
+     * @return RedirectResponse
+     * @throws AuthorizationException
      */
-    public function update(StoreUser $request)
+    public function update(StoreUser $request): RedirectResponse
     {
         $user = User::where('username', $request->username)->first();
         $this->authorizeForUser(Auth::user(), 'update', $user);
@@ -97,10 +106,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\User $user
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Response
      */
-    public function destroy(User $user)
+    public function destroy(User $user): ?Response
     {
         //
     }

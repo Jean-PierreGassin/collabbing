@@ -2,10 +2,14 @@
 
 namespace App\Policies;
 
-use App\User;
 use App\IdeaApplication;
+use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Class IdeaApplicationPolicy
+ * @package App\Policies
+ */
 class IdeaApplicationPolicy
 {
     use HandlesAuthorization;
@@ -21,7 +25,12 @@ class IdeaApplicationPolicy
     }
 
 
-    public function update(User $user, IdeaApplication $application)
+    /**
+     * @param User $user
+     * @param IdeaApplication $application
+     * @return bool
+     */
+    public function update(User $user, IdeaApplication $application): bool
     {
         if ($user->id === $application->idea->user_id) {
             return true;
@@ -30,12 +39,22 @@ class IdeaApplicationPolicy
         return ($user->id === $application->user_id);
     }
 
-    public function delete(User $user, IdeaApplication $application)
+    /**
+     * @param User $user
+     * @param IdeaApplication $application
+     * @return bool
+     */
+    public function delete(User $user, IdeaApplication $application): bool
     {
         return ($user->id === $application->user_id);
     }
 
-    public function manage(User $user, IdeaApplication $application)
+    /**
+     * @param User $user
+     * @param IdeaApplication $application
+     * @return bool
+     */
+    public function manage(User $user, IdeaApplication $application): bool
     {
         return ($user->id === $application->user_id);
     }

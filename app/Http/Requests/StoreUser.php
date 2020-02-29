@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * Class StoreUser
+ * @package App\Http\Requests
+ */
 class StoreUser extends FormRequest
 {
 
@@ -13,7 +17,7 @@ class StoreUser extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +27,7 @@ class StoreUser extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'first_name' => 'required|string|max:255',
