@@ -7,7 +7,10 @@ use Tests\DuskTestCase;
 
 class IdeaTest extends DuskTestCase
 {
-    public function testThatAUserCanCreateAnIdea(): void
+    /**
+     * @test
+     */
+    public function user_can_create_idea(): void
     {
         $this->browse(
             function ($first) {
@@ -27,7 +30,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanCommentOnAnIdea(): void
+    /**
+     * @test
+     */
+    public function user_can_comment_on_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -39,7 +45,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSupportAnIdea(): void
+    /**
+     * @test
+     */
+    public function user_can_support_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -50,7 +59,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanApplyToCollaborateOnAnIdea(): void
+    /**
+     * @test
+     */
+    public function user_can_apply_to_collaborate_on_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -62,7 +74,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanApproveIdeaApplications(): void
+    /**
+     * @test
+     */
+    public function user_can_approve_idea_application(): void
     {
         $this->browse(
             function ($browser) {
@@ -74,7 +89,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanDeclineIdeaApplications(): void
+    /**
+     * @test
+     */
+    public function user_can_decline_idea_application(): void
     {
         $this->browse(
             function ($browser) {
@@ -86,7 +104,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanCloseAnIdea(): void
+    /**
+     * @test
+     */
+    public function user_can_close_idea(): void
     {
         $this->browse(
             function ($browser) {

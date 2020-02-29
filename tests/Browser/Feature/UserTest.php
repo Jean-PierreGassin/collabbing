@@ -7,7 +7,10 @@ use Tests\DuskTestCase;
 
 class UserTest extends DuskTestCase
 {
-    public function testThatAGuestCanRegister(): void
+    /**
+     * @test
+     */
+    public function guests_can_register(): void
     {
         $this->browse(
             function ($browser) {
@@ -22,7 +25,10 @@ class UserTest extends DuskTestCase
         );
     }
 
-    public function testThatAGuestCanLogin(): void
+    /**
+     * @test
+     */
+    public function guests_can_login(): void
     {
         $this->browse(
             function ($browser) {
@@ -35,7 +41,10 @@ class UserTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanUpdateTheirProfile(): void
+    /**
+     * @test
+     */
+    public function user_can_update_their_profile(): void
     {
         $this->browse(
             function ($first) {
@@ -54,7 +63,10 @@ class UserTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanLogout(): void
+    /**
+     * @test
+     */
+    public function user_can_logout(): void
     {
         $this->browse(
             function ($browser) {

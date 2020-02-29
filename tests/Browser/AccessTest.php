@@ -9,7 +9,10 @@ class AccessTest extends DuskTestCase
 {
     protected $idea;
 
-    public function testThatAGuestCannotSeeTheApplyButtonOnAnIdea(): void
+    /**
+     * @test
+     */
+    public function guest_cannot_see_apply_button_on_idea(): void
     {
         $this->idea = Idea::inRandomOrder()->first();
 
@@ -21,7 +24,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAGuestCannotSeeTheSupportButtonOnAnIdea(): void
+    /**
+     * @test
+     */
+    public function guest_cannot_see_support_button_on_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -31,7 +37,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAGuestCannotSeeTheCommentCreationBoxOnAnIdea(): void
+    /**
+     * @test
+     */
+    public function guest_cannot_see_comment_creation_button_on_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -41,7 +50,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheApplyButtonOnTheirOwnIdea(): void
+    /**
+     * @test
+     */
+    public function user_cannot_see_apply_button_on_own_idea(): void
     {
         $user = $this->idea->user;
 
@@ -59,7 +71,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheApplyButtonOnAClosedIdea(): void
+    /**
+     * @test
+     */
+    public function user_cannot_see_apply_button_on_closed_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -69,7 +84,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheSupportButtonOnAClosedIdea(): void
+    /**
+     * @test
+     */
+    public function user_cannot_see_support_button_on_closed_idea(): void
     {
         $this->browse(
             function ($browser) {
@@ -79,7 +97,10 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheCommentSubmitButtonOnAClosedIdea(): void
+    /**
+     * @test
+     */
+    public function user_cannot_see_submit_button_on_closed_idea(): void
     {
         $this->browse(
             function ($browser) {

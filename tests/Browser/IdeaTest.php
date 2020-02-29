@@ -10,7 +10,10 @@ class IdeaTest extends DuskTestCase
 {
     protected $idea;
 
-    public function testThatAUserCanSeeAListOfIdeas(): void
+    /**
+     * @test
+     */
+    public function user_can_see_list_of_ideas(): void
     {
         $this->browse(
             function ($first) {
@@ -28,7 +31,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeHighlightedIdeas(): void
+    /**
+     * @test
+     */
+    public function user_can_see_highlighted_ideas(): void
     {
         $this->browse(
             function ($browser) {
@@ -38,7 +44,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasComments(): void
+    /**
+     * @test
+     */
+    public function user_can_see_idea_comments(): void
     {
         $this->idea = Idea::inRandomOrder()->first();
 
@@ -50,7 +59,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasSupporters(): void
+    /**
+     * @test
+     */
+    public function user_can_see_idea_supporters(): void
     {
         $this->browse(
             function ($browser) {
@@ -60,7 +72,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasCollaborators(): void
+    /**
+     * @test
+     */
+    public function user_can_see_idea_collaborators(): void
     {
         $this->browse(
             function ($browser) {
@@ -70,7 +85,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasPendingApplications(): void
+    /**
+     * @test
+     */
+    public function user_can_see_their_ideas_pending_applications(): void
     {
         $this->browse(
             function ($browser) {
@@ -80,7 +98,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasApprovedApplications(): void
+    /**
+     * @test
+     */
+    public function user_can_see_their_ideas_approved_applications(): void
     {
         $this->browse(
             function ($browser) {
@@ -90,7 +111,10 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasDeclinedApplications(): void
+    /**
+     * @test
+     */
+    public function user_can_see_their_ideas_declined_applications(): void
     {
         $this->browse(
             function ($browser) {
