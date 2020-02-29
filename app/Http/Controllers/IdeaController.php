@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreIdea;
 use App\Models\Idea;
 use App\Models\User;
+use App\Services\Ideas\ApplicationService;
+use App\Services\Ideas\IdeaService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
@@ -21,6 +23,22 @@ use Illuminate\View\View;
 class IdeaController extends Controller
 {
     /**
+     * @var IdeaService
+     */
+    private IdeaService $ideaService;
+
+    /**
+     * @var ApplicationService
+     */
+    private ApplicationService $applicationService;
+
+    public function __construct(IdeaService $ideaService, ApplicationService $applicationService)
+    {
+        $this->ideaService = $ideaService;
+        $this->applicationService = $applicationService;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @param Request $request
@@ -28,28 +46,18 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->get('search')) {
-            $searchResults = Idea::where('status', 'open')
-                ->orderBy('created_at', 'desc')
-                ->where('title', 'like', '%' . $request->get('search') . '%')
-                ->paginate();
+        $searchResults = [];
+        if ($search = $request->get('search')) {
+            $searchResults = $this->ideaService->searchIdeas($search);
         }
 
-        $trendingIdeas = Idea::where('status', 'open')
-            ->withCount('supporters')
-            ->orderBy('supporters_count', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit(3)
-            ->paginate();
+        $trendingIdeas = $this->ideaService->getTrendingIdeas();
 
         $trendingIds = $trendingIdeas->pluck('id');
 
-        $ideas = Idea::where('status', 'open')
-            ->orderBy('created_at', 'desc')
-            ->whereNotIn('id', $trendingIds->all())
-            ->paginate(10);
+        $ideas = $this->ideaService->getIdeas();
 
-        return view('idea.list', compact('trendingIdeas', 'ideas'));
+        return view('idea.list', compact('searchResults', 'trendingIdeas', 'ideas'));
     }
 
     /**
@@ -60,8 +68,8 @@ class IdeaController extends Controller
      */
     public function dashboard(Idea $idea)
     {
-        $applications = $idea->pendingApplications()->get();
-        $collaborators = $idea->approvedApplications()->get();
+        $applications = $this->applicationService->getPendingApplications($idea);
+        $collaborators = $this->applicationService->getApprovedApplications($idea);
 
         return view(
             'idea.manage',
@@ -91,8 +99,7 @@ class IdeaController extends Controller
      */
     public function store(StoreIdea $request): RedirectResponse
     {
-        $user = $request->user();
-        $idea = $user->ideas()->create($request->validated());
+        $idea = $this->ideaService->create($request->validated());
 
         return redirect()
             ->route('ideas.show', compact('idea'))

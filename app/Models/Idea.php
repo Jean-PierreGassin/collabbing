@@ -45,7 +45,7 @@ class Idea extends Model
     /**
      * @return HasMany
      */
-    public function pendingApplications()
+    public function pendingApplications(): HasMany
     {
         return $this->applications()->where('status', 'pending');
     }
