@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Idea;
-use App\IdeaSupporter;
+use App\Models\Idea;
+use App\Models\IdeaSupporter;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;

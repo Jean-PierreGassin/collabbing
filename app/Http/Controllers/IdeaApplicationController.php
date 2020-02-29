@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreIdeaApplication;
-use App\Idea;
-use App\IdeaApplication;
+use App\Models\Idea;
+use App\Models\IdeaApplication;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;

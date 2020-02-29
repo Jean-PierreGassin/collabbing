@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 */
 
 $factory->define(
-    App\User::class,
+    App\Models\User::class,
     function (Faker $faker) {
         return [
             'username' => $faker->userName,

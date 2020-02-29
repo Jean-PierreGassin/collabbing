@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\IdeaApplication;
-use App\User;
+use App\Models\IdeaApplication;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**

@@ -2,16 +2,17 @@
 
 namespace App\Providers;
 
-use App\Idea;
-use App\IdeaApplication;
-use App\IdeaComment;
-use App\IdeaSupporter;
+use App\Console\Commands\ModelMakeCommand;
+use App\Models\Idea;
+use App\Models\IdeaApplication;
+use App\Models\IdeaComment;
+use App\Models\IdeaSupporter;
+use App\Models\User;
 use App\Policies\IdeaApplicationPolicy;
 use App\Policies\IdeaCommentPolicy;
 use App\Policies\IdeaPolicy;
 use App\Policies\IdeaSupporterPolicy;
 use App\Policies\UserPolicy;
-use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 /**
@@ -50,6 +51,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend(
+            'command.model.make',
+            fn($command, $app) => new ModelMakeCommand($app['files'])
+        );
     }
 }

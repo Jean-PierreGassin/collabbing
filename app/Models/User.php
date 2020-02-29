@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Github\Client;
 use Illuminate\Database\Eloquent\Relations\HasMany;

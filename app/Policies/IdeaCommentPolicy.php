@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\IdeaComment;
-use App\User;
+use App\Models\IdeaComment;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**

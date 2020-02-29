@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Idea;
+use App\Models\Idea;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
