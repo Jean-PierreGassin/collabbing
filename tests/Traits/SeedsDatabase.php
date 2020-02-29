@@ -10,7 +10,7 @@ use App\User;
 
 trait SeedsDatabase
 {
-    public function createUsersWithClosedIdea()
+    public function createUsersWithClosedIdea(): void
     {
         factory(User::class, 2)
             ->create()
@@ -24,7 +24,7 @@ trait SeedsDatabase
         $this->createIdeaRelations(User::find(2));
     }
 
-    protected function createIdeaRelations($user)
+    protected function createIdeaRelations($user): void
     {
         foreach ($user->ideas->all() as $idea) {
             $idea->comments()

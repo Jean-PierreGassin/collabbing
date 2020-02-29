@@ -56,7 +56,12 @@
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover"
-    ]
+    ],
+    "test": "phpunit --colors=always",
+    "test-integration": "phpunit --testsuite=integration --colors=always",
+    "test-all": "phpunit --testsuite=stable,integration --colors=always",
+    "check-style": "phpcs -p -s --cache",
+    "fix-style": "phpcbf -p -s"
   },
   "config": {
     "preferred-install": "dist",

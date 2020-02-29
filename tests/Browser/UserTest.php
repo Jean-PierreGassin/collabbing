@@ -9,7 +9,7 @@ class UserTest extends DuskTestCase
 {
     protected $user;
 
-    public function testThatAUserCanSeeTheirDashboard()
+    public function testThatAUserCanSeeTheirDashboard(): void
     {
         $this->browse(
             function ($first) {
@@ -27,7 +27,7 @@ class UserTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirProfile()
+    public function testThatAUserCanSeeTheirProfile(): void
     {
         $this->browse(
             function ($browser) {
@@ -37,7 +37,7 @@ class UserTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnotherUsersProfile()
+    public function testThatAUserCanSeeAnotherUsersProfile(): void
     {
         $this->browse(
             function ($browser) {

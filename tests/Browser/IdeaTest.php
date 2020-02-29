@@ -10,7 +10,7 @@ class IdeaTest extends DuskTestCase
 {
     protected $idea;
 
-    public function testThatAUserCanSeeAListOfIdeas()
+    public function testThatAUserCanSeeAListOfIdeas(): void
     {
         $this->browse(
             function ($first) {
@@ -28,7 +28,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeHighlightedIdeas()
+    public function testThatAUserCanSeeHighlightedIdeas(): void
     {
         $this->browse(
             function ($browser) {
@@ -38,7 +38,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasComments()
+    public function testThatAUserCanSeeAnIdeasComments(): void
     {
         $this->idea = Idea::inRandomOrder()->first();
 
@@ -50,7 +50,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasSupporters()
+    public function testThatAUserCanSeeAnIdeasSupporters(): void
     {
         $this->browse(
             function ($browser) {
@@ -60,7 +60,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeAnIdeasCollaborators()
+    public function testThatAUserCanSeeAnIdeasCollaborators(): void
     {
         $this->browse(
             function ($browser) {
@@ -70,7 +70,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasPendingApplications()
+    public function testThatAUserCanSeeTheirIdeasPendingApplications(): void
     {
         $this->browse(
             function ($browser) {
@@ -80,7 +80,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasApprovedApplications()
+    public function testThatAUserCanSeeTheirIdeasApprovedApplications(): void
     {
         $this->browse(
             function ($browser) {
@@ -90,7 +90,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSeeTheirIdeasDeclinedApplications()
+    public function testThatAUserCanSeeTheirIdeasDeclinedApplications(): void
     {
         $this->browse(
             function ($browser) {

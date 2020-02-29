@@ -7,7 +7,7 @@ use Tests\DuskTestCase;
 
 class IdeaTest extends DuskTestCase
 {
-    public function testThatAUserCanCreateAnIdea()
+    public function testThatAUserCanCreateAnIdea(): void
     {
         $this->browse(
             function ($first) {
@@ -27,7 +27,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanCommentOnAnIdea()
+    public function testThatAUserCanCommentOnAnIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -39,7 +39,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanSupportAnIdea()
+    public function testThatAUserCanSupportAnIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -50,7 +50,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanApplyToCollaborateOnAnIdea()
+    public function testThatAUserCanApplyToCollaborateOnAnIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -62,7 +62,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanApproveIdeaApplications()
+    public function testThatAUserCanApproveIdeaApplications(): void
     {
         $this->browse(
             function ($browser) {
@@ -74,7 +74,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanDeclineIdeaApplications()
+    public function testThatAUserCanDeclineIdeaApplications(): void
     {
         $this->browse(
             function ($browser) {
@@ -86,7 +86,7 @@ class IdeaTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCanCloseAnIdea()
+    public function testThatAUserCanCloseAnIdea(): void
     {
         $this->browse(
             function ($browser) {

@@ -9,7 +9,7 @@ class AccessTest extends DuskTestCase
 {
     protected $idea;
 
-    public function testThatAGuestCannotSeeTheApplyButtonOnAnIdea()
+    public function testThatAGuestCannotSeeTheApplyButtonOnAnIdea(): void
     {
         $this->idea = Idea::inRandomOrder()->first();
 
@@ -21,7 +21,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAGuestCannotSeeTheSupportButtonOnAnIdea()
+    public function testThatAGuestCannotSeeTheSupportButtonOnAnIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -31,7 +31,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAGuestCannotSeeTheCommentCreationBoxOnAnIdea()
+    public function testThatAGuestCannotSeeTheCommentCreationBoxOnAnIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -41,7 +41,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheApplyButtonOnTheirOwnIdea()
+    public function testThatAUserCannotSeeTheApplyButtonOnTheirOwnIdea(): void
     {
         $user = $this->idea->user;
 
@@ -59,7 +59,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheApplyButtonOnAClosedIdea()
+    public function testThatAUserCannotSeeTheApplyButtonOnAClosedIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -69,7 +69,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheSupportButtonOnAClosedIdea()
+    public function testThatAUserCannotSeeTheSupportButtonOnAClosedIdea(): void
     {
         $this->browse(
             function ($browser) {
@@ -79,7 +79,7 @@ class AccessTest extends DuskTestCase
         );
     }
 
-    public function testThatAUserCannotSeeTheCommentSubmitButtonOnAClosedIdea()
+    public function testThatAUserCannotSeeTheCommentSubmitButtonOnAClosedIdea(): void
     {
         $this->browse(
             function ($browser) {
