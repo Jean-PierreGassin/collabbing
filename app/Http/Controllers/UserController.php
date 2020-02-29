@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUser;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 /**
@@ -19,6 +18,16 @@ use Illuminate\View\View;
  */
 class UserController extends Controller
 {
+    /**
+     * @var UserService
+     */
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -35,16 +44,11 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param Request $request
+     * @param User $user
      * @return Factory|View
      */
-    public function show(Request $request)
+    public function show(Request $request, User $user)
     {
-        $user = User::where('username', $request->username)->first();
-
-        if (!$user) {
-            return view('errors.404');
-        }
-
         return view('user.single', compact('user'));
     }
 
@@ -52,17 +56,13 @@ class UserController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Request $request
+     * @param User $user
      * @return Factory|View
      * @throws AuthorizationException
      */
-    public function edit(Request $request)
+    public function edit(Request $request, User $user)
     {
-        $user = User::where('username', $request->username)->first();
         $this->authorizeForUser(Auth::user(), 'manage', $user);
-
-        if (!$user) {
-            return view('errors.404');
-        }
 
         return view('user.edit-add', compact('user'));
     }
@@ -71,46 +71,18 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param StoreUser $request
+     * @param User $user
      * @return RedirectResponse
      * @throws AuthorizationException
      */
-    public function update(StoreUser $request): RedirectResponse
+    public function update(StoreUser $request, User $user): RedirectResponse
     {
-        $user = User::where('username', $request->username)->first();
         $this->authorizeForUser(Auth::user(), 'update', $user);
 
-        if (!$user) {
-            return view('errors.404');
-        }
-
-        foreach ($request->validated() as $key => $value) {
-            if ($key === 'password' && is_null($value)) {
-                unset($key);
-                continue;
-            }
-
-            if ($key === 'password' && !is_null($value)) {
-                $value = Hash::make($value);
-            }
-
-            $user->{$key} = $value;
-        }
-
-        $user->save();
+        $this->userService->update($user, $request->validated());
 
         return redirect()
             ->back()
             ->with('status', 'User successfully edited');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param User $user
-     * @return Response
-     */
-    public function destroy(User $user): ?Response
-    {
-        //
     }
 }

@@ -24,19 +24,20 @@ class IdeaService
     }
 
     /**
-     * @return LengthAwarePaginator
+     * @param Idea $idea
+     * @param array $data
+     * @return bool
      */
-    public function getIdeas(): LengthAwarePaginator
+    public function update(Idea $idea, array $data): bool
     {
-        return Idea::where('status', 'open')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $idea->update($data);
+        return $idea->save();
     }
 
     /**
      * @return LengthAwarePaginator
      */
-    public function getTrendingIdeas(): LengthAwarePaginator
+    public function getTrending(): LengthAwarePaginator
     {
         return Idea::where('status', 'open')
             ->withCount('supporters')
@@ -50,11 +51,31 @@ class IdeaService
      * @param string $search
      * @return LengthAwarePaginator
      */
-    public function searchIdeas(string $search): LengthAwarePaginator
+    public function search(string $search): LengthAwarePaginator
     {
         return Idea::where('status', 'open')
             ->orderBy('created_at', 'desc')
             ->where('title', 'like', "%{$search}%")
             ->paginate();
+    }
+
+    /**
+     * @return LengthAwarePaginator
+     */
+    public function getUserIdeas(): LengthAwarePaginator
+    {
+        return Auth::user()->ideas()
+            ->orderBy('created_at', 'desc')
+            ->paginate(5, ['*'], 'ideas');
+    }
+
+    /**
+     * @return LengthAwarePaginator
+     */
+    public function getCollaboratedIdeas(): LengthAwarePaginator
+    {
+        $collaborationIds = Auth::user()->collaborations()->pluck('idea_id');
+        return Idea::whereIn('id', $collaborationIds)
+            ->paginate(5, ['*'], 'collaborations');
     }
 }

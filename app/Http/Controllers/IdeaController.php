@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreIdea;
 use App\Models\Idea;
-use App\Models\User;
 use App\Services\Ideas\ApplicationService;
 use App\Services\Ideas\IdeaService;
-use Exception;
+use App\Services\Ideas\SupporterService;
+use App\Services\RepositoryService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -32,10 +31,26 @@ class IdeaController extends Controller
      */
     private ApplicationService $applicationService;
 
-    public function __construct(IdeaService $ideaService, ApplicationService $applicationService)
-    {
+    /**
+     * @var SupporterService
+     */
+    private SupporterService $supporterService;
+
+    /**
+     * @var RepositoryService
+     */
+    private RepositoryService $repositoryService;
+
+    public function __construct(
+        IdeaService $ideaService,
+        ApplicationService $applicationService,
+        SupporterService $supporterService,
+        RepositoryService $repositoryService
+    ) {
         $this->ideaService = $ideaService;
         $this->applicationService = $applicationService;
+        $this->supporterService = $supporterService;
+        $this->repositoryService = $repositoryService;
     }
 
     /**
@@ -48,14 +63,17 @@ class IdeaController extends Controller
     {
         $searchResults = [];
         if ($search = $request->get('search')) {
-            $searchResults = $this->ideaService->searchIdeas($search);
+            $searchResults = $this->ideaService->search($search);
         }
 
-        $trendingIdeas = $this->ideaService->getTrendingIdeas();
+        $trendingIdeas = $this->ideaService->getTrending();
 
         $trendingIds = $trendingIdeas->pluck('id');
 
-        $ideas = $this->ideaService->getIdeas();
+        $ideas = Idea::where('status', 'open')
+            ->orderBy('created_at', 'desc')
+            ->whereNotIn('id', $trendingIds)
+            ->paginate(10);
 
         return view('idea.list', compact('searchResults', 'trendingIdeas', 'ideas'));
     }
@@ -115,9 +133,9 @@ class IdeaController extends Controller
     public function show(Idea $idea)
     {
         if (Auth::user()) {
-            $collaborator = $idea->hasApplicationFromUser(Auth::user()->id, 'approved');
-            $applicant = $idea->hasApplicationFromUser(Auth::user()->id, 'pending');
-            $supporter = $idea->hasSupportFromUser(Auth::user()->id);
+            $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
+            $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
+            $supporter = $this->supporterService->getSupportFromUser($idea);
         }
 
         return view(
@@ -157,23 +175,11 @@ class IdeaController extends Controller
     {
         $this->authorize('update', $idea);
 
-        $idea->update($request->validated());
-        $idea->save();
+        $this->ideaService->update($idea, $request->validated());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully edited');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Idea $idea
-     * @return Response
-     */
-    public function destroy(Idea $idea): ?Response
-    {
-        //
     }
 
     /**
@@ -189,13 +195,7 @@ class IdeaController extends Controller
             return route('ideas.dashboard', $idea);
         }
 
-        try {
-            $gitHub = Auth::user()->createGithubClient();
-
-            $gitHub->repo()->create($idea->repository_name);
-            $idea->repository = 1;
-            $idea->save();
-        } catch (Exception $e) {
+        if (!$this->repositoryService->create($idea)) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
                 ->with('status', 'Something went wrong, try again 🙉');
@@ -215,42 +215,14 @@ class IdeaController extends Controller
     {
         $this->authorize('inviteUsersToRepository', $idea);
 
-        foreach ($idea->approvedApplications()->get() as $collaborator) {
-            $this->inviteUserToRepository($idea, $collaborator);
-        }
-
-        return redirect()
-            ->route('ideas.dashboard', $idea)
-            ->with('status', 'All Collaborators has been invited 🤟');
-    }
-
-    /**
-     * @param Idea $idea
-     * @param $collaborator
-     * @return bool|RedirectResponse
-     * @throws AuthorizationException
-     */
-    public function inviteUserToRepository(Idea $idea, $collaborator)
-    {
-        $this->authorize('inviteUsersToRepository', $idea);
-
-        $user = User::find(Auth::user()->id);
-
-        try {
-            $gitHub = Auth::user()->createGithubClient();
-
-            $gitHub->repo()->collaborators()->add(
-                $user->github_username,
-                $idea->repository_name,
-                $collaborator->user->github_username
-            );
-        } catch (Exception $e) {
+        if (!$this->repositoryService->inviteUsers($idea)) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
                 ->with('status', 'Something went wrong, try again 🙉');
         }
 
-
-        return true;
+        return redirect()
+            ->route('ideas.dashboard', $idea)
+            ->with('status', 'All Collaborators has been invited 🤟');
     }
 }

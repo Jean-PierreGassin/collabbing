@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreIdeaComment;
 use App\Models\Idea;
 use App\Models\IdeaComment;
+use App\Services\Ideas\CommentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 /**
@@ -19,13 +19,17 @@ use Illuminate\View\View;
 class IdeaCommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return void
+     * @var CommentService
      */
-    public function index(): void
+    private CommentService $commentService;
+
+    /**
+     * IdeaCommentController constructor.
+     * @param CommentService $commentService
+     */
+    public function __construct(CommentService $commentService)
     {
-        //
+        $this->commentService = $commentService;
     }
 
     /**
@@ -55,25 +59,11 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('storeComment', $idea);
 
-        $input = $request->validated();
-        $input['user_id'] = $request->user()->id;
-
-        $idea->comments()->create($input);
+        $this->commentService->store($idea, $request->validated());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Comment successfully created');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param IdeaComment $comment
-     * @return Response
-     */
-    public function show(IdeaComment $comment): ?Response
-    {
-        //
     }
 
     /**
@@ -104,22 +94,10 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('update', $comment);
 
-        $comment->update($request->validated());
-        $comment->save();
+        $this->commentService->update($comment, $request->validated());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Comment successfully edited');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param IdeaComment $comment
-     * @return Response
-     */
-    public function destroy(IdeaComment $comment): ?Response
-    {
-        //
     }
 }

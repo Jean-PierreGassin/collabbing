@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Idea;
+use App\Services\Ideas\IdeaService;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
@@ -14,13 +13,19 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
+     * @var IdeaService
      */
-    public function __construct()
+    private IdeaService $ideaService;
+
+    /**
+     * Create a new controller instance.
+     * @param IdeaService $ideaService
+     */
+    public function __construct(IdeaService $ideaService)
     {
         $this->middleware('auth');
+
+        $this->ideaService = $ideaService;
     }
 
     /**
@@ -30,13 +35,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $ideas = Auth::user()->ideas()
-            ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'ideas');
-
-        $collaborations = Auth::user()->collaborations()->pluck('idea_id');
-        $collaborations = Idea::whereIn('id', $collaborations)
-            ->paginate(5, ['*'], 'collaborations');
+        $ideas = $this->ideaService->getUserIdeas();
+        $collaborations = $this->ideaService->getCollaboratedIdeas();
 
         return view('user.dashboard', compact('ideas', 'collaborations'));
     }

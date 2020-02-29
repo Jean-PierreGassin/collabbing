@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreIdeaApplication;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Services\Ideas\ApplicationService;
+use App\Services\Ideas\IdeaService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -20,13 +21,24 @@ use Illuminate\View\View;
 class IdeaApplicationController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return Response
+     * @var IdeaService
      */
-    public function index(): ?Response
+    private IdeaService $ideaService;
+
+    /**
+     * @var ApplicationService
+     */
+    private ApplicationService $applicationService;
+
+    /**
+     * IdeaApplicationController constructor.
+     * @param ApplicationService $applicationService
+     * @param IdeaService $ideaService
+     */
+    public function __construct(ApplicationService $applicationService, IdeaService $ideaService)
     {
-        //
+        $this->ideaService = $ideaService;
+        $this->applicationService = $applicationService;
     }
 
     /**
@@ -56,49 +68,11 @@ class IdeaApplicationController extends Controller
     {
         $this->authorize('storeApplication', $idea);
 
-        $input = $request->validated();
-        $input['user_id'] = $request->user()->id;
-        $application = $idea->applications()->create($input);
-
-        $application->save();
+        $this->applicationService->create($idea, $request->validated());
 
         return redirect()
             ->route('ideas.show', $idea->id)
             ->with('status', 'Application successfully submitted');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param IdeaApplication $application
-     * @return Response
-     */
-    public function show(IdeaApplication $application): ?Response
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param IdeaApplication $application
-     * @return Response
-     */
-    public function edit(IdeaApplication $application): ?Response
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param IdeaApplication $application
-     * @return Response
-     */
-    public function update(Request $request, IdeaApplication $application): ?Response
-    {
-        //
     }
 
     /**
@@ -113,10 +87,8 @@ class IdeaApplicationController extends Controller
     {
         $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
 
+        $this->applicationService->approve($application);
         $applicantName = "{$application->user->first_name} {$application->user->last_name}";
-
-        $application->status = 'approved';
-        $application->save();
 
         return redirect()
             ->back()
@@ -135,9 +107,8 @@ class IdeaApplicationController extends Controller
     {
         $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
 
+        $this->applicationService->destroy($application);
         $applicantName = "{$application->user->first_name} {$application->user->last_name}";
-
-        $application->delete();
 
         return redirect()
             ->back()

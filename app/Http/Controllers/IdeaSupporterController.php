@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Idea;
 use App\Models\IdeaSupporter;
-use Exception;
+use App\Services\Ideas\SupporterService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 /**
  * Class IdeaSupporterController
@@ -17,23 +16,13 @@ use Illuminate\Http\Response;
 class IdeaSupporterController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return Response
+     * @var SupporterService
      */
-    public function index(): ?Response
-    {
-        //
-    }
+    private SupporterService $supporterService;
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create(): ?Response
+    public function __construct(SupporterService $supporterService)
     {
-        //
+        $this->supporterService = $supporterService;
     }
 
     /**
@@ -48,49 +37,10 @@ class IdeaSupporterController extends Controller
     {
         $this->authorize('storeSupporter', $idea);
 
-        $idea->supporters()->firstOrCreate(
-            [
-                'user_id' => $request->user()->id,
-                'idea_id' => $idea->id,
-            ]
-        );
+        $this->supporterService->create($idea);
 
         return redirect()
             ->back();
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param IdeaSupporter $supporter
-     * @return Response
-     */
-    public function show(IdeaSupporter $supporter): ?Response
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param IdeaSupporter $supporter
-     * @return Response
-     */
-    public function edit(IdeaSupporter $supporter): ?Response
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param IdeaSupporter $supporter
-     * @return Response
-     */
-    public function update(Request $request, IdeaSupporter $supporter): ?Response
-    {
-        //
     }
 
     /**
@@ -105,11 +55,7 @@ class IdeaSupporterController extends Controller
     {
         $this->authorize('delete', $supporter);
 
-        try {
-            $supporter->delete();
-        } catch (Exception $e) {
-            //
-        }
+        $this->supporterService->destroy($supporter);
 
         return redirect()
             ->back();
