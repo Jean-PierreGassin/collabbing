@@ -2,11 +2,11 @@
 
 namespace Tests\Traits;
 
-use App\Idea;
-use App\IdeaApplication;
-use App\IdeaComment;
-use App\IdeaSupporter;
-use App\User;
+use App\Models\Idea;
+use App\Models\IdeaApplication;
+use App\Models\IdeaComment;
+use App\Models\IdeaSupporter;
+use App\Models\User;
 
 trait SeedsDatabase
 {

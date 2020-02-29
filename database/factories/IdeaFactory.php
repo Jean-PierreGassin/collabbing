@@ -3,7 +3,7 @@
 use Faker\Generator as Faker;
 
 $factory->define(
-    App\Idea::class,
+    App\Models\Idea::class,
     function (Faker $faker) {
         return [
             'title' => $faker->title,

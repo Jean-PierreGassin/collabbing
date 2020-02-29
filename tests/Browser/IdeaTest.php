@@ -2,8 +2,8 @@
 
 namespace Tests\Browser;
 
-use App\Idea;
-use App\User;
+use App\Models\Idea;
+use App\Models\User;
 use Tests\DuskTestCase;
 
 class IdeaTest extends DuskTestCase

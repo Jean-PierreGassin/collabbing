@@ -3,7 +3,7 @@
 use Faker\Generator as Faker;
 
 $factory->define(
-    App\IdeaSupporter::class,
+    App\Models\IdeaSupporter::class,
     function (Faker $faker) {
         return [];
     }

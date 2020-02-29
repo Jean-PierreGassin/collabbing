@@ -2,7 +2,7 @@
 
 namespace Tests\Browser;
 
-use App\User;
+use App\Models\User;
 use Tests\DuskTestCase;
 
 class UserTest extends DuskTestCase
