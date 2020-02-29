@@ -38,7 +38,7 @@ class IdeaController extends Controller
             ->whereNotIn('id', $trendingIds->all())
             ->paginate(10);
 
-        return view('idea.list', compact('searchResults', 'trendingIdeas', 'ideas'));
+        return view('idea.list', compact('trendingIdeas', 'ideas'));
     }
 
     /**
