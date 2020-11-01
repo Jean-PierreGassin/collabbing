@@ -61,7 +61,7 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
-        $searchResults = [];
+        $searchResults = null;
         if ($search = $request->get('search')) {
             $searchResults = $this->ideaService->search($search);
         }
