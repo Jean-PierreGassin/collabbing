@@ -43,7 +43,7 @@
         @endcan
     </div>
 
-    @if (isset($single) && (Gate::check('update', $idea) || Gate::check('manage', $idea->comments) || $collaborator))
+    @if (isset($single, $collaborator) && (Gate::check('update', $idea) || Gate::check('manage', $idea->comments) || $collaborator))
         @include('components.comments')
         @include('comment.add')
     @endif

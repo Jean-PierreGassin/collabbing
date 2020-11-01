@@ -132,11 +132,13 @@ class IdeaController extends Controller
      */
     public function show(Idea $idea)
     {
-        if (Auth::user()) {
-            $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
-            $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
-            $supporter = $this->supporterService->getSupportFromUser($idea);
+        if (!Auth::user()) {
+            return view('idea.single', compact('idea'));
         }
+
+        $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
+        $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
+        $supporter = $this->supporterService->getSupportFromUser($idea);
 
         return view(
             'idea.single',
