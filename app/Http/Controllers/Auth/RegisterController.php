@@ -75,7 +75,7 @@ class RegisterController extends Controller
     {
         return User::create(
             [
-                'username' => ucfirst($data['username']),
+                'username' => $data['username'],
                 'first_name' => ucwords($data['first_name']),
                 'last_name' => ucwords($data['last_name']),
                 'email' => $data['email'],
