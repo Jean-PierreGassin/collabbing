@@ -4,6 +4,7 @@ namespace App\Services\Ideas;
 
 use App\Models\Idea;
 use App\Models\IdeaComment;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -17,7 +18,7 @@ class CommentService
      * @param array $data
      * @return IdeaComment
      */
-    public function store(Idea $idea, array $data): IdeaComment
+    public function store(Idea $idea, array $data): Model
     {
         $data['user_id'] = Auth::user()->id;
 
