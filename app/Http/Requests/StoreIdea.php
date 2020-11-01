@@ -33,6 +33,7 @@ class StoreIdea extends FormRequest
             'repository_name' => 'required|alpha_dash|max:50',
             'communication' => 'required|max:50',
             'content' => 'required|max:1500',
+            'status' => 'in:open,closed'
         ];
     }
 
