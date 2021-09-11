@@ -78,13 +78,13 @@ class User extends Authenticatable
     }
 
     /**
-     * @return mixed|string
+     * @return string
      */
-    public function profilePicture()
+    public function profilePicture(): string
     {
         if ($this->github_token) {
             return Cache::remember(
-                'users.profile-picture',
+                "users.profile-picture.{$this->github_username}",
                 60,
                 function () {
                     return GitHubService::createClient($this->github_token)
