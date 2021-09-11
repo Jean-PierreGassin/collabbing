@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Class User
+ * @property string $github_token
+ * @property string $github_username
  * @package App
  */
 class User extends Authenticatable
@@ -28,6 +30,8 @@ class User extends Authenticatable
         'bio',
         'email',
         'password',
+        'github_token',
+        'github_username',
     ];
 
     /**
@@ -39,13 +43,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-    /**
-     * The GitHub client used to authenticate users.
-     *
-     * @var Client
-     */
-    protected $githubClient;
 
     /**
      * @return HasMany
@@ -97,20 +94,5 @@ class User extends Authenticatable
         }
 
         return 'https://www.gravatar.com/avatar/' . md5($this->email);
-    }
-
-    /**
-     * @param null $token
-     * @return Client
-     */
-    public function createGithubClient($token = null): Client
-    {
-        if (!$this->githubClient) {
-            $this->githubClient = new Client();
-
-            $this->githubClient->authenticate($this->github_token ?? $token, 'http_token');
-        }
-
-        return $this->githubClient;
     }
 }

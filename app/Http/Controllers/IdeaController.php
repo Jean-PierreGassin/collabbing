@@ -8,6 +8,7 @@ use App\Services\Ideas\ApplicationService;
 use App\Services\Ideas\IdeaService;
 use App\Services\Ideas\SupporterService;
 use App\Services\RepositoryService;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
@@ -189,7 +190,7 @@ class IdeaController extends Controller
      * @return RedirectResponse|string
      * @throws AuthorizationException
      */
-    public function createRepository(Idea $idea)
+    public function createRepository(Idea $idea): string|RedirectResponse
     {
         $this->authorize('createRepository', $idea);
 
@@ -197,10 +198,12 @@ class IdeaController extends Controller
             return route('ideas.dashboard', $idea);
         }
 
-        if (!$this->repositoryService->create($idea)) {
+        try {
+            $this->repositoryService->create($idea);
+        } catch (Exception $exception) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
-                ->with('status', 'Something went wrong, try again 🙉');
+                ->with('errors', collect($exception->getMessage()));
         }
 
         return redirect()

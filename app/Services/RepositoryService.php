@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Idea;
 use App\Models\User;
+use App\Services\ThirdParty\GitHub\GitHubService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,21 +14,27 @@ use Illuminate\Support\Facades\Auth;
  */
 class RepositoryService
 {
+    private GitHubService $gitHubService;
+
+    public function __construct(GitHubService $gitHubService)
+    {
+        $this->gitHubService = $gitHubService;
+    }
+
     /**
      * @param Idea $idea
      * @return bool
      */
     public function create(Idea $idea): bool
     {
-        try {
-            $gitHub = Auth::user()->createGithubClient();
+        $this->gitHubService::createClient(Auth::user()->github_token)
+            ->repo()->create($idea->repository_name);
 
-            $gitHub->repo()->create($idea->repository_name);
-            $idea->repository = 1;
-            $idea->save();
-        } catch (Exception $e) {
-            return false;
-        }
+        $idea->update(
+            [
+                'repository' => true,
+            ]
+        );
 
         return true;
     }
