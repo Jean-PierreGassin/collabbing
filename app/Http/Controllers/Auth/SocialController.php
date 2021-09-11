@@ -44,17 +44,19 @@ class SocialController extends Controller
     public function handleProviderCallback(): RedirectResponse
     {
         $providerUser = Socialite::driver('github')->user();
-        $user = User::find(Auth::user()->id);
 
-        $gitHub = $user->createGithubClient($providerUser->token);
-
-        $user->github_token = $providerUser->token;
-        $user->github_username = $gitHub->currentUser()->show()['login'];
-        $user->save();
+        /* @var $user User */
+        $user = Auth::user();
+        $user->update(
+            [
+                'github_token' => $providerUser->token,
+                'github_username' => $providerUser->getNickname(),
+            ]
+        );
 
         return redirect()
             ->route('users.edit', $user->username)
-            ->with('status', 'You\'ve successfully linked your GitHub account ❤️');
+            ->with('status', 'Successfully linked GitHub account');
     }
 
     /**
@@ -64,14 +66,17 @@ class SocialController extends Controller
      */
     public function revokeProvider(): RedirectResponse
     {
-        $user = User::find(Auth::user()->id);
-
-        $user->github_token = null;
-        $user->github_username = null;
-        $user->save();
+        /* @var $user User */
+        $user = Auth::user();
+        $user->update(
+            [
+                'github_token' => null,
+                'github_username' => null,
+            ]
+        );
 
         return redirect()
-            ->route('users.edit', $user->username)
-            ->with('status', 'You\'ve successfully un-linked your GitHub account 🤷‍♂️️');
+            ->back()
+            ->with('status', 'Successfully un-linked GitHub account');
     }
 }
