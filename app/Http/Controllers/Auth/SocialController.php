@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -43,10 +44,17 @@ class SocialController extends Controller
      */
     public function handleProviderCallback(): RedirectResponse
     {
-        $providerUser = Socialite::driver('github')->user();
-
         /* @var $user User */
         $user = Auth::user();
+
+        try {
+            $providerUser = Socialite::driver('github')->user();
+        } catch (Exception) {
+            return redirect()
+                ->route('users.edit', $user->username)
+                ->with('errors', collect('Unable to link GitHub account'));
+        }
+
         $user->update(
             [
                 'github_token' => $providerUser->token,
