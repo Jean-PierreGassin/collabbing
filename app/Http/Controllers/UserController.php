@@ -44,24 +44,27 @@ class UserController extends Controller
      * Display the specified resource.
      *
      * @param Request $request
-     * @param User $user
      * @return Factory|View
      */
-    public function show(Request $request, User $user)
+    public function show(Request $request)
     {
-        return view('user.single', compact('user'));
+        if ($user = $this->userService->getUserByUsername($request->username)) {
+            return view('user.single', compact('user'));
+        }
+
+        return view('errors.404');
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param Request $request
-     * @param User $user
      * @return Factory|View
      * @throws AuthorizationException
      */
-    public function edit(Request $request, User $user)
+    public function edit(Request $request)
     {
+        $user = $this->userService->getUserByUsername($request->username);
         $this->authorizeForUser(Auth::user(), 'manage', $user);
 
         return view('user.edit-add', compact('user'));
@@ -71,12 +74,12 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param StoreUser $request
-     * @param User $user
      * @return RedirectResponse
      * @throws AuthorizationException
      */
-    public function update(StoreUser $request, User $user): RedirectResponse
+    public function update(StoreUser $request): RedirectResponse
     {
+        $user = $this->userService->getUserByUsername($request->username);
         $this->authorizeForUser(Auth::user(), 'update', $user);
 
         $this->userService->update($user, $request->validated());

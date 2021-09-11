@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 /**
  * Class RegisterController
@@ -52,7 +53,7 @@ class RegisterController extends Controller
      */
     protected function validator(array $data): Validator
     {
-        return Validator::make(
+        return ValidatorFacade::make(
             $data,
             [
                 'username' => 'required|string|min:3|max:20|regex:/^[a-zA-Z,0-9]+$/|unique:users',
@@ -74,7 +75,7 @@ class RegisterController extends Controller
     {
         return User::create(
             [
-                'username' => ucfirst($data['username']),
+                'username' => $data['username'],
                 'first_name' => ucwords($data['first_name']),
                 'last_name' => ucwords($data['last_name']),
                 'email' => $data['email'],
