@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ThirdParty\GitHub\GitHubService;
 use Github\Client;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -86,9 +87,8 @@ class User extends Authenticatable
                 'users.profile-picture',
                 60,
                 function () {
-                    $gitHub = $this->createGithubClient();
-
-                    return $gitHub->currentUser()->show()['avatar_url'];
+                    return GitHubService::createClient($this->github_token)
+                        ->currentUser()->show()['avatar_url'];
                 }
             );
         }
