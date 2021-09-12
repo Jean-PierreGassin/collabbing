@@ -45,14 +45,14 @@
 <div id="app">
     @include('components.navigation')
 
-    <main class="py-4">
+    <main class="py-4 mb-5">
         @yield('content')
     </main>
 </div>
 
-<div class="container">
-    <footer class="pt-4 my-md-5 pt-md-5 border-top border-dark">
-        <div class="row">
+<div class="fixed-bottom bg-light">
+    <footer class="footer mt-4 border-top border-dark">
+        <div class="row m-2">
             <div class="col-6 col-md-6">
                 <h5>Resources</h5>
                 <ul class="list-unstyled text-small">

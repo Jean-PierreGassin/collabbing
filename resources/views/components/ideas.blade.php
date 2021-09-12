@@ -3,13 +3,13 @@
         <div class="card-header border-0">
             <h5 class="mb-3">
                 @if (!isset($single))
-                    <a href="{{ route('ideas.show', $idea) }}">{{ $idea->title }}</a>
+                    <a href="{{ route('ideas.show', $idea) }}">{{ ucfirst($idea->title) }}</a>
                 @else
-                    {{ $idea->title }} - <small>by <a href="{{ route('users.show', $idea->user->username) }}">{{ $idea->user->username }}</a></small>
+                    {{ ucfirst($idea->title) }} - <small>by <a href="{{ route('users.show', $idea->user->username) }}">{{ $idea->user->username }}</a></small>
                 @endif
             </h5>
 
-            <h6 class="card-subtitle text-muted">
+            <h6 class="card-subtitle">
                 @can('update', $idea)
                     <div class="float-right">
                         Status:&nbsp;
@@ -23,7 +23,7 @@
                 Collaborators: {{ number_format(count($idea->approvedApplications)) }}
 
                 @if (!isset($single))
-                    <div class="float-right">
+                    <div class="float-right text-muted">
                         <i>Created {{ $idea->created_at->diffForHumans() }}</i>
                     </div>
                 @endif
@@ -57,6 +57,4 @@
     @endif
 @endforeach
 
-@if (!isset($single))
-    @include('components.pagination', ['data' => $ideas])
-@endif
+

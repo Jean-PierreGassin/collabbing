@@ -14,6 +14,7 @@ use App\Policies\IdeaPolicy;
 use App\Policies\IdeaSupporterPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 /**
  * Class AppServiceProvider
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+        Paginator::useBootstrap();
     }
 
     /**

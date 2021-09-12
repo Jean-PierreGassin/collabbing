@@ -63,20 +63,19 @@ class IdeaController extends Controller
     public function index(Request $request)
     {
         $searchResults = null;
-        if ($search = $request->get('search')) {
-            $searchResults = $this->ideaService->search($search);
+        $keyword = $request->get('search');
+        if ($keyword) {
+            $searchResults = $this->ideaService->search($keyword);
+            $searchResults->setPath("ideas?search=$keyword");
         }
 
         $trendingIdeas = $this->ideaService->getTrending();
 
-        $trendingIds = $trendingIdeas->pluck('id');
-
         $ideas = Idea::where('status', 'open')
             ->orderBy('created_at', 'desc')
-            ->whereNotIn('id', $trendingIds)
             ->paginate(10);
 
-        return view('idea.list', compact('searchResults', 'trendingIdeas', 'ideas'));
+        return view('idea.list', compact('searchResults', 'keyword', 'trendingIdeas', 'ideas'));
     }
 
     /**

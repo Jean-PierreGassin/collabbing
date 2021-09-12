@@ -4,7 +4,7 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <h3>Submitting Feedback</h3>
                 <p>
                     If you'd like to submit feedback, shoot an email to

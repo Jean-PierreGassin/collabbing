@@ -5,7 +5,9 @@ namespace App\Services\Ideas;
 
 
 use App\Models\Idea;
+use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -35,16 +37,17 @@ class IdeaService
     }
 
     /**
-     * @return LengthAwarePaginator
+     * @return Collection
      */
-    public function getTrending(): LengthAwarePaginator
+    public function getTrending(): Collection
     {
         return Idea::where('status', 'open')
             ->withCount('supporters')
             ->orderBy('supporters_count', 'desc')
             ->orderBy('created_at', 'desc')
+            ->where('created_at', '>=', Carbon::now()->subDay())
             ->limit(3)
-            ->paginate();
+            ->get();
     }
 
     /**
@@ -55,8 +58,8 @@ class IdeaService
     {
         return Idea::where('status', 'open')
             ->orderBy('created_at', 'desc')
-            ->where('title', 'like', "%{$search}%")
-            ->paginate();
+            ->where('title', 'like', "{$search}%")
+            ->paginate(10);
     }
 
     /**
