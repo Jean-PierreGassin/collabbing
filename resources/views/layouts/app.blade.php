@@ -42,10 +42,10 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-<div id="app">
+<div id="app" class="mb-5" style="margin-bottom: 10rem !important">
     @include('components.navigation')
 
-    <main class="py-4 mb-5">
+    <main class="py-4">
         @yield('content')
     </main>
 </div>
