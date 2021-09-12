@@ -50,7 +50,7 @@
     </main>
 </div>
 
-<div class="fixed-bottom bg-light">
+<div class="fixed-bottom bg-dark">
     <footer class="footer mt-4 border-top border-dark">
         <div class="row m-2">
             <div class="col-6 col-md-6">

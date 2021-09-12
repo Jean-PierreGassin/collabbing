@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar navbar-expand-md navbar-light bg-dark">
     <div class="container">
         <a class="navbar-brand" href="{{ route('ideas.index') }}">
             {{ config('app.name', 'Laravel') }}
