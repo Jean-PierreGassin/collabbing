@@ -1,33 +1,27 @@
 @foreach ($ideas as $idea)
     <div class="card mb-3">
         <div class="card-header border-0">
-            <h5 class="mb-3">
-                @if (!isset($single))
-                    <a href="{{ route('ideas.show', $idea) }}">{{ ucfirst($idea->title) }}</a>
-                @else
-                    {{ ucfirst($idea->title) }} - <small>by <a href="{{ route('users.show', $idea->user->username) }}">{{ $idea->user->username }}</a></small>
-                @endif
-            </h5>
+            <div class="row">
+                <div class="col-8">
+                    <h5 class="mb-3">
+                        @if (!isset($single))
+                            <a href="{{ route('ideas.show', $idea) }}">{{ ucfirst($idea->title) }}</a>
+                        @else
+                            {{ ucfirst($idea->title) }} - <small>by <a
+                                        href="{{ route('users.show', $idea->user->username) }}">{{ $idea->user->username }}</a></small>
+                        @endif
+                    </h5>
+                </div>
 
-            <h6 class="card-subtitle">
                 @can('update', $idea)
-                    <div class="float-right">
+                    <div class="col-4 text-right">
                         Status:&nbsp;
-                        <span class="float-right {{ $idea->status === 'open' ? 'text-success' : 'text-danger' }}">
+                        <span class="{{ $idea->status === 'open' ? 'text-success' : 'text-danger' }}">
                             {{ ucfirst($idea->status) }}
                         </span>
                     </div>
                 @endcan
-
-                Supporters: {{ number_format(count($idea->supporters)) }},
-                Collaborators: {{ number_format(count($idea->approvedApplications)) }}
-
-                @if (!isset($single))
-                    <div class="float-right text-muted">
-                        <i>Created {{ $idea->created_at->diffForHumans() }}</i>
-                    </div>
-                @endif
-            </h6>
+            </div>
         </div>
 
         @if (isset($single))
@@ -40,18 +34,37 @@
             <h6 class="text-muted text-right mr-2 mt-3"><i>Created {{ $idea->created_at->diffForHumans() }}</i></h6>
         @endif
 
-        @can('update', $idea)
-            <div class="card-footer border-0">
-                <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">Edit Idea</a>
+        <div class="card-footer border-0">
+            @can('update', $idea)
+                <a class="btn btn-dark btn-sm" href="{{ route('ideas.edit', $idea) }}">
+                    Edit Idea
+                </a>
 
-                <a class="btn btn-info btn-sm float-right" href="{{ route('ideas.dashboard', $idea) }}">
+                <a class="btn btn-info btn-sm" href="{{ route('ideas.dashboard', $idea) }}">
                     Idea Dashboard
                 </a>
-            </div>
-        @endcan
+            @endcan
+
+            @if (!isset($single))
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-left">
+                            Supporters: {{ number_format(count($idea->supporters)) }},
+                            Collaborators: {{ number_format(count($idea->approvedApplications)) }}
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="text-right text-muted">
+                            <i>Created {{ $idea->created_at->diffForHumans() }}</i>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
     </div>
 
-    @if (isset($single, $collaborator) && (Gate::check('update', $idea) || Gate::check('manage', $idea->comments) || $collaborator))
+    @if (isset($single) && (Gate::check('update', $idea) || Gate::check('manage', $idea->comments) || isset($collaborator)))
         @include('components.comments')
         @include('comment.add')
     @endif

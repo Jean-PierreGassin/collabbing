@@ -1,20 +1,12 @@
 <div id="accordion">
     <div class="card mb-2">
         <div class="card-header" id="{{ $application->user_id }}-header">
-            <h5 class="mb-0">
-                <button class="btn btn-link collapsed"
-                        data-toggle="collapse"
-                        data-target="#{{ $application->id }}"
-                        aria-expanded="false"
-                        aria-controls="{{ $application->id }}">
-                    {{ $application->user->first_name }} {{ $application->user->last_name }}'s Application
-                </button>
-            </h5>
+            <h6 class="mb-0">
+                <a href="{{ route('users.show', $application->user->username) }}">{{ $application->user->name }}'s Application</a>
+            </h6>
         </div>
 
-        <div id="{{ $application->id }}" class="collapse"
-             aria-labelledby="{{ $application->user_id }}-header"
-             data-parent="#accordion">
+        <div id="{{ $application->id }}">
             <div class="card-body">
                 {!! nl2br(e($application->content)) !!}
             </div>

@@ -4,7 +4,7 @@
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-12 mb-5">
+            <div class="col-md-8 mb-5">
                 @if (session('status'))
                     <div class="alert alert-success">
                         {{ session('status') }}
@@ -78,26 +78,22 @@
 
             <div class="col-md-4">
                 <div class="row">
-                    <div class="col mb-3">
-                        <span class="btn-group btn-block">
-                            <a href="{{ route('ideas.edit', $idea) }}" class="btn btn-block btn-dark">
-                                Edit Idea
-                            </a>
+                    <div class="col-12 mb-3 btn-group btn-block">
+                        <a href="{{ route('ideas.edit', $idea) }}" class="btn btn-dark">
+                            Edit Idea
+                        </a>
 
-                            @if (!$idea->repository)
-                                <a href="{{ $idea->user->github_token ? route('ideas.repository-create', $idea) : route('auth.github.login') }}"
-                                   class="btn {{ $idea->user->github_token ? 'btn-warning' : 'btn-outline-warning' }}">
-                                <i class="fab fa-github"></i>
-                                Create Repository
+                        @if (!$idea->repository)
+                            <a href="{{ $idea->user->github_token ? route('ideas.repository-create', $idea) : route('auth.github.login') }}"
+                               class="btn {{ $idea->user->github_token ? 'btn-warning' : 'btn-outline-warning' }}">
+                                <i class="fab fa-github"></i> Create Repository
                             </a>
-                            @else
-                                <a href="{{ $idea->user->github_token ? route('ideas.repository-invite', $idea) : route('auth.github.login') }}"
-                                   class="btn {{ $idea->user->github_token ? 'btn-warning' : 'btn-outline-warning' }}">
-                                <i class="fab fa-github"></i>
-                                Invite Collaborators
+                        @else
+                            <a href="{{ $idea->user->github_token ? route('ideas.repository-invite', $idea) : route('auth.github.login') }}"
+                               class="btn {{ $idea->user->github_token ? 'btn-warning' : 'btn-outline-warning' }}">
+                                <i class="fab fa-github"></i> Invite Collaborators
                             </a>
-                            @endif
-                        </span>
+                        @endif
                     </div>
                 </div>
 
