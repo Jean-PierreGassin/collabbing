@@ -1,7 +1,13 @@
 @foreach ($ideas as $idea)
     <div class="card mb-3">
         <div class="card-header border-0">
-            <h5 class="mb-3"><a href="{{ route('ideas.show', $idea) }}">{{ $idea->title }}</a></h5>
+            <h5 class="mb-3">
+                @if (!isset($single))
+                    <a href="{{ route('ideas.show', $idea) }}">{{ $idea->title }}</a>
+                @else
+                    {{ $idea->title }} - <small>by <a href="{{ route('users.show', $idea->user->username) }}">{{ $idea->user->username }}</a></small>
+                @endif
+            </h5>
 
             <h6 class="card-subtitle text-muted">
                 @can('update', $idea)
@@ -17,7 +23,9 @@
                 Collaborators: {{ number_format(count($idea->approvedApplications)) }}
 
                 @if (!isset($single))
-                    - <i>Created {{ $idea->created_at->diffForHumans() }}</i>
+                    <div class="float-right">
+                        <i>Created {{ $idea->created_at->diffForHumans() }}</i>
+                    </div>
                 @endif
             </h6>
         </div>
@@ -29,7 +37,7 @@
                 </div>
             </div>
 
-            <h6 class="text-muted text-right mr-2 mt-3">Created {{ $idea->created_at->diffForHumans() }}</h6>
+            <h6 class="text-muted text-right mr-2 mt-3"><i>Created {{ $idea->created_at->diffForHumans() }}</i></h6>
         @endif
 
         @can('update', $idea)

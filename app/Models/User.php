@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Services\ThirdParty\GitHub\GitHubService;
-use Github\Client;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,6 +10,9 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Class User
+ * @property string $username
+ * @property string $first_name
+ * @property string $last_name
  * @property string $github_token
  * @property string $github_username
  * @package App
@@ -75,6 +77,11 @@ class User extends Authenticatable
     public function applications(): HasMany
     {
         return $this->hasMany(IdeaApplication::class, 'user_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return "$this->first_name $this->last_name";
     }
 
     /**
