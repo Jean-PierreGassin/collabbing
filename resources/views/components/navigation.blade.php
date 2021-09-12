@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-light bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('ideas.index') }}">
-            {{ config('app.name', 'Laravel') }}
+        <a class="navbar-brand text-white" href="{{ route('ideas.index') }}">
+            {{ config('app.name', 'Collabbing') }}
         </a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -14,7 +14,7 @@
             @auth
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                        <a class="nav-link text-info" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
 
                     <li class="nav-item">
@@ -27,11 +27,11 @@
             <ul class="navbar-nav ml-auto order-3">
                 <!-- Authentication Links -->
                 @guest
-                    <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
-                    <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li>
+                    <li><a class="nav-link text-white" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+                    <li><a class="nav-link text-white" href="{{ route('register') }}">{{ __('Register') }}</a></li>
                 @else
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                        <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ Auth::user()->first_name }} <span class="caret"></span>
                         </a>
@@ -60,7 +60,7 @@
 
                 <div class="input-group">
                     {!! Form::search('search', null, [
-                        'class' => 'form-control py-2 bg-light text-white border border-secondary border-right-0',
+                        'class' => 'form-control py-2 bg-dark text-white border border-secondary border-right-0',
                         'placeholder' => 'a robot that sings karaoke...' ,
                         'aria-describedby' => 'contentHelp',
                     ]) !!}
