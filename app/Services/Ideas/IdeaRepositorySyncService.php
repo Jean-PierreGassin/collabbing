@@ -81,6 +81,7 @@ class IdeaRepositorySyncService
             'repository_pushed_at' => $pushedAt,
             'repository_synced_at' => $syncedAt,
             'repository_missing_at' => null,
+            'repository_sync_due_at' => $this->nextSyncDueAt($syncedAt),
         ])->save();
 
         if (! $wasSynced) {
@@ -151,6 +152,7 @@ class IdeaRepositorySyncService
             'repository' => false,
             'repository_synced_at' => $missingAt,
             'repository_missing_at' => $missingAt,
+            'repository_sync_due_at' => null,
         ])->save();
 
         $this->recordEvent(
@@ -174,6 +176,29 @@ class IdeaRepositorySyncService
                 'payload' => $payload,
             ]
         );
+    }
+
+    public function scheduleRetry(Idea $idea): void
+    {
+        $idea->forceFill([
+            'repository_sync_due_at' => $this->retrySyncDueAt(now()),
+        ])->save();
+    }
+
+    private function nextSyncDueAt(Carbon $from): Carbon
+    {
+        return $from->copy()->addMinutes(random_int(
+            (int) config('services.github.repository_sync.next_min_minutes', 360),
+            (int) config('services.github.repository_sync.next_max_minutes', 720)
+        ));
+    }
+
+    private function retrySyncDueAt(Carbon $from): Carbon
+    {
+        return $from->copy()->addMinutes(random_int(
+            (int) config('services.github.repository_sync.retry_min_minutes', 120),
+            (int) config('services.github.repository_sync.retry_max_minutes', 240)
+        ));
     }
 
     private function repositoryPayload(array $repository): array

@@ -37,6 +37,7 @@ class Idea extends Model
         'repository_pushed_at',
         'repository_synced_at',
         'repository_missing_at',
+        'repository_sync_due_at',
     ];
 
     protected function casts(): array
@@ -46,6 +47,7 @@ class Idea extends Model
             'repository_pushed_at' => 'datetime',
             'repository_synced_at' => 'datetime',
             'repository_missing_at' => 'datetime',
+            'repository_sync_due_at' => 'datetime',
         ];
     }
 

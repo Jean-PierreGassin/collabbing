@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new SyncGitHubRepositories)->everyThirtyMinutes()->withoutOverlapping(20);
+        $schedule->job(new SyncGitHubRepositories)->everyFiveMinutes()->withoutOverlapping(5);
     }
 
     /**

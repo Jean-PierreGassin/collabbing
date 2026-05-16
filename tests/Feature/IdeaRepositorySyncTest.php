@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SyncGitHubRepositories;
 use App\Models\Idea;
 use App\Models\User;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
+use Carbon\Carbon;
 use Github\Exception\RuntimeException as GitHubRuntimeException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Mockery;
@@ -17,6 +19,8 @@ class IdeaRepositorySyncTest extends TestCase
 
     public function test_repository_is_marked_missing_when_git_hub_returns_not_found(): void
     {
+        Carbon::setTestNow('2026-05-16 10:00:00');
+
         $user = User::factory()->create([
             'github_token' => 'github-token',
             'github_username' => 'octocat',
@@ -39,11 +43,14 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertFalse($idea->repository);
         $this->assertNotNull($idea->repository_missing_at);
         $this->assertNotNull($idea->repository_synced_at);
+        $this->assertNull($idea->repository_sync_due_at);
         $this->assertTrue($idea->repositoryEvents()->where('type', 'repository_missing')->exists());
     }
 
     public function test_repository_snapshot_stores_latest_github_activity(): void
     {
+        Carbon::setTestNow('2026-05-16 10:00:00');
+
         $user = User::factory()->create([
             'github_token' => 'github-token',
             'github_username' => 'octocat',
@@ -79,8 +86,48 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertSame('Ship repository sync', $idea->repository_latest_commit_message);
         $this->assertSame('octocat', $idea->repository_latest_commit_author);
         $this->assertNotNull($idea->repository_pushed_at);
+        $this->assertNotNull($idea->repository_sync_due_at);
+        $this->assertTrue($idea->repository_sync_due_at->betweenIncluded(
+            now()->addMinutes(360),
+            now()->addMinutes(720)
+        ));
         $this->assertSame(1, $idea->repositoryEvents()->where('type', 'repository_commit')->count());
         $this->assertSame(1, $idea->repositoryEvents()->where('type', 'repository_synced')->count());
+    }
+
+    public function test_repository_sync_job_only_processes_due_repositories_in_a_small_batch(): void
+    {
+        Carbon::setTestNow('2026-05-16 10:00:00');
+        config(['services.github.repository_sync.max_per_run' => 2]);
+
+        $user = User::factory()->create([
+            'github_token' => 'github-token',
+            'github_username' => 'octocat',
+        ]);
+
+        $dueIdeas = Idea::factory()
+            ->count(3)
+            ->for($user)
+            ->sequence(
+                ['repository_sync_due_at' => now()->subMinutes(10)],
+                ['repository_sync_due_at' => now()->subMinute()],
+                ['repository_sync_due_at' => null],
+            )
+            ->create([
+                'repository' => true,
+            ]);
+
+        Idea::factory()->for($user)->create([
+            'repository' => true,
+            'repository_sync_due_at' => now()->addHour(),
+        ]);
+
+        $sync = Mockery::mock(IdeaRepositorySyncService::class);
+        $sync->shouldReceive('sync')
+            ->twice()
+            ->with(Mockery::on(fn (Idea $idea) => $dueIdeas->contains(fn (Idea $dueIdea) => $dueIdea->is($idea))));
+
+        (new SyncGitHubRepositories)->handle($sync);
     }
 
     private function repositoryPayload(): array
