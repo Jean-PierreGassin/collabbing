@@ -2,6 +2,8 @@ ARG PHP_VERSION=8.5
 ARG PHP_VARIANT=fpm-bookworm
 ARG APP_CONTAINER_PATH=/var/www/html
 ARG COMPOSER_VERSION=2
+ARG HOST_UID=1000
+ARG HOST_GID=1000
 
 FROM composer:${COMPOSER_VERSION} AS composer_image
 
@@ -9,6 +11,8 @@ FROM php:${PHP_VERSION}-${PHP_VARIANT}
 
 ARG APP_CONTAINER_PATH=/var/www/html
 ARG DEBIAN_FRONTEND=noninteractive
+ARG HOST_UID=1000
+ARG HOST_GID=1000
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -44,6 +48,11 @@ RUN apt-get update \
     && docker-php-ext-enable redis xdebug \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN groupmod -o -g "${HOST_GID}" www-data \
+    && usermod -o -u "${HOST_UID}" -g "${HOST_GID}" www-data \
+    && mkdir -p "${APP_CONTAINER_PATH}" /usr/local/etc/php/conf.d \
+    && chown -R www-data:www-data "${APP_CONTAINER_PATH}" /usr/local/etc/php/conf.d
 
 RUN printf '%s\n' \
     'autoload -Uz compinit' \
