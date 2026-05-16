@@ -51,17 +51,17 @@
             @can('storeSupporter', $idea)
                 <div class="col text-sm-right">
                     @if ($supporter)
-                        {!! Form::open([
-                            'route' => ['ideas.supporters.destroy', $idea, $supporter],
-                            'method' => 'DELETE'
-                        ]) !!}
-                        {!! Form::submit('Un-Support this Idea 👎', ['class' => 'btn btn-info btn-sm']) !!}
+                        <form action="{{ route('ideas.supporters.destroy', [$idea, $supporter]) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-info btn-sm">Un-Support this Idea 👎</button>
                     @else
-                        {!! Form::open(['route' => ['ideas.supporters.store', $idea], 'method' => 'POST']) !!}
-                        {!! Form::submit('Support this Idea 👍', ['class' => 'btn btn-outline-info btn-sm']) !!}
+                        <form action="{{ route('ideas.supporters.store', $idea) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-info btn-sm">Support this Idea 👍</button>
                     @endif
 
-                    {!! Form::close() !!}
+                        </form>
                 </div>
             @endcan
         </div>

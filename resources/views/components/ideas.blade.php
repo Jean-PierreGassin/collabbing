@@ -14,7 +14,7 @@
                 </div>
 
                 @can('update', $idea)
-                    <div class="col-4 text-right">
+                    <div class="col-4 text-end">
                         Status:&nbsp;
                         <span class="{{ $idea->status === 'open' ? 'text-success' : 'text-danger' }}">
                             {{ ucfirst($idea->status) }}
@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <h6 class="text-muted text-right mr-2 mt-3"><i>Created {{ $idea->created_at->diffForHumans() }}</i></h6>
+            <h6 class="text-muted text-end me-2 mt-3"><i>Created {{ $idea->created_at->diffForHumans() }}</i></h6>
         @endif
 
         <div class="card-footer border-0">
@@ -48,14 +48,14 @@
             @if (!isset($single))
                 <div class="row">
                     <div class="col-6">
-                        <div class="text-left">
+                        <div class="text-start">
                             Supporters: {{ number_format(count($idea->supporters)) }},
                             Collaborators: {{ number_format(count($idea->approvedApplications)) }}
                         </div>
                     </div>
 
                     <div class="col-6">
-                        <div class="text-right text-muted">
+                        <div class="text-end text-muted">
                             <i>Created {{ $idea->created_at->diffForHumans() }}</i>
                         </div>
                     </div>
@@ -69,5 +69,4 @@
         @include('comment.add')
     @endif
 @endforeach
-
 

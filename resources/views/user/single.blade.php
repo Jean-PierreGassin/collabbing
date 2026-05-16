@@ -25,7 +25,7 @@
                             <a href="{{ route('users.show', $user->username) }}">{{ '@' . $user->username }}</a>
 
                             @can('update', $user)
-                                <a class="btn btn-dark btn-sm float-right"
+                                <a class="btn btn-dark btn-sm float-end"
                                    href="{{ route('users.edit', $user->username) }}">
                                     Edit Profile
                                 </a>

@@ -23,22 +23,21 @@
                     <div class="card-header"><h5>{{ $idea->title }}</h5></div>
 
                     <div class="card-body">
-                        {!! Form::open(['route' => ['ideas.applications.store', $idea], 'method' => 'POST']) !!}
+                        <form action="{{ route('ideas.applications.store', $idea) }}" method="POST">
+                            @csrf
 
                         <div class="form-group">
-                            {!! Form::label('content', 'Application') !!}
-                            {!! Form::textarea('content', null, [
-                            'class' => 'form-control',
-                            'placeholder' => 'I\'m really good at water sports even though it has nothing to do with this project.' ,
-                            'aria-describedby' => 'contentHelp',
-                            ]) !!}
+                            <label for="content">Application</label>
+                            <textarea id="content" name="content" class="form-control"
+                                      placeholder="I'm really good at water sports even though it has nothing to do with this project."
+                                      aria-describedby="contentHelp">{{ old('content') }}</textarea>
                             <small id="contentHelp" class="form-text text-muted">Tell us why you're good for the part,
                                 make it interesting and we'll do the rest.
                             </small>
                         </div>
 
-                        {!! Form::submit('Submit Application 😎', ['class' => 'btn btn-outline-success']) !!}
-                        {!! Form::close() !!}
+                            <button type="submit" class="btn btn-outline-success">Submit Application 😎</button>
+                        </form>
                     </div>
                 </div>
             </div>

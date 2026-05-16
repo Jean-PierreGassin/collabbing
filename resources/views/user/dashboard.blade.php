@@ -25,21 +25,21 @@
                             <li class="nav-item">
                                 <a class="nav-link
                             {{ str_contains(Request::getQueryString(), 'ideas') || !Request::getQueryString() ? 'active' : '' }}"
-                                   id="pills-ideas-tab" data-toggle="pill" href="#pills-ideas"
+                                   id="pills-ideas-tab" data-bs-toggle="pill" href="#pills-ideas"
                                    role="tab"
                                    aria-controls="pills-ideas" aria-selected="true">My Ideas</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link
                            {{ str_contains(Request::getQueryString(), 'collaborations') ? 'active' : '' }}"
-                                   id="pills-collaborating-tab" data-toggle="pill" href="#pills-collaborating"
+                                   id="pills-collaborating-tab" data-bs-toggle="pill" href="#pills-collaborating"
                                    role="tab"
                                    aria-controls="pills-collaborating" aria-selected="false">Ideas I'm collaborating on</a>
                             </li>
                         </ul>
                     </div>
 
-                    <div class="col-4 text-right">
+                    <div class="col-4 text-end">
                         <a class="btn btn-outline-success btn-sm"
                            href="{{ route('ideas.create') }}">
                             Create an Idea

@@ -4,11 +4,10 @@
     </a>
 
     @can('deleteApplication', $idea)
-        {!! Form::open([
-            'route' => ['ideas.applications.destroy', $idea, $collaborator],
-            'method' => 'DELETE'
-        ]) !!}
-        {!! Form::submit('Remove Collaborator 🤕', ['class' => 'btn btn-danger btn-sm']) !!}
-        {!! Form::close() !!}
+        <form action="{{ route('ideas.applications.destroy', [$idea, $collaborator]) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger btn-sm">Remove Collaborator 🤕</button>
+        </form>
     @endcan
 </li>

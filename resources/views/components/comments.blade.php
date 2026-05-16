@@ -21,7 +21,7 @@
         </div>
 
         @if ($comment->created_at->timestamp < $comment->updated_at->timestamp)
-            <h6 class="text-muted text-right mr-2">Last edited {{ $comment->updated_at->diffForHumans() }}</h6>
+            <h6 class="text-muted text-end me-2">Last edited {{ $comment->updated_at->diffForHumans() }}</h6>
         @endif
 
         @can('update', $comment)

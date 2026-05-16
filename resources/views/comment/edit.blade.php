@@ -22,14 +22,14 @@
                     <div class="card-header">Edit your Comment</div>
 
                     <div class="card-body">
-                        {!! Form::model($comment, ['route' => ['ideas.comments.update', $idea, $comment], 'method' => 'PUT']) !!}
+                        <form action="{{ route('ideas.comments.update', [$idea, $comment]) }}" method="POST">
+                            @csrf
+                            @method('PUT')
 
                         <div class="form-group">
-                            {!! Form::label('content', 'Comment') !!}
-                            {!! Form::textarea('content', null, [
-                            'class' => 'form-control',
-                            'aria-describedby' => 'contentHelp',
-                            ]) !!}
+                            <label for="content">Comment</label>
+                            <textarea id="content" name="content" class="form-control"
+                                      aria-describedby="contentHelp">{{ old('content', $comment->content) }}</textarea>
                             <small id="contentHelp" class="form-text text-muted">Nobody likes a bossy boots, think
                                 before you type.
                             </small>
@@ -37,8 +37,8 @@
                     </div>
 
                     <div class="card-footer">
-                        {!! Form::submit('Edit Comment', ['class' => 'btn btn-dark btn-sm float-right']) !!}
-                        {!! Form::close() !!}
+                        <button type="submit" class="btn btn-dark btn-sm float-end">Edit Comment</button>
+                        </form>
                     </div>
                 </div>
             </div>

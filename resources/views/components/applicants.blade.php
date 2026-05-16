@@ -11,29 +11,27 @@
                 {!! nl2br(e($application->content)) !!}
             </div>
 
-            <h6 class="text-muted text-right mr-2">Submitted {{ $idea->created_at->diffForHumans() }}</h6>
+            <h6 class="text-muted text-end me-2">Submitted {{ $idea->created_at->diffForHumans() }}</h6>
 
             <div class="card-footer">
                 <div class="row">
                     <div class="col-sm">
                         @can('deleteApplication', $idea)
-                            {!! Form::open([
-                                'route' => ['ideas.applications.destroy', $idea, $application],
-                                'method' => 'DELETE'
-                            ]) !!}
-                            {!! Form::submit('Decline this Application 👎', ['class' => 'btn btn-danger btn-sm']) !!}
-                            {!! Form::close() !!}
+                            <form action="{{ route('ideas.applications.destroy', [$idea, $application]) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Decline this Application 👎</button>
+                            </form>
                         @endcan
                     </div>
 
                     <div class="col-sm text-sm-right">
                         @can('updateApplication', $idea)
-                            {!! Form::open([
-                                'route' => ['ideas.applications.approve', $idea, $application],
-                                'method' => 'PUT'
-                            ]) !!}
-                            {!! Form::submit('Approve this Application ✅', ['class' => 'btn btn-success btn-sm float-right']) !!}
-                            {!! Form::close() !!}
+                            <form action="{{ route('ideas.applications.approve', [$idea, $application]) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="btn btn-success btn-sm float-end">Approve this Application ✅</button>
+                            </form>
                         @endcan
                     </div>
                 </div>

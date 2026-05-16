@@ -14,8 +14,7 @@
 
     <title>{{ config('app.name', 'Laravel') }} - @yield('title')</title>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    @vite(['resources/js/app.js'])
     <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js"
             integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl"
             crossorigin="anonymous"></script>
@@ -38,8 +37,6 @@
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css">
 
-    <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
 <div id="app" class="mb-5" style="margin-bottom: 10rem !important">
@@ -60,7 +57,7 @@
                     {{--                    <li><a class="text-muted" href="{{ route('resources.pricing') }}">Pricing</a></li>--}}
                 </ul>
             </div>
-            <div class="col-6 col-md-6 text-right">
+            <div class="col-6 col-md-6 text-end">
                 <small class="d-block mb-3 text-muted">
                     <a href="https://github.com/Jean-PierreGassin">Created & owned by Jean-Pierre Gassin</a>
                 </small>

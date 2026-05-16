@@ -4,7 +4,7 @@
             {{ config('app.name', 'Collabbing') }}
         </a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             @auth
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item {{ Route::currentRouteName() === 'dashboard' ? 'active' : '' }}">
                         <a class="nav-link text-info" href="{{ route('dashboard') }}">Dashboard</a>
                     </li>
@@ -24,7 +24,7 @@
         @endauth
 
         <!-- Right Side Of Navbar -->
-            <ul class="navbar-nav ml-auto order-3">
+            <ul class="navbar-nav ms-auto order-3">
                 <!-- Authentication Links -->
                 @guest
                     <li><a class="nav-link text-white" href="{{ route('login') }}">{{ __('Login') }}</a></li>
@@ -32,7 +32,7 @@
                 @else
                     <li class="nav-item dropdown">
                         <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ Auth::user()->first_name }} <span class="caret"></span>
                         </a>
 
@@ -55,19 +55,16 @@
                 @endguest
             </ul>
 
-            <div class="col-12 mt-3 mt-sm-0 col-md-6 ml-auto order-sm-2">
-                {!! Form::open(['route' => 'ideas.index', 'method' => 'GET']) !!}
-
+            <div class="col-12 mt-3 mt-sm-0 col-md-6 ms-auto order-sm-2">
+                <form action="{{ route('ideas.index') }}" method="GET">
                 <div class="input-group">
-                    {!! Form::search('search', null, [
-                        'class' => 'form-control py-2 bg-dark text-white border border-secondary border-right-0',
-                        'placeholder' => 'a robot that sings karaoke...' ,
-                        'aria-describedby' => 'contentHelp',
-                    ]) !!}
-                    {!! Form::submit('Search Ideas', ['class' => 'btn btn-secondary rounded-0']) !!}
+                    <input type="search" name="search" value="{{ request('search') }}"
+                           class="form-control py-2 bg-dark text-white border border-secondary border-end-0"
+                           placeholder="a robot that sings karaoke..."
+                           aria-describedby="contentHelp">
+                    <button type="submit" class="btn btn-secondary rounded-0">Search Ideas</button>
                 </div>
-
-                {!! Form::close() !!}
+                </form>
             </div>
         </div>
     </div>

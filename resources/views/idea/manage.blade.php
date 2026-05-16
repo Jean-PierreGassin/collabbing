@@ -28,13 +28,13 @@
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link active"
-                           id="pills-applications-tab" data-toggle="pill" href="#pills-ideas"
+                           id="pills-applications-tab" data-bs-toggle="pill" href="#pills-ideas"
                            role="tab"
                            aria-controls="pills-ideas" aria-selected="true">Applications</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           id="pills-collaborators-tab" data-toggle="pill" href="#pills-collaborating"
+                           id="pills-collaborators-tab" data-bs-toggle="pill" href="#pills-collaborating"
                            role="tab"
                            aria-controls="pills-collaborating" aria-selected="false">Collaborators</a>
                     </li>

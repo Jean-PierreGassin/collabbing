@@ -23,36 +23,33 @@
                     <div class="card-header">{{ isset($user) ? 'Edit' : 'Create' }} Profile</div>
 
                     <div class="card-body">
-                        @if (isset($user))
-                            {!! Form::model($user, ['route' => ['users.update', $user->username], 'method' => 'PUT']) !!}
-                        @else
-                            {!! Form::open(['route' => 'users.store', 'method' => 'POST']) !!}
-                        @endif
+                        <form action="{{ isset($user) ? route('users.update', $user->username) : route('users.store') }}" method="POST">
+                            @csrf
+                            @isset($user)
+                                @method('PUT')
+                            @endisset
 
                         <div class="form-group row">
                             <div class="col">
-                                {!! Form::label('first_name', 'First Name') !!}
-                                {!! Form::text('first_name', null, [
-                                'class' => 'form-control',
-                                'placeholder' => 'John',
-                                ]) !!}
+                                <label for="first_name">First Name</label>
+                                <input id="first_name" name="first_name" type="text" class="form-control"
+                                       value="{{ old('first_name', $user->first_name ?? '') }}"
+                                       placeholder="John">
                             </div>
 
                             <div class="col">
-                                {!! Form::label('last_name', 'Last Name') !!}
-                                {!! Form::text('last_name', null, [
-                                'class' => 'form-control',
-                                'placeholder' => 'Smith',
-                                ]) !!}
+                                <label for="last_name">Last Name</label>
+                                <input id="last_name" name="last_name" type="text" class="form-control"
+                                       value="{{ old('last_name', $user->last_name ?? '') }}"
+                                       placeholder="Smith">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            {!! Form::label('email', 'E-Mail Address') !!}
-                            {!! Form::email('email', null, [
-                            'class' => 'form-control',
-                            'placeholder' => 'john.smith@apples.com' ,
-                            ]) !!}
+                            <label for="email">E-Mail Address</label>
+                            <input id="email" name="email" type="email" class="form-control"
+                                   value="{{ old('email', $user->email ?? '') }}"
+                                   placeholder="john.smith@apples.com">
                         </div>
 
                         @if (isset($user))
@@ -76,31 +73,25 @@
                         @endif
 
                         <div class="form-group">
-                            {!! Form::label('bio', 'Bio (supports markdown)') !!}
-                            {!! Form::textarea('bio', null, [
-                            'class' => 'form-control',
-                            'placeholder' => 'Tell us what you\'re good at and what you enjoy...' ,
-                            ]) !!}
+                            <label for="bio">Bio (supports markdown)</label>
+                            <textarea id="bio" name="bio" class="form-control"
+                                      placeholder="Tell us what you're good at and what you enjoy...">{{ old('bio', $user->bio ?? '') }}</textarea>
                         </div>
 
                         <div class="form-group row">
                             <div class="col">
-                                {!! Form::label('password', 'New Password:') !!}
-                                {!! Form::password('password', [
-                                    'class' => 'form-control',
-                                ]) !!}
+                                <label for="password">New Password:</label>
+                                <input id="password" name="password" type="password" class="form-control">
                             </div>
 
                             <div class="col">
-                                {!! Form::label('password_confirmation', 'Confirm Password:') !!}
-                                {!! Form::password('password_confirmation', [
-                                    'class' => 'form-control',
-                                ]) !!}
+                                <label for="password_confirmation">Confirm Password:</label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" class="form-control">
                             </div>
                         </div>
 
-                        {!! Form::submit(isset($user) ? 'Edit Profile' : 'Create Profile', ['class' => 'btn btn-primary']) !!}
-                        {!! Form::close() !!}
+                        <button type="submit" class="btn btn-primary">{{ isset($user) ? 'Edit Profile' : 'Create Profile' }}</button>
+                        </form>
                     </div>
                 </div>
             </div>
