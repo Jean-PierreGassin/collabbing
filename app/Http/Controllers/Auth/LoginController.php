@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class LoginController
@@ -46,5 +48,10 @@ class LoginController extends Controller
     public function username(): string
     {
         return 'username';
+    }
+
+    public function showLoginForm(): Response
+    {
+        return Inertia::render('Auth/Login');
     }
 }

@@ -14,12 +14,12 @@
 Route::get(
     '/',
     function () {
-        return view('app');
+        return Inertia\Inertia::render('Home');
     }
 )->name('home');
 
 Route::get('/app/{path?}', function () {
-    return view('app');
+    return redirect()->route('home');
 })
     ->where('path', '.*')
     ->name('app');
@@ -165,11 +165,11 @@ Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
  */
 Route::prefix('resources')->group(
     function () {
-        Route::view('feedback', 'app')
+        Route::get('feedback', fn () => Inertia\Inertia::render('Feedback'))
             ->name('resources.feedback')
             ->middleware('web');
 
-        Route::view('pricing', 'app')
+        Route::get('pricing', fn () => Inertia\Inertia::render('Pricing'))
             ->name('resources.pricing')
             ->middleware('web');
     }

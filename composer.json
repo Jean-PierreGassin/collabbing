@@ -12,6 +12,7 @@
     "graham-campbell/github": "^13.1",
     "graham-campbell/markdown": "^16.1",
     "guzzlehttp/guzzle": "^7.9",
+    "inertiajs/inertia-laravel": "*",
     "laravel/framework": "^13.0",
     "laravel/socialite": "^5.2",
     "laravel/tinker": "^3.0",

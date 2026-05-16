@@ -57,6 +57,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
+use Inertia\ServiceProvider;
 
 return [
 
@@ -208,6 +209,7 @@ return [
         /*
          * Package Service Providers...
          */
+        ServiceProvider::class,
 
         /*
          * Application Service Providers...

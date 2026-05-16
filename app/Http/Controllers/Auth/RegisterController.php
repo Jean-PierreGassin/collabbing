@@ -8,6 +8,8 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class RegisterController
@@ -75,5 +77,10 @@ class RegisterController extends Controller
                 'password' => Hash::make($data['password']),
             ]
         );
+    }
+
+    public function showRegistrationForm(): Response
+    {
+        return Inertia::render('Auth/Register');
     }
 }

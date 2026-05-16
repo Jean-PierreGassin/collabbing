@@ -4,9 +4,9 @@ namespace App\Services\Ideas;
 
 use App\Models\Idea;
 use App\Models\IdeaSupporter;
+use App\Repositories\Ideas\SupporterRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -14,14 +14,11 @@ use Illuminate\Support\Facades\Auth;
  */
 class SupporterService
 {
+    public function __construct(private SupporterRepository $supporters) {}
+
     public function create(Idea $idea): Model
     {
-        return $idea->supporters()->firstOrCreate(
-            [
-                'user_id' => Auth::user()->id,
-                'idea_id' => $idea->id,
-            ]
-        );
+        return $this->supporters->create($idea, Auth::user());
     }
 
     /**
@@ -29,14 +26,14 @@ class SupporterService
      */
     public function destroy(IdeaSupporter $supporter): bool
     {
-        return $supporter->delete();
+        return $this->supporters->destroy($supporter);
     }
 
     /**
-     * @return Model|HasMany|object|null
+     * @return Model|null
      */
     public function getSupportFromUser(Idea $idea)
     {
-        return $idea->hasSupportFromUser(Auth::user()->id);
+        return $this->supporters->getSupportFromUser($idea, Auth::user());
     }
 }

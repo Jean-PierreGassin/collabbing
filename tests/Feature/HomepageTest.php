@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class HomepageTest extends TestCase
@@ -12,26 +13,29 @@ class HomepageTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('vue-app');
+            ->assertDontSee('@inertia', false)
+            ->assertInertia(fn (Assert $page) => $page->component('Home'));
     }
 
-    public function test_vue_app_shell_loads(): void
+    public function test_app_namespace_redirects_home(): void
     {
         $response = $this->get('/app');
 
-        $response
-            ->assertOk()
-            ->assertSee('vue-app');
+        $response->assertRedirect(route('home'));
     }
 
-    public function test_resource_pages_load_the_vue_app_shell(): void
+    public function test_resource_pages_load_the_inertia_app_shell(): void
     {
-        foreach (['/resources/feedback', '/resources/pricing'] as $path) {
+        foreach ([
+            '/resources/feedback' => 'Feedback',
+            '/resources/pricing' => 'Pricing',
+        ] as $path => $component) {
             $response = $this->get($path);
 
             $response
                 ->assertOk()
-                ->assertSee('vue-app');
+                ->assertDontSee('@inertia', false)
+                ->assertInertia(fn (Assert $page) => $page->component($component));
         }
     }
 }

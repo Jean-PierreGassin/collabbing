@@ -1,60 +1,79 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
-import { ArrowRight, Lightbulb, LayoutDashboard, MessageSquare, Users } from '@lucide/vue';
+import { Link } from '@inertiajs/vue3';
+import { LogOut, Plus, Search } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import CsrfField from '@/components/forms/CsrfField.vue';
+import FlashMessages from '@/components/layout/FlashMessages.vue';
 import { useSessionStore } from '@/stores/session';
 
-const route = useRoute();
 const session = useSessionStore();
 
 const navItems = computed(() => [
-  { label: 'Home', to: '/', icon: Users },
-  { label: 'Ideas', to: session.routes.appIdeas, icon: Lightbulb },
-  { label: 'Dashboard', to: session.routes.appDashboard, icon: LayoutDashboard },
-  { label: 'Resources', to: session.routes.appResources, icon: MessageSquare },
+  { label: 'Dashboard', href: session.routes.dashboard, auth: true },
+  { label: 'Create an Idea', href: session.routes.ideasCreate, auth: true },
 ]);
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <header class="border-b bg-background/95 backdrop-blur">
+    <header class="border-b border-border bg-background/95 backdrop-blur">
       <div class="mx-auto flex min-h-16 w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <RouterLink to="/" class="flex items-center gap-3">
-          <span class="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Users class="size-5" aria-hidden="true" />
-          </span>
-          <span class="text-lg font-semibold tracking-normal">{{ session.appName }}</span>
-        </RouterLink>
+        <Link :href="session.routes.home" class="text-lg font-semibold text-white">Collabbing</Link>
 
-        <nav class="flex flex-wrap items-center gap-1">
-          <RouterLink
+        <nav class="flex flex-wrap items-center gap-2">
+          <Button
             v-for="item in navItems"
-            :key="item.to"
-            :to="item.to"
-            class="inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-            :class="{ 'bg-accent text-accent-foreground': route.path === item.to }"
+            v-show="!item.auth || session.isAuthenticated"
+            :key="item.href"
+            :as="Link"
+            :href="item.href"
+            variant="ghost"
           >
-            <component :is="item.icon" class="size-4" aria-hidden="true" />
+            <Plus v-if="item.label === 'Create an Idea'" class="size-4" aria-hidden="true" />
             {{ item.label }}
-          </RouterLink>
+          </Button>
         </nav>
 
-        <div class="flex items-center gap-2">
-          <Button v-if="session.isAuthenticated" variant="outline" as="a" :href="session.routes.classicDashboard">
-            Open classic dashboard
-            <ArrowRight class="size-4" aria-hidden="true" />
-          </Button>
+        <div class="flex flex-wrap items-center gap-2">
+          <form class="relative" :action="session.routes.ideas" method="GET">
+            <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <input
+              name="search"
+              type="search"
+              class="h-9 w-48 rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
+              placeholder="Find an idea"
+            >
+          </form>
+
+          <template v-if="session.isAuthenticated">
+            <Button variant="outline" :as="Link" :href="session.user?.routes.show ?? session.routes.dashboard">
+              {{ session.user?.name }}
+            </Button>
+            <form :action="session.routes.logout" method="POST">
+              <CsrfField />
+              <Button type="submit" variant="ghost" size="icon" aria-label="Logout">
+                <LogOut class="size-4" aria-hidden="true" />
+              </Button>
+            </form>
+          </template>
           <template v-else>
-            <Button variant="ghost" as="a" :href="session.routes.login">Log in</Button>
-            <Button as="a" :href="session.routes.register">Join</Button>
+            <Button variant="ghost" :as="Link" :href="session.routes.login">Login</Button>
+            <Button :as="Link" :href="session.routes.register">Register</Button>
           </template>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <FlashMessages />
       <slot />
     </main>
+
+    <footer class="border-t border-border">
+      <div class="mx-auto flex w-full max-w-7xl justify-center px-4 py-8 text-sm text-muted-foreground sm:px-6 lg:px-8">
+        <Link class="hover:text-primary" :href="session.routes.feedback">Feedback</Link>
+      </div>
+    </footer>
   </div>
 </template>

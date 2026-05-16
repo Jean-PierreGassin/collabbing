@@ -7,12 +7,13 @@ use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Services\Ideas\ApplicationService;
 use App\Services\Ideas\IdeaService;
+use App\Services\Inertia\PagePropsService;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class IdeaApplicationController
@@ -23,19 +24,22 @@ class IdeaApplicationController extends Controller
 
     private ApplicationService $applicationService;
 
+    private PagePropsService $pageProps;
+
     /**
      * IdeaApplicationController constructor.
      */
-    public function __construct(ApplicationService $applicationService, IdeaService $ideaService)
+    public function __construct(ApplicationService $applicationService, IdeaService $ideaService, PagePropsService $pageProps)
     {
         $this->ideaService = $ideaService;
         $this->applicationService = $applicationService;
+        $this->pageProps = $pageProps;
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return Factory|View
+     * @return Response
      *
      * @throws AuthorizationException
      */
@@ -43,7 +47,9 @@ class IdeaApplicationController extends Controller
     {
         $this->authorize('createApplication', $idea);
 
-        return view('idea.apply', compact('idea'));
+        return Inertia::render('Ideas/Apply', [
+            'idea' => $this->pageProps->idea($idea),
+        ]);
     }
 
     /**

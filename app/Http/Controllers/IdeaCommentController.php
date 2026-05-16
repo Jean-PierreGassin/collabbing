@@ -6,11 +6,12 @@ use App\Http\Requests\StoreIdeaComment;
 use App\Models\Idea;
 use App\Models\IdeaComment;
 use App\Services\Ideas\CommentService;
+use App\Services\Inertia\PagePropsService;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class IdeaCommentController
@@ -19,18 +20,21 @@ class IdeaCommentController extends Controller
 {
     private CommentService $commentService;
 
+    private PagePropsService $pageProps;
+
     /**
      * IdeaCommentController constructor.
      */
-    public function __construct(CommentService $commentService)
+    public function __construct(CommentService $commentService, PagePropsService $pageProps)
     {
         $this->commentService = $commentService;
+        $this->pageProps = $pageProps;
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return Factory|View
+     * @return Response
      *
      * @throws AuthorizationException
      */
@@ -38,7 +42,9 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('storeComment', $idea);
 
-        return view('comment.add');
+        return Inertia::render('Comments/Form', [
+            'idea' => $this->pageProps->idea($idea),
+        ]);
     }
 
     /**
@@ -60,7 +66,7 @@ class IdeaCommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @return Factory|View
+     * @return Response
      *
      * @throws AuthorizationException
      */
@@ -68,7 +74,10 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('manage', $comment);
 
-        return view('comment.edit', compact('idea', 'comment'));
+        return Inertia::render('Comments/Form', [
+            'idea' => $this->pageProps->idea($idea),
+            'comment' => $this->pageProps->comment($comment),
+        ]);
     }
 
     /**

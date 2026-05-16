@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class ResetPasswordController
@@ -38,5 +41,13 @@ class ResetPasswordController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    public function showResetForm(Request $request, $token = null): Response
+    {
+        return Inertia::render('Auth/PasswordReset', [
+            'token' => $token,
+            'email' => $request->email,
+        ]);
     }
 }
