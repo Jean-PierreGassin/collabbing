@@ -14,9 +14,15 @@
 Route::get(
     '/',
     function () {
-        return view('welcome');
+        return view('app');
     }
-);
+)->name('home');
+
+Route::get('/app/{path?}', function () {
+    return view('app');
+})
+    ->where('path', '.*')
+    ->name('app');
 
 /**
  * Resources for Users
@@ -159,11 +165,11 @@ Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
  */
 Route::prefix('resources')->group(
     function () {
-        Route::get('feedback', 'Resources\FeedbackController@index')
+        Route::view('feedback', 'app')
             ->name('resources.feedback')
             ->middleware('web');
 
-        Route::get('pricing', 'Resources\PricingController@index')
+        Route::view('pricing', 'app')
             ->name('resources.pricing')
             ->middleware('web');
     }
