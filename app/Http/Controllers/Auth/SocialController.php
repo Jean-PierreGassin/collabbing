@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 /**
  * Class SocialController
- * @package App\Http\Controllers\Auth
  */
 class SocialController extends Controller
 {
@@ -20,15 +20,13 @@ class SocialController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(private UserService $users)
     {
         $this->middleware('auth');
     }
 
     /**
      * Redirect the user to the GitHub authentication page.
-     *
-     * @return RedirectResponse
      */
     public function redirectToProvider(): RedirectResponse
     {
@@ -39,8 +37,6 @@ class SocialController extends Controller
 
     /**
      * Obtain the user information from GitHub.
-     *
-     * @return RedirectResponse
      */
     public function handleProviderCallback(): RedirectResponse
     {
@@ -55,12 +51,10 @@ class SocialController extends Controller
                 ->with('errors', collect('Unable to link GitHub account'));
         }
 
-        $user->update(
-            [
-                'github_token' => $providerUser->token,
-                'github_username' => $providerUser->getNickname(),
-            ]
-        );
+        $this->users->update($user, [
+            'github_token' => $providerUser->token,
+            'github_username' => $providerUser->getNickname(),
+        ]);
 
         return redirect()
             ->route('users.edit', $user->username)
@@ -69,19 +63,15 @@ class SocialController extends Controller
 
     /**
      * Remove the provider token for this user.
-     *
-     * @return RedirectResponse
      */
     public function revokeProvider(): RedirectResponse
     {
         /* @var $user User */
         $user = Auth::user();
-        $user->update(
-            [
-                'github_token' => null,
-                'github_username' => null,
-            ]
-        );
+        $this->users->update($user, [
+            'github_token' => null,
+            'github_username' => null,
+        ]);
 
         return redirect()
             ->back()

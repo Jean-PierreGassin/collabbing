@@ -3,14 +3,14 @@
 namespace App\Exceptions;
 
 use Exception;
-use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Class Handler
- * @package App\Exceptions
  */
 class Handler extends ExceptionHandler
 {
@@ -38,8 +38,6 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param Throwable $exception
-     * @return void
      * @throws Exception
      */
     public function report(Throwable $exception): void
@@ -50,13 +48,22 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param Request $request
-     * @param Throwable $exception
-     * @return Response
+     * @param  Request  $request
+     *
      * @throws Exception
      */
     public function render($request, Throwable $exception): Response
     {
-        return parent::render($request, $exception);
+        $response = parent::render($request, $exception);
+
+        if (! $request->expectsJson() && in_array($response->getStatusCode(), [401, 403, 404, 500], true)) {
+            return Inertia::render('Error', [
+                'status' => $response->getStatusCode(),
+            ])
+                ->toResponse($request)
+                ->setStatusCode($response->getStatusCode());
+        }
+
+        return $response;
     }
 }

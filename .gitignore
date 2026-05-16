@@ -1,4 +1,5 @@
 /node_modules
+/public/build
 /public/hot
 /public/storage
 /storage/*.key
@@ -6,6 +7,9 @@
 /.idea
 /.vscode
 /.vagrant
+/.phpunit.cache*
+/bootstrap/cache.nobody-owned*
+/phpunit.xml
 Homestead.json
 Homestead.yaml
 npm-debug.log

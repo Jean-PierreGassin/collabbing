@@ -14,9 +14,15 @@
 Route::get(
     '/',
     function () {
-        return view('welcome');
+        return Inertia\Inertia::render('Home');
     }
-);
+)->name('home');
+
+Route::get('/app/{path?}', function () {
+    return redirect()->route('home');
+})
+    ->where('path', '.*')
+    ->name('app');
 
 /**
  * Resources for Users
@@ -159,11 +165,11 @@ Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
  */
 Route::prefix('resources')->group(
     function () {
-        Route::get('feedback', 'Resources\FeedbackController@index')
+        Route::get('feedback', fn () => Inertia\Inertia::render('Feedback'))
             ->name('resources.feedback')
             ->middleware('web');
 
-        Route::get('pricing', 'Resources\PricingController@index')
+        Route::get('pricing', fn () => Inertia\Inertia::render('Pricing'))
             ->name('resources.pricing')
             ->middleware('web');
     }

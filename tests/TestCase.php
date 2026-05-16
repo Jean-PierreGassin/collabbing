@@ -10,9 +10,10 @@ abstract class TestCase extends BaseTestCase
 
     protected $user;
 
-    public function __construct()
+    protected function setUp(): void
     {
         parent::setUp();
-        parent::__construct();
+
+        $this->withoutVite();
     }
 }

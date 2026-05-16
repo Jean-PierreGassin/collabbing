@@ -7,7 +7,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
  * Class UserPolicy
- * @package App\Policies
  */
 class UserPolicy
 {
@@ -23,23 +22,13 @@ class UserPolicy
         //
     }
 
-    /**
-     * @param User $user
-     * @param User $userToEdit
-     * @return bool
-     */
     public function manage(User $user, User $userToEdit): bool
     {
-        return (strtolower($user->username) === strtolower($userToEdit->username));
+        return strtolower($user->username) === strtolower($userToEdit->username);
     }
 
-    /**
-     * @param User $user
-     * @param User $userToEdit
-     * @return bool
-     */
     public function update(User $user, User $userToEdit): bool
     {
-        return (strtolower($user->username) === strtolower($userToEdit->username));
+        return strtolower($user->username) === strtolower($userToEdit->username);
     }
 }

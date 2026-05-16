@@ -3,34 +3,36 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Repositories\Users\UserRepository;
 use Illuminate\Support\Facades\Hash;
 
 /**
  * Class UserService
- * @package App\Services
  */
 class UserService
 {
+    public function __construct(private UserRepository $users) {}
+
+    public function all()
+    {
+        return $this->users->all();
+    }
+
     /**
-     * @param string $username
      * @return mixed
      */
     public function getUserByUsername(string $username)
     {
-        return User::whereUsername($username)->limit(1)->first();
+        return $this->users->getByUsername($username);
     }
 
-    /**
-     * @param User $user
-     * @param array $data
-     * @return bool
-     */
     public function update(User $user, array $data): bool
     {
         // TODO: Move this to request validation
+        $values = [];
+
         foreach ($data as $key => $value) {
             if ($key === 'password' && $value === null) {
-                unset($key);
                 continue;
             }
 
@@ -38,9 +40,9 @@ class UserService
                 $value = Hash::make($value);
             }
 
-            $user->{$key} = $value;
+            $values[$key] = $value;
         }
 
-        return $user->save();
+        return $this->users->update($user, $values);
     }
 }

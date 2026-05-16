@@ -4,35 +4,27 @@ namespace App\Services\Ideas;
 
 use App\Models\Idea;
 use App\Models\IdeaComment;
+use App\Repositories\Ideas\CommentRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Class CommentService
- * @package App\Services\Ideas
  */
 class CommentService
 {
+    public function __construct(private CommentRepository $comments) {}
+
     /**
-     * @param Idea $idea
-     * @param array $data
      * @return IdeaComment
      */
     public function store(Idea $idea, array $data): Model
     {
-        $data['user_id'] = Auth::user()->id;
-
-        return $idea->comments()->create($data);
+        return $this->comments->create($idea, Auth::user(), $data);
     }
 
-    /**
-     * @param IdeaComment $comment
-     * @param array $data
-     * @return bool
-     */
     public function update(IdeaComment $comment, array $data): bool
     {
-        $comment->update($data);
-        return $comment->save();
+        return $this->comments->update($comment, $data);
     }
 }

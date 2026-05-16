@@ -4,75 +4,53 @@ namespace App\Services\Ideas;
 
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Repositories\Ideas\ApplicationRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Class ApplicationService
- * @package App\Services\Ideas
  */
 class ApplicationService
 {
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return bool
-     */
+    public function __construct(private ApplicationRepository $applications) {}
+
     public function create(Idea $idea, array $data): bool
     {
-        $data['user_id'] = Auth::user()->id;
-        $application = $idea->applications()->create($data);
+        $application = $this->applications->create($idea, Auth::user(), $data);
 
-        return $application->save();
+        return $application->exists;
     }
 
-    /**
-     * @param IdeaApplication $application
-     * @return bool
-     */
     public function approve(IdeaApplication $application): bool
     {
-        $application->status = 'approved';
-        return $application->save();
+        return $this->applications->approve($application);
     }
 
     /**
-     * @param IdeaApplication $application
-     * @return bool
      * @throws \Exception
      */
     public function destroy(IdeaApplication $application): bool
     {
-        return $application->delete();
+        return $this->applications->destroy($application);
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
     public function getPendingApplications(Idea $idea): Collection
     {
-        return $idea->pendingApplications()->get();
+        return $this->applications->getPendingApplications($idea);
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
     public function getApprovedApplications(Idea $idea): Collection
     {
-        return $idea->approvedApplications()->get();
+        return $this->applications->getApprovedApplications($idea);
     }
 
     /**
-     * @param Idea $idea
-     * @param string $type
-     * @return Model|HasMany|object|null
+     * @return Model|null
      */
     public function getApplicationFromUser(Idea $idea, string $type)
     {
-        return $idea->hasApplicationFromUser(Auth::user()->id, $type);
+        return $this->applications->getApplicationFromUser($idea, Auth::user(), $type);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\Table\TableExtension;
 
 /*
  * This file is part of Laravel Markdown.
@@ -41,7 +43,10 @@ return [
     |
     */
 
-    'extensions' => [],
+    'extensions' => [
+        CommonMarkCoreExtension::class,
+        TableExtension::class,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -66,55 +71,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Enable Em Tag Parsing
+    | Commonmark Configuration
     |--------------------------------------------------------------------------
     |
-    | This option specifies if `<em>` parsing is enabled.
+    | This option specifies an array of options for commonmark.
     |
-    | Default: true
+    | Default: [
+    |              'enable_em' => true,
+    |              'enable_strong' => true,
+    |              'use_asterisk' => true,
+    |              'use_underscore' => true,
+    |              'unordered_list_markers' => ['-', '+', '*'],
+    |          ]
     |
     */
 
-    'enable_em' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Enable Strong Tag Parsing
-    |--------------------------------------------------------------------------
-    |
-    | This option specifies if `<strong>` parsing is enabled.
-    |
-    | Default: true
-    |
-    */
-
-    'enable_strong' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Enable Asterisk Parsing
-    |--------------------------------------------------------------------------
-    |
-    | This option specifies if `*` should be parsed for emphasis.
-    |
-    | Default: true
-    |
-    */
-
-    'use_asterisk' => true,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Enable Underscore Parsing
-    |--------------------------------------------------------------------------
-    |
-    | This option specifies if `_` should be parsed for emphasis.
-    |
-    | Default: true
-    |
-    */
-
-    'use_underscore' => true,
+    'commonmark' => [
+        'enable_em' => true,
+        'enable_strong' => true,
+        'use_asterisk' => true,
+        'use_underscore' => true,
+        'unordered_list_markers' => ['-', '+', '*'],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -141,5 +119,37 @@ return [
     */
 
     'allow_unsafe_links' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum Nesting Level
+    |--------------------------------------------------------------------------
+    |
+    | This option specifies the maximum permitted block nesting level.
+    |
+    | Default: PHP_INT_MAX
+    |
+    */
+
+    'max_nesting_level' => PHP_INT_MAX,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Slug Normalizer
+    |--------------------------------------------------------------------------
+    |
+    | This option specifies an array of options for slug normalization.
+    |
+    | Default: [
+    |              'max_length' => 255,
+    |              'unique' => 'document',
+    |          ]
+    |
+    */
+
+    'slug_normalizer' => [
+        'max_length' => 255,
+        'unique' => 'document',
+    ],
 
 ];

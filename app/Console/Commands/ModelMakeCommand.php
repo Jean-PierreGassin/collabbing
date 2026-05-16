@@ -6,13 +6,11 @@ use Illuminate\Foundation\Console\ModelMakeCommand as Command;
 
 /**
  * Class ModelMakeCommand
- * @package App\Console
  */
 class ModelMakeCommand extends Command
 {
     /**
-     * @param string $rootNamespace
-     * @return string
+     * @param  string  $rootNamespace
      */
     protected function getDefaultNamespace($rootNamespace): string
     {

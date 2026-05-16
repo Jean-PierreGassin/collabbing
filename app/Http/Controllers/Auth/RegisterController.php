@@ -8,10 +8,11 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class RegisterController
- * @package App\Http\Controllers\Auth
  */
 class RegisterController extends Controller
 {
@@ -47,9 +48,6 @@ class RegisterController extends Controller
 
     /**
      * Get a validator for an incoming registration request.
-     *
-     * @param array $data
-     * @return Validator
      */
     protected function validator(array $data): Validator
     {
@@ -67,9 +65,6 @@ class RegisterController extends Controller
 
     /**
      * Create a new user instance after a valid registration.
-     *
-     * @param array $data
-     * @return User
      */
     protected function create(array $data): User
     {
@@ -82,5 +77,10 @@ class RegisterController extends Controller
                 'password' => Hash::make($data['password']),
             ]
         );
+    }
+
+    public function showRegistrationForm(): Response
+    {
+        return Inertia::render('Auth/Register');
     }
 }

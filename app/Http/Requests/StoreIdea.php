@@ -6,15 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class StoreIdea
- * @package App\Http\Requests
  */
 class StoreIdea extends FormRequest
 {
-
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -23,8 +19,6 @@ class StoreIdea extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -33,14 +27,12 @@ class StoreIdea extends FormRequest
             'repository_name' => 'required|alpha_dash|max:50',
             'communication' => 'required|max:50',
             'content' => 'required|max:1500',
-            'status' => 'in:open,closed'
+            'status' => 'in:open,closed',
         ];
     }
 
     /**
      * Get the error messages for the defined validation rules.
-     *
-     * @return array
      */
     public function messages(): array
     {

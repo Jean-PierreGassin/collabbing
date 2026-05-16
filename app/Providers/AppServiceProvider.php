@@ -18,7 +18,6 @@ use Illuminate\Pagination\Paginator;
 
 /**
  * Class AppServiceProvider
- * @package App\Providers
  */
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,8 +36,6 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -48,14 +45,12 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
         $this->app->extend(
             'command.model.make',
-            fn($command, $app) => new ModelMakeCommand($app['files'])
+            fn ($command, $app) => new ModelMakeCommand($app['files'])
         );
     }
 }

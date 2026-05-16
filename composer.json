@@ -8,26 +8,24 @@
   "license": "MIT",
   "type": "project",
   "require": {
-    "php": "^8.0",
-    "facade/ignition": "^2.12",
-    "fideloper/proxy": "^4.0",
-    "graham-campbell/github": "^10.3",
-    "graham-campbell/markdown": "^13.1",
-    "guzzlehttp/guzzle": "^7.3",
-    "laravel/framework": "^8.0",
-    "laravel/helpers": "^1.1",
+    "php": "^8.5",
+    "graham-campbell/github": "^13.1",
+    "graham-campbell/markdown": "^16.1",
+    "guzzlehttp/guzzle": "^7.9",
+    "inertiajs/inertia-laravel": "*",
+    "laravel/framework": "^13.0",
     "laravel/socialite": "^5.2",
-    "laravel/tinker": "^2.2",
-    "laravel/ui": "^3.0",
-    "laravelcollective/html": "^6.0"
+    "laravel/tinker": "^3.0",
+    "laravel/ui": "^4.6"
   },
   "require-dev": {
-    "filp/whoops": "^2.0",
-    "fzaninotto/faker": "^1.4",
-    "laravel/sail": "^1.10",
-    "mockery/mockery": "^1.0",
-    "nunomaduro/collision": "^5.0",
-    "phpunit/phpunit": "^9.0"
+    "fakerphp/faker": "^1.24",
+    "laravel/boost": "*",
+    "laravel/pail": "^1.2",
+    "laravel/pint": "^1.24",
+    "mockery/mockery": "^1.6",
+    "nunomaduro/collision": "^8.8",
+    "phpunit/phpunit": "^12.5"
   },
   "autoload": {
     "psr-4": {
@@ -58,16 +56,22 @@
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover"
     ],
+    "lint": "pint --test",
+    "lint:fix": "pint",
     "test": "phpunit --colors=always",
     "test-integration": "phpunit --testsuite=integration --colors=always",
-    "test-all": "phpunit --testsuite=stable,integration --colors=always",
-    "check-style": "phpcs -p -s --cache",
-    "fix-style": "phpcbf -p -s"
+    "test-all": "phpunit --testsuite=stable,integration --colors=always"
   },
   "config": {
     "preferred-install": "dist",
     "sort-packages": true,
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    },
+    "platform": {
+      "php": "8.5.5"
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable": true

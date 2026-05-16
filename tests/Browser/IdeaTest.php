@@ -53,7 +53,7 @@ class IdeaTest extends DuskTestCase
 
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertSee('Comments');
             }
         );
@@ -66,7 +66,7 @@ class IdeaTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertSee('Supporters');
             }
         );
@@ -79,7 +79,7 @@ class IdeaTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertSee('Collaborators');
             }
         );
@@ -92,7 +92,7 @@ class IdeaTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                $browser->visit('/ideas/'.$this->idea->id.'/manage')
                     ->assertSee('Pending Applications');
             }
         );
@@ -105,7 +105,7 @@ class IdeaTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                $browser->visit('/ideas/'.$this->idea->id.'/manage')
                     ->assertSee('Approved Applications');
             }
         );
@@ -118,7 +118,7 @@ class IdeaTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id . '/manage')
+                $browser->visit('/ideas/'.$this->idea->id.'/manage')
                     ->assertSee('Declined Applications');
             }
         );

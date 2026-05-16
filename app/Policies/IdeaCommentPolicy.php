@@ -8,7 +8,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
  * Class IdeaCommentPolicy
- * @package App\Policies
  */
 class IdeaCommentPolicy
 {
@@ -24,33 +23,18 @@ class IdeaCommentPolicy
         //
     }
 
-    /**
-     * @param User $user
-     * @param IdeaComment $comment
-     * @return bool
-     */
     public function update(User $user, IdeaComment $comment): bool
     {
-        return ($user->id === $comment->user_id);
+        return $user->id === $comment->user_id;
     }
 
-    /**
-     * @param User $user
-     * @param IdeaComment $comment
-     * @return bool
-     */
     public function delete(User $user, IdeaComment $comment): bool
     {
-        return ($user->id === $comment->user_id);
+        return $user->id === $comment->user_id;
     }
 
-    /**
-     * @param User $user
-     * @param IdeaComment $comment
-     * @return bool
-     */
     public function manage(User $user, IdeaComment $comment): bool
     {
-        return ($user->id === $comment->user_id);
+        return $user->id === $comment->user_id;
     }
 }

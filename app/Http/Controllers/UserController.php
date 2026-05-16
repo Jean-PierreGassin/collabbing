@@ -4,62 +4,65 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUser;
 use App\Models\User;
+use App\Services\Inertia\PagePropsService;
 use App\Services\UserService;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Class UserController
- * @package App\Http\Controllers
  */
 class UserController extends Controller
 {
-    /**
-     * @var UserService
-     */
     private UserService $userService;
 
-    public function __construct(UserService $userService)
+    private PagePropsService $pageProps;
+
+    public function __construct(UserService $userService, PagePropsService $pageProps)
     {
         $this->userService = $userService;
+        $this->pageProps = $pageProps;
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return Factory|View
+     * @return Response
      */
     public function index()
     {
-        $users = User::all();
+        $users = $this->userService->all();
 
-        return view('user.list', compact('users'));
+        return Inertia::render('Users/Index', [
+            'users' => $users->map(fn (User $user) => $this->pageProps->user($user))->values(),
+        ]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param Request $request
-     * @return Factory|View
+     * @return Response
      */
     public function show(Request $request)
     {
         if ($user = $this->userService->getUserByUsername($request->username)) {
-            return view('user.single', compact('user'));
+            return Inertia::render('Users/Show', [
+                'user' => $this->pageProps->user($user),
+            ]);
         }
 
-        return view('errors.404');
+        abort(404);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Request $request
-     * @return Factory|View
+     * @return Response
+     *
      * @throws AuthorizationException
      */
     public function edit(Request $request)
@@ -67,14 +70,15 @@ class UserController extends Controller
         $user = $this->userService->getUserByUsername($request->username);
         $this->authorizeForUser(Auth::user(), 'manage', $user);
 
-        return view('user.edit-add', compact('user'));
+        return Inertia::render('Users/Form', [
+            'user' => $this->pageProps->user($user),
+            'githubClientId' => config('services.github.client_id'),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param StoreUser $request
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function update(StoreUser $request): RedirectResponse
