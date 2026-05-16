@@ -7,12 +7,14 @@ use GrahamCampbell\GitHub\Facades\GitHub;
 
 class GitHubService
 {
-    protected static mixed $client = null;
+    protected static array $clients = [];
 
     public static function createClient(string $token): Client
     {
-        if (self::$client === null) {
-            self::$client = GitHub::getFactory()->make(
+        $cacheKey = sha1($token);
+
+        if (! isset(self::$clients[$cacheKey])) {
+            self::$clients[$cacheKey] = GitHub::getFactory()->make(
                 [
                     'token' => $token,
                     'method' => 'token',
@@ -20,6 +22,6 @@ class GitHubService
             );
         }
 
-        return self::$client;
+        return self::$clients[$cacheKey];
     }
 }

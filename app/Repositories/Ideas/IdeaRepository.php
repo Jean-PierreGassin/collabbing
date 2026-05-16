@@ -72,6 +72,7 @@ class IdeaRepository
     {
         return $this->update($idea, [
             'repository' => true,
+            'repository_missing_at' => null,
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace App\Services\Inertia;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\IdeaComment;
+use App\Models\IdeaRepositoryEvent;
 use App\Models\IdeaSupporter;
 use App\Models\User;
 use GrahamCampbell\Markdown\Facades\Markdown;
@@ -62,6 +63,7 @@ class PagePropsService
             'statusDisplay' => ucfirst($idea->status),
             'repository' => $idea->repository,
             'repositoryName' => $idea->repository_name,
+            'repositoryActivity' => $this->repositoryActivity($idea),
             'createdAtForHumans' => $idea->created_at->diffForHumans(),
             'user' => $this->user($idea->user),
             'supportersCount' => $idea->supporters->count(),
@@ -90,6 +92,36 @@ class PagePropsService
                     ? route('ideas.repository-invite', $idea)
                     : route('auth.github.login'),
             ],
+        ];
+    }
+
+    private function repositoryActivity(Idea $idea): array
+    {
+        $events = $idea->exists && ($idea->repository || $idea->repository_missing_at)
+            ? $idea->repositoryEvents()->latest('occurred_at')->limit(5)->get()
+            : collect();
+
+        return [
+            'htmlUrl' => $idea->repository_html_url,
+            'defaultBranch' => $idea->repository_default_branch,
+            'isMissing' => (bool) $idea->repository_missing_at,
+            'openIssuesCount' => (int) $idea->repository_open_issues_count,
+            'stargazersCount' => (int) $idea->repository_stargazers_count,
+            'forksCount' => (int) $idea->repository_forks_count,
+            'lastPushedAtForHumans' => $idea->repository_pushed_at?->diffForHumans(),
+            'lastSyncedAtForHumans' => $idea->repository_synced_at?->diffForHumans(),
+            'latestCommitSha' => $idea->repository_latest_commit_sha,
+            'latestCommitShortSha' => $idea->repository_latest_commit_sha
+                ? substr($idea->repository_latest_commit_sha, 0, 7)
+                : null,
+            'latestCommitMessage' => $idea->repository_latest_commit_message,
+            'latestCommitAuthor' => $idea->repository_latest_commit_author,
+            'events' => $events->map(fn (IdeaRepositoryEvent $event) => [
+                'id' => $event->id,
+                'type' => $event->type,
+                'summary' => $event->summary,
+                'occurredAtForHumans' => $event->occurred_at->diffForHumans(),
+            ])->values(),
         ];
     }
 

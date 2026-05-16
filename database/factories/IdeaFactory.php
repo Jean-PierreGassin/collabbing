@@ -15,6 +15,7 @@ class IdeaFactory extends Factory
             'title' => $this->faker->sentence(3),
             'communication' => 'Slack',
             'content' => $this->faker->paragraph,
+            'repository_name' => $this->faker->slug(3),
         ];
     }
 }

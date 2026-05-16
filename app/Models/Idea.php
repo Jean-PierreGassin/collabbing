@@ -26,7 +26,28 @@ class Idea extends Model
         'status',
         'repository',
         'repository_name',
+        'repository_html_url',
+        'repository_default_branch',
+        'repository_open_issues_count',
+        'repository_stargazers_count',
+        'repository_forks_count',
+        'repository_latest_commit_sha',
+        'repository_latest_commit_message',
+        'repository_latest_commit_author',
+        'repository_pushed_at',
+        'repository_synced_at',
+        'repository_missing_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'repository' => 'boolean',
+            'repository_pushed_at' => 'datetime',
+            'repository_synced_at' => 'datetime',
+            'repository_missing_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {
@@ -75,5 +96,10 @@ class Idea extends Model
     public function supporters(): HasMany
     {
         return $this->hasMany(IdeaSupporter::class, 'idea_id');
+    }
+
+    public function repositoryEvents(): HasMany
+    {
+        return $this->hasMany(IdeaRepositoryEvent::class, 'idea_id');
     }
 }

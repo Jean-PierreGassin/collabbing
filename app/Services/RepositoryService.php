@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Models\Idea;
 use App\Repositories\Ideas\IdeaRepository;
-use App\Services\ThirdParty\GitHub\GitHubService;
+use App\Services\Ideas\IdeaRepositorySyncService;
+use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,14 +14,21 @@ use Illuminate\Support\Facades\Auth;
  */
 class RepositoryService
 {
-    public function __construct(private IdeaRepository $ideas) {}
+    public function __construct(
+        private IdeaRepository $ideas,
+        private GitHubRepositoryClient $github,
+        private IdeaRepositorySyncService $sync
+    ) {}
 
     public function create(Idea $idea): bool
     {
-        GitHubService::createClient(Auth::user()->github_token)
-            ->repo()->create($idea->repository_name);
+        $repository = $this->github->create(Auth::user(), $idea->repository_name);
 
-        return $this->ideas->markRepositoryCreated($idea);
+        $created = $this->ideas->markRepositoryCreated($idea);
+
+        $this->sync->recordCreated($idea->refresh(), $repository);
+
+        return $created;
     }
 
     public function inviteUsers(Idea $idea): bool
@@ -35,12 +43,7 @@ class RepositoryService
     public function inviteUser(Idea $idea, $collaborator): bool
     {
         try {
-            GitHubService::createClient(Auth::user()->github_token)
-                ->repo()->collaborators()->add(
-                    Auth::user()->github_username,
-                    $idea->repository_name,
-                    $collaborator->user->github_username
-                );
+            $this->github->addCollaborator(Auth::user(), $idea->repository_name, $collaborator->user->github_username);
         } catch (Exception $e) {
             return false;
         }

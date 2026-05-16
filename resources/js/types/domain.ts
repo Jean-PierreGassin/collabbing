@@ -56,6 +56,29 @@ export interface IdeaSupporter {
   };
 }
 
+export interface IdeaRepositoryEvent {
+  id: number;
+  type: string;
+  summary: string;
+  occurredAtForHumans: string;
+}
+
+export interface IdeaRepositoryActivity {
+  htmlUrl: string | null;
+  defaultBranch: string | null;
+  isMissing: boolean;
+  openIssuesCount: number;
+  stargazersCount: number;
+  forksCount: number;
+  lastPushedAtForHumans: string | null;
+  lastSyncedAtForHumans: string | null;
+  latestCommitSha: string | null;
+  latestCommitShortSha: string | null;
+  latestCommitMessage: string | null;
+  latestCommitAuthor: string | null;
+  events: IdeaRepositoryEvent[];
+}
+
 export interface Idea {
   id: number;
   title: string;
@@ -65,8 +88,9 @@ export interface Idea {
   contentHtml: string;
   status: string;
   statusDisplay: string;
-  repository: string | null;
+  repository: boolean;
   repositoryName: string | null;
+  repositoryActivity: IdeaRepositoryActivity;
   createdAtForHumans: string;
   user: DomainUser;
   supportersCount: number;
