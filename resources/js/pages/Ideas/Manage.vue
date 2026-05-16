@@ -20,7 +20,7 @@ const activeTab = ref<'applications' | 'collaborators'>('applications');
   <section class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between gap-4">
-        <h4 class="text-xl font-semibold">{{ idea.title }}</h4>
+        <h1 class="text-2xl font-semibold text-white">{{ idea.title }}</h1>
       </div>
 
       <div class="flex flex-wrap gap-2">
@@ -43,18 +43,18 @@ const activeTab = ref<'applications' | 'collaborators'>('applications');
                 <form v-if="idea.can.deleteApplication" :action="application.routes.destroy" method="POST">
                   <CsrfField />
                   <MethodField method="DELETE" />
-                  <Button type="submit" variant="destructive" size="sm">Decline this Application 👎</Button>
+                  <Button type="submit" variant="destructive" size="sm">Decline Application</Button>
                 </form>
                 <form v-if="idea.can.updateApplication" :action="application.routes.approve" method="POST">
                   <CsrfField />
                   <MethodField method="PUT" />
-                  <Button type="submit" size="sm">Approve this Application ✅</Button>
+                  <Button type="submit" size="sm">Approve Application</Button>
                 </form>
               </div>
             </CardContent>
           </Card>
         </template>
-        <i v-else>~ tumbleweed</i>
+        <p v-else>No pending applications.</p>
       </div>
 
       <div v-else class="flex flex-col gap-3">
@@ -66,19 +66,28 @@ const activeTab = ref<'applications' | 'collaborators'>('applications');
             <form v-if="idea.can.deleteApplication" :action="collaborator.routes.destroy" method="POST">
               <CsrfField />
               <MethodField method="DELETE" />
-              <Button type="submit" variant="destructive" size="sm">Remove Collaborator 🤕</Button>
+              <Button type="submit" variant="destructive" size="sm">Remove Collaborator</Button>
             </form>
           </div>
         </template>
-        <p v-else>Looks a little lonely in here 😰</p>
+        <p v-else>No collaborators have joined yet.</p>
       </div>
     </div>
 
     <aside class="flex flex-col gap-3">
       <div class="flex flex-wrap gap-2">
         <Button as="a" :href="idea.routes.edit" variant="secondary">Edit Idea</Button>
-        <Button v-if="!idea.repository" as="a" :href="idea.routes.repositoryCreate" variant="outline">Create Repository</Button>
-        <Button v-else as="a" :href="idea.routes.repositoryInvite" variant="outline">Invite Collaborators</Button>
+        <Button v-if="!idea.repository && !idea.user.hasGithubToken" as="a" :href="idea.routes.repositoryCreate" variant="outline">
+          Link GitHub to create a repository
+        </Button>
+        <form v-else-if="!idea.repository" :action="idea.routes.repositoryCreate" method="POST">
+          <CsrfField />
+          <Button type="submit" variant="outline">Create Repository</Button>
+        </form>
+        <form v-else :action="idea.routes.repositoryInvite" method="POST">
+          <CsrfField />
+          <Button type="submit" variant="outline">Invite Collaborators</Button>
+        </form>
       </div>
       <IdeaSidebar :idea="idea" />
     </aside>

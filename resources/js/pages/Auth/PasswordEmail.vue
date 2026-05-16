@@ -10,12 +10,14 @@ const session = useSessionStore();
 
 <template>
   <Card class="mx-auto w-full max-w-3xl">
-    <CardHeader>{{ 'Reset Password' }}</CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">Reset Password</h1></CardHeader>
     <CardContent>
       <form method="POST" :action="session.routes.passwordEmail" class="flex flex-col gap-4">
         <CsrfField />
         <FormField id="email" :label="'E-Mail Address'">
-          <input id="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="email" required>
+          <template #default="{ invalid, describedBy }">
+            <input id="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="email" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+          </template>
         </FormField>
         <Button type="submit" class="self-start">Send Password Reset Link</Button>
       </form>

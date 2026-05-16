@@ -8,10 +8,20 @@ const errors = computed(() => session.flash.errors);
 
 <template>
   <div v-if="session.flash.status || errors.length > 0" class="flex flex-col gap-3">
-    <div v-if="session.flash.status" class="rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+    <div
+      v-if="session.flash.status"
+      class="rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary"
+      role="status"
+      aria-live="polite"
+    >
       {{ session.flash.status }}
     </div>
-    <div v-if="errors.length > 0" class="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+    <div
+      v-if="errors.length > 0"
+      class="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      role="alert"
+      aria-live="assertive"
+    >
       <ul class="list-inside list-disc">
         <li v-for="error in errors" :key="error">{{ error }}</li>
       </ul>

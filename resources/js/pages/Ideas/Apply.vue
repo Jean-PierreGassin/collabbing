@@ -12,20 +12,27 @@ defineProps<{
 
 <template>
   <Card>
-    <CardHeader><h5 class="text-lg font-semibold">{{ idea.title }}</h5></CardHeader>
+    <CardHeader>
+      <h1 class="text-2xl font-semibold text-white">Apply to {{ idea.title }}</h1>
+    </CardHeader>
     <CardContent>
       <form :action="idea.routes.applicationsStore" method="POST" class="flex flex-col gap-4">
         <CsrfField />
-        <FormField id="content" label="Application" help="Tell us why you're good for the part, make it interesting and we'll do the rest.">
-          <textarea
-            id="content"
-            name="content"
-            class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
-            placeholder="I'm really good at water sports even though it has nothing to do with this project."
-            required
-          />
+        <FormField id="content" label="Application" help="Share the skills, context, or time you can contribute.">
+          <template #default="{ invalid, describedBy }">
+            <textarea
+              id="content"
+              name="content"
+              class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+              placeholder="I can help with backend APIs and weekly planning."
+              maxlength="1500"
+              :aria-invalid="invalid || undefined"
+              :aria-describedby="describedBy"
+              required
+            />
+          </template>
         </FormField>
-        <Button type="submit" variant="outline" class="self-start">Submit Application 😎</Button>
+        <Button type="submit" variant="outline" class="self-start">Submit Application</Button>
       </form>
     </CardContent>
   </Card>

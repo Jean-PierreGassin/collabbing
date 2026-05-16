@@ -31,7 +31,7 @@ class SocialController extends Controller
     public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver('github')
-            ->scopes(['repo'])
+            ->scopes(['public_repo'])
             ->redirect();
     }
 
@@ -75,6 +75,6 @@ class SocialController extends Controller
 
         return redirect()
             ->back()
-            ->with('status', 'Successfully un-linked GitHub account');
+            ->with('status', 'GitHub account unlinked.');
     }
 }

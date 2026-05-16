@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -44,6 +45,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        $this->middleware('throttle:5,1')->only('register');
     }
 
     /**
@@ -54,11 +56,11 @@ class RegisterController extends Controller
         return ValidatorFacade::make(
             $data,
             [
-                'username' => 'required|string|min:3|max:20|regex:/^[a-zA-Z,0-9]+$/|unique:users',
+                'username' => ['required', 'string', 'min:3', 'max:20', 'regex:/^[A-Za-z0-9_-]+$/', 'unique:users,username'],
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|confirmed',
+                'password' => ['required', 'string', 'confirmed', 'max:128', Password::min(12)->letters()->numbers()],
             ]
         );
     }

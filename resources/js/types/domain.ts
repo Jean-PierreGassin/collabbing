@@ -4,7 +4,7 @@ export interface DomainUser {
   firstName: string;
   lastName: string;
   name: string;
-  email: string;
+  email: string | null;
   bio: string | null;
   bioHtml: string | null;
   githubUsername: string | null;

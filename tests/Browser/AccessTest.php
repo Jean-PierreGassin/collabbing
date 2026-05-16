@@ -32,7 +32,7 @@ class AccessTest extends DuskTestCase
         $this->browse(
             function ($browser) {
                 $browser->visit('/ideas/'.$this->idea->id)
-                    ->assertDontSee('Support Idea 👍');
+                    ->assertDontSee('Support Idea');
             }
         );
     }
@@ -92,7 +92,7 @@ class AccessTest extends DuskTestCase
         $this->browse(
             function ($browser) {
                 $browser->visit('/ideas/'.$this->idea->id)
-                    ->assertDontSee('Support Idea 👍');
+                    ->assertDontSee('Support Idea');
             }
         );
     }

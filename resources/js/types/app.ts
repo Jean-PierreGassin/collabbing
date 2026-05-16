@@ -12,6 +12,7 @@ export interface AppRoutes {
   ideas: string;
   ideasCreate: string;
   ideasStore: string;
+  users: string;
   feedback: string;
   pricing: string;
 }

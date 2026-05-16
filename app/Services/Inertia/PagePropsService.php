@@ -20,20 +20,22 @@ class PagePropsService
             return null;
         }
 
+        $canUpdate = Gate::allows('update', $user);
+
         return [
             'id' => $user->id,
             'username' => $user->username,
             'firstName' => $user->first_name,
             'lastName' => $user->last_name,
             'name' => $user->name,
-            'email' => $user->email,
+            'email' => $canUpdate ? $user->email : null,
             'bio' => $user->bio,
             'bioHtml' => $user->bio ? (string) Markdown::convertToHtml($user->bio) : null,
             'githubUsername' => $user->github_username,
-            'hasGithubToken' => (bool) $user->github_token,
+            'hasGithubToken' => $user->hasGithubToken(),
             'profilePicture' => $user->profilePicture(),
             'createdAtFormatted' => date('d M - Y', $user->created_at->timestamp),
-            'canUpdate' => Gate::allows('update', $user),
+            'canUpdate' => $canUpdate,
             'routes' => [
                 'show' => route('users.show', $user->username),
                 'edit' => route('users.edit', $user->username),
@@ -85,10 +87,10 @@ class PagePropsService
                 'applicationsStore' => route('ideas.applications.store', $idea),
                 'commentsStore' => route('ideas.comments.store', $idea),
                 'supportersStore' => route('ideas.supporters.store', $idea),
-                'repositoryCreate' => $idea->user->github_token
+                'repositoryCreate' => $idea->user->hasGithubToken()
                     ? route('ideas.repository-create', $idea)
                     : route('auth.github.login'),
-                'repositoryInvite' => $idea->user->github_token
+                'repositoryInvite' => $idea->user->hasGithubToken()
                     ? route('ideas.repository-invite', $idea)
                     : route('auth.github.login'),
             ],

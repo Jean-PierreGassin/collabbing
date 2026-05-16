@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use App\Services\ThirdParty\GitHub\GitHubService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Class User
@@ -22,6 +20,8 @@ class User extends Authenticatable
 {
     use HasFactory;
     use Notifiable;
+
+    private const DEFAULT_PROFILE_PICTURE = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp';
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +48,13 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'github_token' => 'encrypted',
+        ];
+    }
 
     public function ideas(): HasMany
     {
@@ -79,17 +86,17 @@ class User extends Authenticatable
 
     public function profilePicture(): string
     {
-        if ($this->github_token) {
-            return Cache::remember(
-                "users.profile-picture.{$this->github_username}",
-                60,
-                function () {
-                    return GitHubService::createClient($this->github_token)
-                        ->currentUser()->show()['avatar_url'];
-                }
-            );
+        if ($this->github_username) {
+            return 'https://github.com/'.rawurlencode($this->github_username).'.png?size=200';
         }
 
-        return 'https://www.gravatar.com/avatar/'.md5($this->email);
+        return self::DEFAULT_PROFILE_PICTURE;
+    }
+
+    public function hasGithubToken(): bool
+    {
+        $token = $this->getRawOriginal('github_token');
+
+        return is_string($token) && $token !== '';
     }
 }

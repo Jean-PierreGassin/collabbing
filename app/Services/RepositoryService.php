@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Models\Idea;
+use App\Models\IdeaApplication;
 use App\Repositories\Ideas\IdeaRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
-use Exception;
-use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 /**
  * Class RepositoryService
@@ -22,7 +22,7 @@ class RepositoryService
 
     public function create(Idea $idea): bool
     {
-        $repository = $this->github->create(Auth::user(), $idea->repository_name);
+        $repository = $this->github->create($idea->user, $idea->repository_name);
 
         $created = $this->ideas->markRepositoryCreated($idea);
 
@@ -33,18 +33,20 @@ class RepositoryService
 
     public function inviteUsers(Idea $idea): bool
     {
-        foreach ($this->ideas->getApprovedApplications($idea) as $collaborator) {
-            $this->inviteUser($idea, $collaborator);
-        }
-
-        return true;
+        return $this->ideas
+            ->getApprovedApplications($idea)
+            ->every(fn (IdeaApplication $collaborator) => $this->inviteUser($idea, $collaborator));
     }
 
-    public function inviteUser(Idea $idea, $collaborator): bool
+    public function inviteUser(Idea $idea, IdeaApplication $collaborator): bool
     {
+        if (! $collaborator->user->github_username) {
+            return false;
+        }
+
         try {
-            $this->github->addCollaborator(Auth::user(), $idea->repository_name, $collaborator->user->github_username);
-        } catch (Exception $e) {
+            $this->github->addCollaborator($idea->user, $idea->repository_name, $collaborator->user->github_username);
+        } catch (Throwable) {
             return false;
         }
 

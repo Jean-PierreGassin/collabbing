@@ -15,7 +15,7 @@ const props = defineProps<{
 
 const supporterSentence = computed(() => {
   if (props.idea.supportersCount === 0) {
-    return "Ain't nobody supportin' this here idea yet.";
+    return 'No one is supporting this idea yet.';
   }
 
   return `There ${props.idea.supportersCount > 1 ? 'are' : 'is'} ${props.idea.supportersCount.toLocaleString()} ${props.idea.supportersCount > 1 ? 'people' : 'person'} supporting this idea.`;
@@ -29,15 +29,15 @@ const supporterSentence = computed(() => {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>Collaborators</div>
           <div v-if="idea.can.storeApplication">
-            <Button v-if="collaborator" as="a" href="#" size="sm">You're a Collaborator 🤟</Button>
-            <Button v-else-if="applicant" as="a" href="#" size="sm">You're an Applicant ✅</Button>
-            <Button v-else as="a" :href="idea.routes.applicationsCreate" variant="outline" size="sm">Apply to Collaborate 📝</Button>
+            <Button v-if="collaborator" type="button" size="sm" disabled>Collaborator</Button>
+            <Button v-else-if="applicant" type="button" size="sm" disabled>Application pending</Button>
+            <Button v-else as="a" :href="idea.routes.applicationsCreate" variant="outline" size="sm">Apply to Collaborate</Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <template v-if="idea.collaborators.length === 0">
-          It's quiet... too quiet.
+          No collaborators have joined yet.
         </template>
         <div v-else class="flex flex-wrap gap-2">
           <a v-for="collab in idea.collaborators" :key="collab.id" :href="collab.user.routes.show">
@@ -60,7 +60,7 @@ const supporterSentence = computed(() => {
             as="a"
             :href="idea.repositoryActivity.htmlUrl"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             variant="outline"
             size="sm"
           >
@@ -129,11 +129,11 @@ const supporterSentence = computed(() => {
             <form v-if="supporter" :action="supporter.routes.destroy" method="POST">
               <CsrfField />
               <MethodField method="DELETE" />
-              <Button type="submit" size="sm" variant="outline">Un-Support this Idea 👎</Button>
+              <Button type="submit" size="sm" variant="outline">Remove Support</Button>
             </form>
             <form v-else :action="idea.routes.supportersStore" method="POST">
               <CsrfField />
-              <Button type="submit" size="sm" variant="outline">Support this Idea 👍</Button>
+              <Button type="submit" size="sm" variant="outline">Support Idea</Button>
             </form>
           </div>
         </div>

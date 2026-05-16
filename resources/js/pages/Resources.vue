@@ -7,6 +7,7 @@ const session = useSessionStore();
 
 <template>
   <section class="flex flex-col gap-3">
+    <h1 class="text-2xl font-semibold text-white">Resources</h1>
     <Button as="a" :href="session.routes.feedback" variant="link" class="w-fit px-0">Feedback</Button>
     <Button as="a" :href="session.routes.pricing" variant="link" class="w-fit px-0">Pricing</Button>
   </section>

@@ -13,16 +13,6 @@ class IdeaPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
     public function manage(User $user, Idea $ideaToEdit): bool
     {
         return $user->id === $ideaToEdit->user_id;
@@ -45,7 +35,8 @@ class IdeaPolicy
 
     public function createApplication(User $user, Idea $idea): bool
     {
-        return $user->id !== $idea->user_id;
+        return $user->id !== $idea->user_id
+            && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
     public function updateApplication(User $user, Idea $idea): bool
@@ -60,7 +51,8 @@ class IdeaPolicy
 
     public function storeApplication(User $user, Idea $idea): bool
     {
-        return $user->id !== $idea->user_id;
+        return $user->id !== $idea->user_id
+            && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
     public function storeSupporter(User $user, Idea $idea): bool
@@ -79,5 +71,13 @@ class IdeaPolicy
         }
 
         return false;
+    }
+
+    private function hasActiveApplicationFrom(User $user, Idea $idea): bool
+    {
+        return $idea->applications()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
     }
 }

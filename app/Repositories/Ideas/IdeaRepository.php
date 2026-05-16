@@ -10,6 +10,12 @@ use Illuminate\Support\Collection;
 
 class IdeaRepository
 {
+    private const INDEX_RELATIONS = [
+        'user',
+        'supporters',
+        'approvedApplications.user',
+    ];
+
     public function createForUser(User $user, array $data): Idea
     {
         return $user->ideas()->create($data);
@@ -25,6 +31,7 @@ class IdeaRepository
     public function getTrending(): Collection
     {
         return Idea::where('status', 'open')
+            ->with(self::INDEX_RELATIONS)
             ->withCount('supporters')
             ->orderBy('supporters_count', 'desc')
             ->orderBy('created_at', 'desc')
@@ -35,7 +42,10 @@ class IdeaRepository
 
     public function search(string $search): LengthAwarePaginator
     {
+        $search = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search);
+
         return Idea::where('status', 'open')
+            ->with(self::INDEX_RELATIONS)
             ->orderBy('created_at', 'desc')
             ->where('title', 'like', "{$search}%")
             ->paginate(10);
@@ -44,6 +54,7 @@ class IdeaRepository
     public function getOpenRecent(): LengthAwarePaginator
     {
         return Idea::where('status', 'open')
+            ->with(self::INDEX_RELATIONS)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
     }
@@ -51,6 +62,7 @@ class IdeaRepository
     public function getUserIdeas(User $user): LengthAwarePaginator
     {
         return $user->ideas()
+            ->with(self::INDEX_RELATIONS)
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'ideas');
     }
@@ -60,6 +72,7 @@ class IdeaRepository
         $collaborationIds = $user->collaborations()->pluck('idea_id');
 
         return Idea::whereIn('id', $collaborationIds)
+            ->with(self::INDEX_RELATIONS)
             ->paginate(5, ['*'], 'collaborations');
     }
 

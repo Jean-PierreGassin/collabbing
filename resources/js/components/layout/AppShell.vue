@@ -15,6 +15,13 @@ const brandLabel = computed(() => (session.isAuthenticated ? 'Browse ideas' : 'C
 
 <template>
   <div class="flex min-h-screen flex-col bg-background text-foreground">
+    <a
+      href="#main-content"
+      class="fixed left-4 top-4 z-50 -translate-y-20 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-ring/50"
+    >
+      Skip to main content
+    </a>
+
     <header class="border-b border-border bg-background/95 backdrop-blur">
       <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div class="flex items-center justify-between gap-3 lg:justify-start">
@@ -83,7 +90,7 @@ const brandLabel = computed(() => (session.isAuthenticated ? 'Browse ideas' : 'C
       </div>
     </header>
 
-    <main class="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main id="main-content" tabindex="-1" class="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 outline-none sm:px-6 lg:px-8">
       <FlashMessages />
       <slot />
     </main>
@@ -103,6 +110,7 @@ const brandLabel = computed(() => (session.isAuthenticated ? 'Browse ideas' : 'C
           <h2 class="text-sm font-semibold text-white">Explore</h2>
           <nav aria-label="Explore links" class="flex flex-col gap-2 text-muted-foreground">
             <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.ideas">Ideas</Link>
+            <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.users">Members</Link>
             <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.pricing">Pricing</Link>
           </nav>
         </div>

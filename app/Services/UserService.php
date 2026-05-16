@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\Users\UserRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -13,22 +14,18 @@ class UserService
 {
     public function __construct(private UserRepository $users) {}
 
-    public function all()
+    public function all(): LengthAwarePaginator
     {
         return $this->users->all();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUserByUsername(string $username)
+    public function getUserByUsername(string $username): ?User
     {
         return $this->users->getByUsername($username);
     }
 
     public function update(User $user, array $data): bool
     {
-        // TODO: Move this to request validation
         $values = [];
 
         foreach ($data as $key => $value) {
