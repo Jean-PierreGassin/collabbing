@@ -19,6 +19,7 @@ class UserFactory extends Factory
             'email' => $this->faker->unique()->safeEmail,
             'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm',
             'github_token' => $this->faker->md5,
+            'github_username' => $this->faker->unique()->userName,
             'bio' => $this->faker->text,
             'remember_token' => Str::random(10),
         ];

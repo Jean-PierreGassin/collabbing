@@ -48,7 +48,7 @@ class SocialController extends Controller
         } catch (Exception) {
             return redirect()
                 ->route('users.edit', $user->username)
-                ->with('errors', collect('Unable to link GitHub account'));
+                ->withErrors(['github' => 'Unable to link GitHub account']);
         }
 
         $this->users->update($user, [

@@ -20,6 +20,13 @@ return [
         'client_id' => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
         'redirect' => env('APP_URL').'/auth/github/callback',
+        'repository_sync' => [
+            'max_per_run' => env('GITHUB_REPOSITORY_SYNC_MAX_PER_RUN', 25),
+            'next_min_minutes' => env('GITHUB_REPOSITORY_SYNC_NEXT_MIN_MINUTES', 360),
+            'next_max_minutes' => env('GITHUB_REPOSITORY_SYNC_NEXT_MAX_MINUTES', 720),
+            'retry_min_minutes' => env('GITHUB_REPOSITORY_SYNC_RETRY_MIN_MINUTES', 120),
+            'retry_max_minutes' => env('GITHUB_REPOSITORY_SYNC_RETRY_MAX_MINUTES', 240),
+        ],
     ],
 
     'mailgun' => [

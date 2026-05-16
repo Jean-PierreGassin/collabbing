@@ -199,7 +199,7 @@ class IdeaController extends Controller
         } catch (Exception $exception) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
-                ->with('errors', collect($exception->getMessage()));
+                ->withErrors(['repository' => $exception->getMessage()]);
         }
 
         return redirect()

@@ -51,6 +51,76 @@ const supporterSentence = computed(() => {
       </CardContent>
     </Card>
 
+    <Card v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0">
+      <CardHeader>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>Repository</div>
+          <Button
+            v-if="idea.repositoryActivity.htmlUrl"
+            as="a"
+            :href="idea.repositoryActivity.htmlUrl"
+            target="_blank"
+            rel="noreferrer"
+            variant="outline"
+            size="sm"
+          >
+            View on GitHub
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent class="flex flex-col gap-4 text-sm">
+        <div v-if="idea.repositoryActivity.isMissing" class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive">
+          Repository is no longer available on GitHub.
+        </div>
+
+        <template v-else>
+          <div v-if="idea.repositoryActivity.latestCommitMessage" class="flex flex-col gap-1">
+            <span class="text-xs uppercase text-muted-foreground">Latest commit</span>
+            <span>{{ idea.repositoryActivity.latestCommitMessage }}</span>
+            <span class="text-muted-foreground">
+              <template v-if="idea.repositoryActivity.latestCommitAuthor">
+                {{ idea.repositoryActivity.latestCommitAuthor }}
+              </template>
+              <template v-if="idea.repositoryActivity.latestCommitShortSha">
+                - {{ idea.repositoryActivity.latestCommitShortSha }}
+              </template>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-md border border-border px-2 py-2">
+              <div class="font-semibold">{{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}</div>
+              <div class="text-xs text-muted-foreground">Issues</div>
+            </div>
+            <div class="rounded-md border border-border px-2 py-2">
+              <div class="font-semibold">{{ idea.repositoryActivity.stargazersCount.toLocaleString() }}</div>
+              <div class="text-xs text-muted-foreground">Stars</div>
+            </div>
+            <div class="rounded-md border border-border px-2 py-2">
+              <div class="font-semibold">{{ idea.repositoryActivity.forksCount.toLocaleString() }}</div>
+              <div class="text-xs text-muted-foreground">Forks</div>
+            </div>
+          </div>
+
+          <div class="text-muted-foreground">
+            <template v-if="idea.repositoryActivity.lastPushedAtForHumans">
+              Last pushed {{ idea.repositoryActivity.lastPushedAtForHumans }}.
+            </template>
+            <template v-if="idea.repositoryActivity.lastSyncedAtForHumans">
+              Synced {{ idea.repositoryActivity.lastSyncedAtForHumans }}.
+            </template>
+          </div>
+        </template>
+
+        <div v-if="idea.repositoryActivity.events.length > 0" class="flex flex-col gap-2 border-t border-border pt-3">
+          <div v-for="event in idea.repositoryActivity.events" :key="event.id" class="flex flex-col gap-1">
+            <span>{{ event.summary }}</span>
+            <span class="text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
