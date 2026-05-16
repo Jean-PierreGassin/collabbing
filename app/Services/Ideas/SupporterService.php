@@ -11,14 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Class SupporterService
- * @package App\Services\Ideas
  */
 class SupporterService
 {
-    /**
-     * @param Idea $idea
-     * @return Model
-     */
     public function create(Idea $idea): Model
     {
         return $idea->supporters()->firstOrCreate(
@@ -30,8 +25,6 @@ class SupporterService
     }
 
     /**
-     * @param IdeaSupporter $supporter
-     * @return bool
      * @throws Exception
      */
     public function destroy(IdeaSupporter $supporter): bool
@@ -40,7 +33,6 @@ class SupporterService
     }
 
     /**
-     * @param Idea $idea
      * @return Model|HasMany|object|null
      */
     public function getSupportFromUser(Idea $idea)

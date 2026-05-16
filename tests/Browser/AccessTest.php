@@ -2,7 +2,7 @@
 
 namespace Tests\Browser;
 
-use App\Idea;
+use App\Models\Idea;
 use Tests\DuskTestCase;
 
 class AccessTest extends DuskTestCase
@@ -18,7 +18,7 @@ class AccessTest extends DuskTestCase
 
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Apply to Collaborate');
             }
         );
@@ -31,7 +31,7 @@ class AccessTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Support Idea 👍');
             }
         );
@@ -44,7 +44,7 @@ class AccessTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Submit Comment');
             }
         );
@@ -65,7 +65,7 @@ class AccessTest extends DuskTestCase
 
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Apply to Collaborate');
             }
         );
@@ -78,7 +78,7 @@ class AccessTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Apply to Collaborate');
             }
         );
@@ -91,7 +91,7 @@ class AccessTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Support Idea 👍');
             }
         );
@@ -104,7 +104,7 @@ class AccessTest extends DuskTestCase
     {
         $this->browse(
             function ($browser) {
-                $browser->visit('/ideas/' . $this->idea->id)
+                $browser->visit('/ideas/'.$this->idea->id)
                     ->assertDontSee('Submit Comment');
             }
         );

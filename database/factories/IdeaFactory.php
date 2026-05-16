@@ -1,14 +1,20 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(
-    App\Models\Idea::class,
-    function (Faker $faker) {
+use App\Models\Idea;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class IdeaFactory extends Factory
+{
+    protected $model = Idea::class;
+
+    public function definition(): array
+    {
         return [
-            'title' => $faker->title,
+            'title' => $this->faker->sentence(3),
             'communication' => 'Slack',
-            'content' => $faker->paragraph,
+            'content' => $this->faker->paragraph,
         ];
     }
-);
+}

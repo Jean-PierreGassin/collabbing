@@ -11,15 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Class ApplicationService
- * @package App\Services\Ideas
  */
 class ApplicationService
 {
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return bool
-     */
     public function create(Idea $idea, array $data): bool
     {
         $data['user_id'] = Auth::user()->id;
@@ -28,19 +22,14 @@ class ApplicationService
         return $application->save();
     }
 
-    /**
-     * @param IdeaApplication $application
-     * @return bool
-     */
     public function approve(IdeaApplication $application): bool
     {
         $application->status = 'approved';
+
         return $application->save();
     }
 
     /**
-     * @param IdeaApplication $application
-     * @return bool
      * @throws \Exception
      */
     public function destroy(IdeaApplication $application): bool
@@ -48,27 +37,17 @@ class ApplicationService
         return $application->delete();
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
     public function getPendingApplications(Idea $idea): Collection
     {
         return $idea->pendingApplications()->get();
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
     public function getApprovedApplications(Idea $idea): Collection
     {
         return $idea->approvedApplications()->get();
     }
 
     /**
-     * @param Idea $idea
-     * @param string $type
      * @return Model|HasMany|object|null
      */
     public function getApplicationFromUser(Idea $idea, string $type)

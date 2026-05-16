@@ -9,13 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Class CommentService
- * @package App\Services\Ideas
  */
 class CommentService
 {
     /**
-     * @param Idea $idea
-     * @param array $data
      * @return IdeaComment
      */
     public function store(Idea $idea, array $data): Model
@@ -25,14 +22,10 @@ class CommentService
         return $idea->comments()->create($data);
     }
 
-    /**
-     * @param IdeaComment $comment
-     * @param array $data
-     * @return bool
-     */
     public function update(IdeaComment $comment, array $data): bool
     {
         $comment->update($data);
+
         return $comment->save();
     }
 }

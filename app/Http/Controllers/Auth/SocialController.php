@@ -11,7 +11,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 /**
  * Class SocialController
- * @package App\Http\Controllers\Auth
  */
 class SocialController extends Controller
 {
@@ -27,8 +26,6 @@ class SocialController extends Controller
 
     /**
      * Redirect the user to the GitHub authentication page.
-     *
-     * @return RedirectResponse
      */
     public function redirectToProvider(): RedirectResponse
     {
@@ -39,8 +36,6 @@ class SocialController extends Controller
 
     /**
      * Obtain the user information from GitHub.
-     *
-     * @return RedirectResponse
      */
     public function handleProviderCallback(): RedirectResponse
     {
@@ -69,8 +64,6 @@ class SocialController extends Controller
 
     /**
      * Remove the provider token for this user.
-     *
-     * @return RedirectResponse
      */
     public function revokeProvider(): RedirectResponse
     {

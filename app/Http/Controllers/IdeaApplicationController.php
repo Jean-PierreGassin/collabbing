@@ -16,24 +16,15 @@ use Illuminate\View\View;
 
 /**
  * Class IdeaApplicationController
- * @package App\Http\Controllers
  */
 class IdeaApplicationController extends Controller
 {
-    /**
-     * @var IdeaService
-     */
     private IdeaService $ideaService;
 
-    /**
-     * @var ApplicationService
-     */
     private ApplicationService $applicationService;
 
     /**
      * IdeaApplicationController constructor.
-     * @param ApplicationService $applicationService
-     * @param IdeaService $ideaService
      */
     public function __construct(ApplicationService $applicationService, IdeaService $ideaService)
     {
@@ -44,9 +35,8 @@ class IdeaApplicationController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @param Request $request
-     * @param Idea $idea
      * @return Factory|View
+     *
      * @throws AuthorizationException
      */
     public function create(Request $request, Idea $idea)
@@ -59,9 +49,8 @@ class IdeaApplicationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param StoreIdeaApplication $request
-     * @param Idea $idea
      * @return RedirectResponse
+     *
      * @throws AuthorizationException
      */
     public function store(StoreIdeaApplication $request, Idea $idea)
@@ -78,9 +67,6 @@ class IdeaApplicationController extends Controller
     /**
      * Approve the application.
      *
-     * @param Idea $idea
-     * @param IdeaApplication $application
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function approveApplication(Idea $idea, IdeaApplication $application): RedirectResponse
@@ -98,9 +84,6 @@ class IdeaApplicationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param Idea $idea
-     * @param IdeaApplication $application
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function destroy(Idea $idea, IdeaApplication $application): RedirectResponse

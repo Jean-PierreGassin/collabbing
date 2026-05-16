@@ -9,14 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Class RepositoryService
- * @package App\Services
  */
 class RepositoryService
 {
-    /**
-     * @param Idea $idea
-     * @return bool
-     */
     public function create(Idea $idea): bool
     {
         GitHubService::createClient(Auth::user()->github_token)
@@ -31,10 +26,6 @@ class RepositoryService
         return true;
     }
 
-    /**
-     * @param Idea $idea
-     * @return bool
-     */
     public function inviteUsers(Idea $idea): bool
     {
         foreach ($idea->approvedApplications()->get() as $collaborator) {
@@ -44,11 +35,6 @@ class RepositoryService
         return true;
     }
 
-    /**
-     * @param Idea $idea
-     * @param $collaborator
-     * @return bool
-     */
     public function inviteUser(Idea $idea, $collaborator): bool
     {
         try {

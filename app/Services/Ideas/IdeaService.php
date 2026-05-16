@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Services\Ideas;
-
 
 use App\Models\Idea;
 use Carbon\Carbon;
@@ -12,33 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Class IdeaService
- * @package App\Services\Ideas
  */
 class IdeaService
 {
-    /**
-     * @param array $data
-     * @return Idea
-     */
     public function create(array $data): Idea
     {
         return Auth::user()->ideas()->create($data);
     }
 
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return bool
-     */
     public function update(Idea $idea, array $data): bool
     {
         $idea->update($data);
+
         return $idea->save();
     }
 
-    /**
-     * @return Collection
-     */
     public function getTrending(): Collection
     {
         return Idea::where('status', 'open')
@@ -50,10 +36,6 @@ class IdeaService
             ->get();
     }
 
-    /**
-     * @param string $search
-     * @return LengthAwarePaginator
-     */
     public function search(string $search): LengthAwarePaginator
     {
         return Idea::where('status', 'open')
@@ -62,9 +44,6 @@ class IdeaService
             ->paginate(10);
     }
 
-    /**
-     * @return LengthAwarePaginator
-     */
     public function getUserIdeas(): LengthAwarePaginator
     {
         return Auth::user()->ideas()
@@ -72,12 +51,10 @@ class IdeaService
             ->paginate(5, ['*'], 'ideas');
     }
 
-    /**
-     * @return LengthAwarePaginator
-     */
     public function getCollaboratedIdeas(): LengthAwarePaginator
     {
         $collaborationIds = Auth::user()->collaborations()->pluck('idea_id');
+
         return Idea::whereIn('id', $collaborationIds)
             ->paginate(5, ['*'], 'collaborations');
     }

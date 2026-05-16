@@ -1,10 +1,16 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(
-    App\Models\IdeaSupporter::class,
-    function (Faker $faker) {
+use App\Models\IdeaSupporter;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class IdeaSupporterFactory extends Factory
+{
+    protected $model = IdeaSupporter::class;
+
+    public function definition(): array
+    {
         return [];
     }
-);
+}

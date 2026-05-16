@@ -51,7 +51,7 @@ class UserTest extends DuskTestCase
         $this->browse(
             function ($browser) {
                 $browser->visit('/users/john.smith')
-                    ->assertSee($this->user . '\'s Profile');
+                    ->assertSee($this->user.'\'s Profile');
             }
         );
     }

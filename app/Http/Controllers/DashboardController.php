@@ -8,18 +8,13 @@ use Illuminate\View\View;
 
 /**
  * Class DashboardController
- * @package App\Http\Controllers
  */
 class DashboardController extends Controller
 {
-    /**
-     * @var IdeaService
-     */
     private IdeaService $ideaService;
 
     /**
      * Create a new controller instance.
-     * @param IdeaService $ideaService
      */
     public function __construct(IdeaService $ideaService)
     {

@@ -9,13 +9,9 @@ class GitHubService
 {
     protected static mixed $client = null;
 
-    /**
-     * @param string $token
-     * @return Client
-     */
     public static function createClient(string $token): Client
     {
-        if (null === self::$client) {
+        if (self::$client === null) {
             self::$client = GitHub::getFactory()->make(
                 [
                     'token' => $token,

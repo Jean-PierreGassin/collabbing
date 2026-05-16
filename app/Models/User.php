@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ThirdParty\GitHub\GitHubService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,15 +11,16 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Class User
+ *
  * @property string $username
  * @property string $first_name
  * @property string $last_name
  * @property string $github_token
  * @property string $github_username
- * @package App
  */
 class User extends Authenticatable
 {
+    use HasFactory;
     use Notifiable;
 
     /**
@@ -47,17 +49,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function ideas(): HasMany
     {
         return $this->hasMany(Idea::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(IdeaComment::class, 'user_id');
@@ -71,9 +67,6 @@ class User extends Authenticatable
         return $this->applications()->where('status', 'approved');
     }
 
-    /**
-     * @return HasMany
-     */
     public function applications(): HasMany
     {
         return $this->hasMany(IdeaApplication::class, 'user_id');
@@ -84,9 +77,6 @@ class User extends Authenticatable
         return "$this->first_name $this->last_name";
     }
 
-    /**
-     * @return string
-     */
     public function profilePicture(): string
     {
         if ($this->github_token) {
@@ -100,6 +90,6 @@ class User extends Authenticatable
             );
         }
 
-        return 'https://www.gravatar.com/avatar/' . md5($this->email);
+        return 'https://www.gravatar.com/avatar/'.md5($this->email);
     }
 }

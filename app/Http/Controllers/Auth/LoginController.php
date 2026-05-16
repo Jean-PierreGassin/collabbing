@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 /**
  * Class LoginController
- * @package App\Http\Controllers\Auth
  */
 class LoginController extends Controller
 {
@@ -43,8 +42,6 @@ class LoginController extends Controller
 
     /**
      * Get the login username to be used by the controller.
-     *
-     * @return string
      */
     public function username(): string
     {

@@ -14,13 +14,9 @@ use Illuminate\View\View;
 
 /**
  * Class UserController
- * @package App\Http\Controllers
  */
 class UserController extends Controller
 {
-    /**
-     * @var UserService
-     */
     private UserService $userService;
 
     public function __construct(UserService $userService)
@@ -43,7 +39,6 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Request $request
      * @return Factory|View
      */
     public function show(Request $request)
@@ -58,8 +53,8 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Request $request
      * @return Factory|View
+     *
      * @throws AuthorizationException
      */
     public function edit(Request $request)
@@ -73,8 +68,6 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param StoreUser $request
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function update(StoreUser $request): RedirectResponse

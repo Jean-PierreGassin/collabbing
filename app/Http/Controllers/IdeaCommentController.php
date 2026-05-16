@@ -14,18 +14,13 @@ use Illuminate\View\View;
 
 /**
  * Class IdeaCommentController
- * @package App\Http\Controllers
  */
 class IdeaCommentController extends Controller
 {
-    /**
-     * @var CommentService
-     */
     private CommentService $commentService;
 
     /**
      * IdeaCommentController constructor.
-     * @param CommentService $commentService
      */
     public function __construct(CommentService $commentService)
     {
@@ -35,9 +30,8 @@ class IdeaCommentController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @param Request $request
-     * @param Idea $idea
      * @return Factory|View
+     *
      * @throws AuthorizationException
      */
     public function create(Request $request, Idea $idea)
@@ -50,9 +44,6 @@ class IdeaCommentController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param StoreIdeaComment $request
-     * @param Idea $idea
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function store(StoreIdeaComment $request, Idea $idea): RedirectResponse
@@ -69,9 +60,8 @@ class IdeaCommentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Idea $idea
-     * @param IdeaComment $comment
      * @return Factory|View
+     *
      * @throws AuthorizationException
      */
     public function edit(Idea $idea, IdeaComment $comment)
@@ -84,10 +74,6 @@ class IdeaCommentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param StoreIdeaComment $request
-     * @param Idea $idea
-     * @param IdeaComment $comment
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function update(StoreIdeaComment $request, Idea $idea, IdeaComment $comment): RedirectResponse

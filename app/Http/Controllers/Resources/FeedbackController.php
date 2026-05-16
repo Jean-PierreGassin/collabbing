@@ -8,7 +8,6 @@ use Illuminate\View\View;
 
 /**
  * Class FeedbackController
- * @package App\Http\Controllers\Resources
  */
 class FeedbackController extends Controller
 {

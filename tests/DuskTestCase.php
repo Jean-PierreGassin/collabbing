@@ -15,6 +15,7 @@ abstract class DuskTestCase extends BaseTestCase
      * Prepare for Dusk test execution.
      *
      * @beforeClass
+     *
      * @return void
      */
     public static function prepare()
@@ -36,7 +37,7 @@ abstract class DuskTestCase extends BaseTestCase
                 '--no-sandbox',
                 '--ignore-ssl-errors',
                 '--whitelisted-ips=""',
-                '--disable-dev-shm-usage'
+                '--disable-dev-shm-usage',
             ]
         );
 

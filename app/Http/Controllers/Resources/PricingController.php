@@ -8,7 +8,6 @@ use Illuminate\View\View;
 
 /**
  * Class PricingController
- * @package App\Http\Controllers\Resources
  */
 class PricingController extends Controller
 {

@@ -18,28 +18,15 @@ use Illuminate\View\View;
 
 /**
  * Class IdeaController
- * @package App\Http\Controllers
  */
 class IdeaController extends Controller
 {
-    /**
-     * @var IdeaService
-     */
     private IdeaService $ideaService;
 
-    /**
-     * @var ApplicationService
-     */
     private ApplicationService $applicationService;
 
-    /**
-     * @var SupporterService
-     */
     private SupporterService $supporterService;
 
-    /**
-     * @var RepositoryService
-     */
     private RepositoryService $repositoryService;
 
     public function __construct(
@@ -57,7 +44,6 @@ class IdeaController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param Request $request
      * @return Factory|View
      */
     public function index(Request $request)
@@ -81,7 +67,6 @@ class IdeaController extends Controller
     /**
      * Display the dashboard for an idea
      *
-     * @param Idea $idea
      * @return Factory|View
      */
     public function dashboard(Idea $idea)
@@ -111,9 +96,6 @@ class IdeaController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param StoreIdea $request
-     * @return RedirectResponse
      */
     public function store(StoreIdea $request): RedirectResponse
     {
@@ -127,12 +109,11 @@ class IdeaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Idea $idea
      * @return Factory|View
      */
     public function show(Idea $idea)
     {
-        if (!Auth::user()) {
+        if (! Auth::user()) {
             return view('idea.single', compact('idea'));
         }
 
@@ -154,8 +135,8 @@ class IdeaController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param Idea $idea
      * @return Factory|View
+     *
      * @throws AuthorizationException
      */
     public function edit(Idea $idea)
@@ -168,9 +149,6 @@ class IdeaController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param StoreIdea $request
-     * @param Idea $idea
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function update(StoreIdea $request, Idea $idea): RedirectResponse
@@ -185,8 +163,6 @@ class IdeaController extends Controller
     }
 
     /**
-     * @param Idea $idea
-     * @return RedirectResponse|string
      * @throws AuthorizationException
      */
     public function createRepository(Idea $idea): string|RedirectResponse
@@ -211,15 +187,13 @@ class IdeaController extends Controller
     }
 
     /**
-     * @param Idea $idea
-     * @return RedirectResponse
      * @throws AuthorizationException
      */
     public function inviteUsersToRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('inviteUsersToRepository', $idea);
 
-        if (!$this->repositoryService->inviteUsers($idea)) {
+        if (! $this->repositoryService->inviteUsers($idea)) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
                 ->with('status', 'Something went wrong, try again 🙉');

@@ -12,11 +12,12 @@ trait SeedsDatabase
 {
     public function createUsersWithClosedIdea(): void
     {
-        factory(User::class, 2)
+        User::factory()
+            ->count(2)
             ->create()
             ->each(
-                function ($user) {
-                    $user->ideas()->save(factory(Idea::class)->make());
+                function (User $user) {
+                    $user->ideas()->save(Idea::factory()->make());
                 }
             );
 
@@ -28,11 +29,11 @@ trait SeedsDatabase
     {
         foreach ($user->ideas->all() as $idea) {
             $idea->comments()
-                ->save(factory(IdeaComment::class)->make(['user_id' => $user->id]));
+                ->save(IdeaComment::factory()->make(['user_id' => $user->id]));
             $idea->supporters()
-                ->save(factory(IdeaSupporter::class)->make(['user_id' => $user->id]));
+                ->save(IdeaSupporter::factory()->make(['user_id' => $user->id]));
             $idea->applications()
-                ->save(factory(IdeaApplication::class)->make(['user_id' => $user->id]));
+                ->save(IdeaApplication::factory()->make(['user_id' => $user->id]));
         }
 
         // 'close' the first idea for each user
@@ -42,4 +43,3 @@ trait SeedsDatabase
         $idea->save();
     }
 }
-
