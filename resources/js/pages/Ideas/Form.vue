@@ -12,6 +12,44 @@ const props = defineProps<{
 }>();
 
 const session = useSessionStore();
+const repositoryNamePattern = '[A-Za-z0-9_-]+';
+const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
+const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
+
+function sanitizeRepositoryName(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const sanitized = input.value.replace(repositoryNameSanitizer, '');
+
+  if (input.value !== sanitized) {
+    input.value = sanitized;
+  }
+}
+
+function blockInvalidRepositoryNameInput(event: InputEvent): void {
+  if (!event.data || repositoryNameAllowedCharacters.test(event.data)) {
+    return;
+  }
+
+  event.preventDefault();
+}
+
+function pasteRepositoryName(event: ClipboardEvent): void {
+  const pasted = event.clipboardData?.getData('text') ?? '';
+  const sanitized = pasted.replace(repositoryNameSanitizer, '');
+
+  if (pasted === sanitized) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const input = event.target as HTMLInputElement;
+  const start = input.selectionStart ?? input.value.length;
+  const end = input.selectionEnd ?? input.value.length;
+
+  input.value = `${input.value.slice(0, start)}${sanitized}${input.value.slice(end)}`.slice(0, 100);
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
 </script>
 
 <template>
@@ -36,9 +74,9 @@ const session = useSessionStore();
           </FormField>
         </div>
 
-        <FormField id="repository_name" label="Repository Name" help="Use up to 50 letters, numbers, dashes, or underscores.">
+        <FormField id="repository_name" label="Repository Name" help="Use up to 100 letters, numbers, dashes, or underscores.">
           <template #default="{ invalid, describedBy }">
-            <input id="repository_name" name="repository_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="idea?.repositoryName ?? ''" placeholder="design-review-matchmaker" maxlength="50" pattern="[A-Za-z0-9_-]+" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <input id="repository_name" name="repository_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="idea?.repositoryName ?? ''" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
           </template>
         </FormField>
 

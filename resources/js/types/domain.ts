@@ -24,6 +24,7 @@ export interface DomainUser {
 export interface IdeaApplication {
   id: number;
   content: string;
+  contentHtml: string;
   status: string;
   createdAtForHumans: string;
   user: DomainUser;
@@ -36,6 +37,7 @@ export interface IdeaApplication {
 export interface IdeaComment {
   id: number;
   content: string;
+  contentHtml: string;
   createdAtForHumans: string;
   updatedAtForHumans: string;
   wasEdited: boolean;

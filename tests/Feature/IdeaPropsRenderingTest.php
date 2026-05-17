@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Idea;
+use App\Models\IdeaApplication;
+use App\Models\IdeaComment;
 use App\Models\User;
 use App\Services\Inertia\PagePropsService;
 use Carbon\Carbon;
@@ -35,6 +37,40 @@ class IdeaPropsRenderingTest extends TestCase
         );
 
         $this->assertSame("<h1>Searchable idea</h1>\n", $props['items'][0]['contentHtml']);
+    }
+
+    public function test_comment_props_render_markdown_content(): void
+    {
+        $user = $this->makeUser();
+        $comment = new IdeaComment([
+            'content' => '**Useful** comment',
+        ]);
+        $comment->id = 1;
+        $comment->idea_id = 1;
+        $comment->created_at = Carbon::now();
+        $comment->updated_at = Carbon::now();
+        $comment->setRelation('user', $user);
+
+        $props = app(PagePropsService::class)->comment($comment);
+
+        $this->assertSame("<p><strong>Useful</strong> comment</p>\n", $props['contentHtml']);
+    }
+
+    public function test_application_props_render_markdown_content(): void
+    {
+        $user = $this->makeUser();
+        $application = new IdeaApplication([
+            'content' => '- Can build APIs',
+            'status' => 'pending',
+        ]);
+        $application->id = 1;
+        $application->idea_id = 1;
+        $application->created_at = Carbon::now();
+        $application->setRelation('user', $user);
+
+        $props = app(PagePropsService::class)->application($application);
+
+        $this->assertSame("<ul>\n<li>Can build APIs</li>\n</ul>\n", $props['contentHtml']);
     }
 
     public function test_public_user_props_do_not_expose_email_addresses(): void
@@ -77,14 +113,7 @@ class IdeaPropsRenderingTest extends TestCase
 
     private function makeIdeaWithRelations(string $content): Idea
     {
-        $user = new User([
-            'username' => 'tester',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'tester@example.com',
-        ]);
-        $user->id = 1;
-        $user->created_at = Carbon::now();
+        $user = $this->makeUser();
 
         $idea = new Idea([
             'title' => 'Test title',
@@ -100,5 +129,19 @@ class IdeaPropsRenderingTest extends TestCase
         $idea->setRelation('approvedApplications', new EloquentCollection);
 
         return $idea;
+    }
+
+    private function makeUser(): User
+    {
+        $user = new User([
+            'username' => 'tester',
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => 'tester@example.com',
+        ]);
+        $user->id = 1;
+        $user->created_at = Carbon::now();
+
+        return $user;
     }
 }

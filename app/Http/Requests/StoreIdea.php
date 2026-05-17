@@ -24,7 +24,7 @@ class StoreIdea extends FormRequest
     {
         return [
             'title' => 'required|max:100',
-            'repository_name' => 'required|alpha_dash|max:50',
+            'repository_name' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z0-9_-]+$/'],
             'communication' => 'required|max:50',
             'content' => 'required|max:1500',
             'status' => 'in:open,closed',
@@ -39,6 +39,7 @@ class StoreIdea extends FormRequest
         return [
             'content.required' => 'The description field is required',
             'content.max' => 'The description may not be greater than 1500 characters.',
+            'repository_name.regex' => 'Repository names may only contain letters, numbers, dashes, and underscores.',
         ];
     }
 }

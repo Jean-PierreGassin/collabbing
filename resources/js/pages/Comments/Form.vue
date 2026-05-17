@@ -14,12 +14,12 @@ defineProps<{
 
 <template>
   <Card>
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ comment ? 'Edit your Comment' : 'Share your Comment' }}</h1></CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ comment ? 'Edit comment' : 'Comment' }}</h1></CardHeader>
     <CardContent>
       <form :action="comment ? comment.routes.update : idea.routes.commentsStore" method="POST" class="flex flex-col gap-4">
         <CsrfField />
         <MethodField v-if="comment" method="PUT" />
-        <FormField id="content" :label="comment ? 'Comment' : 'Content'" help="Keep it specific and constructive.">
+        <FormField id="content" :label="comment ? 'Comment' : 'Content'" help="Keep it specific and constructive. Markdown is supported.">
           <template #default="{ invalid, describedBy }">
             <textarea
               id="content"

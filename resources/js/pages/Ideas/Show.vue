@@ -27,11 +27,11 @@ defineProps<{
         <template v-if="idea.can.update || collaborator">
           <CommentList :comments="comments" />
           <Card>
-            <CardHeader><h2 class="text-lg font-semibold text-white">Share your Comment</h2></CardHeader>
+            <CardHeader><h2 class="text-lg font-semibold text-white">Add comment</h2></CardHeader>
             <CardContent>
               <form :action="idea.routes.commentsStore" method="POST" class="flex flex-col gap-4">
                 <CsrfField />
-                <FormField id="content" label="Content" help="Keep it specific and constructive.">
+                <FormField id="content" label="Comment" help="Markdown is supported.">
                   <template #default="{ invalid, describedBy }">
                     <textarea
                       id="content"
@@ -45,7 +45,7 @@ defineProps<{
                     />
                   </template>
                 </FormField>
-                <Button type="submit" class="self-end" size="sm">Share Comment</Button>
+                <Button type="submit" class="self-end" size="sm">Post comment</Button>
               </form>
             </CardContent>
           </Card>

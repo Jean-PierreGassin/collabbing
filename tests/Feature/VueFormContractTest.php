@@ -103,7 +103,9 @@ class VueFormContractTest extends TestCase
 
         $this->assertStringContainsString('maxlength="100"', $idea);
         $this->assertStringContainsString('maxlength="50"', $idea);
-        $this->assertStringContainsString('pattern="[A-Za-z0-9_-]+"', $idea);
+        $this->assertStringContainsString(':pattern="repositoryNamePattern"', $idea);
+        $this->assertStringContainsString('@beforeinput="blockInvalidRepositoryNameInput"', $idea);
+        $this->assertStringContainsString('@paste="pasteRepositoryName"', $idea);
         $this->assertStringContainsString('maxlength="1500"', $idea);
         $this->assertStringContainsString('maxlength="1500"', $comment);
         $this->assertStringContainsString('maxlength="1500"', $inlineComment);
@@ -118,10 +120,35 @@ class VueFormContractTest extends TestCase
         $contents = file_get_contents(resource_path('js/components/layout/FlashMessages.vue'));
 
         $this->assertIsString($contents);
-        $this->assertStringContainsString('role="status"', $contents);
-        $this->assertStringContainsString('aria-live="polite"', $contents);
-        $this->assertStringContainsString('role="alert"', $contents);
-        $this->assertStringContainsString('aria-live="assertive"', $contents);
+        $this->assertStringContainsString(":role=\"toast.tone === 'error' ? 'alert' : 'status'\"", $contents);
+        $this->assertStringContainsString(":aria-live=\"toast.tone === 'error' ? 'assertive' : 'polite'\"", $contents);
+        $this->assertStringContainsString('inset-x-3 bottom-3', $contents);
+        $this->assertStringContainsString('sm:max-w-md', $contents);
+        $this->assertStringContainsString('sm:min-h-24', $contents);
+        $this->assertStringContainsString('toasts.value = [toast];', $contents);
+        $this->assertStringContainsString('fields need attention. Review the highlighted fields.', $contents);
+        $this->assertStringContainsString('line-clamp-2', $contents);
+        $this->assertStringContainsString('@mouseenter="pauseToast(toast)"', $contents);
+    }
+
+    public function test_shell_provides_page_transitions_and_default_seo_metadata(): void
+    {
+        $shell = file_get_contents(resource_path('js/components/layout/AppShell.vue'));
+        $blade = file_get_contents(resource_path('views/app.blade.php'));
+
+        $this->assertIsString($shell);
+        $this->assertIsString($blade);
+        $this->assertStringContainsString('<Transition name="page-fade" mode="out-in">', $shell);
+        $this->assertStringContainsString('class="page-transition-panel"', $shell);
+        $this->assertStringContainsString('<Head :title="seo.title">', $shell);
+        $this->assertStringContainsString('head-key="description"', $shell);
+        $this->assertStringContainsString('property="og:title"', $shell);
+        $this->assertStringContainsString('name="twitter:card"', $shell);
+        $this->assertStringContainsString('rel="canonical"', $shell);
+        $this->assertStringContainsString('rel="icon" type="image/svg+xml" href="/favicon.svg"', $blade);
+        $this->assertStringContainsString('rel="manifest" href="/site.webmanifest"', $blade);
+        $this->assertStringContainsString('<title>Collabbing</title>', $blade);
+        $this->assertStringContainsString('type="application/ld+json"', $blade);
     }
 
     public function test_app_shell_provides_a_keyboard_bypass_to_main_content(): void
@@ -133,6 +160,24 @@ class VueFormContractTest extends TestCase
         $this->assertStringContainsString('Skip to main content', $contents);
         $this->assertStringContainsString('<main id="main-content" tabindex="-1"', $contents);
         $this->assertStringContainsString('focus:translate-y-0', $contents);
+    }
+
+    public function test_mobile_navigation_uses_compact_disclosure_controls(): void
+    {
+        $contents = file_get_contents(resource_path('js/components/layout/AppShell.vue'));
+
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('const isMobileMenuOpen = ref(false);', $contents);
+        $this->assertStringContainsString('const isMobileSearchOpen = ref(false);', $contents);
+        $this->assertStringContainsString('class="size-11"', $contents);
+        $this->assertStringContainsString(":aria-label=\"isMobileSearchOpen ? 'Close search' : 'Search ideas'\"", $contents);
+        $this->assertStringContainsString(":aria-label=\"isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'\"", $contents);
+        $this->assertStringContainsString('id="mobile-site-search"', $contents);
+        $this->assertStringContainsString('id="mobile-navigation"', $contents);
+        $this->assertStringContainsString('Mobile main navigation', $contents);
+        $this->assertStringContainsString('Mobile workspace navigation', $contents);
+        $this->assertStringContainsString('class="h-11 justify-start"', $contents);
+        $this->assertStringContainsString('mobile-panel', file_get_contents(resource_path('css/app.css')));
     }
 
     public function test_collaboration_copy_uses_clear_actions_and_state_instead_of_placeholder_links(): void
@@ -185,6 +230,35 @@ class VueFormContractTest extends TestCase
         $this->assertStringContainsString('GitHub account unlinked.', $socialController);
         $this->assertStringContainsString('Too many attempts', $errorPage);
         $this->assertStringContainsString('Reading and browsing still work', $errorPage);
+    }
+
+    public function test_comment_sections_avoid_redundant_titles_and_labels(): void
+    {
+        $comments = file_get_contents(resource_path('js/components/comments/CommentList.vue'));
+        $show = file_get_contents(resource_path('js/pages/Ideas/Show.vue'));
+
+        $this->assertIsString($comments);
+        $this->assertIsString($show);
+        $this->assertStringContainsString('>Comments</h2>', $comments);
+        $this->assertStringContainsString('>Add comment</h2>', $show);
+        $this->assertStringContainsString('label="Comment"', $show);
+        $this->assertStringNotContainsString('Collaborator Comments', $comments);
+        $this->assertStringNotContainsString('Share your Comment', $show);
+        $this->assertStringNotContainsString('label="Content"', $show);
+    }
+
+    public function test_profile_edit_flow_uses_inertia_navigation_for_transitions(): void
+    {
+        $show = file_get_contents(resource_path('js/pages/Users/Show.vue'));
+        $form = file_get_contents(resource_path('js/pages/Users/Form.vue'));
+
+        $this->assertIsString($show);
+        $this->assertIsString($form);
+        $this->assertStringContainsString("import { Link } from '@inertiajs/vue3';", $show);
+        $this->assertStringContainsString(':as="Link"', $show);
+        $this->assertStringContainsString("import { router } from '@inertiajs/vue3';", $form);
+        $this->assertStringContainsString('@submit.prevent="submitProfile"', $form);
+        $this->assertStringContainsString('router.post(props.user.routes.update', $form);
     }
 
     public function test_new_tab_links_are_isolated_from_the_opening_window(): void

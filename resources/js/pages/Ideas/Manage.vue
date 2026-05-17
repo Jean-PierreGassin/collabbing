@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
+import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { Idea, IdeaApplication } from '@/types/domain';
@@ -37,7 +38,7 @@ const activeTab = ref<'applications' | 'collaborators'>('applications');
               </h6>
             </CardHeader>
             <CardContent class="flex flex-col gap-4">
-              <div class="whitespace-pre-line">{{ application.content }}</div>
+              <MarkdownContent :html="application.contentHtml" />
               <h6 class="text-right text-sm text-muted-foreground">Submitted {{ idea.createdAtForHumans }}</h6>
               <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
                 <form v-if="idea.can.deleteApplication" :action="application.routes.destroy" method="POST">

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Collabbing">
+  <rect width="64" height="64" rx="14" fill="#151923"/>
+  <path d="M19 41.5c-5.25 0-9.5-4.25-9.5-9.5s4.25-9.5 9.5-9.5h9.5v7H19a2.5 2.5 0 0 0 0 5h9.5v7H19Z" fill="#F2A51D"/>
+  <path d="M35.5 41.5v-7H45a2.5 2.5 0 0 0 0-5h-9.5v-7H45c5.25 0 9.5 4.25 9.5 9.5s-4.25 9.5-9.5 9.5h-9.5Z" fill="#7DD3FC"/>
+  <path d="M24 28.5h16v7H24z" fill="#F8FAFC"/>
+</svg>

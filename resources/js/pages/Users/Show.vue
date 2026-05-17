@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import type { DomainUser } from '@/types/domain';
 
 defineProps<{
@@ -26,13 +28,13 @@ defineProps<{
       </div>
 
       <div class="flex shrink-0">
-        <Button v-if="user.canUpdate" as="a" :href="user.routes.edit" variant="secondary" size="sm">Edit Profile</Button>
+        <Button v-if="user.canUpdate" :as="Link" :href="user.routes.edit" variant="secondary" size="sm">Edit Profile</Button>
       </div>
     </CardHeader>
 
     <CardContent>
       <section class="border-l-2 border-primary pl-4" aria-label="Member bio">
-        <p v-if="user.bioHtml" class="mb-0" v-html="user.bioHtml" />
+        <MarkdownContent v-if="user.bioHtml" :html="user.bioHtml" />
         <p v-else class="mb-0 text-muted-foreground">This member has not added a bio yet.</p>
       </section>
     </CardContent>

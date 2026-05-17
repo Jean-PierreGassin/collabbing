@@ -27,7 +27,7 @@ const supporterSentence = computed(() => {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>Collaborators</div>
+          <h2 class="text-lg font-semibold text-white">Collaborators</h2>
           <div v-if="idea.can.storeApplication">
             <Button v-if="collaborator" type="button" size="sm" disabled>Collaborator</Button>
             <Button v-else-if="applicant" type="button" size="sm" disabled>Application pending</Button>
@@ -54,7 +54,7 @@ const supporterSentence = computed(() => {
     <Card v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0">
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>Repository</div>
+          <h2 class="text-lg font-semibold text-white">Repository</h2>
           <Button
             v-if="idea.repositoryActivity.htmlUrl"
             as="a"
@@ -124,7 +124,7 @@ const supporterSentence = computed(() => {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>Supporters</div>
+          <h2 class="text-lg font-semibold text-white">Supporters</h2>
           <div v-if="idea.can.storeSupporter">
             <form v-if="supporter" :action="supporter.routes.destroy" method="POST">
               <CsrfField />
