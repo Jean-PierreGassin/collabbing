@@ -17,19 +17,39 @@ if [ "$MODE" != "deploy" ] && [ "$MODE" != "--preflight" ]; then
   exit 1
 fi
 
-if [ ! -f "$DOCKER_ENV_FILE" ]; then
-  echo "Missing production environment file: $DOCKER_ENV_FILE" >&2
-  exit 1
-fi
-
-set -a
-# shellcheck source=/dev/null
-. "$DOCKER_ENV_FILE"
-set +a
-
 fail_preflight() {
   echo "Production deploy preflight failed: $*" >&2
   exit 1
+}
+
+load_env_file() {
+  local line
+  local name
+  local value
+
+  if [ ! -f "$DOCKER_ENV_FILE" ]; then
+    echo "Missing production environment file: $DOCKER_ENV_FILE" >&2
+    exit 1
+  fi
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+
+    case "$line" in
+      "" | \#*)
+        continue
+        ;;
+    esac
+
+    name="${line%%=*}"
+    value="${line#*=}"
+
+    if [ "$name" = "$line" ] || ! [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+      fail_preflight "invalid environment line in $DOCKER_ENV_FILE: $line"
+    fi
+
+    export "$name=$value"
+  done < "$DOCKER_ENV_FILE"
 }
 
 require_env() {
@@ -102,6 +122,8 @@ run_preflight() {
 
   echo "Production deploy preflight passed."
 }
+
+load_env_file
 
 if [ "$MODE" = "--preflight" ]; then
   run_preflight
