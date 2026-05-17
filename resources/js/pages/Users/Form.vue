@@ -5,6 +5,7 @@ import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { oldInputString } from '@/lib/forms';
 import type { DomainUser } from '@/types/domain';
 
 const props = defineProps<{
@@ -34,19 +35,19 @@ function submitProfile(event: SubmitEvent): void {
         <div class="grid gap-4 md:grid-cols-2">
           <FormField id="first_name" label="First name">
             <template #default="{ invalid, describedBy }">
-              <input id="first_name" name="first_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.firstName ?? ''" placeholder="John" autocomplete="given-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input id="first_name" name="first_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('first_name', user?.firstName)" placeholder="John" autocomplete="given-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
           <FormField id="last_name" label="Last name">
             <template #default="{ invalid, describedBy }">
-              <input id="last_name" name="last_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.lastName ?? ''" placeholder="Smith" autocomplete="family-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input id="last_name" name="last_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('last_name', user?.lastName)" placeholder="Smith" autocomplete="family-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
         </div>
 
         <FormField id="email" label="Email address">
           <template #default="{ invalid, describedBy }">
-            <input id="email" name="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.email ?? ''" placeholder="john.smith@apples.com" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <input id="email" name="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('email', user?.email)" placeholder="john.smith@apples.com" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
           </template>
         </FormField>
 
@@ -54,7 +55,7 @@ function submitProfile(event: SubmitEvent): void {
           <h4 class="text-xl font-semibold">Integrations</h4>
           <p class="text-sm text-muted-foreground">
             Link GitHub to create repositories from ideas and invite approved collaborators.
-            <a class="text-primary hover:underline" :href="`https://github.com/settings/connections/applications/${githubClientId ?? ''}`">Review GitHub access</a>
+            <a class="text-primary hover:underline" :href="`https://github.com/settings/connections/applications/${githubClientId ?? ''}`" target="_blank" rel="noopener noreferrer">Review GitHub access</a>
           </p>
           <Button v-if="user.hasGithubToken" type="submit" form="github-revoke-form" variant="outline" size="sm" class="w-fit">
             Unlink GitHub
@@ -66,7 +67,7 @@ function submitProfile(event: SubmitEvent): void {
 
         <FormField id="bio" label="Bio (supports markdown)">
           <template #default="{ invalid, describedBy }">
-            <textarea id="bio" name="bio" class="min-h-32 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="Tell us what you're good at and what you enjoy..." maxlength="500" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">{{ user?.bio ?? '' }}</textarea>
+            <textarea id="bio" name="bio" class="min-h-32 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="Tell us what you're good at and what you enjoy..." maxlength="500" :value="oldInputString('bio', user?.bio)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" />
           </template>
         </FormField>
 

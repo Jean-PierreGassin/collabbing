@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchIdeas;
 use App\Models\Idea;
 use App\Services\Ideas\IdeaService;
 use App\Services\Inertia\PagePropsService;
@@ -33,14 +34,21 @@ class DashboardController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(SearchIdeas $request)
     {
-        $ideas = $this->ideaService->getUserIdeas();
-        $collaborations = $this->ideaService->getCollaboratedIdeas();
+        $keyword = $request->searchTerm();
+        $ideas = $this->ideaService->getUserIdeas($keyword);
+        $collaborations = $this->ideaService->getCollaboratedIdeas($keyword);
+
+        if ($keyword) {
+            $ideas->appends(['search' => $keyword]);
+            $collaborations->appends(['search' => $keyword]);
+        }
 
         return Inertia::render('Dashboard', [
-            'ideas' => $ideas->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
-            'collaborations' => $collaborations->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
+            'keyword' => $keyword,
+            'ideas' => $this->pageProps->paginator($ideas, fn (Idea $idea) => $this->pageProps->idea($idea)),
+            'collaborations' => $this->pageProps->paginator($collaborations, fn (Idea $idea) => $this->pageProps->idea($idea)),
         ]);
     }
 }

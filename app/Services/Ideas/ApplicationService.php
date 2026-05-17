@@ -5,8 +5,8 @@ namespace App\Services\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Repositories\Ideas\ApplicationRepository;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -36,12 +36,12 @@ class ApplicationService
         return $this->applications->destroy($application);
     }
 
-    public function getPendingApplications(Idea $idea): Collection
+    public function getPendingApplications(Idea $idea): LengthAwarePaginator
     {
         return $this->applications->getPendingApplications($idea);
     }
 
-    public function getApprovedApplications(Idea $idea): Collection
+    public function getApprovedApplications(Idea $idea): LengthAwarePaginator
     {
         return $this->applications->getApprovedApplications($idea);
     }

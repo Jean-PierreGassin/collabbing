@@ -3,6 +3,7 @@ import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { oldInputString } from '@/lib/forms';
 import { useSessionStore } from '@/stores/session';
 
 defineProps<{
@@ -22,7 +23,7 @@ const session = useSessionStore();
         <input type="hidden" name="token" :value="token ?? ''">
         <FormField id="email" label="Email address">
           <template #default="{ invalid, describedBy }">
-            <input id="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="email" :value="email ?? ''" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input id="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="email" :value="oldInputString('email', email)" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
           </template>
         </FormField>
         <FormField id="password" label="Password" help="Use at least 12 characters with letters and numbers.">

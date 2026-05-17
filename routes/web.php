@@ -168,6 +168,10 @@ Route::prefix('resources')->group(
             ->name('resources.feedback')
             ->middleware('web');
 
+        Route::get('contact', fn () => Inertia\Inertia::render('Contact'))
+            ->name('resources.contact')
+            ->middleware('web');
+
         Route::get('pricing', fn () => Inertia\Inertia::render('Pricing'))
             ->name('resources.pricing')
             ->middleware('web');

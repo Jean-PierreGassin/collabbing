@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
+import UserAvatar from '@/components/users/UserAvatar.vue';
 import type { DomainUser } from '@/types/domain';
 import type { Paginator } from '@/types/domain';
 
@@ -19,7 +20,7 @@ defineProps<{
 
     <div v-if="users.items.length > 0" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <article v-for="user in users.items" :key="user.id" class="flex min-w-0 gap-3 rounded-md border border-border bg-card p-4">
-        <img class="size-12 rounded-full border border-border object-cover" :src="user.profilePicture" :alt="`${user.name} profile picture`">
+        <UserAvatar :src="user.profilePicture" :alt="`${user.name} profile picture`" />
         <div class="flex min-w-0 flex-1 flex-col gap-1">
           <a class="truncate font-medium text-white transition-colors hover:text-primary" :href="user.routes.show">
             {{ user.name }}

@@ -27,6 +27,9 @@ class RouteContractTest extends TestCase
             'ideas.applications.store',
             'ideas.applications.destroy',
             'ideas.applications.approve',
+            'resources.feedback',
+            'resources.contact',
+            'resources.pricing',
         ] as $routeName) {
             $this->assertTrue(Route::has($routeName), "Expected route [{$routeName}] to be registered.");
         }

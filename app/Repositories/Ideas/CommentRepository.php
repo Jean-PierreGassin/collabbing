@@ -5,11 +5,10 @@ namespace App\Repositories\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaComment;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 
 class CommentRepository
 {
-    public function create(Idea $idea, User $user, array $data): Model
+    public function create(Idea $idea, User $user, array $data): IdeaComment
     {
         $data['user_id'] = $user->id;
 

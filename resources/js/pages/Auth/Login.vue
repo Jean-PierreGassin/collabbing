@@ -3,6 +3,7 @@ import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { oldInputBoolean, oldInputString } from '@/lib/forms';
 import { useSessionStore } from '@/stores/session';
 
 const session = useSessionStore();
@@ -16,7 +17,7 @@ const session = useSessionStore();
         <CsrfField />
         <FormField id="username" label="Username">
           <template #default="{ invalid, describedBy }">
-            <input id="username" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="username" autocomplete="username" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input id="username" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="username" autocomplete="username" :value="oldInputString('username')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
           </template>
         </FormField>
         <FormField id="password" label="Password">
@@ -25,7 +26,7 @@ const session = useSessionStore();
           </template>
         </FormField>
         <label class="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="remember" class="size-4 rounded border-input bg-background">
+          <input type="checkbox" name="remember" class="size-4 rounded border-input bg-background" :checked="oldInputBoolean('remember')">
           Remember me
         </label>
         <div class="flex flex-wrap items-center gap-3">

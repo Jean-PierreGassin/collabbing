@@ -6,6 +6,7 @@ use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -14,8 +15,11 @@ class IdeaRepository
     private const INDEX_RELATIONS = [
         'user',
         'codeRepository.events',
+    ];
+
+    private const INDEX_COUNTS = [
         'supporters',
-        'approvedApplications.user',
+        'approvedApplications',
     ];
 
     public function createForUser(User $user, array $data): Idea
@@ -63,8 +67,13 @@ class IdeaRepository
     {
         return Idea::where('status', 'open')
             ->with(self::INDEX_RELATIONS)
-            ->withCount('supporters')
+            ->withCount(self::INDEX_COUNTS)
+            ->where(function ($query): void {
+                $query->has('supporters')
+                    ->orWhereHas('approvedApplications');
+            })
             ->orderBy('supporters_count', 'desc')
+            ->orderBy('approved_applications_count', 'desc')
             ->orderBy('created_at', 'desc')
             ->where('created_at', '>=', Carbon::now()->subDay())
             ->limit(3)
@@ -77,6 +86,7 @@ class IdeaRepository
 
         return Idea::where('status', 'open')
             ->with(self::INDEX_RELATIONS)
+            ->withCount(self::INDEX_COUNTS)
             ->orderBy('created_at', 'desc')
             ->where('title', 'like', "{$search}%")
             ->paginate(10);
@@ -86,30 +96,43 @@ class IdeaRepository
     {
         return Idea::where('status', 'open')
             ->with(self::INDEX_RELATIONS)
+            ->withCount(self::INDEX_COUNTS)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
     }
 
-    public function getUserIdeas(User $user): LengthAwarePaginator
+    public function getUserIdeas(User $user, ?string $search = null): LengthAwarePaginator
     {
         return $user->ideas()
             ->with(self::INDEX_RELATIONS)
+            ->withCount(self::INDEX_COUNTS)
+            ->when($search, fn (Builder $query, string $search): Builder => $this->applyIdeaSearch($query, $search))
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'ideas');
     }
 
-    public function getCollaboratedIdeas(User $user): LengthAwarePaginator
+    public function getCollaboratedIdeas(User $user, ?string $search = null): LengthAwarePaginator
     {
         $collaborationIds = $user->collaborations()->pluck('idea_id');
 
         return Idea::whereIn('id', $collaborationIds)
             ->with(self::INDEX_RELATIONS)
+            ->withCount(self::INDEX_COUNTS)
+            ->when($search, fn (Builder $query, string $search): Builder => $this->applyIdeaSearch($query, $search))
+            ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'collaborations');
     }
 
     public function getComments(Idea $idea): LengthAwarePaginator
     {
-        return $idea->comments()->with('user')->paginate(10);
+        return $idea->comments()
+            ->whereNull('parent_id')
+            ->with([
+                'user',
+                'replies.user',
+            ])
+            ->latest()
+            ->paginate(5, ['*'], 'comments');
     }
 
     public function markRepositoryCreated(Idea $idea): bool
@@ -125,5 +148,15 @@ class IdeaRepository
     public function getApprovedApplications(Idea $idea): Collection
     {
         return $idea->approvedApplications()->get();
+    }
+
+    private function applyIdeaSearch(Builder $query, string $search): Builder
+    {
+        $search = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search);
+
+        return $query->where(function (Builder $query) use ($search): void {
+            $query->where('title', 'like', "{$search}%")
+                ->orWhere('summary', 'like', "%{$search}%");
+        });
     }
 }

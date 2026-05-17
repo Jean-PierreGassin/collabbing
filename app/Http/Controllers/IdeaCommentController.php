@@ -89,7 +89,7 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('update', $comment);
 
-        $this->commentService->update($comment, $request->validated());
+        $this->commentService->update($comment, $request->safe()->only(['content']));
 
         return redirect()
             ->route('ideas.show', compact('idea'))

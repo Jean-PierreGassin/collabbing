@@ -5,8 +5,8 @@ namespace App\Repositories\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApplicationRepository
 {
@@ -29,14 +29,20 @@ class ApplicationRepository
         return $application->delete();
     }
 
-    public function getPendingApplications(Idea $idea): Collection
+    public function getPendingApplications(Idea $idea): LengthAwarePaginator
     {
-        return $idea->pendingApplications()->get();
+        return $idea->pendingApplications()
+            ->with('user')
+            ->latest()
+            ->paginate(10, ['*'], 'applications');
     }
 
-    public function getApprovedApplications(Idea $idea): Collection
+    public function getApprovedApplications(Idea $idea): LengthAwarePaginator
     {
-        return $idea->approvedApplications()->get();
+        return $idea->approvedApplications()
+            ->with('user')
+            ->latest()
+            ->paginate(10, ['*'], 'collaborators');
     }
 
     public function getApplicationFromUser(Idea $idea, User $user, string $type): ?Model

@@ -36,12 +36,14 @@ export interface IdeaApplication {
 
 export interface IdeaComment {
   id: number;
+  parentId: number | null;
   content: string;
   contentHtml: string;
   createdAtForHumans: string;
   updatedAtForHumans: string;
   wasEdited: boolean;
   user: DomainUser;
+  replies: IdeaComment[];
   can: {
     update: boolean;
   };
@@ -85,6 +87,7 @@ export interface Idea {
   id: number;
   title: string;
   titleDisplay: string;
+  summary: string;
   communication: string | null;
   content: string;
   contentHtml: string;
@@ -98,6 +101,7 @@ export interface Idea {
   supportersCount: number;
   approvedApplicationsCount: number;
   collaborators: IdeaApplication[];
+  hiddenCollaboratorsCount: number;
   can: {
     update: boolean;
     storeApplication: boolean;

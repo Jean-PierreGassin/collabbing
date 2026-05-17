@@ -5,6 +5,7 @@ import { LayoutDashboard, LogOut, Menu, Plus, Search, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FlashMessages from '@/components/layout/FlashMessages.vue';
+import BreadcrumbBar from '@/components/navigation/BreadcrumbBar.vue';
 import { useSharedPage } from '@/lib/page';
 import { useSessionStore } from '@/stores/session';
 import type { Idea, DomainUser } from '@/types/domain';
@@ -39,7 +40,7 @@ const seo = computed(() => {
     return {
       title: idea.titleDisplay,
       pageTitle: `${idea.titleDisplay} | Collabbing`,
-      description: excerpt(idea.content, defaultDescription),
+      description: excerpt(idea.summary, defaultDescription),
       type: 'article',
     };
   }
@@ -59,6 +60,7 @@ const seo = computed(() => {
     'Auth/PasswordReset': 'Choose a New Password',
     'Auth/Register': 'Register',
     'Comments/Form': 'Comment',
+    Contact: 'Contact',
     Dashboard: 'Dashboard',
     Error: 'Page Error',
     Feedback: 'Feedback',
@@ -66,7 +68,7 @@ const seo = computed(() => {
     'Ideas/Apply': 'Apply to Collaborate',
     'Ideas/Form': idea ? 'Edit Idea' : 'Share an Idea',
     'Ideas/Index': 'Ideas',
-    'Ideas/Manage': idea ? `${idea.titleDisplay} Dashboard` : 'Idea Dashboard',
+    'Ideas/Manage': idea ? `Manage ${idea.titleDisplay}` : 'Manage Idea',
     'Pricing': 'Pricing',
     'Resources': 'Resources',
     'Users/Form': user ? 'Edit Profile' : 'Create Profile',
@@ -88,6 +90,18 @@ const canonicalUrl = computed(() => (
     ? undefined
     : `${window.location.origin}${page.url.split('#')[0]}`
 ));
+
+const transitionKey = computed(() => {
+  const [pathAndQuery, hash = ''] = page.url.split('#');
+  const [path, query = ''] = pathAndQuery.split('?');
+  const params = new URLSearchParams(query);
+
+  params.delete('comments');
+
+  const nextQuery = params.toString();
+
+  return `${path}${nextQuery ? `?${nextQuery}` : ''}${hash ? `#${hash}` : ''}`;
+});
 
 function closeMobileNavigation(): void {
   isMobileMenuOpen.value = false;
@@ -281,10 +295,12 @@ function toggleMobileSearch(): void {
       </div>
     </header>
 
+    <BreadcrumbBar />
+
     <main id="main-content" tabindex="-1" class="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 outline-none sm:px-6 lg:px-8">
       <FlashMessages />
       <Transition name="page-fade" mode="out-in">
-        <div :key="page.url" class="page-transition-panel">
+        <div :key="transitionKey" class="page-transition-panel">
           <slot />
         </div>
       </Transition>
@@ -328,7 +344,7 @@ function toggleMobileSearch(): void {
           <h2 class="text-sm font-semibold text-white">Support</h2>
           <nav aria-label="Support links" class="flex flex-col gap-2 text-muted-foreground">
             <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.feedback">Feedback</Link>
-            <a class="w-fit transition-colors hover:text-primary" href="mailto:jeanpierre.gassin@gmail.com?subject=Collabbing Feedback">Contact</a>
+            <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.contact">Contact</Link>
           </nav>
         </div>
       </div>

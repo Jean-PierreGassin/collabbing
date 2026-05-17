@@ -51,6 +51,30 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertIndexRelationshipsAreLoaded($loadedIdea);
     }
 
+    public function test_trending_ideas_require_support_or_collaboration_signal(): void
+    {
+        $quietIdea = Idea::factory()
+            ->for(User::factory(), 'user')
+            ->create([
+                'status' => 'open',
+            ]);
+
+        $activeIdea = $this->createIdeaWithIndexRelations();
+
+        $trendingIds = app(IdeaRepository::class)
+            ->getTrending()
+            ->pluck('id');
+
+        $recentIds = app(IdeaRepository::class)
+            ->getOpenRecent()
+            ->getCollection()
+            ->pluck('id');
+
+        $this->assertTrue($trendingIds->contains($activeIdea->id));
+        $this->assertFalse($trendingIds->contains($quietIdea->id));
+        $this->assertTrue($recentIds->contains($quietIdea->id));
+    }
+
     public function test_dashboard_ideas_are_loaded_with_index_relationships(): void
     {
         $owner = User::factory()->create();
@@ -81,7 +105,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
             ->getCollection()
             ->firstWhere('id', $idea->id);
 
-        $this->assertIndexRelationshipsAreLoaded($loadedIdea);
+        $this->assertIndexRelationshipsAreLoaded($loadedIdea, 2);
     }
 
     private function createIdeaWithIndexRelations(array $overrides = [], ?User $owner = null): Idea
@@ -107,12 +131,13 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         return $idea;
     }
 
-    private function assertIndexRelationshipsAreLoaded(?Idea $idea): void
+    private function assertIndexRelationshipsAreLoaded(?Idea $idea, int $approvedApplicationsCount = 1): void
     {
         $this->assertInstanceOf(Idea::class, $idea);
         $this->assertTrue($idea->relationLoaded('user'));
-        $this->assertTrue($idea->relationLoaded('supporters'));
-        $this->assertTrue($idea->relationLoaded('approvedApplications'));
-        $this->assertTrue($idea->approvedApplications->first()->relationLoaded('user'));
+        $this->assertSame(1, $idea->getAttribute('supporters_count'));
+        $this->assertSame($approvedApplicationsCount, $idea->getAttribute('approved_applications_count'));
+        $this->assertFalse($idea->relationLoaded('supporters'));
+        $this->assertFalse($idea->relationLoaded('approvedApplications'));
     }
 }

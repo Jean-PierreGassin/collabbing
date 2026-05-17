@@ -3,14 +3,18 @@ import { computed } from 'vue';
 import { fieldErrors } from '@/lib/forms';
 
 const props = withDefaults(defineProps<{
+  errorKey?: string;
   id: string;
   label: string;
+  hideLabel?: boolean;
   help?: string;
 }>(), {
+  errorKey: undefined,
+  hideLabel: false,
   help: undefined,
 });
 
-const errors = computed(() => fieldErrors(props.id));
+const errors = computed(() => fieldErrors(props.errorKey ?? props.id));
 const helpId = computed(() => (props.help ? `${props.id}-help` : undefined));
 const errorId = computed(() => (errors.value.length > 0 ? `${props.id}-error` : undefined));
 const describedBy = computed(() => [helpId.value, errorId.value].filter(Boolean).join(' ') || undefined);
@@ -18,7 +22,7 @@ const describedBy = computed(() => [helpId.value, errorId.value].filter(Boolean)
 
 <template>
   <div class="flex flex-col gap-2">
-    <label :for="id" class="text-sm font-medium text-foreground">{{ label }}</label>
+    <label :for="id" :class="hideLabel ? 'sr-only' : 'text-sm font-medium text-foreground'">{{ label }}</label>
     <slot :invalid="errors.length > 0" :described-by="describedBy" />
     <p v-if="help" :id="helpId" class="text-sm text-muted-foreground">{{ help }}</p>
     <p v-if="errors.length > 0" :id="errorId" class="text-sm text-destructive" role="alert">

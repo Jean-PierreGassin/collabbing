@@ -18,7 +18,7 @@ const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingI
 <template>
   <section class="flex flex-col gap-10">
     <div class="flex flex-col gap-3 border-b border-border pb-6">
-      <h1 class="text-3xl font-semibold text-white">Ideas</h1>
+      <h1 class="sr-only">Ideas</h1>
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
