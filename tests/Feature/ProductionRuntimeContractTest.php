@@ -69,6 +69,10 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('Missing production environment file', $script);
         $this->assertStringContainsString('Production deploy preflight failed', $script);
         $this->assertStringContainsString('validate_production_env', $script);
+        $this->assertLessThan(
+            strpos($script, 'docker swarm init'),
+            strrpos($script, 'validate_production_env'),
+        );
         $this->assertStringContainsString('. "$DOCKER_ENV_FILE"', $script);
         $this->assertStringContainsString('docker network inspect "$NETWORK_NAME"', $script);
         $this->assertStringContainsString('php artisan "$@"', $script);

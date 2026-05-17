@@ -108,6 +108,8 @@ if [ "$MODE" = "--preflight" ]; then
   exit 0
 fi
 
+validate_production_env
+
 if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -qx active; then
   docker swarm init
 fi
