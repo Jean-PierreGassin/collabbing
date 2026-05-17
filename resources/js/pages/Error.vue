@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps<{
   status: 401 | 403 | 404 | 419 | 429 | 500 | 503;
@@ -57,22 +58,23 @@ const details = computed(() => {
 
 <template>
   <section class="mx-auto flex min-h-[45vh] max-w-2xl flex-col items-center justify-center gap-5 px-4 text-center">
-    <p class="text-sm font-semibold uppercase tracking-wide text-blue-200">Error {{ status }}</p>
+    <p class="text-sm font-semibold uppercase tracking-wide text-primary">Error {{ status }}</p>
     <h1 class="text-4xl font-semibold text-white md:text-5xl">{{ details.title }}</h1>
-    <p class="text-base leading-7 text-slate-200 md:text-lg">{{ details.message }}</p>
+    <p class="text-base leading-7 text-muted-foreground md:text-lg">{{ details.message }}</p>
     <div class="flex flex-wrap justify-center gap-3">
-      <a
+      <Button
+        as="a"
         href="/ideas"
-        class="inline-flex min-h-11 items-center justify-center rounded-md bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-200"
       >
         Browse ideas
-      </a>
-      <a
+      </Button>
+      <Button
+        as="a"
         href="/"
-        class="inline-flex min-h-11 items-center justify-center rounded-md border border-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-200"
+        variant="outline"
       >
         Go home
-      </a>
+      </Button>
     </div>
   </section>
 </template>

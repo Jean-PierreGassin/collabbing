@@ -54,7 +54,10 @@ function pasteRepositoryName(event: ClipboardEvent): void {
 
 <template>
   <Card>
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ idea ? 'Edit' : 'Share' }} your Idea</h1></CardHeader>
+    <CardHeader>
+      <h1 class="text-2xl font-semibold text-white">{{ idea ? 'Edit' : 'Share' }} your idea</h1>
+      <p class="text-sm text-muted-foreground">Describe the problem, the collaboration shape, and the repository plan.</p>
+    </CardHeader>
     <CardContent>
       <form :action="idea ? idea.routes.update : session.routes.ideasStore" method="POST" class="flex flex-col gap-5">
         <CsrfField />
@@ -74,19 +77,19 @@ function pasteRepositoryName(event: ClipboardEvent): void {
           </FormField>
         </div>
 
-        <FormField id="repository_name" label="Repository Name" help="Use up to 100 letters, numbers, dashes, or underscores.">
+        <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores.">
           <template #default="{ invalid, describedBy }">
             <input id="repository_name" name="repository_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="idea?.repositoryName ?? ''" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
           </template>
         </FormField>
 
-        <FormField id="content" label="The Pitch (supports markdown)" help="Make it meaningful and to the point, short and sweet is the best way to get an idea across.">
+        <FormField id="content" label="Pitch (supports markdown)" help="Keep it specific: the problem, who it helps, and what a first version should do.">
           <template #default="{ invalid, describedBy }">
             <textarea id="content" name="content" class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="Explain the problem, who it helps, and what a first version should do." maxlength="1500" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>{{ idea?.content ?? '' }}</textarea>
           </template>
         </FormField>
 
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <label v-if="idea" for="status" class="flex items-center gap-2 text-sm">
             Status:
             <select id="status" name="status" class="h-9 rounded-md border border-input bg-background px-2 text-sm">
@@ -96,7 +99,7 @@ function pasteRepositoryName(event: ClipboardEvent): void {
           </label>
           <span v-else />
 
-          <Button type="submit" size="sm" :variant="idea ? 'secondary' : 'default'">
+          <Button type="submit" size="sm" :variant="idea ? 'secondary' : 'default'" class="self-start">
             {{ idea ? 'Edit Idea' : 'Share Idea' }}
           </Button>
         </div>

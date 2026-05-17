@@ -25,26 +25,26 @@ function submitProfile(event: SubmitEvent): void {
 
 <template>
   <Card>
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ user ? 'Edit' : 'Create' }} Profile</h1></CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ user ? 'Edit' : 'Create' }} profile</h1></CardHeader>
     <CardContent>
       <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit.prevent="submitProfile">
         <CsrfField />
         <MethodField v-if="user" method="PUT" />
 
         <div class="grid gap-4 md:grid-cols-2">
-          <FormField id="first_name" label="First Name">
+          <FormField id="first_name" label="First name">
             <template #default="{ invalid, describedBy }">
               <input id="first_name" name="first_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.firstName ?? ''" placeholder="John" autocomplete="given-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
-          <FormField id="last_name" label="Last Name">
+          <FormField id="last_name" label="Last name">
             <template #default="{ invalid, describedBy }">
               <input id="last_name" name="last_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.lastName ?? ''" placeholder="Smith" autocomplete="family-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
         </div>
 
-        <FormField id="email" label="E-Mail Address">
+        <FormField id="email" label="Email address">
           <template #default="{ invalid, describedBy }">
             <input id="email" name="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.email ?? ''" placeholder="john.smith@apples.com" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
           </template>
@@ -53,10 +53,10 @@ function submitProfile(event: SubmitEvent): void {
         <div v-if="user" class="flex flex-col gap-3">
           <h4 class="text-xl font-semibold">Integrations</h4>
           <p class="text-sm text-muted-foreground">
-            Linking your GitHub account will allow for seamless integration between your ideas and repositories - view your access to Collabbing
-            <a class="text-primary hover:underline" :href="`https://github.com/settings/connections/applications/${githubClientId ?? ''}`">here</a>
+            Link GitHub to create repositories from ideas and invite approved collaborators.
+            <a class="text-primary hover:underline" :href="`https://github.com/settings/connections/applications/${githubClientId ?? ''}`">Review GitHub access</a>
           </p>
-          <Button v-if="user.hasGithubToken" type="submit" form="github-revoke-form" size="sm" class="w-fit">
+          <Button v-if="user.hasGithubToken" type="submit" form="github-revoke-form" variant="outline" size="sm" class="w-fit">
             Unlink GitHub
           </Button>
           <Button v-else as="a" :href="user.routes.githubLogin" variant="outline" size="sm" class="w-fit">
@@ -71,12 +71,12 @@ function submitProfile(event: SubmitEvent): void {
         </FormField>
 
         <div class="grid gap-4 md:grid-cols-2">
-          <FormField id="password" label="New Password:" help="Leave blank to keep your current password. New passwords need at least 12 characters with letters and numbers.">
+          <FormField id="password" label="New password" help="Leave blank to keep your current password. New passwords need at least 12 characters with letters and numbers.">
             <template #default="{ invalid, describedBy }">
               <input id="password" name="password" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
             </template>
           </FormField>
-          <FormField id="password_confirmation" label="Confirm Password:">
+          <FormField id="password_confirmation" label="Confirm password">
             <template #default="{ invalid, describedBy }">
               <input id="password_confirmation" name="password_confirmation" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
             </template>

@@ -32,7 +32,7 @@ defineProps<{
             />
           </template>
         </FormField>
-        <Button type="submit" variant="outline" class="self-start">Submit Application</Button>
+        <Button type="submit" class="self-start">Submit Application</Button>
       </form>
     </CardContent>
   </Card>
