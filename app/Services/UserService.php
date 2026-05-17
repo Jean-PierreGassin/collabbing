@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ConnectedAccount;
 use App\Models\User;
 use App\Repositories\Users\UserRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -41,5 +42,24 @@ class UserService
         }
 
         return $this->users->update($user, $values);
+    }
+
+    public function connectProvider(User $user, string $provider, ?string $token, ?string $username, ?string $providerUserId = null, array $scopes = []): ConnectedAccount
+    {
+        return $user->connectedAccounts()->updateOrCreate(
+            ['provider' => $provider],
+            [
+                'provider_user_id' => $providerUserId,
+                'provider_username' => $username,
+                'token' => $token,
+                'scopes' => $scopes,
+                'connected_at' => now(),
+            ]
+        );
+    }
+
+    public function disconnectProvider(User $user, string $provider): void
+    {
+        $user->connectedAccounts()->where('provider', $provider)->delete();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Idea;
+use App\Models\CodeRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -29,27 +29,29 @@ class SyncGitHubRepositories implements ShouldBeUnique, ShouldQueue
 
     public function handle(IdeaRepositorySyncService $sync): void
     {
-        Idea::query()
-            ->where('repository', true)
+        CodeRepository::query()
+            ->where('provider', CodeRepository::PROVIDER_GITHUB)
+            ->where('status', CodeRepository::STATUS_ACTIVE)
             ->where(fn ($query) => $query
-                ->whereNull('repository_sync_due_at')
-                ->orWhere('repository_sync_due_at', '<=', now()))
-            ->whereHas('user', fn ($query) => $query
-                ->whereNotNull('github_token')
-                ->whereNotNull('github_username'))
-            ->with('user')
-            ->oldest('repository_sync_due_at')
+                ->whereNull('sync_due_at')
+                ->orWhere('sync_due_at', '<=', now()))
+            ->whereHas('idea.user.githubAccount', fn ($query) => $query
+                ->whereNotNull('token')
+                ->whereNotNull('provider_username'))
+            ->with('idea.user.githubAccount')
+            ->oldest('sync_due_at')
             ->limit((int) config('services.github.repository_sync.max_per_run', 25))
             ->get()
-            ->each(function (Idea $idea) use ($sync): void {
+            ->each(function (CodeRepository $codeRepository) use ($sync): void {
                 try {
-                    $sync->sync($idea);
+                    $sync->sync($codeRepository);
                 } catch (Throwable $exception) {
-                    $sync->scheduleRetry($idea);
+                    $sync->scheduleRetry($codeRepository);
 
                     Log::warning('GitHub repository sync failed for idea.', [
-                        'idea_id' => $idea->id,
-                        'repository_name' => $idea->repository_name,
+                        'idea_id' => $codeRepository->idea_id,
+                        'code_repository_id' => $codeRepository->id,
+                        'repository_name' => $codeRepository->name,
                         'exception' => $exception::class,
                         'message' => $exception->getMessage(),
                     ]);

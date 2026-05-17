@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
 use Carbon\Carbon;
@@ -12,18 +13,48 @@ class IdeaRepository
 {
     private const INDEX_RELATIONS = [
         'user',
+        'codeRepository.events',
         'supporters',
         'approvedApplications.user',
     ];
 
     public function createForUser(User $user, array $data): Idea
     {
-        return $user->ideas()->create($data);
+        $repositoryName = $data['repository_name'] ?? null;
+        unset($data['repository_name']);
+
+        $idea = $user->ideas()->create($data);
+
+        if ($repositoryName) {
+            $idea->codeRepository()->create([
+                'provider' => CodeRepository::PROVIDER_GITHUB,
+                'status' => CodeRepository::STATUS_PLANNED,
+                'owner' => $user->githubUsername(),
+                'name' => $repositoryName,
+            ]);
+        }
+
+        return $idea->load('codeRepository');
     }
 
     public function update(Idea $idea, array $data): bool
     {
+        $repositoryName = $data['repository_name'] ?? null;
+        unset($data['repository_name']);
+
         $idea->update($data);
+
+        if ($repositoryName) {
+            $idea->loadMissing('user');
+
+            $idea->codeRepository()->updateOrCreate(
+                ['provider' => CodeRepository::PROVIDER_GITHUB],
+                [
+                    'owner' => $idea->user->githubUsername(),
+                    'name' => $repositoryName,
+                ]
+            );
+        }
 
         return $idea->save();
     }
@@ -83,10 +114,12 @@ class IdeaRepository
 
     public function markRepositoryCreated(Idea $idea): bool
     {
-        return $this->update($idea, [
-            'repository' => true,
-            'repository_missing_at' => null,
-        ]);
+        $idea->codeRepository?->forceFill([
+            'status' => CodeRepository::STATUS_ACTIVE,
+            'missing_at' => null,
+        ])->save();
+
+        return true;
     }
 
     public function getApprovedApplications(Idea $idea): Collection

@@ -2,7 +2,7 @@
 
 namespace App\Services\Ideas;
 
-use App\Models\Idea;
+use App\Models\CodeRepository;
 use App\Models\User;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Carbon\Carbon;
@@ -14,19 +14,28 @@ class IdeaRepositorySyncService
 {
     public function __construct(private GitHubRepositoryClient $github) {}
 
-    public function sync(Idea $idea): void
+    public function sync(CodeRepository $codeRepository): void
     {
-        $idea->loadMissing('user');
+        $codeRepository->loadMissing('idea.user.githubAccount');
 
-        if (! $idea->repository || ! $idea->user instanceof User || ! $idea->user->github_token || ! $idea->user->github_username || ! $idea->repository_name) {
+        $owner = $codeRepository->idea?->user;
+
+        if (
+            $codeRepository->provider !== CodeRepository::PROVIDER_GITHUB
+            || $codeRepository->status !== CodeRepository::STATUS_ACTIVE
+            || ! $owner instanceof User
+            || ! $owner->githubToken()
+            || ! $owner->githubUsername()
+            || ! $codeRepository->name
+        ) {
             return;
         }
 
         try {
-            $repository = $this->github->show($idea->user, $idea->repository_name);
+            $repository = $this->github->show($owner, $codeRepository->name);
         } catch (GitHubRuntimeException $exception) {
             if ($exception->getCode() === 404) {
-                $this->markMissing($idea);
+                $this->markMissing($codeRepository);
 
                 return;
             }
@@ -35,61 +44,66 @@ class IdeaRepositorySyncService
         }
 
         $branch = Arr::get($repository, 'default_branch');
-        $latestCommit = $this->github->latestCommit($idea->user, $idea->repository_name, is_string($branch) ? $branch : null);
+        $latestCommit = $this->github->latestCommit($owner, $codeRepository->name, is_string($branch) ? $branch : null);
 
-        $this->recordSnapshot($idea, $repository, $latestCommit);
+        $this->recordSnapshot($codeRepository, $repository, $latestCommit);
     }
 
-    public function recordCreated(Idea $idea, array $repository): void
+    public function recordCreated(CodeRepository $codeRepository, array $repository): void
     {
-        $this->recordSnapshot($idea, $repository, null);
+        $this->recordSnapshot($codeRepository, $repository, null);
 
         $this->recordEvent(
-            $idea,
+            $codeRepository,
             'repository_created',
             'Repository created on GitHub.',
-            'repository_created:'.$idea->repository_name,
+            'repository_created:'.$codeRepository->name,
             now(),
             $this->repositoryPayload($repository)
         );
     }
 
-    public function recordSnapshot(Idea $idea, array $repository, ?array $latestCommit): void
+    public function recordSnapshot(CodeRepository $codeRepository, array $repository, ?array $latestCommit): void
     {
-        $wasSynced = (bool) $idea->repository_synced_at;
-        $previousBranch = $idea->repository_default_branch;
-        $previousIssuesCount = $idea->repository_open_issues_count;
-        $previousCommitSha = $idea->repository_latest_commit_sha;
-        $previousMissingAt = $idea->repository_missing_at;
+        $wasSynced = (bool) $codeRepository->synced_at;
+        $previousBranch = $codeRepository->default_branch;
+        $previousIssuesCount = $codeRepository->open_issues_count;
+        $previousCommitSha = $codeRepository->latest_commit_sha;
+        $previousMissingAt = $codeRepository->missing_at;
 
         $latestCommitSha = Arr::get($latestCommit ?? [], 'sha');
         $latestCommitMessage = $this->commitMessage($latestCommit);
         $latestCommitAuthor = $this->commitAuthor($latestCommit);
         $pushedAt = $this->parseDate(Arr::get($repository, 'pushed_at'));
         $syncedAt = now();
+        $fullName = Arr::get($repository, 'full_name');
 
-        $idea->forceFill([
-            'repository' => true,
-            'repository_html_url' => Arr::get($repository, 'html_url'),
-            'repository_default_branch' => Arr::get($repository, 'default_branch'),
-            'repository_open_issues_count' => (int) Arr::get($repository, 'open_issues_count', 0),
-            'repository_stargazers_count' => (int) Arr::get($repository, 'stargazers_count', 0),
-            'repository_forks_count' => (int) Arr::get($repository, 'forks_count', 0),
-            'repository_latest_commit_sha' => $latestCommitSha,
-            'repository_latest_commit_message' => $latestCommitMessage,
-            'repository_latest_commit_author' => $latestCommitAuthor,
-            'repository_pushed_at' => $pushedAt,
-            'repository_synced_at' => $syncedAt,
-            'repository_missing_at' => null,
-            'repository_sync_due_at' => $this->nextSyncDueAt($syncedAt),
+        $codeRepository->forceFill([
+            'status' => CodeRepository::STATUS_ACTIVE,
+            'provider_repository_id' => $this->repositoryProviderId($repository),
+            'owner' => $this->repositoryOwner($repository, $codeRepository->owner),
+            'name' => Arr::get($repository, 'name', $codeRepository->name),
+            'full_name' => is_string($fullName) ? $fullName : $codeRepository->full_name,
+            'html_url' => Arr::get($repository, 'html_url'),
+            'default_branch' => Arr::get($repository, 'default_branch'),
+            'open_issues_count' => (int) Arr::get($repository, 'open_issues_count', 0),
+            'stargazers_count' => (int) Arr::get($repository, 'stargazers_count', 0),
+            'forks_count' => (int) Arr::get($repository, 'forks_count', 0),
+            'latest_commit_sha' => $latestCommitSha,
+            'latest_commit_message' => $latestCommitMessage,
+            'latest_commit_author' => $latestCommitAuthor,
+            'pushed_at' => $pushedAt,
+            'synced_at' => $syncedAt,
+            'missing_at' => null,
+            'sync_due_at' => $this->nextSyncDueAt($syncedAt),
         ])->save();
 
         if (! $wasSynced) {
             $this->recordEvent(
-                $idea,
+                $codeRepository,
                 'repository_synced',
                 'Repository sync connected to GitHub.',
-                'repository_synced:'.$idea->repository_name,
+                'repository_synced:'.$codeRepository->name,
                 $syncedAt,
                 $this->repositoryPayload($repository)
             );
@@ -97,10 +111,10 @@ class IdeaRepositorySyncService
 
         if ($previousMissingAt) {
             $this->recordEvent(
-                $idea,
+                $codeRepository,
                 'repository_restored',
                 'Repository is available on GitHub again.',
-                'repository_restored:'.$idea->repository_name.':'.$syncedAt->timestamp,
+                'repository_restored:'.$codeRepository->name.':'.$syncedAt->timestamp,
                 $syncedAt,
                 $this->repositoryPayload($repository)
             );
@@ -108,7 +122,7 @@ class IdeaRepositorySyncService
 
         if ($latestCommitSha && $latestCommitSha !== $previousCommitSha) {
             $this->recordEvent(
-                $idea,
+                $codeRepository,
                 'repository_commit',
                 $latestCommitMessage ? 'Latest commit: '.$latestCommitMessage : 'Repository received a new commit.',
                 'commit:'.$latestCommitSha,
@@ -121,53 +135,53 @@ class IdeaRepositorySyncService
             );
         }
 
-        if ($wasSynced && $previousBranch && $previousBranch !== $idea->repository_default_branch) {
+        if ($wasSynced && $previousBranch && $previousBranch !== $codeRepository->default_branch) {
             $this->recordEvent(
-                $idea,
+                $codeRepository,
                 'repository_branch_changed',
-                "Default branch changed from {$previousBranch} to {$idea->repository_default_branch}.",
-                'default_branch:'.$idea->repository_default_branch.':'.$syncedAt->timestamp,
+                "Default branch changed from {$previousBranch} to {$codeRepository->default_branch}.",
+                'default_branch:'.$codeRepository->default_branch.':'.$syncedAt->timestamp,
                 $syncedAt,
-                ['previous' => $previousBranch, 'current' => $idea->repository_default_branch]
+                ['previous' => $previousBranch, 'current' => $codeRepository->default_branch]
             );
         }
 
-        if ($wasSynced && $previousIssuesCount !== $idea->repository_open_issues_count) {
+        if ($wasSynced && $previousIssuesCount !== $codeRepository->open_issues_count) {
             $this->recordEvent(
-                $idea,
+                $codeRepository,
                 'repository_issues_changed',
-                "Open issues changed from {$previousIssuesCount} to {$idea->repository_open_issues_count}.",
-                'open_issues:'.$idea->repository_open_issues_count.':'.$syncedAt->timestamp,
+                "Open issues changed from {$previousIssuesCount} to {$codeRepository->open_issues_count}.",
+                'open_issues:'.$codeRepository->open_issues_count.':'.$syncedAt->timestamp,
                 $syncedAt,
-                ['previous' => $previousIssuesCount, 'current' => $idea->repository_open_issues_count]
+                ['previous' => $previousIssuesCount, 'current' => $codeRepository->open_issues_count]
             );
         }
     }
 
-    private function markMissing(Idea $idea): void
+    private function markMissing(CodeRepository $codeRepository): void
     {
         $missingAt = now();
 
-        $idea->forceFill([
-            'repository' => false,
-            'repository_synced_at' => $missingAt,
-            'repository_missing_at' => $missingAt,
-            'repository_sync_due_at' => null,
+        $codeRepository->forceFill([
+            'status' => CodeRepository::STATUS_MISSING,
+            'synced_at' => $missingAt,
+            'missing_at' => $missingAt,
+            'sync_due_at' => null,
         ])->save();
 
         $this->recordEvent(
-            $idea,
+            $codeRepository,
             'repository_missing',
             'Repository is no longer available on GitHub.',
-            'repository_missing:'.$idea->repository_name.':'.$missingAt->toDateString(),
+            'repository_missing:'.$codeRepository->name.':'.$missingAt->toDateString(),
             $missingAt,
-            ['repository_name' => $idea->repository_name]
+            ['repository_name' => $codeRepository->name]
         );
     }
 
-    private function recordEvent(Idea $idea, string $type, string $summary, string $dedupeKey, Carbon $occurredAt, array $payload = []): void
+    private function recordEvent(CodeRepository $codeRepository, string $type, string $summary, string $dedupeKey, Carbon $occurredAt, array $payload = []): void
     {
-        $idea->repositoryEvents()->firstOrCreate(
+        $codeRepository->events()->firstOrCreate(
             ['dedupe_key' => $dedupeKey],
             [
                 'type' => $type,
@@ -178,10 +192,10 @@ class IdeaRepositorySyncService
         );
     }
 
-    public function scheduleRetry(Idea $idea): void
+    public function scheduleRetry(CodeRepository $codeRepository): void
     {
-        $idea->forceFill([
-            'repository_sync_due_at' => $this->retrySyncDueAt(now()),
+        $codeRepository->forceFill([
+            'sync_due_at' => $this->retrySyncDueAt(now()),
         ])->save();
     }
 
@@ -214,6 +228,28 @@ class IdeaRepositorySyncService
             'forks_count',
             'pushed_at',
         ]);
+    }
+
+    private function repositoryProviderId(array $repository): ?string
+    {
+        $id = Arr::get($repository, 'id');
+
+        return is_scalar($id) ? (string) $id : null;
+    }
+
+    private function repositoryOwner(array $repository, ?string $fallback): ?string
+    {
+        $owner = Arr::get($repository, 'owner.login');
+
+        if (is_string($owner) && $owner !== '') {
+            return $owner;
+        }
+
+        $fullName = Arr::get($repository, 'full_name');
+
+        return is_string($fullName) && str_contains($fullName, '/')
+            ? Str::before($fullName, '/')
+            : $fallback;
     }
 
     private function commitMessage(?array $latestCommit): ?string

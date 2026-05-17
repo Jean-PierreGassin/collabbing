@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
-use App\Repositories\Ideas\IdeaRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -15,37 +16,46 @@ use Throwable;
 class RepositoryService
 {
     public function __construct(
-        private IdeaRepository $ideas,
         private GitHubRepositoryClient $github,
         private IdeaRepositorySyncService $sync
     ) {}
 
     public function create(Idea $idea): bool
     {
-        $repository = $this->github->create($idea->user, $idea->repository_name);
+        $idea->loadMissing('user.githubAccount', 'codeRepository');
 
-        $created = $this->ideas->markRepositoryCreated($idea);
+        if (! $idea->codeRepository instanceof CodeRepository) {
+            throw new RuntimeException('Repository settings are missing.');
+        }
 
-        $this->sync->recordCreated($idea->refresh(), $repository);
+        $repository = $this->github->create($idea->user, $idea->codeRepository->name);
 
-        return $created;
+        $this->sync->recordCreated($idea->codeRepository, $repository);
+
+        return true;
     }
 
     public function inviteUsers(Idea $idea): bool
     {
-        return $this->ideas
-            ->getApprovedApplications($idea)
+        return $idea->approvedApplications()
+            ->with('user.githubAccount')
+            ->get()
             ->every(fn (IdeaApplication $collaborator) => $this->inviteUser($idea, $collaborator));
     }
 
     public function inviteUser(Idea $idea, IdeaApplication $collaborator): bool
     {
-        if (! $collaborator->user->github_username) {
+        $idea->loadMissing('user.githubAccount', 'codeRepository');
+        $collaborator->loadMissing('user.githubAccount');
+
+        $collaboratorUsername = $collaborator->user->githubUsername();
+
+        if (! $idea->codeRepository instanceof CodeRepository || ! $collaboratorUsername) {
             return false;
         }
 
         try {
-            $this->github->addCollaborator($idea->user, $idea->repository_name, $collaborator->user->github_username);
+            $this->github->addCollaborator($idea->user, $idea->codeRepository->name, $collaboratorUsername);
         } catch (Throwable) {
             return false;
         }

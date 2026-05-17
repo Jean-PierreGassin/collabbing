@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -13,13 +14,13 @@ use Illuminate\Notifications\Notifiable;
  * @property string $username
  * @property string $first_name
  * @property string $last_name
- * @property string $github_token
- * @property string $github_username
  */
 class User extends Authenticatable
 {
     use HasFactory;
     use Notifiable;
+
+    public const PROVIDER_GITHUB = 'github';
 
     private const DEFAULT_PROFILE_PICTURE = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp';
 
@@ -35,8 +36,6 @@ class User extends Authenticatable
         'bio',
         'email',
         'password',
-        'github_token',
-        'github_username',
     ];
 
     /**
@@ -48,13 +47,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'github_token' => 'encrypted',
-        ];
-    }
 
     public function ideas(): HasMany
     {
@@ -79,15 +71,27 @@ class User extends Authenticatable
         return $this->hasMany(IdeaApplication::class, 'user_id');
     }
 
-    public function getNameAttribute()
+    public function connectedAccounts(): HasMany
+    {
+        return $this->hasMany(ConnectedAccount::class);
+    }
+
+    public function githubAccount(): HasOne
+    {
+        return $this->hasOne(ConnectedAccount::class)->where('provider', self::PROVIDER_GITHUB);
+    }
+
+    public function getNameAttribute(): string
     {
         return "$this->first_name $this->last_name";
     }
 
     public function profilePicture(): string
     {
-        if ($this->github_username) {
-            return 'https://github.com/'.rawurlencode($this->github_username).'.png?size=200';
+        $githubUsername = $this->githubUsername();
+
+        if ($githubUsername) {
+            return 'https://github.com/'.rawurlencode($githubUsername).'.png?size=200';
         }
 
         return self::DEFAULT_PROFILE_PICTURE;
@@ -95,8 +99,28 @@ class User extends Authenticatable
 
     public function hasGithubToken(): bool
     {
-        $token = $this->getRawOriginal('github_token');
+        $token = $this->githubToken();
 
         return is_string($token) && $token !== '';
+    }
+
+    public function githubToken(): ?string
+    {
+        return $this->githubAccount?->token;
+    }
+
+    public function githubUsername(): ?string
+    {
+        return $this->githubAccount?->provider_username;
+    }
+
+    public function getGithubTokenAttribute(): ?string
+    {
+        return $this->githubToken();
+    }
+
+    public function getGithubUsernameAttribute(): ?string
+    {
+        return $this->githubUsername();
     }
 }

@@ -100,10 +100,7 @@ class AuthSecurityTest extends TestCase
 
     public function test_user_props_do_not_require_a_github_api_request_for_profile_pictures(): void
     {
-        $user = User::factory()->create([
-            'github_token' => 'invalid-token',
-            'github_username' => 'octocat',
-        ]);
+        $user = User::factory()->withGithubAccount('invalid-token', 'octocat')->create();
 
         $response = $this->get(route('users.show', $user->username));
 
@@ -182,10 +179,7 @@ class AuthSecurityTest extends TestCase
 
     public function test_github_revoke_requires_a_non_get_request(): void
     {
-        $user = User::factory()->create([
-            'github_token' => 'github-token',
-            'github_username' => 'octocat',
-        ]);
+        $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
         $response = $this
             ->actingAs($user)
@@ -195,8 +189,8 @@ class AuthSecurityTest extends TestCase
 
         $user->refresh();
 
-        $this->assertSame('github-token', $user->github_token);
-        $this->assertSame('octocat', $user->github_username);
+        $this->assertSame('github-token', $user->githubToken());
+        $this->assertSame('octocat', $user->githubUsername());
     }
 
     public function test_github_oauth_requests_only_public_repository_scope(): void
@@ -224,62 +218,58 @@ class AuthSecurityTest extends TestCase
 
     public function test_github_tokens_are_encrypted_at_rest(): void
     {
-        $user = User::factory()->create([
-            'github_token' => 'github-token',
-        ]);
+        $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
-        $storedToken = DB::table('users')
-            ->where('id', $user->id)
-            ->value('github_token');
+        $storedToken = DB::table('connected_accounts')
+            ->where('user_id', $user->id)
+            ->where('provider', User::PROVIDER_GITHUB)
+            ->value('token');
 
         $this->assertIsString($storedToken);
         $this->assertNotSame('github-token', $storedToken);
-        $this->assertSame('github-token', $user->refresh()->github_token);
+        $this->assertSame('github-token', $user->refresh()->githubToken());
     }
 
-    public function test_github_token_migration_encrypts_existing_plaintext_tokens(): void
+    public function test_github_callback_stores_a_provider_account(): void
     {
-        $userId = DB::table('users')->insertGetId([
-            'username' => 'plaintext-token-user',
-            'first_name' => 'Plain',
-            'last_name' => 'Token',
-            'email' => 'plaintext-token@example.com',
-            'password' => bcrypt('password'),
-            'github_token' => 'legacy-token',
-            'github_username' => 'octocat',
-            'created_at' => now(),
-            'updated_at' => now(),
+        $user = User::factory()->create();
+        $providerUser = Mockery::mock();
+        $providerUser->token = 'github-token';
+        $providerUser->shouldReceive('getId')->once()->andReturn(123);
+        $providerUser->shouldReceive('getNickname')->once()->andReturn('octocat');
+        $provider = Mockery::mock();
+        $provider->shouldReceive('user')->once()->andReturn($providerUser);
+
+        Socialite::shouldReceive('driver')
+            ->once()
+            ->with('github')
+            ->andReturn($provider);
+
+        $this
+            ->actingAs($user)
+            ->get(route('auth.github.callback'))
+            ->assertRedirect(route('users.edit', $user->username));
+
+        $this->assertDatabaseHas('connected_accounts', [
+            'user_id' => $user->id,
+            'provider' => User::PROVIDER_GITHUB,
+            'provider_user_id' => '123',
+            'provider_username' => 'octocat',
         ]);
-
-        $migration = include database_path('migrations/2026_05_16_211122_encrypt_github_tokens_on_users_table.php');
-
-        $migration->up();
-
-        $storedToken = DB::table('users')
-            ->where('id', $userId)
-            ->value('github_token');
-
-        $this->assertIsString($storedToken);
-        $this->assertNotSame('legacy-token', $storedToken);
-        $this->assertSame('legacy-token', User::findOrFail($userId)->github_token);
     }
 
     public function test_github_revoke_clears_the_connected_account_with_csrf_protected_delete(): void
     {
-        $user = User::factory()->create([
-            'github_token' => 'github-token',
-            'github_username' => 'octocat',
-        ]);
+        $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
         $response = $this
             ->actingAs($user)
             ->delete(route('auth.github.revoke'));
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'github_token' => null,
-            'github_username' => null,
+        $this->assertDatabaseMissing('connected_accounts', [
+            'user_id' => $user->id,
+            'provider' => User::PROVIDER_GITHUB,
         ]);
     }
 

@@ -193,7 +193,9 @@ class IdeaController extends Controller
     {
         $this->authorize('createRepository', $idea);
 
-        if ($idea->repository) {
+        $idea->loadMissing('codeRepository');
+
+        if ($idea->codeRepository?->isAvailable()) {
             return redirect()->route('ideas.dashboard', $idea);
         }
 

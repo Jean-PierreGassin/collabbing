@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class IdeaPropsRenderingTest extends TestCase
@@ -42,7 +41,6 @@ class IdeaPropsRenderingTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'private@example.com',
-            'github_username' => null,
         ]);
 
         $props = app(PagePropsService::class)->user($user);
@@ -66,24 +64,14 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertTrue($props['canUpdate']);
     }
 
-    public function test_user_props_do_not_decrypt_legacy_plaintext_github_tokens_for_presence_checks(): void
+    public function test_user_props_include_connected_github_account_state(): void
     {
-        $userId = DB::table('users')->insertGetId([
-            'username' => 'legacy-token-user',
-            'first_name' => 'Legacy',
-            'last_name' => 'Token',
-            'email' => 'legacy-token@example.com',
-            'password' => bcrypt('password'),
-            'github_token' => 'legacy-plaintext-token',
-            'github_username' => 'octocat',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $user = User::findOrFail($userId);
+        $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
         $props = app(PagePropsService::class)->user($user);
 
         $this->assertTrue($props['hasGithubToken']);
+        $this->assertSame('octocat', $props['githubUsername']);
         $this->assertSame('https://github.com/octocat.png?size=200', $props['profilePicture']);
     }
 
@@ -94,7 +82,6 @@ class IdeaPropsRenderingTest extends TestCase
             'first_name' => 'Test',
             'last_name' => 'User',
             'email' => 'tester@example.com',
-            'github_token' => null,
         ]);
         $user->id = 1;
         $user->created_at = Carbon::now();
@@ -104,12 +91,11 @@ class IdeaPropsRenderingTest extends TestCase
             'communication' => 'Slack',
             'content' => $content,
             'status' => 'open',
-            'repository' => false,
-            'repository_name' => 'test-title',
         ]);
         $idea->id = 1;
         $idea->created_at = Carbon::now();
         $idea->setRelation('user', $user);
+        $idea->setRelation('codeRepository', null);
         $idea->setRelation('supporters', new EloquentCollection);
         $idea->setRelation('approvedApplications', new EloquentCollection);
 

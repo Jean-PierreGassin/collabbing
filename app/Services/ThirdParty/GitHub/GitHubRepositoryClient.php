@@ -8,24 +8,24 @@ class GitHubRepositoryClient
 {
     public function create(User $owner, string $repositoryName): array
     {
-        return GitHubService::createClient($owner->github_token)
+        return GitHubService::createClient($owner->githubToken())
             ->repo()
             ->create($repositoryName);
     }
 
     public function show(User $owner, string $repositoryName): array
     {
-        return GitHubService::createClient($owner->github_token)
+        return GitHubService::createClient($owner->githubToken())
             ->repo()
-            ->show($owner->github_username, $repositoryName);
+            ->show($owner->githubUsername(), $repositoryName);
     }
 
     public function latestCommit(User $owner, string $repositoryName, ?string $branch): ?array
     {
-        $commits = GitHubService::createClient($owner->github_token)
+        $commits = GitHubService::createClient($owner->githubToken())
             ->repo()
             ->commits()
-            ->all($owner->github_username, $repositoryName, array_filter([
+            ->all($owner->githubUsername(), $repositoryName, array_filter([
                 'sha' => $branch,
                 'per_page' => 1,
             ]));
@@ -35,9 +35,9 @@ class GitHubRepositoryClient
 
     public function addCollaborator(User $owner, string $repositoryName, string $collaboratorUsername): void
     {
-        GitHubService::createClient($owner->github_token)
+        GitHubService::createClient($owner->githubToken())
             ->repo()
             ->collaborators()
-            ->add($owner->github_username, $repositoryName, $collaboratorUsername);
+            ->add($owner->githubUsername(), $repositoryName, $collaboratorUsername);
     }
 }

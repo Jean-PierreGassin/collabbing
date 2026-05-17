@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use Database\Factories\IdeaRepositoryEventFactory;
+use Database\Factories\RepositoryEventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class IdeaRepositoryEvent extends Model
+class RepositoryEvent extends Model
 {
-    /** @use HasFactory<IdeaRepositoryEventFactory> */
+    /** @use HasFactory<RepositoryEventFactory> */
     use HasFactory;
 
     protected $fillable = [
-        'idea_id',
         'type',
         'summary',
         'occurred_at',
@@ -29,8 +28,8 @@ class IdeaRepositoryEvent extends Model
         ];
     }
 
-    public function idea(): BelongsTo
+    public function codeRepository(): BelongsTo
     {
-        return $this->belongsTo(Idea::class);
+        return $this->belongsTo(CodeRepository::class);
     }
 }
