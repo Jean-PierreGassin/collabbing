@@ -100,6 +100,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate deployment secrets
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+          PRODUCTION_ENV_FILE: ${{ secrets.PRODUCTION_ENV_FILE }}
+        run: |
+          missing=0
+
+          for name in PRODUCTION_HOST PRODUCTION_USER PRODUCTION_SSH_KEY PRODUCTION_SSH_KNOWN_HOSTS PRODUCTION_ENV_FILE; do
+            if [ -z "${!name}" ]; then
+              echo "Missing ${name}" >&2
+              missing=1
+            fi
+          done
+
+          exit "$missing"
+
       - name: Prepare SSH
         run: |
           install -m 700 -d ~/.ssh

@@ -47,6 +47,8 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('Run PHPUnit', $workflow);
         $this->assertStringContainsString('Build frontend', $workflow);
         $this->assertStringContainsString('Build and push image', $workflow);
+        $this->assertStringContainsString('Validate deployment secrets', $workflow);
+        $this->assertStringContainsString('Missing ${name}', $workflow);
         $this->assertStringContainsString('Run deployment preflight', $workflow);
         $this->assertStringContainsString('Deploy over SSH', $workflow);
         $this->assertStringContainsString('docker login ghcr.io', $workflow);
