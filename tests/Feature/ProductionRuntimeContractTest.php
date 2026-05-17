@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\TrustHosts;
 use App\Jobs\SyncGitHubRepositories;
 use Tests\TestCase;
 
@@ -10,6 +11,16 @@ class ProductionRuntimeContractTest extends TestCase
     public function test_health_check_route_is_available_for_container_rollouts(): void
     {
         $this->get(route('health'))->assertNoContent();
+    }
+
+    public function test_production_trusted_hosts_are_derived_from_configured_url(): void
+    {
+        config(['app.url' => 'https://collabbing.example.com']);
+
+        $trustedHosts = (new TrustHosts($this->app))->hosts();
+
+        $this->assertContains('^collabbing\.example\.com$', $trustedHosts);
+        $this->assertNotContains('^evil\.example\.com$', $trustedHosts);
     }
 
     public function test_queue_retry_window_exceeds_github_sync_job_timeout(): void
@@ -33,6 +44,13 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('queue:work', $stack);
         $this->assertStringContainsString('schedule:work', $stack);
         $this->assertStringContainsString('order: start-first', $stack);
+
+        $nginx = file_get_contents(base_path('docker/production/nginx.conf'));
+
+        $this->assertIsString($nginx);
+        $this->assertStringContainsString('map $http_x_forwarded_proto $forwarded_proto', $nginx);
+        $this->assertStringContainsString('fastcgi_param HTTP_X_FORWARDED_HOST $host;', $nginx);
+        $this->assertStringContainsString('fastcgi_param HTTP_X_FORWARDED_PROTO $forwarded_proto;', $nginx);
     }
 
     public function test_master_push_deploys_a_built_image_after_verification(): void
@@ -47,6 +65,9 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('Run PHPUnit', $workflow);
         $this->assertStringContainsString('Build frontend', $workflow);
         $this->assertStringContainsString('Build and push image', $workflow);
+        $this->assertStringContainsString("permissions:\n  contents: read\n\nenv:", $workflow);
+        $this->assertStringContainsString("    permissions:\n      contents: read\n      packages: write", $workflow);
+        $this->assertStringContainsString("    permissions:\n      contents: read\n      packages: read", $workflow);
         $this->assertStringContainsString('Validate deployment secrets', $workflow);
         $this->assertStringContainsString('Missing ${name}', $workflow);
         $this->assertStringContainsString('Run deployment preflight', $workflow);
@@ -80,7 +101,9 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringNotContainsString('. "$DOCKER_ENV_FILE"', $script);
         $this->assertStringContainsString('docker network inspect "$NETWORK_NAME"', $script);
         $this->assertStringContainsString('php artisan "$@"', $script);
-        $this->assertStringContainsString('run_artisan migrate --force', $script);
+        $this->assertStringContainsString('run_artisan_with_retry migrate --force', $script);
+        $this->assertStringContainsString('wait_for_service_replicas', $script);
+        $this->assertStringContainsString('Timed out waiting for ${STACK_NAME}_${service}', $script);
         $this->assertStringContainsString('run_artisan queue:restart', $script);
         $this->assertStringContainsString('run_artisan schedule:interrupt', $script);
         $this->assertLessThan(

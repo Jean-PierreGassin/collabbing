@@ -161,27 +161,69 @@ run_artisan() {
     php artisan "$@"
 }
 
+run_artisan_with_retry() {
+  local attempts="${ARTISAN_RETRY_ATTEMPTS:-30}"
+  local delay="${ARTISAN_RETRY_DELAY_SECONDS:-2}"
+
+  for attempt in $(seq 1 "$attempts"); do
+    if run_artisan "$@"; then
+      return 0
+    fi
+
+    if [ "$attempt" -eq "$attempts" ]; then
+      return 1
+    fi
+
+    sleep "$delay"
+  done
+}
+
+wait_for_service_replicas() {
+  local service="$1"
+  local attempts="${SERVICE_READY_ATTEMPTS:-60}"
+  local delay="${SERVICE_READY_DELAY_SECONDS:-2}"
+  local replicas
+  local running
+  local desired
+
+  for _ in $(seq 1 "$attempts"); do
+    replicas="$(docker service ls --filter "name=${STACK_NAME}_${service}" --format '{{.Replicas}}')"
+    running="${replicas%%/*}"
+    desired="${replicas##*/}"
+
+    if [ -n "$replicas" ] && [ "$running" = "$desired" ] && [ "$desired" != "0" ]; then
+      return 0
+    fi
+
+    sleep "$delay"
+  done
+
+  echo "Timed out waiting for ${STACK_NAME}_${service} replicas to become ready." >&2
+  docker service ps "${STACK_NAME}_${service}" || true
+  return 1
+}
+
 if docker network inspect "$NETWORK_NAME" >/dev/null 2>&1; then
-  run_artisan migrate --force
+  run_artisan_with_retry migrate --force
   MIGRATED_BEFORE_DEPLOY=1
 fi
 
 docker stack deploy --with-registry-auth --compose-file "$STACK_FILE" "$STACK_NAME"
 
-for _ in $(seq 1 60); do
-  if docker service ls --filter "name=${STACK_NAME}_app" --format '{{.Replicas}}' | grep -Eq '^[1-9][0-9]*/[1-9][0-9]*$'; then
-    break
-  fi
-
-  sleep 2
-done
+wait_for_service_replicas mysql
+wait_for_service_replicas redis
+wait_for_service_replicas app
+wait_for_service_replicas nginx
 
 if [ "$MIGRATED_BEFORE_DEPLOY" -eq 0 ]; then
-  run_artisan migrate --force
+  run_artisan_with_retry migrate --force
 fi
 
 run_artisan queue:restart
 
 run_artisan schedule:interrupt || true
+
+wait_for_service_replicas queue
+wait_for_service_replicas scheduler
 
 docker service ls --filter "name=${STACK_NAME}_"
