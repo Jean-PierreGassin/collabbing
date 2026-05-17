@@ -25,11 +25,11 @@ const activeTab = ref<'ideas' | 'collaborations'>(new URLSearchParams(window.loc
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap gap-2">
-        <Button :variant="activeTab === 'ideas' ? 'default' : 'ghost'" @click="activeTab = 'ideas'">My Ideas</Button>
-        <Button :variant="activeTab === 'collaborations' ? 'default' : 'ghost'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
+      <div class="flex flex-wrap gap-1 rounded-md border border-border bg-card p-1">
+        <Button :variant="activeTab === 'ideas' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'ideas'" @click="activeTab = 'ideas'">My Ideas</Button>
+        <Button :variant="activeTab === 'collaborations' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'collaborations'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
       </div>
-      <Button :as="Link" :href="session.routes.ideasCreate" variant="outline" size="sm">Create an Idea</Button>
+      <Button :as="Link" :href="session.routes.ideasCreate" size="sm">Create an Idea</Button>
     </div>
 
     <div v-if="activeTab === 'ideas'">

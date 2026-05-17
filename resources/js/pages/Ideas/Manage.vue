@@ -24,9 +24,9 @@ const activeTab = ref<'applications' | 'collaborators'>('applications');
         <h1 class="text-2xl font-semibold text-white">{{ idea.title }}</h1>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <Button :variant="activeTab === 'applications' ? 'default' : 'ghost'" @click="activeTab = 'applications'">Applications</Button>
-        <Button :variant="activeTab === 'collaborators' ? 'default' : 'ghost'" @click="activeTab = 'collaborators'">Collaborators</Button>
+      <div class="flex flex-wrap gap-1 rounded-md border border-border bg-card p-1">
+        <Button :variant="activeTab === 'applications' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'applications'" @click="activeTab = 'applications'">Applications</Button>
+        <Button :variant="activeTab === 'collaborators' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'collaborators'" @click="activeTab = 'collaborators'">Collaborators</Button>
       </div>
 
       <div v-if="activeTab === 'applications'" class="flex flex-col gap-3">

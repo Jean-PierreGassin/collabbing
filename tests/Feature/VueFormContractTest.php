@@ -219,7 +219,9 @@ class VueFormContractTest extends TestCase
         $this->assertStringContainsString('disabled>Collaborator</Button>', $sidebar);
         $this->assertStringContainsString('disabled>Application pending</Button>', $sidebar);
         $this->assertStringContainsString('No collaborators have joined yet.', $sidebar);
-        $this->assertStringContainsString('<h1 class="text-2xl font-semibold text-white">Ideas</h1>', $ideasIndex);
+        $this->assertStringContainsString('<h1 class="text-3xl font-semibold text-white">Ideas</h1>', $ideasIndex);
+        $this->assertStringContainsString('const trendingIdeaIds = computed', $ideasIndex);
+        $this->assertStringContainsString('const recentIdeas = computed', $ideasIndex);
         $this->assertStringContainsString('No ideas matched', $ideasIndex);
         $this->assertStringContainsString('No pending applications.', $ideasManage);
         $this->assertStringContainsString('You have not shared any ideas yet.', $dashboard);

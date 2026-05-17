@@ -45,7 +45,7 @@ defineProps<{
                     />
                   </template>
                 </FormField>
-                <Button type="submit" class="self-end" size="sm">Post comment</Button>
+                <Button type="submit" class="self-start" size="sm">Post comment</Button>
               </form>
             </CardContent>
           </Card>

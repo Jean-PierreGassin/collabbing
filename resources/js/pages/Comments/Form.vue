@@ -33,7 +33,7 @@ defineProps<{
             >{{ comment?.content ?? '' }}</textarea>
           </template>
         </FormField>
-        <Button type="submit" size="sm" :variant="comment ? 'secondary' : 'default'" class="self-end">
+        <Button type="submit" size="sm" :variant="comment ? 'secondary' : 'default'" class="self-start">
           {{ comment ? 'Edit Comment' : 'Share Comment' }}
         </Button>
       </form>
