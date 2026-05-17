@@ -3,13 +3,15 @@
 namespace App\Repositories\Users;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UserRepository
 {
-    public function all(): Collection
+    public function all(): LengthAwarePaginator
     {
-        return User::all();
+        return User::query()
+            ->orderBy('username')
+            ->paginate(24);
     }
 
     public function getByUsername(string $username): ?User

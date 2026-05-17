@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('idea_repository_events', function (Blueprint $table) {
+        Schema::create('repository_events', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('idea_id');
+            $table->foreignId('code_repository_id')->constrained()->cascadeOnDelete();
             $table->string('type');
             $table->string('summary');
             $table->timestamp('occurred_at')->index();
@@ -21,9 +21,8 @@ return new class extends Migration
             $table->json('payload')->nullable();
             $table->timestamps();
 
-            $table->foreign('idea_id')->references('id')->on('ideas')->cascadeOnDelete();
-            $table->unique(['idea_id', 'dedupe_key']);
-            $table->index(['idea_id', 'occurred_at']);
+            $table->unique(['code_repository_id', 'dedupe_key']);
+            $table->index(['code_repository_id', 'occurred_at']);
         });
     }
 
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('idea_repository_events');
+        Schema::dropIfExists('repository_events');
     }
 };

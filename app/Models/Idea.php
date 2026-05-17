@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Class Idea
@@ -24,32 +25,7 @@ class Idea extends Model
         'communication',
         'content',
         'status',
-        'repository',
-        'repository_name',
-        'repository_html_url',
-        'repository_default_branch',
-        'repository_open_issues_count',
-        'repository_stargazers_count',
-        'repository_forks_count',
-        'repository_latest_commit_sha',
-        'repository_latest_commit_message',
-        'repository_latest_commit_author',
-        'repository_pushed_at',
-        'repository_synced_at',
-        'repository_missing_at',
-        'repository_sync_due_at',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'repository' => 'boolean',
-            'repository_pushed_at' => 'datetime',
-            'repository_synced_at' => 'datetime',
-            'repository_missing_at' => 'datetime',
-            'repository_sync_due_at' => 'datetime',
-        ];
-    }
 
     public function user(): BelongsTo
     {
@@ -100,8 +76,13 @@ class Idea extends Model
         return $this->hasMany(IdeaSupporter::class, 'idea_id');
     }
 
-    public function repositoryEvents(): HasMany
+    public function codeRepositories(): HasMany
     {
-        return $this->hasMany(IdeaRepositoryEvent::class, 'idea_id');
+        return $this->hasMany(CodeRepository::class, 'idea_id');
+    }
+
+    public function codeRepository(): HasOne
+    {
+        return $this->hasOne(CodeRepository::class, 'idea_id')->latestOfMany();
     }
 }

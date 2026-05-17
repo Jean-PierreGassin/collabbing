@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\ConnectedAccount;
 use App\Models\User;
 use App\Repositories\Users\UserRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -13,22 +15,18 @@ class UserService
 {
     public function __construct(private UserRepository $users) {}
 
-    public function all()
+    public function all(): LengthAwarePaginator
     {
         return $this->users->all();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUserByUsername(string $username)
+    public function getUserByUsername(string $username): ?User
     {
         return $this->users->getByUsername($username);
     }
 
     public function update(User $user, array $data): bool
     {
-        // TODO: Move this to request validation
         $values = [];
 
         foreach ($data as $key => $value) {
@@ -44,5 +42,24 @@ class UserService
         }
 
         return $this->users->update($user, $values);
+    }
+
+    public function connectProvider(User $user, string $provider, ?string $token, ?string $username, ?string $providerUserId = null, array $scopes = []): ConnectedAccount
+    {
+        return $user->connectedAccounts()->updateOrCreate(
+            ['provider' => $provider],
+            [
+                'provider_user_id' => $providerUserId,
+                'provider_username' => $username,
+                'token' => $token,
+                'scopes' => $scopes,
+                'connected_at' => now(),
+            ]
+        );
+    }
+
+    public function disconnectProvider(User $user, string $provider): void
+    {
+        $user->connectedAccounts()->where('provider', $provider)->delete();
     }
 }

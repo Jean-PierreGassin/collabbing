@@ -10,31 +10,31 @@ defineProps<{
 
 <template>
   <Card>
-    <CardHeader>
-      <h5 class="flex items-center justify-between gap-4 text-lg font-semibold">
-        <a class="text-primary hover:underline" :href="user.routes.show">@{{ user.username }}</a>
-        <Button v-if="user.canUpdate" as="a" :href="user.routes.edit" variant="secondary" size="sm">Edit Profile</Button>
-      </h5>
+    <CardHeader class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex min-w-0 gap-4">
+        <img class="size-16 rounded-full border border-border object-cover" :src="user.profilePicture" :alt="`${user.name} profile picture`">
+        <div class="min-w-0">
+          <h1 class="truncate text-2xl font-semibold text-white">{{ user.name }}</h1>
+          <p class="truncate text-sm text-muted-foreground">@{{ user.username }}</p>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Member since {{ user.createdAtFormatted }}
+            <template v-if="user.githubUsername">
+              · <a class="text-primary hover:underline" :href="`https://github.com/${user.githubUsername}`">GitHub Profile</a>
+            </template>
+          </p>
+        </div>
+      </div>
 
-      <h6 class="text-sm text-muted-foreground">
-        Member since: {{ user.createdAtFormatted }}
-        <template v-if="user.githubUsername">
-          - <a class="text-primary hover:underline" :href="`https://github.com/${user.githubUsername}`">GitHub Profile</a>
-        </template>
-      </h6>
+      <div class="flex shrink-0">
+        <Button v-if="user.canUpdate" as="a" :href="user.routes.edit" variant="secondary" size="sm">Edit Profile</Button>
+      </div>
     </CardHeader>
 
     <CardContent>
-      <blockquote class="border-l-2 border-primary pl-4">
+      <section class="border-l-2 border-primary pl-4" aria-label="Member bio">
         <p v-if="user.bioHtml" class="mb-0" v-html="user.bioHtml" />
-        <p v-else class="mb-0">I've got nothing good to say</p>
-        <footer class="mt-2 text-sm text-muted-foreground">
-          Someone called
-          <cite :title="`${user.firstName} ${user.lastName}`">
-            {{ user.firstName }} {{ user.lastName }}
-          </cite>
-        </footer>
-      </blockquote>
+        <p v-else class="mb-0 text-muted-foreground">This member has not added a bio yet.</p>
+      </section>
     </CardContent>
   </Card>
 </template>

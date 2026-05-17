@@ -8,8 +8,6 @@ use App\Services\Inertia\PagePropsService;
 use App\Services\UserService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,45 +28,34 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @return Response
      */
-    public function index()
+    public function index(): Response
     {
         $users = $this->userService->all();
 
         return Inertia::render('Users/Index', [
-            'users' => $users->map(fn (User $user) => $this->pageProps->user($user))->values(),
+            'users' => $this->pageProps->paginator($users, fn (User $user) => $this->pageProps->user($user)),
         ]);
     }
 
     /**
      * Display the specified resource.
-     *
-     * @return Response
      */
-    public function show(Request $request)
+    public function show(User $user): Response
     {
-        if ($user = $this->userService->getUserByUsername($request->username)) {
-            return Inertia::render('Users/Show', [
-                'user' => $this->pageProps->user($user),
-            ]);
-        }
-
-        abort(404);
+        return Inertia::render('Users/Show', [
+            'user' => $this->pageProps->user($user),
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @return Response
-     *
      * @throws AuthorizationException
      */
-    public function edit(Request $request)
+    public function edit(User $user): Response
     {
-        $user = $this->userService->getUserByUsername($request->username);
-        $this->authorizeForUser(Auth::user(), 'manage', $user);
+        $this->authorize('manage', $user);
 
         return Inertia::render('Users/Form', [
             'user' => $this->pageProps->user($user),
@@ -81,10 +68,9 @@ class UserController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function update(StoreUser $request): RedirectResponse
+    public function update(StoreUser $request, User $user): RedirectResponse
     {
-        $user = $this->userService->getUserByUsername($request->username);
-        $this->authorizeForUser(Auth::user(), 'update', $user);
+        $this->authorize('update', $user);
 
         $this->userService->update($user, $request->validated());
 

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ideas', function (Blueprint $table) {
-            $table->timestamp('repository_sync_due_at')
-                ->nullable()
-                ->after('repository_missing_at')
-                ->index();
+        Schema::table('idea_supporters', function (Blueprint $table) {
+            $table->unique(['idea_id', 'user_id'], 'idea_supporters_idea_id_user_id_unique');
         });
     }
 
@@ -24,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('ideas', function (Blueprint $table) {
-            $table->dropColumn('repository_sync_due_at');
+        Schema::table('idea_supporters', function (Blueprint $table) {
+            $table->dropUnique('idea_supporters_idea_id_user_id_unique');
         });
     }
 };

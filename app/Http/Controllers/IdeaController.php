@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchIdeas;
 use App\Http\Requests\StoreIdea;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
@@ -14,7 +15,6 @@ use App\Services\RepositoryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -53,13 +53,14 @@ class IdeaController extends Controller
      *
      * @return Response
      */
-    public function index(Request $request)
+    public function index(SearchIdeas $request)
     {
         $searchResults = null;
-        $keyword = $request->get('search');
+        $keyword = $request->searchTerm();
+
         if ($keyword) {
             $searchResults = $this->ideaService->search($keyword);
-            $searchResults->setPath("ideas?search=$keyword");
+            $searchResults->appends(['search' => $keyword]);
         }
 
         $trendingIdeas = $this->ideaService->getTrending();
@@ -83,6 +84,8 @@ class IdeaController extends Controller
      */
     public function dashboard(Idea $idea)
     {
+        $this->authorize('manage', $idea);
+
         $applications = $this->applicationService->getPendingApplications($idea);
         $collaborators = $this->applicationService->getApprovedApplications($idea);
 
@@ -186,12 +189,14 @@ class IdeaController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function createRepository(Idea $idea): string|RedirectResponse
+    public function createRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('createRepository', $idea);
 
-        if ($idea->repository) {
-            return route('ideas.dashboard', $idea);
+        $idea->loadMissing('codeRepository');
+
+        if ($idea->codeRepository?->isAvailable()) {
+            return redirect()->route('ideas.dashboard', $idea);
         }
 
         try {
@@ -204,7 +209,7 @@ class IdeaController extends Controller
 
         return redirect()
             ->route('ideas.dashboard', $idea)
-            ->with('status', 'Repository created 🔥');
+            ->with('status', 'Repository created.');
     }
 
     /**
@@ -217,11 +222,11 @@ class IdeaController extends Controller
         if (! $this->repositoryService->inviteUsers($idea)) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
-                ->with('status', 'Something went wrong, try again 🙉');
+                ->with('status', 'Repository invitations could not be sent. Please try again.');
         }
 
         return redirect()
             ->route('ideas.dashboard', $idea)
-            ->with('status', 'All Collaborators has been invited 🤟');
+            ->with('status', 'Collaborators have been invited.');
     }
 }

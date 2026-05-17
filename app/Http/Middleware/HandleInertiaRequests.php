@@ -12,15 +12,17 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        $session = $request->hasSession() ? $request->session() : null;
+
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => app(PagePropsService::class)->user($request->user()),
             ],
             'flash' => [
-                'status' => fn () => $request->session()->get('status'),
-                'errors' => fn () => $request->session()->get('errors')
-                    ? $request->session()->get('errors')->all()
+                'status' => fn () => $session?->get('status'),
+                'errors' => fn () => $session?->get('errors')
+                    ? $session->get('errors')->all()
                     : [],
             ],
             'routes' => [
@@ -35,6 +37,7 @@ class HandleInertiaRequests extends Middleware
                 'ideas' => route('ideas.index'),
                 'ideasCreate' => route('ideas.create'),
                 'ideasStore' => route('ideas.store'),
+                'users' => route('users.index'),
                 'feedback' => route('resources.feedback'),
                 'pricing' => route('resources.pricing'),
             ],

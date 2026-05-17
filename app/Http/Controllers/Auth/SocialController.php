@@ -31,7 +31,7 @@ class SocialController extends Controller
     public function redirectToProvider(): RedirectResponse
     {
         return Socialite::driver('github')
-            ->scopes(['repo'])
+            ->scopes(['public_repo'])
             ->redirect();
     }
 
@@ -51,10 +51,16 @@ class SocialController extends Controller
                 ->withErrors(['github' => 'Unable to link GitHub account']);
         }
 
-        $this->users->update($user, [
-            'github_token' => $providerUser->token,
-            'github_username' => $providerUser->getNickname(),
-        ]);
+        $providerUserId = $providerUser->getId();
+
+        $this->users->connectProvider(
+            $user,
+            User::PROVIDER_GITHUB,
+            $providerUser->token,
+            $providerUser->getNickname(),
+            is_scalar($providerUserId) ? (string) $providerUserId : null,
+            ['public_repo']
+        );
 
         return redirect()
             ->route('users.edit', $user->username)
@@ -68,13 +74,10 @@ class SocialController extends Controller
     {
         /* @var $user User */
         $user = Auth::user();
-        $this->users->update($user, [
-            'github_token' => null,
-            'github_username' => null,
-        ]);
+        $this->users->disconnectProvider($user, User::PROVIDER_GITHUB);
 
         return redirect()
             ->back()
-            ->with('status', 'Successfully un-linked GitHub account');
+            ->with('status', 'GitHub account unlinked.');
     }
 }

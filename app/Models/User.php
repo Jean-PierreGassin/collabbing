@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Services\ThirdParty\GitHub\GitHubService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Class User
@@ -15,13 +14,15 @@ use Illuminate\Support\Facades\Cache;
  * @property string $username
  * @property string $first_name
  * @property string $last_name
- * @property string $github_token
- * @property string $github_username
  */
 class User extends Authenticatable
 {
     use HasFactory;
     use Notifiable;
+
+    public const PROVIDER_GITHUB = 'github';
+
+    private const DEFAULT_PROFILE_PICTURE = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp';
 
     /**
      * The attributes that are mass assignable.
@@ -35,8 +36,6 @@ class User extends Authenticatable
         'bio',
         'email',
         'password',
-        'github_token',
-        'github_username',
     ];
 
     /**
@@ -72,24 +71,56 @@ class User extends Authenticatable
         return $this->hasMany(IdeaApplication::class, 'user_id');
     }
 
-    public function getNameAttribute()
+    public function connectedAccounts(): HasMany
+    {
+        return $this->hasMany(ConnectedAccount::class);
+    }
+
+    public function githubAccount(): HasOne
+    {
+        return $this->hasOne(ConnectedAccount::class)->where('provider', self::PROVIDER_GITHUB);
+    }
+
+    public function getNameAttribute(): string
     {
         return "$this->first_name $this->last_name";
     }
 
     public function profilePicture(): string
     {
-        if ($this->github_token) {
-            return Cache::remember(
-                "users.profile-picture.{$this->github_username}",
-                60,
-                function () {
-                    return GitHubService::createClient($this->github_token)
-                        ->currentUser()->show()['avatar_url'];
-                }
-            );
+        $githubUsername = $this->githubUsername();
+
+        if ($githubUsername) {
+            return 'https://github.com/'.rawurlencode($githubUsername).'.png?size=200';
         }
 
-        return 'https://www.gravatar.com/avatar/'.md5($this->email);
+        return self::DEFAULT_PROFILE_PICTURE;
+    }
+
+    public function hasGithubToken(): bool
+    {
+        $token = $this->githubToken();
+
+        return is_string($token) && $token !== '';
+    }
+
+    public function githubToken(): ?string
+    {
+        return $this->githubAccount?->token;
+    }
+
+    public function githubUsername(): ?string
+    {
+        return $this->githubAccount?->provider_username;
+    }
+
+    public function getGithubTokenAttribute(): ?string
+    {
+        return $this->githubToken();
+    }
+
+    public function getGithubUsernameAttribute(): ?string
+    {
+        return $this->githubUsername();
     }
 }

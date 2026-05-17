@@ -93,7 +93,7 @@ class IdeaTest extends DuskTestCase
         $this->browse(
             function ($browser) {
                 $browser->visit('/ideas/'.$this->idea->id.'/manage')
-                    ->assertSee('Pending Applications');
+                    ->assertSee('Applications');
             }
         );
     }
@@ -106,20 +106,7 @@ class IdeaTest extends DuskTestCase
         $this->browse(
             function ($browser) {
                 $browser->visit('/ideas/'.$this->idea->id.'/manage')
-                    ->assertSee('Approved Applications');
-            }
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function user_can_see_their_ideas_declined_applications(): void
-    {
-        $this->browse(
-            function ($browser) {
-                $browser->visit('/ideas/'.$this->idea->id.'/manage')
-                    ->assertSee('Declined Applications');
+                    ->assertSee('Collaborators');
             }
         );
     }

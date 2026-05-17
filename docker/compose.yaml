@@ -34,7 +34,6 @@ services:
         HOST_UID: ${HOST_UID}
         HOST_GID: ${HOST_GID}
     container_name: ${APP_NAME}_php
-    user: "${HOST_UID}:${HOST_GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -63,11 +62,15 @@ services:
     user: "${HOST_UID}:${HOST_GID}"
     environment:
       TZ: ${TZ}
+      APP_URL: http://localhost:${APP_HTTP_PORT}
+      VITE_DEV_SERVER_HOST: 0.0.0.0
+      VITE_DEV_SERVER_PORT: ${NODE_PORT}
+      VITE_HMR_HOST: localhost
     volumes:
       - ${APP_HOST_PATH}:${APP_CONTAINER_PATH}
       - node_modules:${APP_CONTAINER_PATH}/node_modules
     working_dir: ${APP_CONTAINER_PATH}
-    command: sh -lc "npm install && npm run dev -- --host 0.0.0.0"
+    command: sh -lc "npm install && npm run dev"
     ports:
       - "${NODE_PORT}:5173"
     networks:

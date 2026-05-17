@@ -14,19 +14,24 @@ defineProps<{
 
 <template>
   <Card>
-    <CardHeader>{{ comment ? 'Edit your Comment' : 'Share your Comment' }}</CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ comment ? 'Edit your Comment' : 'Share your Comment' }}</h1></CardHeader>
     <CardContent>
       <form :action="comment ? comment.routes.update : idea.routes.commentsStore" method="POST" class="flex flex-col gap-4">
         <CsrfField />
         <MethodField v-if="comment" method="PUT" />
-        <FormField :id="comment ? 'content' : 'content'" :label="comment ? 'Comment' : 'Content'" help="Nobody likes a bossy boots, think before you type.">
-          <textarea
-            id="content"
-            name="content"
-            class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
-            :placeholder="comment ? undefined : 'I liked the thing you said about the other thing, however I prefer to do it this way instead'"
-            required
-          >{{ comment?.content ?? '' }}</textarea>
+        <FormField id="content" :label="comment ? 'Comment' : 'Content'" help="Keep it specific and constructive.">
+          <template #default="{ invalid, describedBy }">
+            <textarea
+              id="content"
+              name="content"
+              class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+              :placeholder="comment ? undefined : 'Add context, a suggestion, or a useful question.'"
+              maxlength="1500"
+              :aria-invalid="invalid || undefined"
+              :aria-describedby="describedBy"
+              required
+            >{{ comment?.content ?? '' }}</textarea>
+          </template>
         </FormField>
         <Button type="submit" size="sm" :variant="comment ? 'secondary' : 'default'" class="self-end">
           {{ comment ? 'Edit Comment' : 'Share Comment' }}

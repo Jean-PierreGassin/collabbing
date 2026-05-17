@@ -101,6 +101,6 @@ class IdeaApplicationController extends Controller
 
         return redirect()
             ->back()
-            ->with('status', "$applicantName is the weakest link, good bye!");
+            ->with('status', "$applicantName has been removed from this idea.");
     }
 }

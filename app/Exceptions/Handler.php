@@ -3,9 +3,11 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -54,16 +56,31 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception): Response
     {
+        if ($exception instanceof DecryptException) {
+            return $this->invalidEncryptedPayloadResponse($request);
+        }
+
         $response = parent::render($request, $exception);
 
-        if (! $request->expectsJson() && in_array($response->getStatusCode(), [401, 403, 404, 500], true)) {
-            return Inertia::render('Error', [
-                'status' => $response->getStatusCode(),
-            ])
-                ->toResponse($request)
-                ->setStatusCode($response->getStatusCode());
+        if (! $request->expectsJson() && $response->getStatusCode() === 419) {
+            return redirect()
+                ->back()
+                ->with('status', 'The page expired. Please try again.');
         }
 
         return $response;
+    }
+
+    private function invalidEncryptedPayloadResponse(Request $request): RedirectResponse|JsonResponse
+    {
+        $response = $request->expectsJson()
+            ? response()->json(['message' => 'The session expired. Please refresh and try again.'], 419)
+            : redirect()
+                ->to($request->fullUrl())
+                ->with('status', 'The session expired. Please refresh and try again.');
+
+        return $response
+            ->withoutCookie(config('session.cookie'))
+            ->withoutCookie('XSRF-TOKEN');
     }
 }

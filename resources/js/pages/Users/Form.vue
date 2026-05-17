@@ -14,7 +14,7 @@ defineProps<{
 
 <template>
   <Card>
-    <CardHeader>{{ user ? 'Edit' : 'Create' }} Profile</CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ user ? 'Edit' : 'Create' }} Profile</h1></CardHeader>
     <CardContent>
       <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5">
         <CsrfField />
@@ -22,15 +22,21 @@ defineProps<{
 
         <div class="grid gap-4 md:grid-cols-2">
           <FormField id="first_name" label="First Name">
-            <input id="first_name" name="first_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.firstName ?? ''" placeholder="John" required>
+            <template #default="{ invalid, describedBy }">
+              <input id="first_name" name="first_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.firstName ?? ''" placeholder="John" autocomplete="given-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            </template>
           </FormField>
           <FormField id="last_name" label="Last Name">
-            <input id="last_name" name="last_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.lastName ?? ''" placeholder="Smith" required>
+            <template #default="{ invalid, describedBy }">
+              <input id="last_name" name="last_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.lastName ?? ''" placeholder="Smith" autocomplete="family-name" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            </template>
           </FormField>
         </div>
 
         <FormField id="email" label="E-Mail Address">
-          <input id="email" name="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.email ?? ''" placeholder="john.smith@apples.com" required>
+          <template #default="{ invalid, describedBy }">
+            <input id="email" name="email" type="email" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="user?.email ?? ''" placeholder="john.smith@apples.com" autocomplete="email" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+          </template>
         </FormField>
 
         <div v-if="user" class="flex flex-col gap-3">
@@ -39,25 +45,38 @@ defineProps<{
             Linking your GitHub account will allow for seamless integration between your ideas and repositories - view your access to Collabbing
             <a class="text-primary hover:underline" :href="`https://github.com/settings/connections/applications/${githubClientId ?? ''}`">here</a>
           </p>
-          <Button as="a" :href="user.hasGithubToken ? user.routes.githubRevoke : user.routes.githubLogin" :variant="user.hasGithubToken ? 'default' : 'outline'" size="sm" class="w-fit">
-            {{ user.hasGithubToken ? 'Un-link GitHub' : 'Link GitHub' }}
+          <Button v-if="user.hasGithubToken" type="submit" form="github-revoke-form" size="sm" class="w-fit">
+            Unlink GitHub
+          </Button>
+          <Button v-else as="a" :href="user.routes.githubLogin" variant="outline" size="sm" class="w-fit">
+            Link GitHub
           </Button>
         </div>
 
         <FormField id="bio" label="Bio (supports markdown)">
-          <textarea id="bio" name="bio" class="min-h-32 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="Tell us what you're good at and what you enjoy...">{{ user?.bio ?? '' }}</textarea>
+          <template #default="{ invalid, describedBy }">
+            <textarea id="bio" name="bio" class="min-h-32 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="Tell us what you're good at and what you enjoy..." maxlength="500" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">{{ user?.bio ?? '' }}</textarea>
+          </template>
         </FormField>
 
         <div class="grid gap-4 md:grid-cols-2">
-          <FormField id="password" label="New Password:">
-            <input id="password" name="password" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40">
+          <FormField id="password" label="New Password:" help="Leave blank to keep your current password. New passwords need at least 12 characters with letters and numbers.">
+            <template #default="{ invalid, describedBy }">
+              <input id="password" name="password" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+            </template>
           </FormField>
           <FormField id="password_confirmation" label="Confirm Password:">
-            <input id="password_confirmation" name="password_confirmation" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40">
+            <template #default="{ invalid, describedBy }">
+              <input id="password_confirmation" name="password_confirmation" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+            </template>
           </FormField>
         </div>
 
         <Button type="submit" class="self-start">{{ user ? 'Edit Profile' : 'Create Profile' }}</Button>
+      </form>
+      <form v-if="user?.hasGithubToken" id="github-revoke-form" :action="user.routes.githubRevoke" method="POST" class="hidden">
+        <CsrfField />
+        <MethodField method="DELETE" />
       </form>
     </CardContent>
   </Card>

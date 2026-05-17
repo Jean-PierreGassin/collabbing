@@ -4,7 +4,7 @@ export interface DomainUser {
   firstName: string;
   lastName: string;
   name: string;
-  email: string;
+  email: string | null;
   bio: string | null;
   bioHtml: string | null;
   githubUsername: string | null;
@@ -56,7 +56,7 @@ export interface IdeaSupporter {
   };
 }
 
-export interface IdeaRepositoryEvent {
+export interface RepositoryEvent {
   id: number;
   type: string;
   summary: string;
@@ -76,7 +76,7 @@ export interface IdeaRepositoryActivity {
   latestCommitShortSha: string | null;
   latestCommitMessage: string | null;
   latestCommitAuthor: string | null;
-  events: IdeaRepositoryEvent[];
+  events: RepositoryEvent[];
 }
 
 export interface Idea {

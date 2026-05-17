@@ -5,8 +5,8 @@ namespace App\Services\Inertia;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\IdeaComment;
-use App\Models\IdeaRepositoryEvent;
 use App\Models\IdeaSupporter;
+use App\Models\RepositoryEvent;
 use App\Models\User;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -20,20 +20,22 @@ class PagePropsService
             return null;
         }
 
+        $canUpdate = Gate::allows('update', $user);
+
         return [
             'id' => $user->id,
             'username' => $user->username,
             'firstName' => $user->first_name,
             'lastName' => $user->last_name,
             'name' => $user->name,
-            'email' => $user->email,
+            'email' => $canUpdate ? $user->email : null,
             'bio' => $user->bio,
             'bioHtml' => $user->bio ? (string) Markdown::convertToHtml($user->bio) : null,
-            'githubUsername' => $user->github_username,
-            'hasGithubToken' => (bool) $user->github_token,
+            'githubUsername' => $user->githubUsername(),
+            'hasGithubToken' => $user->hasGithubToken(),
             'profilePicture' => $user->profilePicture(),
             'createdAtFormatted' => date('d M - Y', $user->created_at->timestamp),
-            'canUpdate' => Gate::allows('update', $user),
+            'canUpdate' => $canUpdate,
             'routes' => [
                 'show' => route('users.show', $user->username),
                 'edit' => route('users.edit', $user->username),
@@ -48,9 +50,12 @@ class PagePropsService
     {
         $idea->loadMissing([
             'user',
+            'codeRepository.events',
             'supporters',
             'approvedApplications.user',
         ]);
+
+        $codeRepository = $idea->codeRepository;
 
         return [
             'id' => $idea->id,
@@ -61,8 +66,8 @@ class PagePropsService
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
             'status' => $idea->status,
             'statusDisplay' => ucfirst($idea->status),
-            'repository' => $idea->repository,
-            'repositoryName' => $idea->repository_name,
+            'repository' => $codeRepository?->isAvailable() ?? false,
+            'repositoryName' => $codeRepository?->name,
             'repositoryActivity' => $this->repositoryActivity($idea),
             'createdAtForHumans' => $idea->created_at->diffForHumans(),
             'user' => $this->user($idea->user),
@@ -85,10 +90,10 @@ class PagePropsService
                 'applicationsStore' => route('ideas.applications.store', $idea),
                 'commentsStore' => route('ideas.comments.store', $idea),
                 'supportersStore' => route('ideas.supporters.store', $idea),
-                'repositoryCreate' => $idea->user->github_token
+                'repositoryCreate' => $idea->user->hasGithubToken()
                     ? route('ideas.repository-create', $idea)
                     : route('auth.github.login'),
-                'repositoryInvite' => $idea->user->github_token
+                'repositoryInvite' => $idea->user->hasGithubToken()
                     ? route('ideas.repository-invite', $idea)
                     : route('auth.github.login'),
             ],
@@ -97,26 +102,28 @@ class PagePropsService
 
     private function repositoryActivity(Idea $idea): array
     {
-        $events = $idea->exists && ($idea->repository || $idea->repository_missing_at)
-            ? $idea->repositoryEvents()->latest('occurred_at')->limit(5)->get()
+        $codeRepository = $idea->codeRepository;
+
+        $events = $codeRepository && ($codeRepository->isAvailable() || $codeRepository->missing_at)
+            ? $codeRepository->events()->latest('occurred_at')->limit(5)->get()
             : collect();
 
         return [
-            'htmlUrl' => $idea->repository_html_url,
-            'defaultBranch' => $idea->repository_default_branch,
-            'isMissing' => (bool) $idea->repository_missing_at,
-            'openIssuesCount' => (int) $idea->repository_open_issues_count,
-            'stargazersCount' => (int) $idea->repository_stargazers_count,
-            'forksCount' => (int) $idea->repository_forks_count,
-            'lastPushedAtForHumans' => $idea->repository_pushed_at?->diffForHumans(),
-            'lastSyncedAtForHumans' => $idea->repository_synced_at?->diffForHumans(),
-            'latestCommitSha' => $idea->repository_latest_commit_sha,
-            'latestCommitShortSha' => $idea->repository_latest_commit_sha
-                ? substr($idea->repository_latest_commit_sha, 0, 7)
+            'htmlUrl' => $codeRepository?->html_url,
+            'defaultBranch' => $codeRepository?->default_branch,
+            'isMissing' => (bool) $codeRepository?->missing_at,
+            'openIssuesCount' => (int) $codeRepository?->open_issues_count,
+            'stargazersCount' => (int) $codeRepository?->stargazers_count,
+            'forksCount' => (int) $codeRepository?->forks_count,
+            'lastPushedAtForHumans' => $codeRepository?->pushed_at?->diffForHumans(),
+            'lastSyncedAtForHumans' => $codeRepository?->synced_at?->diffForHumans(),
+            'latestCommitSha' => $codeRepository?->latest_commit_sha,
+            'latestCommitShortSha' => $codeRepository?->latest_commit_sha
+                ? substr($codeRepository->latest_commit_sha, 0, 7)
                 : null,
-            'latestCommitMessage' => $idea->repository_latest_commit_message,
-            'latestCommitAuthor' => $idea->repository_latest_commit_author,
-            'events' => $events->map(fn (IdeaRepositoryEvent $event) => [
+            'latestCommitMessage' => $codeRepository?->latest_commit_message,
+            'latestCommitAuthor' => $codeRepository?->latest_commit_author,
+            'events' => $events->map(fn (RepositoryEvent $event) => [
                 'id' => $event->id,
                 'type' => $event->type,
                 'summary' => $event->summary,

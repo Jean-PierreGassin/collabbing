@@ -38,7 +38,7 @@ class StoreIdea extends FormRequest
     {
         return [
             'content.required' => 'The description field is required',
-            'content.max' => 'The description may not be greater than 500 characters.',
+            'content.max' => 'The description may not be greater than 1500 characters.',
         ];
     }
 }

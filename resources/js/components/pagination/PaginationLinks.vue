@@ -9,13 +9,19 @@ defineProps<{
 
 <template>
   <nav v-if="paginator.lastPage > 1" class="mt-4 flex items-center justify-between gap-3">
-    <Button as="a" :href="paginator.previousPageUrl ?? '#'" variant="outline" :disabled="!paginator.previousPageUrl">
+    <Button v-if="paginator.previousPageUrl" as="a" :href="paginator.previousPageUrl" variant="outline">
+      Previous
+    </Button>
+    <Button v-else type="button" variant="outline" disabled>
       Previous
     </Button>
     <span class="text-sm text-muted-foreground">
       Page {{ paginator.currentPage }} of {{ paginator.lastPage }}
     </span>
-    <Button as="a" :href="paginator.nextPageUrl ?? '#'" variant="outline" :disabled="!paginator.nextPageUrl">
+    <Button v-if="paginator.nextPageUrl" as="a" :href="paginator.nextPageUrl" variant="outline">
+      Next
+    </Button>
+    <Button v-else type="button" variant="outline" disabled>
       Next
     </Button>
   </nav>

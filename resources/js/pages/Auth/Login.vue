@@ -10,15 +10,19 @@ const session = useSessionStore();
 
 <template>
   <Card>
-    <CardHeader>{{ 'Login' }}</CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">Login</h1></CardHeader>
     <CardContent>
       <form method="POST" :action="session.routes.login" class="flex flex-col gap-4">
         <CsrfField />
         <FormField id="username" :label="'Username'">
-          <input id="username" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="username" required autofocus>
+          <template #default="{ invalid, describedBy }">
+            <input id="username" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="username" autocomplete="username" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+          </template>
         </FormField>
         <FormField id="password" :label="'Password'">
-          <input id="password" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="password" required>
+          <template #default="{ invalid, describedBy }">
+            <input id="password" type="password" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" name="password" autocomplete="current-password" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+          </template>
         </FormField>
         <label class="flex items-center gap-2 text-sm">
           <input type="checkbox" name="remember" class="size-4 rounded border-input bg-background">

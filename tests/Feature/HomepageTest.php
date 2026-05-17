@@ -24,6 +24,20 @@ class HomepageTest extends TestCase
         $response->assertRedirect(route('home'));
     }
 
+    public function test_error_pages_include_shared_shell_props(): void
+    {
+        $response = $this->get('/missing-page');
+
+        $response
+            ->assertNotFound()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Error')
+                ->where('status', 404)
+                ->has('auth.user')
+                ->has('routes.ideas')
+                ->has('flash.status'));
+    }
+
     public function test_resource_pages_load_the_inertia_app_shell(): void
     {
         foreach ([

@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\CodeRepository;
 use App\Models\Idea;
-use App\Repositories\Ideas\IdeaRepository;
+use App\Models\IdeaApplication;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
-use Exception;
-use Illuminate\Support\Facades\Auth;
+use RuntimeException;
+use Throwable;
 
 /**
  * Class RepositoryService
@@ -15,36 +16,47 @@ use Illuminate\Support\Facades\Auth;
 class RepositoryService
 {
     public function __construct(
-        private IdeaRepository $ideas,
         private GitHubRepositoryClient $github,
         private IdeaRepositorySyncService $sync
     ) {}
 
     public function create(Idea $idea): bool
     {
-        $repository = $this->github->create(Auth::user(), $idea->repository_name);
+        $idea->loadMissing('user.githubAccount', 'codeRepository');
 
-        $created = $this->ideas->markRepositoryCreated($idea);
-
-        $this->sync->recordCreated($idea->refresh(), $repository);
-
-        return $created;
-    }
-
-    public function inviteUsers(Idea $idea): bool
-    {
-        foreach ($this->ideas->getApprovedApplications($idea) as $collaborator) {
-            $this->inviteUser($idea, $collaborator);
+        if (! $idea->codeRepository instanceof CodeRepository) {
+            throw new RuntimeException('Repository settings are missing.');
         }
+
+        $repository = $this->github->create($idea->user, $idea->codeRepository->name);
+
+        $this->sync->recordCreated($idea->codeRepository, $repository);
 
         return true;
     }
 
-    public function inviteUser(Idea $idea, $collaborator): bool
+    public function inviteUsers(Idea $idea): bool
     {
+        return $idea->approvedApplications()
+            ->with('user.githubAccount')
+            ->get()
+            ->every(fn (IdeaApplication $collaborator) => $this->inviteUser($idea, $collaborator));
+    }
+
+    public function inviteUser(Idea $idea, IdeaApplication $collaborator): bool
+    {
+        $idea->loadMissing('user.githubAccount', 'codeRepository');
+        $collaborator->loadMissing('user.githubAccount');
+
+        $collaboratorUsername = $collaborator->user->githubUsername();
+
+        if (! $idea->codeRepository instanceof CodeRepository || ! $collaboratorUsername) {
+            return false;
+        }
+
         try {
-            $this->github->addCollaborator(Auth::user(), $idea->repository_name, $collaborator->user->github_username);
-        } catch (Exception $e) {
+            $this->github->addCollaborator($idea->user, $idea->codeRepository->name, $collaboratorUsername);
+        } catch (Throwable) {
             return false;
         }
 
