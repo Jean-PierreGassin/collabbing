@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
@@ -6,17 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import type { DomainUser } from '@/types/domain';
 
-defineProps<{
+const props = defineProps<{
   user?: DomainUser;
   githubClientId?: string | null;
 }>();
+
+function submitProfile(event: SubmitEvent): void {
+  if (!props.user?.routes.update) {
+    return;
+  }
+
+  router.post(props.user.routes.update, new FormData(event.currentTarget as HTMLFormElement), {
+    preserveScroll: true,
+  });
+}
 </script>
 
 <template>
   <Card>
     <CardHeader><h1 class="text-2xl font-semibold text-white">{{ user ? 'Edit' : 'Create' }} Profile</h1></CardHeader>
     <CardContent>
-      <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5">
+      <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit.prevent="submitProfile">
         <CsrfField />
         <MethodField v-if="user" method="PUT" />
 

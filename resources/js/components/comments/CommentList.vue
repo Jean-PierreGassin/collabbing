@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
+import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import type { IdeaComment, Paginator } from '@/types/domain';
 
 defineProps<{
@@ -10,27 +11,33 @@ defineProps<{
 </script>
 
 <template>
-  <section class="flex flex-col gap-3">
-    <h4 class="mt-4 text-xl font-semibold">Collaborator Comments</h4>
-    <Card v-for="comment in comments.items" :key="comment.id">
-      <CardHeader>
-        <h6 class="text-sm">
-          <a class="text-primary hover:underline" :href="comment.user.routes.show">
+  <Card>
+    <CardHeader>
+      <h2 class="text-lg font-semibold text-white">Comments</h2>
+    </CardHeader>
+    <CardContent v-if="comments.items.length > 0" class="flex flex-col divide-y divide-border">
+      <article v-for="comment in comments.items" :key="comment.id" class="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
+        <header class="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <a class="font-medium text-primary hover:underline" :href="comment.user.routes.show">
             @{{ comment.user.username }}
           </a>
           <span class="text-muted-foreground">
             Posted {{ comment.createdAtForHumans }}
           </span>
-        </h6>
-      </CardHeader>
-      <CardContent class="flex flex-col gap-3">
-        <div class="whitespace-pre-line">{{ comment.content }}</div>
-        <h6 v-if="comment.wasEdited" class="text-right text-sm text-muted-foreground">Last edited {{ comment.updatedAtForHumans }}</h6>
-        <div v-if="comment.can.update" class="border-t border-border pt-3">
-          <Button as="a" :href="comment.routes.edit" variant="secondary" size="sm">Edit Comment</Button>
+        </header>
+        <MarkdownContent :html="comment.contentHtml" />
+        <div v-if="comment.wasEdited || comment.can.update" class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+          <span v-if="comment.wasEdited" class="text-sm text-muted-foreground">Last edited {{ comment.updatedAtForHumans }}</span>
+          <span v-else />
+          <Button v-if="comment.can.update" as="a" :href="comment.routes.edit" variant="secondary" size="sm">Edit</Button>
         </div>
-      </CardContent>
-    </Card>
-    <PaginationLinks :paginator="comments" />
-  </section>
+      </article>
+    </CardContent>
+    <CardContent v-else>
+      <p class="text-sm text-muted-foreground">No comments yet.</p>
+    </CardContent>
+    <div class="border-t border-border px-6 py-4">
+      <PaginationLinks :paginator="comments" />
+    </div>
+  </Card>
 </template>

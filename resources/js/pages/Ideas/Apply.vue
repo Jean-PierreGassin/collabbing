@@ -18,7 +18,7 @@ defineProps<{
     <CardContent>
       <form :action="idea.routes.applicationsStore" method="POST" class="flex flex-col gap-4">
         <CsrfField />
-        <FormField id="content" label="Application" help="Share the skills, context, or time you can contribute.">
+        <FormField id="content" label="Application" help="Share the skills, context, or time you can contribute. Markdown is supported.">
           <template #default="{ invalid, describedBy }">
             <textarea
               id="content"

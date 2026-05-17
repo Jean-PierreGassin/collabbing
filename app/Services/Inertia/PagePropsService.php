@@ -139,6 +139,7 @@ class PagePropsService
         return [
             'id' => $comment->id,
             'content' => $comment->content,
+            'contentHtml' => (string) Markdown::convertToHtml($comment->content),
             'createdAtForHumans' => $comment->created_at->diffForHumans(),
             'updatedAtForHumans' => $comment->updated_at->diffForHumans(),
             'wasEdited' => $comment->created_at->timestamp < $comment->updated_at->timestamp,
@@ -160,6 +161,7 @@ class PagePropsService
         return [
             'id' => $application->id,
             'content' => $application->content,
+            'contentHtml' => (string) Markdown::convertToHtml($application->content),
             'status' => $application->status,
             'createdAtForHumans' => $application->created_at->diffForHumans(),
             'user' => $this->user($application->user),
