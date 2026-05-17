@@ -20,10 +20,10 @@ const session = useSessionStore();
           <CardTitle>Free</CardTitle>
         </CardHeader>
         <CardContent class="flex flex-col gap-5">
-          <h1 class="text-3xl font-semibold">
+          <p class="text-3xl font-semibold">
             $0
             <small class="text-base font-normal text-muted-foreground">/ mo</small>
-          </h1>
+          </p>
           <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
             <li>Limited idea posts per day</li>
             <li>Limited idea applications per day</li>
@@ -44,10 +44,10 @@ const session = useSessionStore();
           </div>
         </CardHeader>
         <CardContent class="flex flex-col gap-5">
-          <h1 class="text-3xl font-semibold">
+          <p class="text-3xl font-semibold">
             $8 USD
             <small class="text-base font-normal text-muted-foreground">/ mo</small>
-          </h1>
+          </p>
           <ul class="flex flex-col gap-2 text-sm text-muted-foreground">
             <li>Unlimited idea posting</li>
             <li>Unlimited idea applications</li>

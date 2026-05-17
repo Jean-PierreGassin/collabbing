@@ -11,10 +11,12 @@ import type { Idea } from '@/types/domain';
 const props = withDefaults(defineProps<{
   idea: Idea;
   featured?: boolean;
+  hideTitle?: boolean;
   single?: boolean;
   showComments?: boolean;
 }>(), {
   featured: false,
+  hideTitle: false,
   single: false,
   showComments: false,
 });
@@ -47,12 +49,14 @@ const supportersLabel = computed(() => {
             <Sparkles class="size-3.5" aria-hidden="true" />
             Trending
           </div>
-          <CardTitle class="leading-tight">
-            <template v-if="!single">
-              <Link class="text-white transition-colors hover:text-primary" :href="idea.routes.show">{{ idea.titleDisplay }}</Link>
-            </template>
-            <template v-else>
+          <template v-if="single && !hideTitle">
+            <h1 class="text-2xl font-semibold leading-tight text-white">
               {{ idea.titleDisplay }}
+            </h1>
+          </template>
+          <CardTitle v-else-if="!single" class="leading-tight">
+            <template>
+              <Link class="text-white transition-colors hover:text-primary" :href="idea.routes.show">{{ idea.titleDisplay }}</Link>
             </template>
           </CardTitle>
           <p class="text-sm text-muted-foreground">

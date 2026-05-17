@@ -23,7 +23,7 @@ defineProps<{
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <div class="flex flex-col gap-4">
-        <IdeaCard :idea="idea" single />
+        <IdeaCard :idea="idea" single hide-title />
         <template v-if="idea.can.update || collaborator">
           <CommentList :comments="comments" />
           <Card>
