@@ -42,6 +42,8 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertIsString($workflow);
         $this->assertStringContainsString('branches:', $workflow);
         $this->assertStringContainsString('- master', $workflow);
+        $this->assertStringContainsString('workflow_dispatch:', $workflow);
+        $this->assertStringContainsString('Run the full deployment after preflight', $workflow);
         $this->assertStringContainsString('Run PHPUnit', $workflow);
         $this->assertStringContainsString('Build frontend', $workflow);
         $this->assertStringContainsString('Build and push image', $workflow);
@@ -49,6 +51,7 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('Deploy over SSH', $workflow);
         $this->assertStringContainsString('docker login ghcr.io', $workflow);
         $this->assertStringContainsString('docker/production/deploy.sh --preflight', $workflow);
+        $this->assertStringContainsString("if: github.event_name == 'push' || inputs.deploy", $workflow);
         $this->assertStringContainsString('PRODUCTION_SSH_KNOWN_HOSTS', $workflow);
         $this->assertStringNotContainsString('echo \'${{ secrets.GITHUB_TOKEN }}\'', $workflow);
         $this->assertStringNotContainsString('ssh-keyscan', $workflow);
