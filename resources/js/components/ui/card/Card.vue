@@ -10,7 +10,7 @@ const props = defineProps<{
 <template>
   <div
     data-slot="card"
-    :class="cn('rounded-lg border bg-card text-card-foreground shadow-sm', props.class)"
+    :class="cn('overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm shadow-black/10', props.class)"
   >
     <slot />
   </div>

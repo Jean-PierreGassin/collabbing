@@ -9,6 +9,7 @@ export const useSessionStore = defineStore('session', () => {
   const routes = computed(() => page.props.routes);
   const flash = computed(() => page.props.flash);
   const errors = computed(() => page.props.errors);
+  const oldInput = computed(() => page.props.oldInput);
   const csrfToken = computed(() => document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? null);
   const isAuthenticated = computed(() => user.value !== null);
 
@@ -17,6 +18,7 @@ export const useSessionStore = defineStore('session', () => {
     errors,
     flash,
     isAuthenticated,
+    oldInput,
     routes,
     user,
   };

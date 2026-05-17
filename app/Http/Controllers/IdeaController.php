@@ -91,8 +91,8 @@ class IdeaController extends Controller
 
         return Inertia::render('Ideas/Manage', [
             'idea' => $this->pageProps->idea($idea),
-            'applications' => $applications->map(fn (IdeaApplication $application) => $this->pageProps->application($application))->values(),
-            'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->pageProps->application($application))->values(),
+            'applications' => $this->pageProps->paginator($applications, fn (IdeaApplication $application) => $this->pageProps->application($application)),
+            'collaborators' => $this->pageProps->paginator($collaborators, fn (IdeaApplication $application) => $this->pageProps->application($application)),
         ]);
     }
 

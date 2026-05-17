@@ -14,6 +14,7 @@ export interface AppRoutes {
   ideasStore: string;
   users: string;
   feedback: string;
+  contact: string;
   pricing: string;
 }
 
@@ -22,6 +23,8 @@ export interface AppFlash {
   errors: string[];
 }
 
+export type OldInputValue = boolean | number | string | string[] | null;
+
 export interface SharedPageProps {
   [key: string]: unknown;
   auth: {
@@ -29,5 +32,6 @@ export interface SharedPageProps {
   };
   errors: Record<string, string>;
   flash: AppFlash;
+  oldInput: Record<string, OldInputValue>;
   routes: AppRoutes;
 }

@@ -14,6 +14,7 @@ class IdeaFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(3),
+            'summary' => $this->faker->sentence(14),
             'communication' => 'Slack',
             'content' => $this->faker->paragraph,
         ];

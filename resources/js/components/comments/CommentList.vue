@@ -1,43 +1,55 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import CommentComposer from '@/components/comments/CommentComposer.vue';
+import CommentThread from '@/components/comments/CommentThread.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
-import MarkdownContent from '@/components/typography/MarkdownContent.vue';
-import type { IdeaComment, Paginator } from '@/types/domain';
+import type { DomainUser, IdeaComment, Paginator } from '@/types/domain';
 
 defineProps<{
   comments: Paginator<IdeaComment>;
+  commentsStore: string;
+  mentionableUsers: DomainUser[];
 }>();
 </script>
 
 <template>
   <Card>
-    <CardHeader>
-      <h2 class="text-lg font-semibold text-white">Comments</h2>
-    </CardHeader>
-    <CardContent v-if="comments.items.length > 0" class="flex flex-col divide-y divide-border">
-      <article v-for="comment in comments.items" :key="comment.id" class="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
-        <header class="flex flex-wrap items-center justify-between gap-2 text-sm">
-          <a class="font-medium text-primary hover:underline" :href="comment.user.routes.show">
-            @{{ comment.user.username }}
-          </a>
-          <span class="text-muted-foreground">
-            Posted {{ comment.createdAtForHumans }}
-          </span>
-        </header>
-        <MarkdownContent :html="comment.contentHtml" />
-        <div v-if="comment.wasEdited || comment.can.update" class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-          <span v-if="comment.wasEdited" class="text-sm text-muted-foreground">Last edited {{ comment.updatedAtForHumans }}</span>
-          <span v-else />
-          <Button v-if="comment.can.update" as="a" :href="comment.routes.edit" variant="secondary" size="sm">Edit</Button>
+    <CardHeader class="gap-4">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div class="flex flex-col gap-1">
+          <h2 class="text-lg font-semibold text-white">Comments</h2>
         </div>
-      </article>
+        <PaginationLinks
+          v-if="comments.lastPage > 1"
+          label="Comment pages"
+          :paginator="comments"
+          :only="['comments']"
+          placement="toolbar"
+        />
+      </div>
+      <CommentComposer
+        :action="commentsStore"
+        label="Comment"
+        hide-label
+        :mentionable-users="mentionableUsers"
+        textarea-id="comment-content"
+      />
+    </CardHeader>
+    <CardContent :class="comments.items.length > 0 ? 'min-h-[34rem]' : undefined">
+      <Transition name="page-fade" mode="out-in">
+        <div :key="comments.currentPage" class="flex flex-col gap-3">
+          <template v-if="comments.items.length > 0">
+            <CommentThread
+              v-for="comment in comments.items"
+              :key="comment.id"
+              :comment="comment"
+              :comments-store="commentsStore"
+              :mentionable-users="mentionableUsers"
+            />
+          </template>
+          <p v-else class="text-sm text-muted-foreground">No comments yet.</p>
+        </div>
+      </Transition>
     </CardContent>
-    <CardContent v-else>
-      <p class="text-sm text-muted-foreground">No comments yet.</p>
-    </CardContent>
-    <div class="border-t border-border px-6 py-4">
-      <PaginationLinks :paginator="comments" />
-    </div>
   </Card>
 </template>

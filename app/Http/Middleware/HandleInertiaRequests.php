@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Inertia\PagePropsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -25,6 +26,13 @@ class HandleInertiaRequests extends Middleware
                     ? $session->get('errors')->all()
                     : [],
             ],
+            'oldInput' => fn () => (object) Arr::except($session?->getOldInput() ?? [], [
+                '_method',
+                '_token',
+                'current_password',
+                'password',
+                'password_confirmation',
+            ]),
             'routes' => [
                 'home' => route('home'),
                 'dashboard' => route('dashboard'),
@@ -39,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'ideasStore' => route('ideas.store'),
                 'users' => route('users.index'),
                 'feedback' => route('resources.feedback'),
+                'contact' => route('resources.contact'),
                 'pricing' => route('resources.pricing'),
             ],
         ];

@@ -4,6 +4,7 @@ import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import UserAvatar from '@/components/users/UserAvatar.vue';
 import type { Idea, IdeaApplication, IdeaSupporter } from '@/types/domain';
 
 const props = defineProps<{
@@ -41,12 +42,16 @@ const supporterSentence = computed(() => {
         </template>
         <div v-else class="flex flex-wrap gap-2">
           <a v-for="collab in idea.collaborators" :key="collab.id" :href="collab.user.routes.show">
-            <img
-              class="size-10 border border-secondary object-cover"
+            <UserAvatar
               :src="collab.user.profilePicture"
               :alt="`${collab.user.firstName} ${collab.user.lastName}`"
-            >
+              size="sm"
+              class="border-secondary"
+            />
           </a>
+          <span v-if="idea.hiddenCollaboratorsCount > 0" class="inline-flex h-8 items-center rounded-md border border-border bg-background/35 px-2 text-xs font-medium text-muted-foreground">
+            +{{ idea.hiddenCollaboratorsCount.toLocaleString() }} more
+          </span>
         </div>
       </CardContent>
     </Card>

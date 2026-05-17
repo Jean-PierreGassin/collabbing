@@ -2,13 +2,16 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import IdeaList from '@/components/ideas/IdeaList.vue';
+import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import { Button } from '@/components/ui/button';
 import { useSessionStore } from '@/stores/session';
-import type { Idea } from '@/types/domain';
+import { Search, X } from '@lucide/vue';
+import type { Idea, Paginator } from '@/types/domain';
 
 defineProps<{
-  ideas: Idea[];
-  collaborations: Idea[];
+  keyword?: string | null;
+  ideas: Paginator<Idea>;
+  collaborations: Paginator<Idea>;
 }>();
 
 const session = useSessionStore();
@@ -17,29 +20,53 @@ const activeTab = ref<'ideas' | 'collaborations'>(new URLSearchParams(window.loc
 
 <template>
   <section class="flex flex-col gap-5">
+    <h1 class="sr-only">Dashboard</h1>
+
     <div class="flex flex-col gap-1">
-      <h1 class="text-2xl font-semibold text-white">Dashboard</h1>
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
         Track ideas you own and collaborations you have joined.
       </p>
     </div>
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-wrap gap-2">
-        <Button :variant="activeTab === 'ideas' ? 'default' : 'ghost'" @click="activeTab = 'ideas'">My Ideas</Button>
-        <Button :variant="activeTab === 'collaborations' ? 'default' : 'ghost'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
+    <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)_minmax(0,1fr)] md:items-center">
+      <div class="flex flex-wrap gap-1 rounded-md border border-border bg-card p-1 md:justify-self-start">
+        <Button :variant="activeTab === 'ideas' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'ideas'" @click="activeTab = 'ideas'">My Ideas</Button>
+        <Button :variant="activeTab === 'collaborations' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'collaborations'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
       </div>
-      <Button :as="Link" :href="session.routes.ideasCreate" variant="outline" size="sm">Create an Idea</Button>
+      <form :action="session.routes.dashboard" method="GET" class="relative w-full md:justify-self-center" role="search">
+        <label for="dashboard-search" class="sr-only">Search dashboard ideas</label>
+        <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <input
+          id="dashboard-search"
+          name="search"
+          type="search"
+          class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-20 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
+          :value="keyword ?? ''"
+          placeholder="Search your dashboard ideas"
+          maxlength="80"
+        >
+        <div class="absolute inset-y-1 right-1 flex items-center gap-1">
+          <Button type="submit" variant="ghost" size="icon" class="size-8" aria-label="Search dashboard ideas">
+            <Search class="size-4" aria-hidden="true" />
+          </Button>
+          <Button v-if="keyword" :as="Link" :href="session.routes.dashboard" variant="ghost" size="icon" class="size-8" aria-label="Clear dashboard search">
+            <X class="size-4" aria-hidden="true" />
+          </Button>
+        </div>
+      </form>
+      <Button :as="Link" :href="session.routes.ideasCreate" size="sm" class="justify-self-center md:justify-self-end">Create an Idea</Button>
     </div>
 
     <div v-if="activeTab === 'ideas'">
-      <IdeaList v-if="ideas.length > 0" :ideas="ideas" />
+      <IdeaList v-if="ideas.items.length > 0" :ideas="ideas.items" />
       <p v-else>You have not shared any ideas yet. <Link class="text-primary hover:underline" :href="session.routes.ideasCreate">Create one</Link></p>
+      <PaginationLinks :paginator="ideas" :only="['ideas']" label="My idea pages" />
     </div>
 
     <div v-else>
-      <IdeaList v-if="collaborations.length > 0" :ideas="collaborations" />
+      <IdeaList v-if="collaborations.items.length > 0" :ideas="collaborations.items" />
       <p v-else>You are not collaborating on any ideas yet. <Link class="text-primary hover:underline" :href="session.routes.ideas">Browse ideas</Link></p>
+      <PaginationLinks :paginator="collaborations" :only="['collaborations']" label="Collaboration idea pages" />
     </div>
   </section>
 </template>

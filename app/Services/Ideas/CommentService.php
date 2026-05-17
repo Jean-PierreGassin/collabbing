@@ -5,7 +5,6 @@ namespace App\Services\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaComment;
 use App\Repositories\Ideas\CommentRepository;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -15,10 +14,7 @@ class CommentService
 {
     public function __construct(private CommentRepository $comments) {}
 
-    /**
-     * @return IdeaComment
-     */
-    public function store(Idea $idea, array $data): Model
+    public function store(Idea $idea, array $data): IdeaComment
     {
         return $this->comments->create($idea, Auth::user(), $data);
     }

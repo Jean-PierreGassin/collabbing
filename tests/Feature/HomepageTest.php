@@ -42,6 +42,7 @@ class HomepageTest extends TestCase
     {
         foreach ([
             '/resources/feedback' => 'Feedback',
+            '/resources/contact' => 'Contact',
             '/resources/pricing' => 'Pricing',
         ] as $path => $component) {
             $response = $this->get($path);

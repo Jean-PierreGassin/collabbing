@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
 
 /*
@@ -45,6 +46,7 @@ return [
 
     'extensions' => [
         CommonMarkCoreExtension::class,
+        HeadingPermalinkExtension::class,
         TableExtension::class,
     ],
 
@@ -150,6 +152,13 @@ return [
     'slug_normalizer' => [
         'max_length' => 255,
         'unique' => 'document',
+    ],
+
+    'heading_permalink' => [
+        'insert' => 'none',
+        'apply_id_to_heading' => true,
+        'id_prefix' => '',
+        'fragment_prefix' => '',
     ],
 
 ];

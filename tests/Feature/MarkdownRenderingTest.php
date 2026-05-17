@@ -11,7 +11,7 @@ class MarkdownRenderingTest extends TestCase
     {
         $html = (string) Markdown::convertToHtml('# Test title');
 
-        $this->assertStringContainsString('<h1>Test title</h1>', $html);
+        $this->assertStringContainsString('<h1 id="test-title">Test title</h1>', $html);
     }
 
     public function test_markdown_content_strips_raw_html(): void

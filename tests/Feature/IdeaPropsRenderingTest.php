@@ -23,7 +23,18 @@ class IdeaPropsRenderingTest extends TestCase
 
         $props = app(PagePropsService::class)->idea($idea);
 
-        $this->assertSame("<h1>Test title</h1>\n", $props['contentHtml']);
+        $this->assertSame('Plain summary for the idea card.', $props['summary']);
+        $this->assertSame("<h1 id=\"test-title\">Test title</h1>\n", $props['contentHtml']);
+    }
+
+    public function test_idea_props_fall_back_to_plain_text_summary_for_existing_ideas(): void
+    {
+        $idea = $this->makeIdeaWithRelations('# Existing title');
+        $idea->summary = null;
+
+        $props = app(PagePropsService::class)->idea($idea);
+
+        $this->assertSame('Existing title', $props['summary']);
     }
 
     public function test_search_result_paginator_maps_rendered_markdown_content(): void
@@ -36,7 +47,7 @@ class IdeaPropsRenderingTest extends TestCase
             fn (Idea $idea) => app(PagePropsService::class)->idea($idea)
         );
 
-        $this->assertSame("<h1>Searchable idea</h1>\n", $props['items'][0]['contentHtml']);
+        $this->assertSame("<h1 id=\"searchable-idea\">Searchable idea</h1>\n", $props['items'][0]['contentHtml']);
     }
 
     public function test_comment_props_render_markdown_content(): void
@@ -50,10 +61,33 @@ class IdeaPropsRenderingTest extends TestCase
         $comment->created_at = Carbon::now();
         $comment->updated_at = Carbon::now();
         $comment->setRelation('user', $user);
+        $comment->setRelation('replies', new EloquentCollection);
 
         $props = app(PagePropsService::class)->comment($comment);
 
         $this->assertSame("<p><strong>Useful</strong> comment</p>\n", $props['contentHtml']);
+    }
+
+    public function test_comment_props_render_profile_links_for_mentions(): void
+    {
+        $commenter = $this->makeUser();
+        User::factory()->create([
+            'username' => 'target_user',
+        ]);
+        $comment = new IdeaComment([
+            'content' => 'Can @target_user review this?',
+        ]);
+        $comment->id = 1;
+        $comment->idea_id = 1;
+        $comment->created_at = Carbon::now();
+        $comment->updated_at = Carbon::now();
+        $comment->setRelation('user', $commenter);
+        $comment->setRelation('replies', new EloquentCollection);
+
+        $props = app(PagePropsService::class)->comment($comment);
+
+        $this->assertStringContainsString('/users/target_user', $props['contentHtml']);
+        $this->assertStringContainsString('@target_user</a>', $props['contentHtml']);
     }
 
     public function test_application_props_render_markdown_content(): void
@@ -117,6 +151,7 @@ class IdeaPropsRenderingTest extends TestCase
 
         $idea = new Idea([
             'title' => 'Test title',
+            'summary' => 'Plain summary for the idea card.',
             'communication' => 'Slack',
             'content' => $content,
             'status' => 'open',

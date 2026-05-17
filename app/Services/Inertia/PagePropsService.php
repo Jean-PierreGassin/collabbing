@@ -10,10 +10,16 @@ use App\Models\RepositoryEvent;
 use App\Models\User;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class PagePropsService
 {
+    private const IDEA_SUMMARY_LIMIT = 240;
+
+    private const COLLABORATOR_PREVIEW_LIMIT = 12;
+
     public function user(?User $user): ?array
     {
         if (! $user) {
@@ -51,16 +57,18 @@ class PagePropsService
         $idea->loadMissing([
             'user',
             'codeRepository.events',
-            'supporters',
-            'approvedApplications.user',
         ]);
 
         $codeRepository = $idea->codeRepository;
+        $supportersCount = $this->relationCount($idea, 'supporters', 'supporters_count');
+        $approvedApplicationsCount = $this->relationCount($idea, 'approvedApplications', 'approved_applications_count');
+        $collaborators = $this->collaboratorPreview($idea);
 
         return [
             'id' => $idea->id,
             'title' => $idea->title,
             'titleDisplay' => ucfirst($idea->title),
+            'summary' => $this->ideaSummary($idea),
             'communication' => $idea->communication,
             'content' => $idea->content,
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
@@ -71,9 +79,10 @@ class PagePropsService
             'repositoryActivity' => $this->repositoryActivity($idea),
             'createdAtForHumans' => $idea->created_at->diffForHumans(),
             'user' => $this->user($idea->user),
-            'supportersCount' => $idea->supporters->count(),
-            'approvedApplicationsCount' => $idea->approvedApplications->count(),
-            'collaborators' => $idea->approvedApplications->map(fn (IdeaApplication $application) => $this->application($application))->values(),
+            'supportersCount' => $supportersCount,
+            'approvedApplicationsCount' => $approvedApplicationsCount,
+            'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->application($application))->values(),
+            'hiddenCollaboratorsCount' => max(0, $approvedApplicationsCount - $collaborators->count()),
             'can' => [
                 'update' => Gate::allows('update', $idea),
                 'storeApplication' => Gate::allows('storeApplication', $idea),
@@ -98,6 +107,51 @@ class PagePropsService
                     : route('auth.github.login'),
             ],
         ];
+    }
+
+    private function ideaSummary(Idea $idea): string
+    {
+        if ($idea->summary) {
+            return $idea->summary;
+        }
+
+        $text = trim((string) preg_replace(
+            '/\s+/',
+            ' ',
+            strip_tags((string) Markdown::convertToHtml($idea->content))
+        ));
+
+        return Str::limit($text ?: $idea->title, self::IDEA_SUMMARY_LIMIT, '');
+    }
+
+    private function relationCount(Idea $idea, string $relation, string $countAttribute): int
+    {
+        $count = $idea->getAttribute($countAttribute);
+
+        if (is_numeric($count)) {
+            return (int) $count;
+        }
+
+        if ($idea->relationLoaded($relation)) {
+            return $idea->{$relation}->count();
+        }
+
+        return $idea->{$relation}()->count();
+    }
+
+    private function collaboratorPreview(Idea $idea): Collection
+    {
+        if ($idea->relationLoaded('approvedApplications')) {
+            return $idea->approvedApplications
+                ->take(self::COLLABORATOR_PREVIEW_LIMIT)
+                ->values();
+        }
+
+        return $idea->approvedApplications()
+            ->with('user')
+            ->latest()
+            ->limit(self::COLLABORATOR_PREVIEW_LIMIT)
+            ->get();
     }
 
     private function repositoryActivity(Idea $idea): array
@@ -134,16 +188,22 @@ class PagePropsService
 
     public function comment(IdeaComment $comment): array
     {
-        $comment->loadMissing('user');
+        $comment->loadMissing(['user', 'replies.user']);
+
+        $contentHtml = $this->commentContentHtml($comment);
 
         return [
             'id' => $comment->id,
+            'parentId' => $comment->parent_id,
             'content' => $comment->content,
-            'contentHtml' => (string) Markdown::convertToHtml($comment->content),
+            'contentHtml' => $contentHtml,
             'createdAtForHumans' => $comment->created_at->diffForHumans(),
             'updatedAtForHumans' => $comment->updated_at->diffForHumans(),
             'wasEdited' => $comment->created_at->timestamp < $comment->updated_at->timestamp,
             'user' => $this->user($comment->user),
+            'replies' => $comment->replies
+                ->map(fn (IdeaComment $reply) => $this->comment($reply))
+                ->values(),
             'can' => [
                 'update' => Gate::allows('update', $comment),
             ],
@@ -152,6 +212,36 @@ class PagePropsService
                 'update' => route('ideas.comments.update', [$comment->idea_id, $comment]),
             ],
         ];
+    }
+
+    private function commentContentHtml(IdeaComment $comment): string
+    {
+        $usernames = collect();
+
+        preg_match_all('/(?<![A-Za-z0-9_-])@([A-Za-z0-9_-]{3,20})\b/', $comment->content, $matches);
+
+        if (! empty($matches[1])) {
+            $usernames = User::query()
+                ->whereIn('username', array_unique($matches[1]))
+                ->get()
+                ->keyBy('username');
+        }
+
+        $content = preg_replace_callback(
+            '/(?<![A-Za-z0-9_-])@([A-Za-z0-9_-]{3,20})\b/',
+            function (array $matches) use ($usernames): string {
+                $user = $usernames->get($matches[1]);
+
+                if (! $user instanceof User) {
+                    return $matches[0];
+                }
+
+                return sprintf('[@%s](%s)', $user->username, route('users.show', $user->username));
+            },
+            $comment->content
+        );
+
+        return (string) Markdown::convertToHtml($content ?? $comment->content);
     }
 
     public function application(IdeaApplication $application): array

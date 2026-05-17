@@ -69,11 +69,13 @@
   }
 
   html {
+    overflow-x: clip;
     color-scheme: dark;
   }
 
   body {
     min-width: 320px;
+    overflow-x: clip;
     background: var(--background);
     color: var(--foreground);
     font-family:
@@ -90,16 +92,20 @@
 .markdown-content {
   display: flex;
   max-width: none;
+  min-width: 0;
   flex-direction: column;
   gap: 0.85rem;
   color: var(--foreground);
   line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .markdown-content :where(h1, h2, h3, h4) {
   color: oklch(1 0 0);
   font-weight: 650;
   line-height: 1.2;
+  scroll-margin-top: 6rem;
 }
 
 .markdown-content h1 {
@@ -116,6 +122,7 @@
 
 .markdown-content :where(p, ul, ol, blockquote, pre) {
   margin: 0;
+  max-width: 100%;
 }
 
 .markdown-content :where(ul, ol) {
@@ -154,6 +161,7 @@
 
 .markdown-content pre {
   overflow-x: auto;
+  white-space: pre-wrap;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: color-mix(in oklab, var(--background) 82%, black);
@@ -203,6 +211,11 @@ select:focus {
     0 0 0 3px color-mix(in oklab, var(--ring) 28%, transparent);
 }
 
+select option {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
 [aria-invalid="true"] {
   border-color: var(--destructive) !important;
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 22%, transparent) !important;
@@ -211,9 +224,9 @@ select:focus {
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition:
-    opacity 320ms ease,
-    translate 320ms ease,
-    scale 320ms ease;
+    opacity 220ms ease,
+    translate 220ms ease,
+    scale 220ms ease;
 }
 
 .page-transition-panel {
@@ -226,8 +239,8 @@ select:focus {
 
 .page-fade-enter-from {
   opacity: 0;
-  translate: 0 0.85rem;
-  scale: 0.985;
+  translate: 0 0.45rem;
+  scale: 0.99;
 }
 
 .page-fade-leave-to {
@@ -268,6 +281,92 @@ select:focus {
   translate: 0 -0.35rem;
 }
 
+.content-fade-enter-active,
+.content-fade-leave-active {
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.content-fade-enter-from {
+  opacity: 0;
+  translate: 0 0.3rem;
+}
+
+.content-fade-leave-to {
+  opacity: 0;
+  translate: 0 -0.3rem;
+}
+
+.description-reveal-panel {
+  min-width: 0;
+}
+
+.toc-float-enter-active,
+.toc-float-leave-active {
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease,
+    scale 180ms ease;
+}
+
+.toc-float-enter-from,
+.toc-float-leave-to {
+  opacity: 0;
+  translate: 0 -0.35rem;
+  scale: 0.98;
+}
+
+.toc-mobile-enter-active,
+.toc-mobile-leave-active {
+  overflow: hidden;
+  transform-origin: top;
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.toc-mobile-enter-from,
+.toc-mobile-leave-to {
+  max-height: 0;
+  opacity: 0;
+  translate: 0 -0.25rem;
+}
+
+.toc-mobile-enter-to,
+.toc-mobile-leave-from {
+  max-height: min(18rem, 55dvh);
+  opacity: 1;
+  translate: 0 0;
+}
+
+.toc-item-enter-active,
+.toc-item-leave-active,
+.toc-item-move {
+  transition:
+    max-height 180ms ease,
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.toc-item-enter-active,
+.toc-item-leave-active {
+  max-height: 2.75rem;
+  overflow: hidden;
+}
+
+.toc-item-leave-active {
+  position: relative;
+}
+
+.toc-item-enter-from,
+.toc-item-leave-to {
+  max-height: 0;
+  opacity: 0;
+  translate: -0.25rem 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-fade-enter-active,
   .page-fade-leave-active,
@@ -275,7 +374,16 @@ select:focus {
   .toast-slide-leave-active,
   .toast-slide-move,
   .mobile-panel-enter-active,
-  .mobile-panel-leave-active {
+  .mobile-panel-leave-active,
+  .content-fade-enter-active,
+  .content-fade-leave-active,
+  .toc-float-enter-active,
+  .toc-float-leave-active,
+  .toc-mobile-enter-active,
+  .toc-mobile-leave-active,
+  .toc-item-enter-active,
+  .toc-item-leave-active,
+  .toc-item-move {
     transition-duration: 1ms;
   }
 }

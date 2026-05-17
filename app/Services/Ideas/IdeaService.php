@@ -40,14 +40,14 @@ class IdeaService
         return $this->ideas->getOpenRecent();
     }
 
-    public function getUserIdeas(): LengthAwarePaginator
+    public function getUserIdeas(?string $search = null): LengthAwarePaginator
     {
-        return $this->ideas->getUserIdeas(Auth::user());
+        return $this->ideas->getUserIdeas(Auth::user(), $search);
     }
 
-    public function getCollaboratedIdeas(): LengthAwarePaginator
+    public function getCollaboratedIdeas(?string $search = null): LengthAwarePaginator
     {
-        return $this->ideas->getCollaboratedIdeas(Auth::user());
+        return $this->ideas->getCollaboratedIdeas(Auth::user(), $search);
     }
 
     public function getComments(Idea $idea): LengthAwarePaginator

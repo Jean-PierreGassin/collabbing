@@ -22,6 +22,7 @@ class Idea extends Model
      */
     protected $fillable = [
         'title',
+        'summary',
         'communication',
         'content',
         'status',

@@ -20,6 +20,7 @@ class ProductWriteThrottleTest extends TestCase
                 ->actingAs($user)
                 ->post(route('ideas.store'), [
                     'title' => "Rate limited idea {$attempt}",
+                    'summary' => 'A bounded write path for a product idea.',
                     'repository_name' => "rate-limited-idea-{$attempt}",
                     'communication' => 'Slack',
                     'content' => 'A bounded write path keeps automated posting from overwhelming the workspace.',
@@ -42,6 +43,7 @@ class ProductWriteThrottleTest extends TestCase
                 ->actingAs($user)
                 ->post(route('ideas.store'), [
                     'title' => "Read allowed idea {$attempt}",
+                    'summary' => 'A read path that should remain available.',
                     'repository_name' => "read-allowed-idea-{$attempt}",
                     'communication' => 'Slack',
                     'content' => 'The write limiter should not prevent normal browsing.',
