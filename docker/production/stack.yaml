@@ -1,7 +1,10 @@
 services:
   nginx:
     image: ${IMAGE}
-    command: ["nginx", "-g", "daemon off;"]
+    command:
+      - sh
+      - -lc
+      - until getent hosts app >/dev/null; do sleep 1; done; exec nginx -g 'daemon off;'
     ports:
       - target: 80
         published: ${APP_HTTP_PORT:-80}
@@ -13,12 +16,13 @@ services:
       - app
     networks:
       - app_network
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
+      - CHOWN
       - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
     deploy:
       replicas: ${NGINX_REPLICAS:-2}
       update_config:
@@ -39,8 +43,6 @@ services:
       - ${APP_ENV_FILE:-.env.production}
     networks:
       - app_network
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     volumes:
@@ -59,14 +61,15 @@ services:
 
   queue:
     image: ${IMAGE}
-    command: ["php", "artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--timeout=120", "--memory=256"]
+    command:
+      - sh
+      - -lc
+      - until getent hosts redis >/dev/null && getent hosts mysql >/dev/null; do sleep 1; done; exec php artisan queue:work redis --sleep=3 --tries=3 --timeout=120 --memory=256
     user: www-data
     env_file:
       - ${APP_ENV_FILE:-.env.production}
     networks:
       - app_network
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     volumes:
@@ -82,14 +85,15 @@ services:
 
   scheduler:
     image: ${IMAGE}
-    command: ["php", "artisan", "schedule:work"]
+    command:
+      - sh
+      - -lc
+      - until getent hosts redis >/dev/null && getent hosts mysql >/dev/null; do sleep 1; done; exec php artisan schedule:work
     user: www-data
     env_file:
       - ${APP_ENV_FILE:-.env.production}
     networks:
       - app_network
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     volumes:
