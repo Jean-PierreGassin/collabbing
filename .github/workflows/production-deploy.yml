@@ -114,6 +114,15 @@ jobs:
           scp -P "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" .env.production "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:~/collabbing/docker/production/.env.production"
           ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "chmod 600 ~/collabbing/docker/production/.env.production && chmod 700 ~/collabbing/docker/production/deploy.sh"
 
+      - name: Run deployment preflight
+        run: |
+          ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "\
+            cd ~/collabbing && \
+            IMAGE='${{ env.IMAGE }}' \
+            STACK_NAME='${{ vars.PRODUCTION_STACK_NAME || 'collabbing' }}' \
+            APP_ENV_FILE='.env.production' \
+            docker/production/deploy.sh --preflight"
+
       - name: Deploy over SSH
         run: |
           printf '%s\n' "${{ secrets.GITHUB_TOKEN }}" | ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"

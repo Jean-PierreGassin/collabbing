@@ -45,8 +45,10 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('Run PHPUnit', $workflow);
         $this->assertStringContainsString('Build frontend', $workflow);
         $this->assertStringContainsString('Build and push image', $workflow);
+        $this->assertStringContainsString('Run deployment preflight', $workflow);
         $this->assertStringContainsString('Deploy over SSH', $workflow);
         $this->assertStringContainsString('docker login ghcr.io', $workflow);
+        $this->assertStringContainsString('docker/production/deploy.sh --preflight', $workflow);
         $this->assertStringContainsString('PRODUCTION_SSH_KNOWN_HOSTS', $workflow);
         $this->assertStringNotContainsString('echo \'${{ secrets.GITHUB_TOKEN }}\'', $workflow);
         $this->assertStringNotContainsString('ssh-keyscan', $workflow);
@@ -60,6 +62,8 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('docker swarm init', $script);
         $this->assertStringContainsString('docker stack deploy', $script);
         $this->assertStringContainsString('Missing production environment file', $script);
+        $this->assertStringContainsString('Production deploy preflight failed', $script);
+        $this->assertStringContainsString('validate_production_env', $script);
         $this->assertStringContainsString('. "$DOCKER_ENV_FILE"', $script);
         $this->assertStringContainsString('docker network inspect "$NETWORK_NAME"', $script);
         $this->assertStringContainsString('php artisan "$@"', $script);
