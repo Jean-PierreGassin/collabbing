@@ -102,7 +102,22 @@ validate_production_env() {
   [ "$SESSION_DRIVER" = "redis" ] || fail_preflight "SESSION_DRIVER must be redis"
   [ "$SESSION_SECURE_COOKIE" = "true" ] || fail_preflight "SESSION_SECURE_COOKIE must be true"
   [ "$QUEUE_CONNECTION" = "redis" ] || fail_preflight "QUEUE_CONNECTION must be redis"
-  [ "$APP_KEY" != "base64:" ] || fail_preflight "APP_KEY must be generated"
+
+  case "$APP_URL" in
+    https://*)
+      ;;
+    *)
+      fail_preflight "APP_URL must use https"
+      ;;
+  esac
+
+  case "$APP_KEY" in
+    base64:?*)
+      ;;
+    *)
+      fail_preflight "APP_KEY must be generated"
+      ;;
+  esac
 
   require_secret DB_PASSWORD
   require_secret MYSQL_PASSWORD

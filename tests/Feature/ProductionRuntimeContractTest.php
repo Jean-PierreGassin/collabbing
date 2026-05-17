@@ -71,6 +71,8 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('load_env_file', $script);
         $this->assertStringContainsString('invalid environment line', $script);
         $this->assertStringContainsString('validate_production_env', $script);
+        $this->assertStringContainsString('APP_URL must use https', $script);
+        $this->assertStringContainsString('APP_KEY must be generated', $script);
         $this->assertLessThan(
             strpos($script, 'docker swarm init'),
             strrpos($script, 'validate_production_env'),
