@@ -31,6 +31,7 @@ RUN apt-get update \
         libfreetype6-dev \
         libonig-dev \
         libxml2-dev \
+        libsqlite3-dev \
         libpq-dev \
         default-mysql-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -43,6 +44,7 @@ RUN apt-get update \
         pcntl \
         pdo \
         pdo_mysql \
+        pdo_sqlite \
         zip \
     && pecl install redis xdebug \
     && docker-php-ext-enable redis xdebug \

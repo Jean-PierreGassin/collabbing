@@ -18,6 +18,8 @@ Route::get(
     }
 )->name('home');
 
+Route::get('/up', fn () => response()->noContent())->name('health');
+
 Route::get('/app/{path?}', function () {
     return redirect()->route('home');
 })

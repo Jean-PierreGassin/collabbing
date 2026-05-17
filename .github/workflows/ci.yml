@@ -4,18 +4,24 @@ on:
   pull_request:
     branches:
       - dev
+      - master
   push:
     branches:
       - dev
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   php-tests:
     name: PHP Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -40,6 +46,7 @@ jobs:
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout

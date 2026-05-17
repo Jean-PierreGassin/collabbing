@@ -25,6 +25,15 @@ create_app() {
 
   mkdir -p "$app_dir/public"
 
+  cat >"$app_dir/package.json" <<JSON
+{
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"setInterval(() => {}, 1000)\""
+  }
+}
+JSON
+
   cat >"$app_dir/public/index.php" <<PHP
 <?php
 header('Content-Type: text/plain');
@@ -45,6 +54,7 @@ write_env() {
     echo "APP_NAME=$app_name"
     echo "APP_HOST_PATH=$app_dir"
     echo "APP_HTTP_PORT=$base_port"
+    echo "NODE_PORT=$((base_port + 5))"
     echo "MAILHOG_SMTP_PORT=$((base_port + 1))"
     echo "MAILHOG_HTTP_PORT=$((base_port + 2))"
     echo "MYSQL_PORT=$((base_port + 3))"
