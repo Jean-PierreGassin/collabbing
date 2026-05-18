@@ -13,20 +13,69 @@ class IdeaValidationTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
+    public function testIdeaCanBeCreated(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload());
+
+        $idea = Idea::query()->where('title', 'A useful collaboration tool')->first();
+
+        $this->assertNotNull($idea);
+
+        $response->assertRedirect(route('ideas.show', $idea));
+        $this->assertSame($user->id, $idea->user_id);
+        $this->assertDatabaseHas('code_repositories', [
+            'idea_id' => $idea->id,
+            'provider' => CodeRepository::PROVIDER_GITHUB,
+            'status' => CodeRepository::STATUS_PLANNED,
+            'name' => 'useful-collaboration-tool',
+        ]);
+    }
+
+    public function testIdeaCanBeEdited(): void
+    {
+        $user = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($user, 'user')
+            ->withCodeRepository('original-repository')
+            ->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'title' => 'An updated collaboration tool',
+                'summary' => 'A better summary for the updated collaboration tool.',
+                'repository_name' => 'updated-collaboration-tool',
+                'status' => 'closed',
+            ]));
+
+        $response->assertRedirect(route('ideas.show', $idea));
+        $this->assertDatabaseHas('ideas', [
+            'id' => $idea->id,
+            'user_id' => $user->id,
+            'title' => 'An updated collaboration tool',
+            'summary' => 'A better summary for the updated collaboration tool.',
+            'status' => 'closed',
+        ]);
+        $this->assertDatabaseHas('code_repositories', [
+            'idea_id' => $idea->id,
+            'provider' => CodeRepository::PROVIDER_GITHUB,
+            'name' => 'updated-collaboration-tool',
+        ]);
+    }
+
     public function testRepositoryNameRejectsSpaces(): void
     {
         $user = User::factory()->create();
 
         $response = $this
             ->actingAs($user)
-            ->post(route('ideas.store'), [
-                'title' => 'A useful collaboration tool',
-                'summary' => 'A short summary for a useful collaboration tool.',
+            ->post(route('ideas.store'), $this->ideaPayload([
                 'repository_name' => 'repo with spaces',
-                'communication' => 'Slack',
-                'content' => 'A focused pitch for a useful collaboration tool.',
-                'status' => 'open',
-            ]);
+            ]));
 
         $response->assertSessionHasErrors('repository_name');
     }
@@ -37,26 +86,15 @@ class IdeaValidationTest extends TestCase
 
         $missingSummary = $this
             ->actingAs($user)
-            ->post(route('ideas.store'), [
-                'title' => 'A useful collaboration tool',
-                'repository_name' => 'useful-collaboration-tool',
-                'communication' => 'Slack',
-                'content' => 'A focused pitch for a useful collaboration tool.',
-                'status' => 'open',
-            ]);
+            ->post(route('ideas.store'), $this->ideaPayload(['summary' => null]));
 
         $missingSummary->assertSessionHasErrors('summary');
 
         $longSummary = $this
             ->actingAs($user)
-            ->post(route('ideas.store'), [
-                'title' => 'A useful collaboration tool',
+            ->post(route('ideas.store'), $this->ideaPayload([
                 'summary' => str_repeat('a', 241),
-                'repository_name' => 'useful-collaboration-tool',
-                'communication' => 'Slack',
-                'content' => 'A focused pitch for a useful collaboration tool.',
-                'status' => 'open',
-            ]);
+            ]));
 
         $longSummary->assertSessionHasErrors('summary');
     }
@@ -85,14 +123,21 @@ class IdeaValidationTest extends TestCase
 
         $this
             ->actingAs($user)
-            ->post(route('ideas.store'), [
-                'title' => 'A useful collaboration tool',
-                'summary' => 'A short summary for a useful collaboration tool.',
+            ->post(route('ideas.store'), $this->ideaPayload([
                 'repository_name' => 'existing-repo',
-                'communication' => 'Slack',
-                'content' => 'A focused pitch for a useful collaboration tool.',
-                'status' => 'open',
-            ])
+            ]))
             ->assertSessionHasErrors('repository_name');
+    }
+
+    private function ideaPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'title' => 'A useful collaboration tool',
+            'summary' => 'A short summary for a useful collaboration tool.',
+            'repository_name' => 'useful-collaboration-tool',
+            'communication' => 'Slack',
+            'content' => 'A focused pitch for a useful collaboration tool.',
+            'status' => 'open',
+        ], $overrides);
     }
 }

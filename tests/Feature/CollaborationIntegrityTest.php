@@ -104,6 +104,58 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
+    public function testPendingApplicantIsNotShownAsACollaborator(): void
+    {
+        $owner = User::factory()->create();
+        $applicant = User::factory()->create();
+        $idea = Idea::factory()->for($owner, 'user')->create();
+
+        $this->actingAs($applicant)
+            ->post(route('ideas.applications.store', $idea), [
+                'content' => 'I would like to collaborate on this idea.',
+            ])
+            ->assertRedirect(route('ideas.show', $idea));
+
+        $this->assertDatabaseHas('idea_applications', [
+            'idea_id' => $idea->id,
+            'user_id' => $applicant->id,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($applicant)
+            ->get(route('ideas.show', $idea))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Show')
+                ->where('collaborator', null)
+                ->where('applicant.status', 'pending')
+                ->where('idea.approvedApplicationsCount', 0)
+                ->has('idea.collaborators', 0));
+    }
+
+    public function testPendingApplicationsStayOutOfCollaboratorManagementList(): void
+    {
+        $owner = User::factory()->create();
+        $applicant = User::factory()->create();
+        $idea = Idea::factory()->for($owner, 'user')->create();
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($applicant, 'user')
+            ->create([
+                'status' => 'pending',
+            ]);
+
+        $this->actingAs($owner)
+            ->get(route('ideas.dashboard', $idea))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Manage')
+                ->has('applications.items', 1)
+                ->where('applications.items.0.status', 'pending')
+                ->has('collaborators.items', 0));
+    }
+
     public function testIdeaOwnerCanReplyToACommentThread(): void
     {
         $owner = User::factory()->create();
