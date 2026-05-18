@@ -20,12 +20,29 @@
   - Use Controllers/Services/Repositories to separate layers
   - Use DTO's to ensure data is passed around in expected structures
 - When making decisions around database architecture, prefer simplicity without sacrificing scalability
+- All times should be stored as UTC and retrieved as UTC, then converted to the users timezone for display
+  - Consider this heavily when events must occur in the future based on the users timezone
+- Do not write rollback code for migrations, only roll forward
 
 ## Code Quality
 - Use PSR-12 standards
-- Ensure changes pass PHPCS/PHPStan/ESLint configuration
+- Ensure changes pass Pint/PHPStan/ESLint configuration
 - Files/Methods/Classes should have realistic human friendly names
-- Do not use docblocks, instead prefer named arguments, return type, and typed args
+- Do not use docblocks unless you think it's required to explain something critical
+- Use named arguments, return types, typed arguments, and constructor property promotion
+- Use conditional statements instead of ternary statements
+- Use Carbon over DateTime in all circumstances
+
+## Performance
+- When making changes, always review for performance and adjust accordingly
+  - This must not add extra complexity/bloat
+  - This must make sense and not conflict with other requirements in this overview
+
+## Security
+- Use appropriate request validation (e.g using input() to access)
+- When making changes, always review for security
+  - This must not add extra complexity/bloat
+  - This must make sense and not conflict with other requirements in this overview
 
 ## Tests
 - When writing tests, ensure we test for real scenarios including:
