@@ -12,9 +12,6 @@ use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class RegisterController
- */
 class RegisterController extends Controller
 {
     /*
@@ -30,27 +27,14 @@ class RegisterController extends Controller
 
     use RegistersUsers;
 
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
     protected $redirectTo = '/ideas';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
         $this->middleware('throttle:5,1')->only('register');
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     */
     protected function validator(array $data): Validator
     {
         return ValidatorFacade::make(
@@ -65,9 +49,6 @@ class RegisterController extends Controller
         );
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     */
     protected function create(array $data): User
     {
         return User::create(

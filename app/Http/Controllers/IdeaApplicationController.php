@@ -5,45 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreIdeaApplication;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Models\User;
 use App\Services\Ideas\ApplicationService;
-use App\Services\Ideas\IdeaService;
 use App\Services\Inertia\PagePropsService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class IdeaApplicationController
- */
 class IdeaApplicationController extends Controller
 {
-    private IdeaService $ideaService;
+    public function __construct(
+        private ApplicationService $applicationService,
+        private PagePropsService $pageProps
+    ) {}
 
-    private ApplicationService $applicationService;
-
-    private PagePropsService $pageProps;
-
-    /**
-     * IdeaApplicationController constructor.
-     */
-    public function __construct(ApplicationService $applicationService, IdeaService $ideaService, PagePropsService $pageProps)
-    {
-        $this->ideaService = $ideaService;
-        $this->applicationService = $applicationService;
-        $this->pageProps = $pageProps;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     *
-     * @throws AuthorizationException
-     */
-    public function create(Request $request, Idea $idea)
+    public function create(Request $request, Idea $idea): Response
     {
         $this->authorize('createApplication', $idea);
 
@@ -52,14 +30,7 @@ class IdeaApplicationController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return RedirectResponse
-     *
-     * @throws AuthorizationException
-     */
-    public function store(StoreIdeaApplication $request, Idea $idea)
+    public function store(StoreIdeaApplication $request, Idea $idea): RedirectResponse
     {
         $this->authorize('storeApplication', $idea);
 
@@ -70,34 +41,30 @@ class IdeaApplicationController extends Controller
             ->with('status', 'Application successfully submitted');
     }
 
-    /**
-     * Approve the application.
-     *
-     * @throws AuthorizationException
-     */
     public function approveApplication(Idea $idea, IdeaApplication $application): RedirectResponse
     {
         $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
 
         $this->applicationService->approve($application);
-        $applicantName = "{$application->user->first_name} {$application->user->last_name}";
+        $user = $application->user;
+        $applicantName = $user instanceof User
+            ? "{$user->first_name} {$user->last_name}"
+            : 'The applicant';
 
         return redirect()
             ->back()
             ->with('status', "You have approved $applicantName");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @throws AuthorizationException
-     */
     public function destroy(Idea $idea, IdeaApplication $application): RedirectResponse
     {
         $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
 
         $this->applicationService->destroy($application);
-        $applicantName = "{$application->user->first_name} {$application->user->last_name}";
+        $user = $application->user;
+        $applicantName = $user instanceof User
+            ? "{$user->first_name} {$user->last_name}"
+            : 'The applicant';
 
         return redirect()
             ->back()

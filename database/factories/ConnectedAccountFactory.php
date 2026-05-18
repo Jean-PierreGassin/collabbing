@@ -6,16 +6,11 @@ use App\Models\ConnectedAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<ConnectedAccount>
- */
+/** @extends Factory<ConnectedAccount> */
 class ConnectedAccountFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ConnectedAccount::class;
+
     public function definition(): array
     {
         return [

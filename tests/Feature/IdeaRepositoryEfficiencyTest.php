@@ -14,7 +14,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_open_recent_ideas_are_loaded_with_index_relationships(): void
+    public function testOpenRecentIdeasAreLoadedWithIndexRelationships(): void
     {
         $idea = $this->createIdeaWithIndexRelations();
 
@@ -26,7 +26,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertIndexRelationshipsAreLoaded($loadedIdea);
     }
 
-    public function test_search_results_are_loaded_with_index_relationships(): void
+    public function testSearchResultsAreLoadedWithIndexRelationships(): void
     {
         $idea = $this->createIdeaWithIndexRelations([
             'title' => 'Searchable collaboration',
@@ -40,7 +40,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertIndexRelationshipsAreLoaded($loadedIdea);
     }
 
-    public function test_trending_ideas_are_loaded_with_index_relationships(): void
+    public function testTrendingIdeasAreLoadedWithIndexRelationships(): void
     {
         $idea = $this->createIdeaWithIndexRelations();
 
@@ -51,7 +51,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertIndexRelationshipsAreLoaded($loadedIdea);
     }
 
-    public function test_trending_ideas_require_support_or_collaboration_signal(): void
+    public function testTrendingIdeasRequireSupportOrCollaborationSignal(): void
     {
         $quietIdea = Idea::factory()
             ->for(User::factory(), 'user')
@@ -75,7 +75,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertTrue($recentIds->contains($quietIdea->id));
     }
 
-    public function test_dashboard_ideas_are_loaded_with_index_relationships(): void
+    public function testDashboardIdeasAreLoadedWithIndexRelationships(): void
     {
         $owner = User::factory()->create();
         $idea = $this->createIdeaWithIndexRelations([], $owner);
@@ -88,7 +88,7 @@ class IdeaRepositoryEfficiencyTest extends TestCase
         $this->assertIndexRelationshipsAreLoaded($loadedIdea);
     }
 
-    public function test_collaborated_ideas_are_loaded_with_index_relationships(): void
+    public function testCollaboratedIdeasAreLoadedWithIndexRelationships(): void
     {
         $collaborator = User::factory()->create();
         $idea = $this->createIdeaWithIndexRelations();

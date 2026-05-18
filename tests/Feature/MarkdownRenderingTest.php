@@ -7,14 +7,14 @@ use Tests\TestCase;
 
 class MarkdownRenderingTest extends TestCase
 {
-    public function test_markdown_content_renders_to_html(): void
+    public function testMarkdownContentRendersToHtml(): void
     {
         $html = (string) Markdown::convertToHtml('# Test title');
 
         $this->assertStringContainsString('<h1 id="test-title">Test title</h1>', $html);
     }
 
-    public function test_markdown_content_strips_raw_html(): void
+    public function testMarkdownContentStripsRawHtml(): void
     {
         $html = (string) Markdown::convertToHtml('**Safe** <script>alert("xss")</script>');
 
@@ -22,7 +22,7 @@ class MarkdownRenderingTest extends TestCase
         $this->assertStringContainsString('Safe', $html);
     }
 
-    public function test_markdown_content_blocks_unsafe_links(): void
+    public function testMarkdownContentBlocksUnsafeLinks(): void
     {
         $html = (string) Markdown::convertToHtml('[Bad link](javascript:alert("xss")) [Safe link](https://example.com)');
 

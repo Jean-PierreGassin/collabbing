@@ -6,18 +6,10 @@ use App\Models\IdeaComment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/**
- * Class IdeaCommentPolicy
- */
 class IdeaCommentPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         //

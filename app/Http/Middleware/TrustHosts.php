@@ -6,11 +6,6 @@ use Illuminate\Http\Middleware\TrustHosts as Middleware;
 
 class TrustHosts extends Middleware
 {
-    /**
-     * Get the host patterns that should be trusted.
-     *
-     * @return array<int, string>
-     */
     public function hosts(): array
     {
         $host = parse_url((string) config('app.url'), PHP_URL_HOST);

@@ -12,7 +12,7 @@ class IdeaSearchTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_search_query_is_normalized_and_preserved_on_pagination_links(): void
+    public function testSearchQueryIsNormalizedAndPreservedOnPaginationLinks(): void
     {
         $owner = User::factory()->create();
 
@@ -48,7 +48,7 @@ class IdeaSearchTest extends TestCase
                 }));
     }
 
-    public function test_search_treats_sql_wildcards_as_literal_characters(): void
+    public function testSearchTreatsSqlWildcardsAsLiteralCharacters(): void
     {
         $owner = User::factory()->create();
 
@@ -67,7 +67,7 @@ class IdeaSearchTest extends TestCase
                 ->has('searchResults.items', 0));
     }
 
-    public function test_search_query_is_limited_to_a_reasonable_length(): void
+    public function testSearchQueryIsLimitedToAReasonableLength(): void
     {
         $this
             ->from(route('ideas.index'))

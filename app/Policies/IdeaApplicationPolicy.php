@@ -2,22 +2,15 @@
 
 namespace App\Policies;
 
+use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/**
- * Class IdeaApplicationPolicy
- */
 class IdeaApplicationPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         //
@@ -25,7 +18,9 @@ class IdeaApplicationPolicy
 
     public function update(User $user, IdeaApplication $application): bool
     {
-        if ($user->id === $application->idea->user_id) {
+        $idea = $application->idea;
+
+        if ($idea instanceof Idea && $user->id === $idea->user_id) {
             return true;
         }
 

@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class RouteContractTest extends TestCase
 {
-    public function test_implemented_resource_routes_are_registered(): void
+    public function testImplementedResourceRoutesAreRegistered(): void
     {
         foreach ([
             'ideas.index',
@@ -35,7 +35,7 @@ class RouteContractTest extends TestCase
         }
     }
 
-    public function test_unimplemented_resource_routes_are_not_registered(): void
+    public function testUnimplementedResourceRoutesAreNotRegistered(): void
     {
         foreach ([
             'ideas.destroy',
@@ -53,7 +53,7 @@ class RouteContractTest extends TestCase
         }
     }
 
-    public function test_mutating_product_routes_are_rate_limited(): void
+    public function testMutatingProductRoutesAreRateLimited(): void
     {
         foreach ([
             'users.update' => 'throttle:product-write',

@@ -11,7 +11,7 @@ class UserDirectoryTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_user_directory_is_paginated_and_does_not_expose_email_addresses(): void
+    public function testUserDirectoryIsPaginatedAndDoesNotExposeEmailAddresses(): void
     {
         foreach (range(1, 25) as $index) {
             User::factory()->create([
@@ -33,7 +33,7 @@ class UserDirectoryTest extends TestCase
             );
     }
 
-    public function test_user_directory_second_page_uses_remaining_members(): void
+    public function testUserDirectorySecondPageUsesRemainingMembers(): void
     {
         foreach (range(1, 25) as $index) {
             User::factory()->create([

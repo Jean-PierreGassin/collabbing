@@ -6,16 +6,11 @@ use App\Models\CodeRepository;
 use App\Models\Idea;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<CodeRepository>
- */
+/** @extends Factory<CodeRepository> */
 class CodeRepositoryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = CodeRepository::class;
+
     public function definition(): array
     {
         $owner = $this->faker->userName;

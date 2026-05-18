@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class HomepageTest extends TestCase
 {
-    public function test_homepage_loads(): void
+    public function testHomepageLoads(): void
     {
         $response = $this->get('/');
 
@@ -17,14 +17,14 @@ class HomepageTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Home'));
     }
 
-    public function test_app_namespace_redirects_home(): void
+    public function testAppNamespaceRedirectsHome(): void
     {
         $response = $this->get('/app');
 
         $response->assertRedirect(route('home'));
     }
 
-    public function test_error_pages_include_shared_shell_props(): void
+    public function testErrorPagesIncludeSharedShellProps(): void
     {
         $response = $this->get('/missing-page');
 
@@ -38,7 +38,7 @@ class HomepageTest extends TestCase
                 ->has('flash.status'));
     }
 
-    public function test_resource_pages_load_the_inertia_app_shell(): void
+    public function testResourcePagesLoadTheInertiaAppShell(): void
     {
         foreach ([
             '/resources/feedback' => 'Feedback',

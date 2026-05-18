@@ -6,13 +6,13 @@ use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
 {
-    public function test_session_cookie_configuration_has_security_defaults(): void
+    public function testSessionCookieConfigurationHasSecurityDefaults(): void
     {
         $this->assertTrue(config('session.http_only'));
         $this->assertSame('lax', config('session.same_site'));
     }
 
-    public function test_web_responses_include_security_headers(): void
+    public function testWebResponsesIncludeSecurityHeaders(): void
     {
         $this->get(route('home'))
             ->assertOk()
@@ -26,14 +26,14 @@ class SecurityHeadersTest extends TestCase
             ->assertHeaderMissing('X-Powered-By');
     }
 
-    public function test_secure_web_responses_include_strict_transport_security(): void
+    public function testSecureWebResponsesIncludeStrictTransportSecurity(): void
     {
         $this->get('https://localhost/')
             ->assertOk()
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
 
-    public function test_not_found_responses_include_security_headers(): void
+    public function testNotFoundResponsesIncludeSecurityHeaders(): void
     {
         $this->get('/missing-page')
             ->assertNotFound()

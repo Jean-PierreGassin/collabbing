@@ -2,29 +2,27 @@
 
 namespace App\Models;
 
+use Database\Factories\IdeaCommentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Class IdeaComment
- */
 class IdeaComment extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'user_id',
         'idea_id',
         'parent_id',
         'content',
     ];
+
+    protected static function newFactory(): IdeaCommentFactory
+    {
+        return IdeaCommentFactory::new();
+    }
 
     public function user(): BelongsTo
     {

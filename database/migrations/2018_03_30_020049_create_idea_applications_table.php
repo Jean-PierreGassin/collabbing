@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateIdeaApplicationsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create(
@@ -37,11 +32,6 @@ class CreateIdeaApplicationsTable extends Migration
         );
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('idea_applications');

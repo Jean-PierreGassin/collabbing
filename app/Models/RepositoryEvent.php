@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepositoryEvent extends Model
 {
-    /** @use HasFactory<RepositoryEventFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -19,6 +18,11 @@ class RepositoryEvent extends Model
         'dedupe_key',
         'payload',
     ];
+
+    protected static function newFactory(): RepositoryEventFactory
+    {
+        return RepositoryEventFactory::new();
+    }
 
     protected function casts(): array
     {

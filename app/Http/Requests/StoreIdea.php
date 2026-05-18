@@ -4,31 +4,24 @@ namespace App\Http\Requests;
 
 use App\Models\CodeRepository;
 use App\Models\Idea;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-/**
- * Class StoreIdea
- */
 class StoreIdea extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
-        /** @var Idea|null $idea */
-        $idea = $this->route('idea');
-        $repository = $idea?->codeRepository;
+        $routeIdea = $this->route('idea');
+        $idea = $routeIdea instanceof Idea ? $routeIdea : null;
+        $repository = $idea?->latestCodeRepository();
+        $user = Auth::user();
 
         return [
             'title' => 'required|max:100',
@@ -40,7 +33,7 @@ class StoreIdea extends FormRequest
                 'regex:/^[A-Za-z0-9_-]+$/',
                 Rule::unique('code_repositories', 'name')
                     ->where('provider', CodeRepository::PROVIDER_GITHUB)
-                    ->where('owner', Auth::user()?->githubUsername())
+                    ->where('owner', $user instanceof User ? $user->githubUsername() : null)
                     ->ignore($repository?->id),
             ],
             'communication' => 'required|max:50',
@@ -49,9 +42,6 @@ class StoreIdea extends FormRequest
         ];
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     */
     public function messages(): array
     {
         return [

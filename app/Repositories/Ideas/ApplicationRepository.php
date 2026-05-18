@@ -5,16 +5,17 @@ namespace App\Repositories\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApplicationRepository
 {
-    public function create(Idea $idea, User $user, array $data): Model
+    public function create(Idea $idea, User $user, array $data): IdeaApplication
     {
-        $data['user_id'] = $user->id;
-
-        return $idea->applications()->create($data);
+        return IdeaApplication::query()->create([
+            ...$data,
+            'idea_id' => $idea->id,
+            'user_id' => $user->id,
+        ]);
     }
 
     public function approve(IdeaApplication $application): bool
@@ -45,11 +46,13 @@ class ApplicationRepository
             ->paginate(10, ['*'], 'collaborators');
     }
 
-    public function getApplicationFromUser(Idea $idea, User $user, string $type): ?Model
+    public function getApplicationFromUser(Idea $idea, User $user, string $type): ?IdeaApplication
     {
-        return $idea->applications()
+        $application = $idea->applications()
             ->where('user_id', $user->id)
             ->where('status', $type)
             ->first();
+
+        return $application instanceof IdeaApplication ? $application : null;
     }
 }

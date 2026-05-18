@@ -3,6 +3,7 @@
 namespace App\Services\Ideas;
 
 use App\Models\CodeRepository;
+use App\Models\Idea;
 use App\Models\User;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Carbon\Carbon;
@@ -18,7 +19,8 @@ class IdeaRepositorySyncService
     {
         $codeRepository->loadMissing('idea.user.githubAccount');
 
-        $owner = $codeRepository->idea?->user;
+        $idea = $codeRepository->idea;
+        $owner = $idea instanceof Idea ? $idea->owner() : null;
 
         if (
             $codeRepository->provider !== CodeRepository::PROVIDER_GITHUB

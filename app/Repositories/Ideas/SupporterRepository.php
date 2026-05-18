@@ -5,13 +5,12 @@ namespace App\Repositories\Ideas;
 use App\Models\Idea;
 use App\Models\IdeaSupporter;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 
 class SupporterRepository
 {
-    public function create(Idea $idea, User $user): Model
+    public function create(Idea $idea, User $user): IdeaSupporter
     {
-        return $idea->supporters()->firstOrCreate([
+        return IdeaSupporter::query()->firstOrCreate([
             'user_id' => $user->id,
             'idea_id' => $idea->id,
         ]);
@@ -22,8 +21,10 @@ class SupporterRepository
         return $supporter->delete();
     }
 
-    public function getSupportFromUser(Idea $idea, User $user): ?Model
+    public function getSupportFromUser(Idea $idea, User $user): ?IdeaSupporter
     {
-        return $idea->supporters()->where('user_id', $user->id)->first();
+        $supporter = $idea->supporters()->where('user_id', $user->id)->first();
+
+        return $supporter instanceof IdeaSupporter ? $supporter : null;
     }
 }

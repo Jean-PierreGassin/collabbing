@@ -7,9 +7,6 @@ use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class ForgotPasswordController
- */
 class ForgotPasswordController extends Controller
 {
     /*
@@ -25,11 +22,6 @@ class ForgotPasswordController extends Controller
 
     use SendsPasswordResetEmails;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');

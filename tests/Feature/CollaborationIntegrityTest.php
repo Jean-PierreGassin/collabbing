@@ -17,7 +17,7 @@ class CollaborationIntegrityTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_supporting_an_idea_is_idempotent(): void
+    public function testSupportingAnIdeaIsIdempotent(): void
     {
         $owner = User::factory()->create();
         $supporter = User::factory()->create();
@@ -38,7 +38,7 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_supporter_uniqueness_is_enforced_by_the_database(): void
+    public function testSupporterUniquenessIsEnforcedByTheDatabase(): void
     {
         $owner = User::factory()->create();
         $supporter = User::factory()->create();
@@ -57,7 +57,7 @@ class CollaborationIntegrityTest extends TestCase
             ->create();
     }
 
-    public function test_user_with_pending_application_cannot_apply_to_same_idea_again(): void
+    public function testUserWithPendingApplicationCannotApplyToSameIdeaAgain(): void
     {
         $owner = User::factory()->create();
         $applicant = User::factory()->create();
@@ -78,7 +78,7 @@ class CollaborationIntegrityTest extends TestCase
         $this->assertDatabaseCount('idea_applications', 1);
     }
 
-    public function test_declined_applicant_can_submit_a_new_application(): void
+    public function testDeclinedApplicantCanSubmitANewApplication(): void
     {
         $owner = User::factory()->create();
         $applicant = User::factory()->create();
@@ -104,7 +104,7 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_idea_owner_can_reply_to_a_comment_thread(): void
+    public function testIdeaOwnerCanReplyToACommentThread(): void
     {
         $owner = User::factory()->create();
         $idea = Idea::factory()->for($owner, 'user')->create();
@@ -128,7 +128,7 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_comment_reply_parent_must_belong_to_the_same_idea(): void
+    public function testCommentReplyParentMustBelongToTheSameIdea(): void
     {
         $owner = User::factory()->create();
         $idea = Idea::factory()->for($owner, 'user')->create();
@@ -152,7 +152,7 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_root_comments_are_listed_latest_first(): void
+    public function testRootCommentsAreListedLatestFirst(): void
     {
         $owner = User::factory()->create();
         $idea = Idea::factory()->for($owner, 'user')->create();
@@ -177,7 +177,7 @@ class CollaborationIntegrityTest extends TestCase
         );
     }
 
-    public function test_root_comments_are_paginated_into_small_page_sets(): void
+    public function testRootCommentsArePaginatedIntoSmallPageSets(): void
     {
         $owner = User::factory()->create();
         $idea = Idea::factory()->for($owner, 'user')->create();
@@ -195,7 +195,7 @@ class CollaborationIntegrityTest extends TestCase
         $this->assertStringContainsString('comments=2', $comments->url(2));
     }
 
-    public function test_dashboard_idea_lists_are_paginated(): void
+    public function testDashboardIdeaListsArePaginated(): void
     {
         $user = User::factory()->create();
         $otherOwner = User::factory()->create();
@@ -229,7 +229,7 @@ class CollaborationIntegrityTest extends TestCase
                 ->where('collaborations.lastPage', 2));
     }
 
-    public function test_dashboard_idea_lists_can_be_searched(): void
+    public function testDashboardIdeaListsCanBeSearched(): void
     {
         $user = User::factory()->create();
 
@@ -257,7 +257,7 @@ class CollaborationIntegrityTest extends TestCase
                 ->where('ideas.items.0.id', $matchingIdea->id));
     }
 
-    public function test_idea_management_lists_are_paginated(): void
+    public function testIdeaManagementListsArePaginated(): void
     {
         $owner = User::factory()->create();
         $idea = Idea::factory()->for($owner, 'user')->create();

@@ -18,7 +18,6 @@ class CodeRepository extends Model
 
     public const STATUS_PLANNED = 'planned';
 
-    /** @use HasFactory<CodeRepositoryFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -41,6 +40,11 @@ class CodeRepository extends Model
         'missing_at',
         'sync_due_at',
     ];
+
+    protected static function newFactory(): CodeRepositoryFactory
+    {
+        return CodeRepositoryFactory::new();
+    }
 
     protected function casts(): array
     {

@@ -11,14 +11,15 @@ use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Carbon\Carbon;
 use Github\Exception\RuntimeException as GitHubRuntimeException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Mockery;
+use PHPUnit\Framework\MockObject\MockObject;
+use RuntimeException;
 use Tests\TestCase;
 
 class IdeaRepositorySyncTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_repository_is_marked_missing_when_git_hub_returns_not_found(): void
+    public function testRepositoryIsMarkedMissingWhenGitHubReturnsNotFound(): void
     {
         Carbon::setTestNow('2026-05-16 10:00:00');
 
@@ -27,13 +28,13 @@ class IdeaRepositorySyncTest extends TestCase
             ->for($user)
             ->withCodeRepository('missing-repo', ['status' => CodeRepository::STATUS_ACTIVE])
             ->create();
-        $codeRepository = $idea->codeRepository;
+        $codeRepository = $this->repositoryFor($idea);
 
-        $github = Mockery::mock(GitHubRepositoryClient::class);
-        $github->shouldReceive('show')
-            ->once()
-            ->with(Mockery::on(fn (User $owner) => $owner->is($user)), 'missing-repo')
-            ->andThrow(new GitHubRuntimeException('Not Found', 404));
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->once())
+            ->method('show')
+            ->with($this->callback(fn (User $owner) => $owner->is($user)), 'missing-repo')
+            ->willThrowException(new GitHubRuntimeException('Not Found', 404));
 
         (new IdeaRepositorySyncService($github))->sync($codeRepository);
 
@@ -46,7 +47,7 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertTrue($codeRepository->events()->where('type', 'repository_missing')->exists());
     }
 
-    public function test_repository_snapshot_stores_latest_github_activity(): void
+    public function testRepositorySnapshotStoresLatestGithubActivity(): void
     {
         Carbon::setTestNow('2026-05-16 10:00:00');
 
@@ -55,22 +56,23 @@ class IdeaRepositorySyncTest extends TestCase
             ->for($user)
             ->withCodeRepository('synced-repo', ['status' => CodeRepository::STATUS_ACTIVE])
             ->create();
-        $codeRepository = $idea->codeRepository;
+        $codeRepository = $this->repositoryFor($idea);
 
-        $github = Mockery::mock(GitHubRepositoryClient::class);
-        $github->shouldReceive('show')
-            ->twice()
-            ->with(Mockery::on(fn (User $owner) => $owner->is($user)), 'synced-repo')
-            ->andReturn($this->repositoryPayload());
-        $github->shouldReceive('latestCommit')
-            ->twice()
-            ->with(Mockery::on(fn (User $owner) => $owner->is($user)), 'synced-repo', 'main')
-            ->andReturn($this->commitPayload());
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->exactly(2))
+            ->method('show')
+            ->with($this->callback(fn (User $owner) => $owner->is($user)), 'synced-repo')
+            ->willReturn($this->repositoryPayload());
+        $github->expects($this->exactly(2))
+            ->method('latestCommit')
+            ->with($this->callback(fn (User $owner) => $owner->is($user)), 'synced-repo', 'main')
+            ->willReturn($this->commitPayload());
 
         $sync = new IdeaRepositorySyncService($github);
 
         $sync->sync($codeRepository);
-        $sync->sync($codeRepository->refresh());
+        $codeRepository->refresh();
+        $sync->sync($codeRepository);
 
         $codeRepository->refresh();
 
@@ -84,7 +86,7 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertSame('octocat', $codeRepository->latest_commit_author);
         $this->assertNotNull($codeRepository->pushed_at);
         $this->assertNotNull($codeRepository->sync_due_at);
-        $this->assertTrue($codeRepository->sync_due_at->betweenIncluded(
+        $this->assertTrue($this->syncDueAt($codeRepository)->betweenIncluded(
             now()->addMinutes(360),
             now()->addMinutes(720)
         ));
@@ -92,7 +94,7 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertSame(1, $codeRepository->events()->where('type', 'repository_synced')->count());
     }
 
-    public function test_repository_sync_job_only_processes_due_repositories_in_a_small_batch(): void
+    public function testRepositorySyncJobOnlyProcessesDueRepositoriesInASmallBatch(): void
     {
         Carbon::setTestNow('2026-05-16 10:00:00');
         config(['services.github.repository_sync.max_per_run' => 2]);
@@ -118,12 +120,43 @@ class IdeaRepositorySyncTest extends TestCase
                 'sync_due_at' => now()->addHour(),
             ]);
 
-        $sync = Mockery::mock(IdeaRepositorySyncService::class);
-        $sync->shouldReceive('sync')
-            ->twice()
-            ->with(Mockery::on(fn (CodeRepository $codeRepository) => $dueRepositories->contains(fn (CodeRepository $dueRepository) => $dueRepository->is($codeRepository))));
+        $sync = $this->syncService();
+        $sync->expects($this->exactly(2))
+            ->method('sync')
+            ->with($this->callback(fn (CodeRepository $codeRepository) => $dueRepositories->contains(fn (CodeRepository $dueRepository) => $dueRepository->is($codeRepository))));
 
         (new SyncGitHubRepositories)->handle($sync);
+    }
+
+    private function repositoryFor(Idea $idea): CodeRepository
+    {
+        $codeRepository = $idea->latestCodeRepository();
+
+        if (! $codeRepository) {
+            throw new RuntimeException('The test idea should have a repository.');
+        }
+
+        return $codeRepository;
+    }
+
+    private function syncDueAt(CodeRepository $codeRepository): Carbon
+    {
+        $syncDueAt = $codeRepository->getAttribute('sync_due_at');
+
+        if ($syncDueAt instanceof Carbon) {
+            return $syncDueAt;
+        }
+
+        if (is_string($syncDueAt)) {
+            return Carbon::parse($syncDueAt);
+        }
+
+        throw new RuntimeException('The repository should have a sync due date.');
+    }
+
+    private function syncService(): IdeaRepositorySyncService&MockObject
+    {
+        return $this->createMock(IdeaRepositorySyncService::class);
     }
 
     private function repositoryPayload(): array

@@ -21,16 +21,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Inertia\ExceptionResponse;
 use Inertia\Inertia;
 
-/**
- * Class AppServiceProvider
- */
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * The policy mappings for the application.
-     *
-     * @var array
-     */
     protected $policies = [
         User::class => UserPolicy::class,
         Idea::class => IdeaPolicy::class,
@@ -39,9 +31,6 @@ class AppServiceProvider extends ServiceProvider
         IdeaApplication::class => IdeaApplicationPolicy::class,
     ];
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->registerPolicies();
@@ -66,9 +55,6 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         $this->app->extend(

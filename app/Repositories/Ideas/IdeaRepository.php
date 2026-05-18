@@ -27,10 +27,14 @@ class IdeaRepository
         $repositoryName = $data['repository_name'] ?? null;
         unset($data['repository_name']);
 
-        $idea = $user->ideas()->create($data);
+        $idea = Idea::query()->create([
+            ...$data,
+            'user_id' => $user->id,
+        ]);
 
         if ($repositoryName) {
-            $idea->codeRepository()->create([
+            CodeRepository::query()->create([
+                'idea_id' => $idea->id,
                 'provider' => CodeRepository::PROVIDER_GITHUB,
                 'status' => CodeRepository::STATUS_PLANNED,
                 'owner' => $user->githubUsername(),
@@ -51,10 +55,12 @@ class IdeaRepository
         if ($repositoryName) {
             $idea->loadMissing('user');
 
+            $owner = $idea->owner();
+
             $idea->codeRepository()->updateOrCreate(
                 ['provider' => CodeRepository::PROVIDER_GITHUB],
                 [
-                    'owner' => $idea->user->githubUsername(),
+                    'owner' => $owner?->githubUsername(),
                     'name' => $repositoryName,
                 ]
             );
@@ -137,7 +143,7 @@ class IdeaRepository
 
     public function markRepositoryCreated(Idea $idea): bool
     {
-        $idea->codeRepository?->forceFill([
+        $idea->latestCodeRepository()?->forceFill([
             'status' => CodeRepository::STATUS_ACTIVE,
             'missing_at' => null,
         ])->save();

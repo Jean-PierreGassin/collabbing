@@ -5,12 +5,9 @@ namespace App\Services;
 use App\Models\ConnectedAccount;
 use App\Models\User;
 use App\Repositories\Users\UserRepository;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Class UserService
- */
 class UserService
 {
     public function __construct(private UserRepository $users) {}
@@ -34,7 +31,7 @@ class UserService
                 continue;
             }
 
-            if ($key === 'password' && $value !== null) {
+            if ($key === 'password') {
                 $value = Hash::make($value);
             }
 
@@ -46,8 +43,11 @@ class UserService
 
     public function connectProvider(User $user, string $provider, ?string $token, ?string $username, ?string $providerUserId = null, array $scopes = []): ConnectedAccount
     {
-        return $user->connectedAccounts()->updateOrCreate(
-            ['provider' => $provider],
+        return ConnectedAccount::query()->updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'provider' => $provider,
+            ],
             [
                 'provider_user_id' => $providerUserId,
                 'provider_username' => $username,

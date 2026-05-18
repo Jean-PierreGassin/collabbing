@@ -6,18 +6,10 @@ use App\Models\IdeaSupporter;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/**
- * Class IdeaSupporterPolicy
- */
 class IdeaSupporterPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         //

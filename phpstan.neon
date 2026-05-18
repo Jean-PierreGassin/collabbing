@@ -2,12 +2,15 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 0
+    level: 5
     paths:
         - app
         - bootstrap/app.php
         - config
+        - database/factories
+        - database/seeders
         - routes
+        - tests
     parallel:
         maximumNumberOfProcesses: 1
     tmpDir: storage/framework/cache/phpstan

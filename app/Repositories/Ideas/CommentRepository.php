@@ -10,9 +10,11 @@ class CommentRepository
 {
     public function create(Idea $idea, User $user, array $data): IdeaComment
     {
-        $data['user_id'] = $user->id;
-
-        return $idea->comments()->create($data);
+        return IdeaComment::query()->create([
+            ...$data,
+            'idea_id' => $idea->id,
+            'user_id' => $user->id,
+        ]);
     }
 
     public function update(IdeaComment $comment, array $data): bool

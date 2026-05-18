@@ -8,12 +8,12 @@ use Tests\TestCase;
 
 class ProductionRuntimeContractTest extends TestCase
 {
-    public function test_health_check_route_is_available_for_container_rollouts(): void
+    public function testHealthCheckRouteIsAvailableForContainerRollouts(): void
     {
         $this->get(route('health'))->assertNoContent();
     }
 
-    public function test_production_trusted_hosts_are_derived_from_configured_url(): void
+    public function testProductionTrustedHostsAreDerivedFromConfiguredUrl(): void
     {
         config(['app.url' => 'https://collabbing.example.com']);
 
@@ -23,7 +23,7 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertNotContains('^evil\.example\.com$', $trustedHosts);
     }
 
-    public function test_queue_retry_window_exceeds_github_sync_job_timeout(): void
+    public function testQueueRetryWindowExceedsGithubSyncJobTimeout(): void
     {
         $job = new SyncGitHubRepositories;
 
@@ -31,7 +31,7 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertGreaterThan($job->timeout, config('queue.connections.database.retry_after'));
     }
 
-    public function test_production_stack_runs_web_queue_scheduler_and_cache_processes(): void
+    public function testProductionStackRunsWebQueueSchedulerAndCacheProcesses(): void
     {
         $stack = file_get_contents(base_path('docker/production/stack.yaml'));
 
@@ -53,7 +53,7 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('fastcgi_param HTTP_X_FORWARDED_PROTO $forwarded_proto;', $nginx);
     }
 
-    public function test_master_push_deploys_a_built_image_after_verification(): void
+    public function testMasterPushDeploysABuiltImageAfterVerification(): void
     {
         $workflow = file_get_contents(base_path('.github/workflows/production-deploy.yml'));
 
@@ -80,7 +80,7 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringNotContainsString('ssh-keyscan', $workflow);
     }
 
-    public function test_deploy_script_runs_database_and_process_refresh_steps(): void
+    public function testDeployScriptRunsDatabaseAndProcessRefreshSteps(): void
     {
         $script = file_get_contents(base_path('docker/production/deploy.sh'));
 

@@ -14,7 +14,7 @@ class NestedResourceAuthorizationTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_idea_owner_cannot_approve_an_application_from_another_idea(): void
+    public function testIdeaOwnerCannotApproveAnApplicationFromAnotherIdea(): void
     {
         $owner = User::factory()->create();
         $ownedIdea = Idea::factory()->for($owner, 'user')->create();
@@ -37,7 +37,7 @@ class NestedResourceAuthorizationTest extends TestCase
         ]);
     }
 
-    public function test_idea_owner_cannot_delete_an_application_from_another_idea(): void
+    public function testIdeaOwnerCannotDeleteAnApplicationFromAnotherIdea(): void
     {
         $owner = User::factory()->create();
         $ownedIdea = Idea::factory()->for($owner, 'user')->create();
@@ -55,7 +55,7 @@ class NestedResourceAuthorizationTest extends TestCase
         $this->assertModelExists($application);
     }
 
-    public function test_comment_owner_cannot_edit_a_comment_through_another_idea(): void
+    public function testCommentOwnerCannotEditACommentThroughAnotherIdea(): void
     {
         $commenter = User::factory()->create();
         $otherIdea = Idea::factory()->for(User::factory(), 'user')->create();
@@ -72,7 +72,7 @@ class NestedResourceAuthorizationTest extends TestCase
         $response->assertNotFound();
     }
 
-    public function test_comment_owner_cannot_update_a_comment_through_another_idea(): void
+    public function testCommentOwnerCannotUpdateACommentThroughAnotherIdea(): void
     {
         $commenter = User::factory()->create();
         $otherIdea = Idea::factory()->for(User::factory(), 'user')->create();
@@ -97,7 +97,7 @@ class NestedResourceAuthorizationTest extends TestCase
         ]);
     }
 
-    public function test_supporter_cannot_delete_support_through_another_idea(): void
+    public function testSupporterCannotDeleteSupportThroughAnotherIdea(): void
     {
         $supporterUser = User::factory()->create();
         $otherIdea = Idea::factory()->for(User::factory(), 'user')->create();
@@ -115,7 +115,7 @@ class NestedResourceAuthorizationTest extends TestCase
         $this->assertModelExists($supporter);
     }
 
-    public function test_non_owner_cannot_view_an_idea_management_dashboard(): void
+    public function testNonOwnerCannotViewAnIdeaManagementDashboard(): void
     {
         $owner = User::factory()->create();
         $otherUser = User::factory()->create();
