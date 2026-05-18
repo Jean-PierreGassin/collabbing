@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\Ideas\IdeaData;
 use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
@@ -61,5 +62,19 @@ class StoreIdea extends FormRequest
             'repository_name.regex' => 'Repository names may only contain letters, numbers, dashes, and underscores.',
             'repository_name.unique' => 'You already have an idea using this repository name.',
         ];
+    }
+
+    public function toData(): IdeaData
+    {
+        $this->validated();
+
+        return new IdeaData(
+            title: $this->string('title')->toString(),
+            summary: $this->string('summary')->toString(),
+            repositoryName: $this->string('repository_name')->toString(),
+            communication: $this->string('communication')->toString(),
+            content: $this->string('content')->toString(),
+            status: $this->string('status', 'open')->toString()
+        );
     }
 }

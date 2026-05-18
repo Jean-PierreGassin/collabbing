@@ -2,6 +2,7 @@
 
 namespace App\Services\Ideas;
 
+use App\Data\Ideas\IdeaApplicationData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
@@ -14,7 +15,7 @@ class ApplicationService
 {
     public function __construct(private ApplicationRepository $applications) {}
 
-    public function create(Idea $idea, array $data): bool
+    public function create(Idea $idea, IdeaApplicationData $data): bool
     {
         $application = $this->applications->create($idea, $this->authenticatedUser(), $data);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Data\Users\UserRegistrationData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterUserRequest;
 use App\Models\User;
@@ -27,7 +28,7 @@ class RegisterController extends Controller
 
     public function register(RegisterUserRequest $request): RedirectResponse|JsonResponse
     {
-        event(new Registered($user = $this->create($request->validated())));
+        event(new Registered($user = $this->create($request->toData())));
 
         $this->guard()->login($user);
 
@@ -42,7 +43,7 @@ class RegisterController extends Controller
         return redirect($this->redirectPath());
     }
 
-    protected function create(array $data): User
+    protected function create(UserRegistrationData $data): User
     {
         return $this->users->create($data);
     }

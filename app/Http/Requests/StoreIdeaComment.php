@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\Ideas\IdeaCommentData;
 use App\Models\Idea;
 use App\Models\IdeaComment;
 use Illuminate\Foundation\Http\FormRequest;
@@ -43,5 +44,20 @@ class StoreIdeaComment extends FormRequest
                 }
             },
         ];
+    }
+
+    public function toData(): IdeaCommentData
+    {
+        $validated = $this->validated();
+        $parentId = null;
+
+        if (array_key_exists('parent_id', $validated) && $validated['parent_id'] !== null) {
+            $parentId = (int) $validated['parent_id'];
+        }
+
+        return new IdeaCommentData(
+            content: $this->string('content')->toString(),
+            parentId: $parentId
+        );
     }
 }

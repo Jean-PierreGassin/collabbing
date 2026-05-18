@@ -15,10 +15,10 @@
   - This must make sense and not conflict with other requirements in this overview
 
 ## Architecture
-- Separate concerns and do not mix layers, for example:
-  - Use Request classes to better structure input
-  - Use Controllers/Services/Repositories to separate layers
-  - Use DTO's to ensure data is passed around in expected structures
+- Separate concerns and do not mix layers
+- Use Request classes to better structure input
+- Use Controllers/Services/Repositories to separate layers
+- Use DTO's to ensure data is passed around in expected structures
 - When making decisions around database architecture, prefer simplicity without sacrificing scalability
 - All times should be stored as UTC and retrieved as UTC, then converted to the users timezone for display
   - Consider this heavily when events must occur in the future based on the users timezone

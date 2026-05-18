@@ -33,7 +33,7 @@ class IdeaApplicationController extends Controller
     {
         $this->authorize('storeApplication', $idea);
 
-        $this->applicationService->create($idea, $request->validated());
+        $this->applicationService->create($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', $idea->id)

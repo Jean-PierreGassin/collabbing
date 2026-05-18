@@ -76,7 +76,7 @@ class IdeaController extends Controller
 
     public function store(StoreIdea $request): RedirectResponse
     {
-        $idea = $this->ideaService->create($request->validated());
+        $idea = $this->ideaService->create($request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
@@ -137,7 +137,7 @@ class IdeaController extends Controller
     {
         $this->authorize('update', $idea);
 
-        $this->ideaService->update($idea, $request->validated());
+        $this->ideaService->update($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))

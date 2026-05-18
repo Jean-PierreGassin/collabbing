@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Data\Ideas\IdeaData;
 use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
@@ -22,49 +23,39 @@ class IdeaRepository
         'approvedApplications',
     ];
 
-    public function createForUser(User $user, array $data): Idea
+    public function createForUser(User $user, IdeaData $data): Idea
     {
-        $repositoryName = $data['repository_name'] ?? null;
-        unset($data['repository_name']);
-
         $idea = Idea::query()->create([
-            ...$data,
+            ...$data->ideaAttributes(),
             'user_id' => $user->id,
         ]);
 
-        if ($repositoryName) {
-            CodeRepository::query()->create([
-                'idea_id' => $idea->id,
-                'provider' => CodeRepository::PROVIDER_GITHUB,
-                'status' => CodeRepository::STATUS_PLANNED,
-                'owner' => $user->githubUsername(),
-                'name' => $repositoryName,
-            ]);
-        }
+        CodeRepository::query()->create([
+            'idea_id' => $idea->id,
+            'provider' => CodeRepository::PROVIDER_GITHUB,
+            'status' => CodeRepository::STATUS_PLANNED,
+            'owner' => $user->githubUsername(),
+            'name' => $data->repositoryName,
+        ]);
 
         return $idea->load('codeRepository');
     }
 
-    public function update(Idea $idea, array $data): bool
+    public function update(Idea $idea, IdeaData $data): bool
     {
-        $repositoryName = $data['repository_name'] ?? null;
-        unset($data['repository_name']);
+        $idea->update($data->ideaAttributes());
 
-        $idea->update($data);
+        $idea->loadMissing('user');
 
-        if ($repositoryName) {
-            $idea->loadMissing('user');
+        $owner = $idea->owner();
 
-            $owner = $idea->owner();
-
-            $idea->codeRepository()->updateOrCreate(
-                ['provider' => CodeRepository::PROVIDER_GITHUB],
-                [
-                    'owner' => $owner?->githubUsername(),
-                    'name' => $repositoryName,
-                ]
-            );
-        }
+        $idea->codeRepository()->updateOrCreate(
+            ['provider' => CodeRepository::PROVIDER_GITHUB],
+            [
+                'owner' => $owner?->githubUsername(),
+                'name' => $data->repositoryName,
+            ]
+        );
 
         return $idea->save();
     }

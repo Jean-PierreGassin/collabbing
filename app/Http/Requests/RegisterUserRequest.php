@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\Users\UserRegistrationData;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -22,6 +23,19 @@ class RegisterUserRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'confirmed', 'max:128', Password::min(12)->letters()->numbers()],
         ];
+    }
+
+    public function toData(): UserRegistrationData
+    {
+        $this->validated();
+
+        return new UserRegistrationData(
+            username: $this->string('username')->toString(),
+            firstName: $this->string('first_name')->toString(),
+            lastName: $this->string('last_name')->toString(),
+            email: $this->string('email')->toString(),
+            password: $this->string('password')->toString()
+        );
     }
 
     protected function prepareForValidation(): void

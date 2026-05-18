@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\Users\UserProfileData;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -30,5 +31,28 @@ class UpdateUserProfileRequest extends FormRequest
             'bio' => ['nullable', 'string', 'max:500'],
             'password' => ['nullable', 'string', 'confirmed', 'max:128', Password::min(12)->letters()->numbers()],
         ];
+    }
+
+    public function toData(): UserProfileData
+    {
+        $validated = $this->validated();
+        $bio = null;
+        $password = null;
+
+        if (array_key_exists('bio', $validated) && is_string($validated['bio'])) {
+            $bio = $validated['bio'];
+        }
+
+        if (array_key_exists('password', $validated) && is_string($validated['password'])) {
+            $password = $validated['password'];
+        }
+
+        return new UserProfileData(
+            firstName: $this->string('first_name')->toString(),
+            lastName: $this->string('last_name')->toString(),
+            email: $this->string('email')->toString(),
+            bio: $bio,
+            password: $password
+        );
     }
 }

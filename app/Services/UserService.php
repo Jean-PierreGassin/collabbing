@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Data\Users\ProviderConnectionData;
+use App\Data\Users\UserProfileData;
+use App\Data\Users\UserRegistrationData;
 use App\Models\ConnectedAccount;
 use App\Models\User;
 use App\Repositories\Users\UserRepository;
@@ -12,15 +15,9 @@ class UserService
 {
     public function __construct(private UserRepository $users) {}
 
-    public function create(array $data): User
+    public function create(UserRegistrationData $data): User
     {
-        return $this->users->create([
-            'username' => $data['username'],
-            'first_name' => ucwords($data['first_name']),
-            'last_name' => ucwords($data['last_name']),
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return $this->users->create($data, Hash::make($data->password));
     }
 
     public function all(): LengthAwarePaginator
@@ -33,37 +30,29 @@ class UserService
         return $this->users->getByUsername($username);
     }
 
-    public function update(User $user, array $data): bool
+    public function update(User $user, UserProfileData $data): bool
     {
-        $values = [];
+        $passwordHash = null;
 
-        foreach ($data as $key => $value) {
-            if ($key === 'password' && $value === null) {
-                continue;
-            }
-
-            if ($key === 'password') {
-                $value = Hash::make($value);
-            }
-
-            $values[$key] = $value;
+        if ($data->password) {
+            $passwordHash = Hash::make($data->password);
         }
 
-        return $this->users->update($user, $values);
+        return $this->users->update($user, $data, $passwordHash);
     }
 
-    public function connectProvider(User $user, string $provider, ?string $token, ?string $username, ?string $providerUserId = null, array $scopes = []): ConnectedAccount
+    public function connectProvider(User $user, ProviderConnectionData $data): ConnectedAccount
     {
         return ConnectedAccount::query()->updateOrCreate(
             [
                 'user_id' => $user->id,
-                'provider' => $provider,
+                'provider' => $data->provider,
             ],
             [
-                'provider_user_id' => $providerUserId,
-                'provider_username' => $username,
-                'token' => $token,
-                'scopes' => $scopes,
+                'provider_user_id' => $data->providerUserId,
+                'provider_username' => $data->username,
+                'token' => $data->token,
+                'scopes' => $data->scopes,
                 'connected_at' => now(),
             ]
         );

@@ -47,7 +47,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $this->userService->update($user, $request->validated());
+        $this->userService->update($user, $request->toData());
 
         return redirect()
             ->back()

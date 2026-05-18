@@ -31,7 +31,7 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('storeComment', $idea);
 
-        $this->commentService->store($idea, $request->validated());
+        $this->commentService->store($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
@@ -52,7 +52,7 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('update', $comment);
 
-        $this->commentService->update($comment, $request->safe()->only(['content']));
+        $this->commentService->update($comment, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
