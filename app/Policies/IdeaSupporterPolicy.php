@@ -10,11 +10,6 @@ class IdeaSupporterPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct()
-    {
-        //
-    }
-
     public function delete(User $user, IdeaSupporter $supportToEdit): bool
     {
         return $user->id === $supportToEdit->user_id;

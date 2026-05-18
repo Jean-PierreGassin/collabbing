@@ -11,11 +11,6 @@ class IdeaApplicationPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct()
-    {
-        //
-    }
-
     public function update(User $user, IdeaApplication $application): bool
     {
         $idea = $application->idea;

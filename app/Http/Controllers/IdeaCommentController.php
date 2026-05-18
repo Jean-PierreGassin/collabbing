@@ -10,20 +10,16 @@ use App\Services\Inertia\PagePropsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class IdeaCommentController extends Controller
 {
-    private CommentService $commentService;
+    public function __construct(
+        private CommentService $commentService,
+        private PagePropsService $pageProps
+    ) {}
 
-    private PagePropsService $pageProps;
-
-    public function __construct(CommentService $commentService, PagePropsService $pageProps)
-    {
-        $this->commentService = $commentService;
-        $this->pageProps = $pageProps;
-    }
-
-    public function create(Request $request, Idea $idea)
+    public function create(Request $request, Idea $idea): Response
     {
         $this->authorize('storeComment', $idea);
 
@@ -43,7 +39,7 @@ class IdeaCommentController extends Controller
             ->with('status', 'Comment successfully created');
     }
 
-    public function edit(Idea $idea, IdeaComment $comment)
+    public function edit(Idea $idea, IdeaComment $comment): Response
     {
         $this->authorize('manage', $comment);
 

@@ -41,12 +41,15 @@ class IdeaController extends Controller
         $trendingIdeas = $this->ideaService->getTrending();
 
         $ideas = $this->ideaService->getOpenRecent();
+        $searchResultsProps = null;
+
+        if ($searchResults) {
+            $searchResultsProps = $this->pageProps->paginator($searchResults, fn (Idea $idea) => $this->pageProps->idea($idea));
+        }
 
         return Inertia::render('Ideas/Index', [
             'keyword' => $keyword,
-            'searchResults' => $searchResults
-                ? $this->pageProps->paginator($searchResults, fn (Idea $idea) => $this->pageProps->idea($idea))
-                : null,
+            'searchResults' => $searchResultsProps,
             'trendingIdeas' => $trendingIdeas->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
             'ideas' => $this->pageProps->paginator($ideas, fn (Idea $idea) => $this->pageProps->idea($idea)),
         ]);
@@ -98,6 +101,16 @@ class IdeaController extends Controller
         $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
         $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
         $supporter = $this->supporterService->getSupportFromUser($idea);
+        $collaboratorProps = null;
+        $applicantProps = null;
+
+        if ($collaborator) {
+            $collaboratorProps = $this->pageProps->application($collaborator);
+        }
+
+        if ($applicant) {
+            $applicantProps = $this->pageProps->application($applicant);
+        }
 
         return Inertia::render('Ideas/Show', [
             'idea' => $this->pageProps->idea($idea),
@@ -105,8 +118,8 @@ class IdeaController extends Controller
                 $this->ideaService->getComments($idea),
                 fn (IdeaComment $comment) => $this->pageProps->comment($comment)
             ),
-            'collaborator' => $collaborator ? $this->pageProps->application($collaborator) : null,
-            'applicant' => $applicant ? $this->pageProps->application($applicant) : null,
+            'collaborator' => $collaboratorProps,
+            'applicant' => $applicantProps,
             'supporter' => $this->pageProps->supporter($supporter),
         ]);
     }

@@ -94,14 +94,22 @@ class User extends Authenticatable
     {
         $account = $this->githubAccount;
 
-        return $account instanceof ConnectedAccount ? $account->token : null;
+        if (! $account instanceof ConnectedAccount) {
+            return null;
+        }
+
+        return $account->token;
     }
 
     public function githubUsername(): ?string
     {
         $account = $this->githubAccount;
 
-        return $account instanceof ConnectedAccount ? $account->provider_username : null;
+        if (! $account instanceof ConnectedAccount) {
+            return null;
+        }
+
+        return $account->provider_username;
     }
 
     public function getGithubTokenAttribute(): ?string

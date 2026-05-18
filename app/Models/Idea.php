@@ -58,14 +58,22 @@ class Idea extends Model
             ->where('status', $type)
             ->first();
 
-        return $application instanceof IdeaApplication ? $application : null;
+        if (! $application instanceof IdeaApplication) {
+            return null;
+        }
+
+        return $application;
     }
 
     public function hasSupportFromUser(int|string $userId): ?IdeaSupporter
     {
         $supporter = $this->supporters()->where('user_id', $userId)->first();
 
-        return $supporter instanceof IdeaSupporter ? $supporter : null;
+        if (! $supporter instanceof IdeaSupporter) {
+            return null;
+        }
+
+        return $supporter;
     }
 
     public function supporters(): HasMany
@@ -87,13 +95,21 @@ class Idea extends Model
     {
         $user = $this->user;
 
-        return $user instanceof User ? $user : null;
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function latestCodeRepository(): ?CodeRepository
     {
         $codeRepository = $this->codeRepository;
 
-        return $codeRepository instanceof CodeRepository ? $codeRepository : null;
+        if (! $codeRepository instanceof CodeRepository) {
+            return null;
+        }
+
+        return $codeRepository;
     }
 }

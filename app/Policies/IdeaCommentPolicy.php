@@ -10,11 +10,6 @@ class IdeaCommentPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct()
-    {
-        //
-    }
-
     public function update(User $user, IdeaComment $comment): bool
     {
         return $user->id === $comment->user_id;

@@ -53,6 +53,10 @@ class ApplicationRepository
             ->where('status', $type)
             ->first();
 
-        return $application instanceof IdeaApplication ? $application : null;
+        if (! $application instanceof IdeaApplication) {
+            return null;
+        }
+
+        return $application;
     }
 }

@@ -156,8 +156,8 @@ class VueFormContractTest extends TestCase
         $contents = file_get_contents(resource_path('js/components/layout/FlashMessages.vue'));
 
         $this->assertIsString($contents);
-        $this->assertStringContainsString(":role=\"toast.tone === 'error' ? 'alert' : 'status'\"", $contents);
-        $this->assertStringContainsString(":aria-live=\"toast.tone === 'error' ? 'assertive' : 'polite'\"", $contents);
+        $this->assertStringContainsString(':role="toastRole(toast.tone)"', $contents);
+        $this->assertStringContainsString(':aria-live="toastAriaLive(toast.tone)"', $contents);
         $this->assertStringContainsString('inset-x-3 bottom-3', $contents);
         $this->assertStringContainsString('sm:max-w-md', $contents);
         $this->assertStringContainsString('sm:min-h-24', $contents);
@@ -243,7 +243,7 @@ class VueFormContractTest extends TestCase
         $this->assertIsString($members);
         $this->assertIsString($sidebar);
         $this->assertStringContainsString('bg-gradient-to-br from-secondary via-card to-background', $avatar);
-        $this->assertStringContainsString("isLoaded ? 'opacity-100' : 'opacity-0'", $avatar);
+        $this->assertStringContainsString('imageOpacityClass', $avatar);
         $this->assertStringContainsString('decoding="async"', $avatar);
         $this->assertStringContainsString('image.value?.complete', $avatar);
         $this->assertStringContainsString('UserAvatar', $profile);
@@ -263,8 +263,8 @@ class VueFormContractTest extends TestCase
         $this->assertStringContainsString('const isMobileMenuOpen = ref(false);', $contents);
         $this->assertStringContainsString('const isMobileSearchOpen = ref(false);', $contents);
         $this->assertStringContainsString('class="size-11"', $contents);
-        $this->assertStringContainsString(":aria-label=\"isMobileSearchOpen ? 'Close search' : 'Search ideas'\"", $contents);
-        $this->assertStringContainsString(":aria-label=\"isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'\"", $contents);
+        $this->assertStringContainsString(':aria-label="mobileSearchLabel"', $contents);
+        $this->assertStringContainsString(':aria-label="mobileMenuLabel"', $contents);
         $this->assertStringContainsString('id="mobile-site-search"', $contents);
         $this->assertStringContainsString('id="mobile-navigation"', $contents);
         $this->assertStringContainsString('Mobile main navigation', $contents);

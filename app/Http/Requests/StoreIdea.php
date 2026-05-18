@@ -6,7 +6,6 @@ use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class StoreIdea extends FormRequest
@@ -19,9 +18,19 @@ class StoreIdea extends FormRequest
     public function rules(): array
     {
         $routeIdea = $this->route('idea');
-        $idea = $routeIdea instanceof Idea ? $routeIdea : null;
+        $idea = null;
+
+        if ($routeIdea instanceof Idea) {
+            $idea = $routeIdea;
+        }
+
         $repository = $idea?->latestCodeRepository();
-        $user = Auth::user();
+        $user = $this->user();
+        $repositoryOwner = null;
+
+        if ($user instanceof User) {
+            $repositoryOwner = $user->githubUsername();
+        }
 
         return [
             'title' => 'required|max:100',
@@ -33,7 +42,7 @@ class StoreIdea extends FormRequest
                 'regex:/^[A-Za-z0-9_-]+$/',
                 Rule::unique('code_repositories', 'name')
                     ->where('provider', CodeRepository::PROVIDER_GITHUB)
-                    ->where('owner', $user instanceof User ? $user->githubUsername() : null)
+                    ->where('owner', $repositoryOwner)
                     ->ignore($repository?->id),
             ],
             'communication' => 'required|max:50',

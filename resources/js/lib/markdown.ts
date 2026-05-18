@@ -21,7 +21,11 @@ export function uniqueMarkdownAnchor(title: string, counts: Map<string, number>)
 
   counts.set(anchor, count + 1);
 
-  return count === 0 ? anchor : `${anchor}-${count}`;
+  if (count === 0) {
+    return anchor;
+  }
+
+  return `${anchor}-${count}`;
 }
 
 export function stripMarkdownFormatting(value: string): string {

@@ -35,9 +35,4 @@ return new class extends Migration
             $table->unique(['provider', 'owner', 'name']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('code_repositories');
-    }
 };

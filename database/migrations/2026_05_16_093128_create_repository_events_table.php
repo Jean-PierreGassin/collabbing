@@ -22,9 +22,4 @@ return new class extends Migration
             $table->index(['code_repository_id', 'occurred_at']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('repository_events');
-    }
 };

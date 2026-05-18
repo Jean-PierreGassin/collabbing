@@ -12,11 +12,4 @@ return new class extends Migration
             $table->unique(['idea_id', 'user_id'], 'idea_supporters_idea_id_user_id_unique');
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('idea_supporters', function (Blueprint $table) {
-            $table->dropUnique('idea_supporters_idea_id_user_id_unique');
-        });
-    }
 };

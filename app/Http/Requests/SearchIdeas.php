@@ -24,12 +24,16 @@ class SearchIdeas extends FormRequest
         $validated = $this->validated();
         $search = $validated['search'] ?? null;
 
-        return is_string($search) ? $search : null;
+        if (! is_string($search)) {
+            return null;
+        }
+
+        return $search;
     }
 
     protected function prepareForValidation(): void
     {
-        $search = $this->query('search');
+        $search = $this->input('search');
 
         if (! is_string($search)) {
             return;
@@ -37,8 +41,10 @@ class SearchIdeas extends FormRequest
 
         $search = Str::squish($search);
 
-        $this->merge([
-            'search' => $search === '' ? null : $search,
-        ]);
+        if ($search === '') {
+            $search = null;
+        }
+
+        $this->merge(['search' => $search]);
     }
 }

@@ -72,7 +72,43 @@ function addToast(message: string, tone: ToastTone): void {
 }
 
 function toastTitle(tone: ToastTone): string {
-  return tone === 'error' ? 'Needs attention' : 'Saved';
+  if (tone === 'error') {
+    return 'Needs attention';
+  }
+
+  return 'Saved';
+}
+
+function toastClass(tone: ToastTone): string {
+  if (tone === 'error') {
+    return 'border-destructive/70 text-foreground';
+  }
+
+  return 'border-primary/70 text-foreground';
+}
+
+function toastRole(tone: ToastTone): 'alert' | 'status' {
+  if (tone === 'error') {
+    return 'alert';
+  }
+
+  return 'status';
+}
+
+function toastAriaLive(tone: ToastTone): 'assertive' | 'polite' {
+  if (tone === 'error') {
+    return 'assertive';
+  }
+
+  return 'polite';
+}
+
+function toastIconClass(tone: ToastTone): string {
+  if (tone === 'error') {
+    return 'bg-destructive/15 text-destructive';
+  }
+
+  return 'bg-primary/15 text-primary';
 }
 
 watch(flashSignature, () => {
@@ -107,9 +143,9 @@ onBeforeUnmount(() => {
       v-for="toast in toasts"
       :key="toast.id"
       class="pointer-events-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-md border bg-popover px-4 py-3 text-sm shadow-2xl shadow-black/35 ring-1 ring-white/10 sm:min-h-24 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-4 sm:p-5 sm:text-base"
-      :class="toast.tone === 'error' ? 'border-destructive/70 text-foreground' : 'border-primary/70 text-foreground'"
-      :role="toast.tone === 'error' ? 'alert' : 'status'"
-      :aria-live="toast.tone === 'error' ? 'assertive' : 'polite'"
+      :class="toastClass(toast.tone)"
+      :role="toastRole(toast.tone)"
+      :aria-live="toastAriaLive(toast.tone)"
       @mouseenter="pauseToast(toast)"
       @mouseleave="resumeToast(toast)"
       @focusin="pauseToast(toast)"
@@ -117,7 +153,7 @@ onBeforeUnmount(() => {
     >
       <div
         class="hidden size-10 shrink-0 items-center justify-center rounded-md sm:flex"
-        :class="toast.tone === 'error' ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary'"
+        :class="toastIconClass(toast.tone)"
       >
         <AlertTriangle v-if="toast.tone === 'error'" class="size-5" aria-hidden="true" />
         <CheckCircle2 v-else class="size-5" aria-hidden="true" />

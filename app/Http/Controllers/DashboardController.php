@@ -7,22 +7,18 @@ use App\Models\Idea;
 use App\Services\Ideas\IdeaService;
 use App\Services\Inertia\PagePropsService;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    private IdeaService $ideaService;
-
-    private PagePropsService $pageProps;
-
-    public function __construct(IdeaService $ideaService, PagePropsService $pageProps)
-    {
+    public function __construct(
+        private IdeaService $ideaService,
+        private PagePropsService $pageProps
+    ) {
         $this->middleware('auth');
-
-        $this->ideaService = $ideaService;
-        $this->pageProps = $pageProps;
     }
 
-    public function index(SearchIdeas $request)
+    public function index(SearchIdeas $request): Response
     {
         $keyword = $request->searchTerm();
         $ideas = $this->ideaService->getUserIdeas($keyword);

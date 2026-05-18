@@ -25,6 +25,10 @@ class SupporterRepository
     {
         $supporter = $idea->supporters()->where('user_id', $user->id)->first();
 
-        return $supporter instanceof IdeaSupporter ? $supporter : null;
+        if (! $supporter instanceof IdeaSupporter) {
+            return null;
+        }
+
+        return $supporter;
     }
 }

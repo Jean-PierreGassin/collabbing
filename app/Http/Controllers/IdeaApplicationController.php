@@ -47,9 +47,11 @@ class IdeaApplicationController extends Controller
 
         $this->applicationService->approve($application);
         $user = $application->user;
-        $applicantName = $user instanceof User
-            ? "{$user->first_name} {$user->last_name}"
-            : 'The applicant';
+        $applicantName = 'The applicant';
+
+        if ($user instanceof User) {
+            $applicantName = "{$user->first_name} {$user->last_name}";
+        }
 
         return redirect()
             ->back()
@@ -62,9 +64,11 @@ class IdeaApplicationController extends Controller
 
         $this->applicationService->destroy($application);
         $user = $application->user;
-        $applicantName = $user instanceof User
-            ? "{$user->first_name} {$user->last_name}"
-            : 'The applicant';
+        $applicantName = 'The applicant';
+
+        if ($user instanceof User) {
+            $applicantName = "{$user->first_name} {$user->last_name}";
+        }
 
         return redirect()
             ->back()

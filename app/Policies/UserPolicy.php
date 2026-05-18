@@ -9,11 +9,6 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    public function __construct()
-    {
-        //
-    }
-
     public function manage(User $user, User $userToEdit): bool
     {
         return strtolower($user->username) === strtolower($userToEdit->username);

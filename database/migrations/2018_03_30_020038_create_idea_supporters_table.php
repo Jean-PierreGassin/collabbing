@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateIdeaSupportersTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'idea_supporters',
@@ -28,10 +28,5 @@ class CreateIdeaSupportersTable extends Migration
                 $table->timestamps();
             }
         );
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('idea_supporters');
     }
 }

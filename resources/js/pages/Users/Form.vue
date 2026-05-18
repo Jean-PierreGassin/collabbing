@@ -13,6 +13,14 @@ const props = defineProps<{
   githubClientId?: string | null;
 }>();
 
+let pageTitle = 'Create profile';
+let submitLabel = 'Create Profile';
+
+if (props.user) {
+  pageTitle = 'Edit profile';
+  submitLabel = 'Edit Profile';
+}
+
 function submitProfile(event: SubmitEvent): void {
   if (!props.user?.routes.update) {
     return;
@@ -26,7 +34,7 @@ function submitProfile(event: SubmitEvent): void {
 
 <template>
   <Card>
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ user ? 'Edit' : 'Create' }} profile</h1></CardHeader>
+    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
     <CardContent>
       <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit.prevent="submitProfile">
         <CsrfField />
@@ -84,7 +92,7 @@ function submitProfile(event: SubmitEvent): void {
           </FormField>
         </div>
 
-        <Button type="submit" class="self-start">{{ user ? 'Edit Profile' : 'Create Profile' }}</Button>
+        <Button type="submit" class="self-start">{{ submitLabel }}</Button>
       </form>
       <form v-if="user?.hasGithubToken" id="github-revoke-form" :action="user.routes.githubRevoke" method="POST" class="hidden">
         <CsrfField />

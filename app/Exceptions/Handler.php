@@ -45,11 +45,13 @@ class Handler extends ExceptionHandler
 
     private function invalidEncryptedPayloadResponse(Request $request): RedirectResponse|JsonResponse
     {
-        $response = $request->expectsJson()
-            ? response()->json(['message' => 'The session expired. Please refresh and try again.'], 419)
-            : redirect()
+        if ($request->expectsJson()) {
+            $response = response()->json(['message' => 'The session expired. Please refresh and try again.'], 419);
+        } else {
+            $response = redirect()
                 ->to($request->fullUrl())
                 ->with('status', 'The session expired. Please refresh and try again.');
+        }
 
         return $response
             ->withoutCookie(config('session.cookie'))

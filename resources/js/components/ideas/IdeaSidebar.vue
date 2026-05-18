@@ -19,7 +19,15 @@ const supporterSentence = computed(() => {
     return 'No one is supporting this idea yet.';
   }
 
-  return `There ${props.idea.supportersCount > 1 ? 'are' : 'is'} ${props.idea.supportersCount.toLocaleString()} ${props.idea.supportersCount > 1 ? 'people' : 'person'} supporting this idea.`;
+  let verb = 'is';
+  let noun = 'person';
+
+  if (props.idea.supportersCount > 1) {
+    verb = 'are';
+    noun = 'people';
+  }
+
+  return `There ${verb} ${props.idea.supportersCount.toLocaleString()} ${noun} supporting this idea.`;
 });
 </script>
 

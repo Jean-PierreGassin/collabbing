@@ -12,15 +12,10 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
-    private UserService $userService;
-
-    private PagePropsService $pageProps;
-
-    public function __construct(UserService $userService, PagePropsService $pageProps)
-    {
-        $this->userService = $userService;
-        $this->pageProps = $pageProps;
-    }
+    public function __construct(
+        private UserService $userService,
+        private PagePropsService $pageProps
+    ) {}
 
     public function index(): Response
     {

@@ -12,11 +12,4 @@ return new class extends Migration
             $table->string('summary', 240)->nullable()->after('title');
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('ideas', function (Blueprint $table) {
-            $table->dropColumn('summary');
-        });
-    }
 };

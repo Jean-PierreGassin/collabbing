@@ -10,12 +10,7 @@ use Illuminate\Http\Request;
 
 class IdeaSupporterController extends Controller
 {
-    private SupporterService $supporterService;
-
-    public function __construct(SupporterService $supporterService)
-    {
-        $this->supporterService = $supporterService;
-    }
+    public function __construct(private SupporterService $supporterService) {}
 
     public function store(Request $request, Idea $idea): RedirectResponse
     {

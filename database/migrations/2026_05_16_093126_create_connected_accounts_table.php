@@ -24,9 +24,4 @@ return new class extends Migration
             $table->index(['provider', 'provider_username']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('connected_accounts');
-    }
 };

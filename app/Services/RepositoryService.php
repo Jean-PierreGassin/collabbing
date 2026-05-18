@@ -53,9 +53,11 @@ class RepositoryService
         $owner = $idea->owner();
         $codeRepository = $idea->latestCodeRepository();
         $collaboratorUser = $collaborator->user;
-        $collaboratorUsername = $collaboratorUser instanceof User
-            ? $collaboratorUser->githubUsername()
-            : null;
+        $collaboratorUsername = null;
+
+        if ($collaboratorUser instanceof User) {
+            $collaboratorUsername = $collaboratorUser->githubUsername();
+        }
 
         if (! $owner || ! $codeRepository || ! $collaboratorUsername) {
             return false;

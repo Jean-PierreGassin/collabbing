@@ -75,7 +75,7 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('v-if="!single"', $ideaCard);
         $this->assertStringContainsString('justify-start gap-2 border-t border-border bg-background/12', $ideaCard);
         $this->assertStringContainsString('<span class="text-border" aria-hidden="true">/</span>', $ideaCard);
-        $this->assertStringContainsString("{{ isDescriptionExpanded ? 'Hide Pitch' : 'Show Pitch' }}", $ideaCard);
+        $this->assertStringContainsString('{{ pitchToggleLabel }}', $ideaCard);
         $this->assertStringContainsString(':aria-controls="descriptionId"', $ideaCard);
         $this->assertStringContainsString('pitchExpanded?: boolean;', $ideaCard);
         $this->assertStringContainsString("'update:pitchExpanded': [value: boolean];", $ideaCard);
@@ -120,9 +120,10 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('pitchNavigationTimer = window.setTimeout', $ideaShow);
         $this->assertStringContainsString("document.getElementById('mobile-pitch-contents')", $ideaShow);
         $this->assertStringContainsString("window.matchMedia('(max-width: 1699px)').matches", $ideaShow);
-        $this->assertStringContainsString(': 96;', $ideaShow);
+        $this->assertStringContainsString('let mobileOffset = 96;', $ideaShow);
         $this->assertStringContainsString('window.scrollTo({', $ideaShow);
-        $this->assertStringContainsString('shouldWaitForExpansion ? 280 : 0', $ideaShow);
+        $this->assertStringContainsString('let scrollDelay = 0;', $ideaShow);
+        $this->assertStringContainsString('scrollDelay = 280;', $ideaShow);
         $this->assertStringContainsString('visiblePitchHeadings', $ideaShow);
         $this->assertStringContainsString('activePathAnchors', $ideaShow);
         $this->assertStringContainsString('new IntersectionObserver', $ideaShow);
@@ -143,7 +144,6 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('id="mobile-pitch-contents"', $ideaShow);
         $this->assertStringContainsString('v-if="shouldShowMobileToc"', $ideaShow);
         $this->assertStringContainsString('class="fixed inset-x-4 top-3 z-[70] rounded-2xl border border-border bg-background/90 px-3 py-2 shadow-lg shadow-background/35 backdrop-blur min-[1700px]:hidden"', $ideaShow);
-        $this->assertStringNotContainsString("isMobileTocOpen ? 'rounded-2xl' : 'rounded-full'", $ideaShow);
         $this->assertStringContainsString('class="mx-auto flex max-w-2xl flex-col"', $ideaShow);
         $this->assertStringContainsString(':aria-expanded="isMobileTocOpen"', $ideaShow);
         $this->assertStringContainsString('@click="isMobileTocOpen = !isMobileTocOpen"', $ideaShow);
@@ -156,7 +156,7 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('class="flex flex-col gap-1 border-l border-border text-sm"', $ideaShow);
         $this->assertStringContainsString(':style="{ paddingLeft: `${0.75 + headingDepth(heading) * 0.9}rem` }"', $ideaShow);
         $this->assertStringContainsString('border-l-2 py-1.5 pr-2', $ideaShow);
-        $this->assertStringContainsString('isActiveHeading(heading) ? \'border-primary text-primary\'', $ideaShow);
+        $this->assertStringContainsString('headingLinkClass(heading)', $ideaShow);
         $this->assertStringNotContainsString('fixed inset-x-0 top-0', $ideaShow);
         $this->assertStringNotContainsString('rounded-b-lg border-x border-b border-border bg-card/95', $ideaShow);
         $this->assertStringNotContainsString('rounded-lg border border-border bg-card/90', $ideaShow);
@@ -243,7 +243,7 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('hide-label', $comments);
         $this->assertStringContainsString("label: 'Comment'", $composer);
         $this->assertStringContainsString(':hide-label="hideLabel"', $composer);
-        $this->assertStringContainsString("hideLabel ? 'sr-only'", file_get_contents(resource_path('js/components/forms/FormField.vue')));
+        $this->assertStringContainsString('const labelClass = computed', file_get_contents(resource_path('js/components/forms/FormField.vue')));
         $this->assertStringContainsString('Markdown and @mentions are supported.', $composer);
         $this->assertStringContainsString('Press Tab to insert the first mention.', $composer);
         $this->assertStringNotContainsString('Add comment', $comments);
@@ -255,7 +255,7 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringNotContainsString('border-t border-border px-6 py-4', $comments);
         $this->assertStringContainsString('name="page-fade" mode="out-in"', $comments);
         $this->assertStringContainsString(':key="comments.currentPage"', $comments);
-        $this->assertStringContainsString("comments.items.length > 0 ? 'min-h-[34rem]' : undefined", $comments);
+        $this->assertStringContainsString('commentsPanelClass()', $comments);
         $pagination = file_get_contents(resource_path('js/components/pagination/PaginationLinks.vue'));
         $this->assertStringContainsString('preserve-state', $pagination);
         $this->assertStringContainsString("router.on('finish'", $pagination);
@@ -276,7 +276,7 @@ class VueInteractionContractTest extends TestCase
         $this->assertStringContainsString('Save changes', $thread);
         $this->assertStringContainsString('method="PUT"', $thread);
         $this->assertStringContainsString('const areRepliesVisible = ref(false);', $thread);
-        $this->assertStringContainsString("'Show' }} {{ comment.replies.length.toLocaleString()", $thread);
+        $this->assertStringContainsString('repliesToggleLabel(areRepliesVisible)', $thread);
     }
 
     public function testProfileEditFlowUsesInertiaNavigationForTransitions(): void

@@ -12,11 +12,4 @@ return new class extends Migration
             $table->index(['idea_id', 'user_id', 'status'], 'idea_applications_idea_user_status_index');
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('idea_applications', function (Blueprint $table) {
-            $table->dropIndex('idea_applications_idea_user_status_index');
-        });
-    }
 };

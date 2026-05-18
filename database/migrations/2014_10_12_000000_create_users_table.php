@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateUsersTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'users',
@@ -24,10 +24,5 @@ class CreateUsersTable extends Migration
                 $table->index(['username', 'email']);
             }
         );
-    }
-
-    public function down()
-    {
-        Schema::dropIfExists('users');
     }
 }

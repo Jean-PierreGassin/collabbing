@@ -20,7 +20,11 @@ class IdeaRepositorySyncService
         $codeRepository->loadMissing('idea.user.githubAccount');
 
         $idea = $codeRepository->idea;
-        $owner = $idea instanceof Idea ? $idea->owner() : null;
+        $owner = null;
+
+        if ($idea instanceof Idea) {
+            $owner = $idea->owner();
+        }
 
         if (
             $codeRepository->provider !== CodeRepository::PROVIDER_GITHUB
@@ -46,7 +50,12 @@ class IdeaRepositorySyncService
         }
 
         $branch = Arr::get($repository, 'default_branch');
-        $latestCommit = $this->github->latestCommit($owner, $codeRepository->name, is_string($branch) ? $branch : null);
+
+        if (! is_string($branch)) {
+            $branch = null;
+        }
+
+        $latestCommit = $this->github->latestCommit($owner, $codeRepository->name, $branch);
 
         $this->recordSnapshot($codeRepository, $repository, $latestCommit);
     }
@@ -79,13 +88,18 @@ class IdeaRepositorySyncService
         $pushedAt = $this->parseDate(Arr::get($repository, 'pushed_at'));
         $syncedAt = now();
         $fullName = Arr::get($repository, 'full_name');
+        $repositoryFullName = $codeRepository->full_name;
+
+        if (is_string($fullName)) {
+            $repositoryFullName = $fullName;
+        }
 
         $codeRepository->forceFill([
             'status' => CodeRepository::STATUS_ACTIVE,
             'provider_repository_id' => $this->repositoryProviderId($repository),
             'owner' => $this->repositoryOwner($repository, $codeRepository->owner),
             'name' => Arr::get($repository, 'name', $codeRepository->name),
-            'full_name' => is_string($fullName) ? $fullName : $codeRepository->full_name,
+            'full_name' => $repositoryFullName,
             'html_url' => Arr::get($repository, 'html_url'),
             'default_branch' => Arr::get($repository, 'default_branch'),
             'open_issues_count' => (int) Arr::get($repository, 'open_issues_count', 0),
@@ -123,12 +137,28 @@ class IdeaRepositorySyncService
         }
 
         if ($latestCommitSha && $latestCommitSha !== $previousCommitSha) {
+            $commitSummary = 'Repository received a new commit.';
+
+            if ($latestCommitMessage) {
+                $commitSummary = 'Latest commit: '.$latestCommitMessage;
+            }
+
+            $commitOccurredAt = $this->parseDate(Arr::get($latestCommit ?? [], 'commit.committer.date'));
+
+            if (! $commitOccurredAt) {
+                $commitOccurredAt = $pushedAt;
+            }
+
+            if (! $commitOccurredAt) {
+                $commitOccurredAt = $syncedAt;
+            }
+
             $this->recordEvent(
                 $codeRepository,
                 'repository_commit',
-                $latestCommitMessage ? 'Latest commit: '.$latestCommitMessage : 'Repository received a new commit.',
+                $commitSummary,
                 'commit:'.$latestCommitSha,
-                $this->parseDate(Arr::get($latestCommit ?? [], 'commit.committer.date')) ?? $pushedAt ?? $syncedAt,
+                $commitOccurredAt,
                 [
                     'sha' => $latestCommitSha,
                     'message' => $latestCommitMessage,
@@ -236,7 +266,11 @@ class IdeaRepositorySyncService
     {
         $id = Arr::get($repository, 'id');
 
-        return is_scalar($id) ? (string) $id : null;
+        if (! is_scalar($id)) {
+            return null;
+        }
+
+        return (string) $id;
     }
 
     private function repositoryOwner(array $repository, ?string $fallback): ?string
@@ -249,9 +283,11 @@ class IdeaRepositorySyncService
 
         $fullName = Arr::get($repository, 'full_name');
 
-        return is_string($fullName) && str_contains($fullName, '/')
-            ? Str::before($fullName, '/')
-            : $fallback;
+        if (is_string($fullName) && str_contains($fullName, '/')) {
+            return Str::before($fullName, '/');
+        }
+
+        return $fallback;
     }
 
     private function commitMessage(?array $latestCommit): ?string
@@ -275,7 +311,11 @@ class IdeaRepositorySyncService
 
         $name = Arr::get($latestCommit ?? [], 'commit.author.name');
 
-        return is_string($name) && $name !== '' ? $name : null;
+        if (! is_string($name) || $name === '') {
+            return null;
+        }
+
+        return $name;
     }
 
     private function parseDate(mixed $value): ?Carbon

@@ -15,8 +15,35 @@ const page = useSharedPage();
 const isMobileMenuOpen = ref(false);
 const isMobileSearchOpen = ref(false);
 
-const brandHref = computed(() => (session.isAuthenticated ? session.routes.ideas : session.routes.home));
-const brandLabel = computed(() => (session.isAuthenticated ? 'Browse ideas' : 'Collabbing home'));
+const brandHref = computed(() => {
+  if (session.isAuthenticated) {
+    return session.routes.ideas;
+  }
+
+  return session.routes.home;
+});
+
+const brandLabel = computed(() => {
+  if (session.isAuthenticated) {
+    return 'Browse ideas';
+  }
+
+  return 'Collabbing home';
+});
+const mobileSearchLabel = computed(() => {
+  if (isMobileSearchOpen.value) {
+    return 'Close search';
+  }
+
+  return 'Search ideas';
+});
+const mobileMenuLabel = computed(() => {
+  if (isMobileMenuOpen.value) {
+    return 'Close navigation menu';
+  }
+
+  return 'Open navigation menu';
+});
 
 const defaultDescription = 'Share early product ideas, find collaborators, and move promising projects toward real work.';
 
@@ -54,6 +81,19 @@ const seo = computed(() => {
     };
   }
 
+  let ideaFormTitle = 'Share an Idea';
+  let ideaManageTitle = 'Manage Idea';
+  let userFormTitle = 'Create Profile';
+
+  if (idea) {
+    ideaFormTitle = 'Edit Idea';
+    ideaManageTitle = `Manage ${idea.titleDisplay}`;
+  }
+
+  if (user) {
+    userFormTitle = 'Edit Profile';
+  }
+
   const titles: Record<string, string> = {
     'Auth/Login': 'Login',
     'Auth/PasswordEmail': 'Reset Password',
@@ -66,30 +106,38 @@ const seo = computed(() => {
     Feedback: 'Feedback',
     Home: 'Collabbing',
     'Ideas/Apply': 'Apply to Collaborate',
-    'Ideas/Form': idea ? 'Edit Idea' : 'Share an Idea',
+    'Ideas/Form': ideaFormTitle,
     'Ideas/Index': 'Ideas',
-    'Ideas/Manage': idea ? `Manage ${idea.titleDisplay}` : 'Manage Idea',
+    'Ideas/Manage': ideaManageTitle,
     'Pricing': 'Pricing',
     'Resources': 'Resources',
-    'Users/Form': user ? 'Edit Profile' : 'Create Profile',
+    'Users/Form': userFormTitle,
     'Users/Index': 'Members',
   };
 
   const title = titles[page.component] ?? 'Collabbing';
 
+  let pageTitle = `${title} | Collabbing`;
+
+  if (title === 'Collabbing') {
+    pageTitle = title;
+  }
+
   return {
     title,
-    pageTitle: title === 'Collabbing' ? title : `${title} | Collabbing`,
+    pageTitle,
     description: defaultDescription,
     type: 'website',
   };
 });
 
-const canonicalUrl = computed(() => (
-  typeof window === 'undefined'
-    ? undefined
-    : `${window.location.origin}${page.url.split('#')[0]}`
-));
+const canonicalUrl = computed(() => {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  return `${window.location.origin}${page.url.split('#')[0]}`;
+});
 
 const transitionKey = computed(() => {
   const [pathAndQuery, hash = ''] = page.url.split('#');
@@ -100,7 +148,17 @@ const transitionKey = computed(() => {
 
   const nextQuery = params.toString();
 
-  return `${path}${nextQuery ? `?${nextQuery}` : ''}${hash ? `#${hash}` : ''}`;
+  let nextUrl = path;
+
+  if (nextQuery) {
+    nextUrl = `${nextUrl}?${nextQuery}`;
+  }
+
+  if (hash) {
+    nextUrl = `${nextUrl}#${hash}`;
+  }
+
+  return nextUrl;
 });
 
 function closeMobileNavigation(): void {
@@ -176,7 +234,7 @@ function toggleMobileSearch(): void {
               class="size-11"
               :aria-expanded="isMobileSearchOpen"
               aria-controls="mobile-site-search"
-              :aria-label="isMobileSearchOpen ? 'Close search' : 'Search ideas'"
+              :aria-label="mobileSearchLabel"
               @click="toggleMobileSearch"
             >
               <Search class="size-5" aria-hidden="true" />
@@ -188,7 +246,7 @@ function toggleMobileSearch(): void {
               class="size-11"
               :aria-expanded="isMobileMenuOpen"
               aria-controls="mobile-navigation"
-              :aria-label="isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+              :aria-label="mobileMenuLabel"
               @click="toggleMobileMenu"
             >
               <X v-if="isMobileMenuOpen" class="size-5" aria-hidden="true" />

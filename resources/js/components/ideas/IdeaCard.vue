@@ -38,14 +38,100 @@ const isDescriptionExpanded = computed({
 
 const collaboratorsLabel = computed(() => {
   const count = props.idea.approvedApplicationsCount;
+  let noun = 'collaborators';
 
-  return `${count.toLocaleString()} ${count === 1 ? 'collaborator' : 'collaborators'}`;
+  if (count === 1) {
+    noun = 'collaborator';
+  }
+
+  return `${count.toLocaleString()} ${noun}`;
 });
 
 const supportersLabel = computed(() => {
   const count = props.idea.supportersCount;
+  let noun = 'supporters';
 
-  return `${count.toLocaleString()} ${count === 1 ? 'supporter' : 'supporters'}`;
+  if (count === 1) {
+    noun = 'supporter';
+  }
+
+  return `${count.toLocaleString()} ${noun}`;
+});
+
+const cardClasses = computed(() => {
+  const classes = [];
+
+  if (props.featured) {
+    classes.push('h-full border-primary/20 bg-card/95');
+  } else {
+    classes.push('bg-card/90');
+  }
+
+  if (! props.single) {
+    classes.push('group relative flex h-full min-h-[18rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
+  }
+
+  return classes;
+});
+
+const headerClass = computed(() => {
+  if (props.single) {
+    return undefined;
+  }
+
+  if (isCompact.value) {
+    return 'relative z-10 gap-3 pointer-events-none p-5';
+  }
+
+  return 'relative z-10 gap-4 pointer-events-none';
+});
+
+const summaryContentClass = computed(() => {
+  if (isCompact.value) {
+    return 'relative z-10 flex flex-1 flex-col gap-3 p-5 pt-0 pointer-events-none';
+  }
+
+  return 'relative z-10 flex flex-1 flex-col gap-4 pointer-events-none';
+});
+
+const cardStatsClass = computed(() => {
+  if (isCompact.value) {
+    return 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-5 py-3 text-sm text-muted-foreground';
+  }
+
+  return 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-6 py-3 text-sm text-muted-foreground';
+});
+
+const cardActionsClass = computed(() => {
+  if (isCompact.value) {
+    return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-5 py-3';
+  }
+
+  return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-6 py-4';
+});
+
+const statusBadgeVariant = computed(() => {
+  if (props.idea.status === 'open') {
+    return 'default';
+  }
+
+  return 'secondary';
+});
+
+const pitchToggleLabel = computed(() => {
+  if (isDescriptionExpanded.value) {
+    return 'Hide Pitch';
+  }
+
+  return 'Show Pitch';
+});
+
+const pitchChevronClass = computed(() => {
+  if (isDescriptionExpanded.value) {
+    return 'rotate-180';
+  }
+
+  return undefined;
 });
 
 function resetPanelStyles(element: HTMLElement): void {
@@ -126,12 +212,7 @@ function leaveDescription(element: Element, done: () => void): void {
 </script>
 
 <template>
-  <Card
-    :class="[
-      featured ? 'h-full border-primary/20 bg-card/95' : 'bg-card/90',
-      !single ? 'group relative flex h-full min-h-[18rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35' : undefined,
-    ]"
-  >
+  <Card :class="cardClasses">
     <Link
       v-if="!single"
       :href="idea.routes.show"
@@ -139,7 +220,7 @@ function leaveDescription(element: Element, done: () => void): void {
       :aria-label="`Open ${idea.titleDisplay}`"
     />
 
-    <CardHeader :class="single ? undefined : (isCompact ? 'relative z-10 gap-3 pointer-events-none p-5' : 'relative z-10 gap-4 pointer-events-none')">
+    <CardHeader :class="headerClass">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-col gap-2">
           <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
@@ -163,7 +244,7 @@ function leaveDescription(element: Element, done: () => void): void {
         </div>
 
         <div v-if="idea.can.update || single" class="pointer-events-auto relative z-20 flex shrink-0 flex-wrap items-center gap-2">
-          <Badge :variant="idea.status === 'open' ? 'default' : 'secondary'" class="w-fit">
+          <Badge :variant="statusBadgeVariant" class="w-fit">
             {{ idea.statusDisplay }}
           </Badge>
         </div>
@@ -188,8 +269,8 @@ function leaveDescription(element: Element, done: () => void): void {
         >
           <span class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65" aria-hidden="true" />
           <span class="inline-flex items-center gap-1 text-sm font-semibold">
-            {{ isDescriptionExpanded ? 'Hide Pitch' : 'Show Pitch' }}
-            <ChevronDown :class="['size-4 transition-transform duration-200', isDescriptionExpanded ? 'rotate-180' : undefined]" aria-hidden="true" />
+            {{ pitchToggleLabel }}
+            <ChevronDown :class="['size-4 transition-transform duration-200', pitchChevronClass]" aria-hidden="true" />
           </span>
           <span class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65" aria-hidden="true" />
         </button>
@@ -209,13 +290,13 @@ function leaveDescription(element: Element, done: () => void): void {
       </section>
     </CardContent>
 
-    <CardContent v-else :class="isCompact ? 'relative z-10 flex flex-1 flex-col gap-3 p-5 pt-0 pointer-events-none' : 'relative z-10 flex flex-1 flex-col gap-4 pointer-events-none'">
+    <CardContent v-else :class="summaryContentClass">
       <p class="min-h-24 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
         {{ idea.summary }}
       </p>
     </CardContent>
 
-    <div v-if="!single" :class="isCompact ? 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-5 py-3 text-sm text-muted-foreground' : 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-6 py-3 text-sm text-muted-foreground'">
+    <div v-if="!single" :class="cardStatsClass">
       <span class="inline-flex items-center gap-2">
         <Users class="size-4 text-primary" aria-hidden="true" />
         {{ supportersLabel }}
@@ -227,7 +308,7 @@ function leaveDescription(element: Element, done: () => void): void {
       </span>
     </div>
 
-    <div v-if="!single && (idea.can.update || idea.repository)" :class="isCompact ? 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-5 py-3' : 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-6 py-4'">
+    <div v-if="!single && (idea.can.update || idea.repository)" :class="cardActionsClass">
       <div class="flex flex-wrap items-center gap-3">
         <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="ml-auto">
           <GitBranch class="size-4" aria-hidden="true" />

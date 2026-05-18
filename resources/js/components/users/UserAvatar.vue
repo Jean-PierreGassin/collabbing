@@ -35,6 +35,22 @@ onMounted(() => {
     isLoaded.value = true;
   }
 });
+
+const placeholderOpacityClass = computed(() => {
+  if (isLoaded.value) {
+    return 'opacity-0';
+  }
+
+  return 'opacity-100';
+});
+
+const imageOpacityClass = computed(() => {
+  if (isLoaded.value) {
+    return 'opacity-100';
+  }
+
+  return 'opacity-0';
+});
 </script>
 
 <template>
@@ -49,13 +65,13 @@ onMounted(() => {
       aria-hidden="true"
       :class="cn(
         'absolute inset-0 bg-gradient-to-br from-secondary via-card to-background transition-opacity duration-200 ease-out',
-        isLoaded ? 'opacity-0' : 'opacity-100'
+        placeholderOpacityClass
       )"
     />
     <img
       ref="image"
       class="relative h-full w-full object-cover transition-opacity duration-200 ease-out motion-reduce:transition-none"
-      :class="isLoaded ? 'opacity-100' : 'opacity-0'"
+      :class="imageOpacityClass"
       :src="src"
       :alt="alt"
       :loading="loading"

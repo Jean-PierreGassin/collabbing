@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\Inertia\PagePropsService;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Inertia\Middleware;
@@ -13,7 +14,11 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $session = $request->hasSession() ? $request->session() : null;
+        $session = null;
+
+        if ($request->hasSession()) {
+            $session = $request->session();
+        }
 
         return [
             ...parent::share($request),
@@ -22,9 +27,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'status' => fn () => $session?->get('status'),
-                'errors' => fn () => $session?->get('errors')
-                    ? $session->get('errors')->all()
-                    : [],
+                'errors' => fn () => $this->sessionErrors($session),
             ],
             'oldInput' => fn () => (object) Arr::except($session?->getOldInput() ?? [], [
                 '_method',
@@ -51,5 +54,20 @@ class HandleInertiaRequests extends Middleware
                 'pricing' => route('resources.pricing'),
             ],
         ];
+    }
+
+    private function sessionErrors(?Session $session): array
+    {
+        if (! $session) {
+            return [];
+        }
+
+        $errors = $session->get('errors');
+
+        if (! $errors) {
+            return [];
+        }
+
+        return $errors->all();
     }
 }

@@ -19,13 +19,4 @@ return new class extends Migration
             $table->index(['idea_id', 'parent_id', 'created_at']);
         });
     }
-
-    public function down(): void
-    {
-        Schema::table('idea_comments', function (Blueprint $table) {
-            $table->dropForeign(['parent_id']);
-            $table->dropIndex(['idea_id', 'parent_id', 'created_at']);
-            $table->dropColumn('parent_id');
-        });
-    }
 };

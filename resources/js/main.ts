@@ -8,7 +8,13 @@ import './bootstrap';
 import '../css/app.css';
 
 createInertiaApp({
-  title: (title) => (title && title !== 'Collabbing' ? `${title} | Collabbing` : 'Collabbing'),
+  title: (title) => {
+    if (title && title !== 'Collabbing') {
+      return `${title} | Collabbing`;
+    }
+
+    return 'Collabbing';
+  },
   resolve: (name) => {
     const pages = import.meta.glob<{ default: DefineComponent }>('./pages/**/*.vue', { eager: true });
     const page = pages[`./pages/${name}.vue`];

@@ -26,11 +26,16 @@ class IdeaFactory extends Factory
     {
         return $this->afterCreating(function (Idea $idea) use ($name, $attributes): void {
             $owner = $idea->user;
+            $repositoryOwner = null;
+
+            if ($owner instanceof User) {
+                $repositoryOwner = $owner->githubUsername();
+            }
 
             $idea->codeRepository()->create(array_merge([
                 'provider' => CodeRepository::PROVIDER_GITHUB,
                 'status' => CodeRepository::STATUS_PLANNED,
-                'owner' => $owner instanceof User ? $owner->githubUsername() : null,
+                'owner' => $repositoryOwner,
                 'name' => $name ?? $this->faker->slug(2),
             ], $attributes));
         });
