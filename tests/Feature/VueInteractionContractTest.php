@@ -53,6 +53,7 @@ class VueInteractionContractTest extends TestCase
 
         $this->assertStringContainsString('disabled>Collaborator</Button>', $sidebar);
         $this->assertStringContainsString('disabled>Application pending</Button>', $sidebar);
+        $this->assertStringContainsString('v-if="collaborator || applicant || idea.can.storeApplication"', $sidebar);
         $this->assertStringContainsString('No collaborators have joined yet.', $sidebar);
         $this->assertStringContainsString('<h1 class="text-2xl font-semibold leading-tight text-white">{{ title }}</h1>', $pageHeader);
         $this->assertStringNotContainsString('aria-label="Page navigation"', $pageHeader);

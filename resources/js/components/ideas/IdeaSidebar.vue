@@ -37,7 +37,7 @@ const supporterSentence = computed(() => {
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 class="text-lg font-semibold text-white">Collaborators</h2>
-          <div v-if="idea.can.storeApplication">
+          <div v-if="collaborator || applicant || idea.can.storeApplication">
             <Button v-if="collaborator" type="button" size="sm" disabled>Collaborator</Button>
             <Button v-else-if="applicant" type="button" size="sm" disabled>Application pending</Button>
             <Button v-else as="a" :href="idea.routes.applicationsCreate" variant="outline" size="sm">Apply to Collaborate</Button>

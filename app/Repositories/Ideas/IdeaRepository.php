@@ -25,20 +25,22 @@ class IdeaRepository
 
     public function createForUser(User $user, IdeaData $data): Idea
     {
-        $idea = Idea::query()->create([
-            ...$data->ideaAttributes(),
-            'user_id' => $user->id,
-        ]);
+        $idea = new Idea($data->ideaAttributes());
+        $idea->user()->associate($user);
+        $idea->save();
 
-        CodeRepository::query()->create([
-            'idea_id' => $idea->id,
+        $codeRepository = new CodeRepository([
             'provider' => CodeRepository::PROVIDER_GITHUB,
             'status' => CodeRepository::STATUS_PLANNED,
             'owner' => $user->githubUsername(),
             'name' => $data->repositoryName,
         ]);
 
-        return $idea->load('codeRepository');
+        $idea->codeRepositories()->save($codeRepository);
+
+        $idea->load('codeRepository');
+
+        return $idea;
     }
 
     public function update(Idea $idea, IdeaData $data): bool
