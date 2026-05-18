@@ -1,0 +1,13 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 0
+    paths:
+        - app
+        - bootstrap/app.php
+        - config
+        - routes
+    parallel:
+        maximumNumberOfProcesses: 1
+    tmpDir: storage/framework/cache/phpstan

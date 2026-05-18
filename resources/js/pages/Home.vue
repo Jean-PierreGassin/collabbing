@@ -31,10 +31,6 @@ const pointer = ref({
   y: 50,
 });
 
-const foregroundDrift = computed(() => ({
-  transform: `translate3d(${(pointer.value.x - 50) * -0.08}px, ${(pointer.value.y - 50) * -0.07}px, 0)`,
-}));
-
 const backgroundDrift = computed(() => ({
   transform: `translate3d(${(pointer.value.x - 50) * 0.06}px, ${(pointer.value.y - 50) * 0.045}px, 0)`,
 }));
