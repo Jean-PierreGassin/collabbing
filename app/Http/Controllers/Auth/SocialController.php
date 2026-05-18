@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Data\Users\ProviderConnectionData;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
@@ -50,14 +51,13 @@ class SocialController extends Controller
 
         $providerUserId = $providerUser->getId();
 
-        $this->users->connectProvider(
-            $user,
-            User::PROVIDER_GITHUB,
-            $providerUser->token,
-            $providerUser->getNickname(),
-            (string) $providerUserId,
-            ['public_repo']
-        );
+        $this->users->connectProvider($user, new ProviderConnectionData(
+            provider: User::PROVIDER_GITHUB,
+            token: $providerUser->token,
+            username: $providerUser->getNickname(),
+            providerUserId: (string) $providerUserId,
+            scopes: ['public_repo']
+        ));
 
         return redirect()
             ->route('users.edit', $user->username)

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUser;
+use App\Http\Requests\UpdateUserProfileRequest;
 use App\Models\User;
 use App\Services\Inertia\PagePropsService;
 use App\Services\UserService;
@@ -43,11 +43,11 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(StoreUser $request, User $user): RedirectResponse
+    public function update(UpdateUserProfileRequest $request, User $user): RedirectResponse
     {
         $this->authorize('update', $user);
 
-        $this->userService->update($user, $request->validated());
+        $this->userService->update($user, $request->toData());
 
         return redirect()
             ->back()

@@ -3,24 +3,17 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
     protected $redirectTo = '/ideas';
@@ -35,11 +28,33 @@ class LoginController extends Controller
         return 'username';
     }
 
-    protected function validateLogin(Request $request): void
+    public function login(LoginRequest $request): RedirectResponse|JsonResponse
     {
-        $request->validate([
-            $this->username() => 'required|string|max:20',
-            'password' => 'required|string|max:128',
+        if ($this->hasTooManyLoginAttempts($request)) {
+            $this->fireLockoutEvent($request);
+
+            $seconds = $this->limiter()->availableIn($this->throttleKey($request));
+
+            throw ValidationException::withMessages([
+                $this->username() => [trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ])],
+            ])->status(HttpResponse::HTTP_TOO_MANY_REQUESTS);
+        }
+
+        if ($this->attemptLogin($request)) {
+            if ($request->hasSession()) {
+                $request->session()->put('auth.password_confirmed_at', time());
+            }
+
+            return $this->sendLoginResponse($request);
+        }
+
+        $this->incrementLoginAttempts($request);
+
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
         ]);
     }
 

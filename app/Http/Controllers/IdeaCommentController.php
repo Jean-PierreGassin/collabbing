@@ -8,7 +8,6 @@ use App\Models\IdeaComment;
 use App\Services\Ideas\CommentService;
 use App\Services\Inertia\PagePropsService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +18,7 @@ class IdeaCommentController extends Controller
         private PagePropsService $pageProps
     ) {}
 
-    public function create(Request $request, Idea $idea): Response
+    public function create(Idea $idea): Response
     {
         $this->authorize('storeComment', $idea);
 
@@ -32,7 +31,7 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('storeComment', $idea);
 
-        $this->commentService->store($idea, $request->validated());
+        $this->commentService->store($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
@@ -53,7 +52,7 @@ class IdeaCommentController extends Controller
     {
         $this->authorize('update', $comment);
 
-        $this->commentService->update($comment, $request->safe()->only(['content']));
+        $this->commentService->update($comment, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Data\Ideas\IdeaApplicationData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
@@ -9,10 +10,10 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApplicationRepository
 {
-    public function create(Idea $idea, User $user, array $data): IdeaApplication
+    public function create(Idea $idea, User $user, IdeaApplicationData $data): IdeaApplication
     {
         return IdeaApplication::query()->create([
-            ...$data,
+            ...$data->attributes(),
             'idea_id' => $idea->id,
             'user_id' => $user->id,
         ]);

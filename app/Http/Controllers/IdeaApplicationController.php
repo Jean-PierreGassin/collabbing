@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\Ideas\ApplicationService;
 use App\Services\Inertia\PagePropsService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,7 +20,7 @@ class IdeaApplicationController extends Controller
         private PagePropsService $pageProps
     ) {}
 
-    public function create(Request $request, Idea $idea): Response
+    public function create(Idea $idea): Response
     {
         $this->authorize('createApplication', $idea);
 
@@ -34,7 +33,7 @@ class IdeaApplicationController extends Controller
     {
         $this->authorize('storeApplication', $idea);
 
-        $this->applicationService->create($idea, $request->validated());
+        $this->applicationService->create($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', $idea->id)

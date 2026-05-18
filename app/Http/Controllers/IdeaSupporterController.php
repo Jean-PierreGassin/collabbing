@@ -6,13 +6,12 @@ use App\Models\Idea;
 use App\Models\IdeaSupporter;
 use App\Services\Ideas\SupporterService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class IdeaSupporterController extends Controller
 {
     public function __construct(private SupporterService $supporterService) {}
 
-    public function store(Request $request, Idea $idea): RedirectResponse
+    public function store(Idea $idea): RedirectResponse
     {
         $this->authorize('storeSupporter', $idea);
 
