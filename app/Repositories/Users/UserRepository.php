@@ -7,6 +7,11 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository
 {
+    public function create(array $data): User
+    {
+        return User::query()->create($data);
+    }
+
     public function all(): LengthAwarePaginator
     {
         return User::query()

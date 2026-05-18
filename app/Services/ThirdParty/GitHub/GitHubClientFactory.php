@@ -5,16 +5,16 @@ namespace App\Services\ThirdParty\GitHub;
 use Github\Client;
 use GrahamCampbell\GitHub\Facades\GitHub;
 
-class GitHubService
+class GitHubClientFactory
 {
-    protected static array $clients = [];
+    private array $clients = [];
 
-    public static function createClient(string $token): Client
+    public function create(string $token): Client
     {
         $cacheKey = sha1($token);
 
-        if (! isset(self::$clients[$cacheKey])) {
-            self::$clients[$cacheKey] = GitHub::getFactory()->make(
+        if (! isset($this->clients[$cacheKey])) {
+            $this->clients[$cacheKey] = GitHub::getFactory()->make(
                 [
                     'token' => $token,
                     'method' => 'token',
@@ -22,6 +22,6 @@ class GitHubService
             );
         }
 
-        return self::$clients[$cacheKey];
+        return $this->clients[$cacheKey];
     }
 }

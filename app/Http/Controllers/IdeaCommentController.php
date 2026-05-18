@@ -8,7 +8,6 @@ use App\Models\IdeaComment;
 use App\Services\Ideas\CommentService;
 use App\Services\Inertia\PagePropsService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +18,7 @@ class IdeaCommentController extends Controller
         private PagePropsService $pageProps
     ) {}
 
-    public function create(Request $request, Idea $idea): Response
+    public function create(Idea $idea): Response
     {
         $this->authorize('storeComment', $idea);
 

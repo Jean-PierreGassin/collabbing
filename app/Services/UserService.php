@@ -12,6 +12,17 @@ class UserService
 {
     public function __construct(private UserRepository $users) {}
 
+    public function create(array $data): User
+    {
+        return $this->users->create([
+            'username' => $data['username'],
+            'first_name' => ucwords($data['first_name']),
+            'last_name' => ucwords($data['last_name']),
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+    }
+
     public function all(): LengthAwarePaginator
     {
         return $this->users->all();
