@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePasswordResetsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'password_resets',
@@ -21,15 +16,5 @@ class CreatePasswordResetsTable extends Migration
                 $table->timestamp('created_at')->nullable();
             }
         );
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('password_resets');
     }
 }

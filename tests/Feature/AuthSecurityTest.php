@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
-use Mockery;
+use Laravel\Socialite\Two\GithubProvider;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
 
 class AuthSecurityTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_registration_rejects_short_passwords(): void
+    public function testRegistrationRejectsShortPasswords(): void
     {
         $response = $this->post(route('register'), $this->registrationPayload([
             'password' => 'short1',
@@ -29,7 +30,7 @@ class AuthSecurityTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_registration_rejects_commas_in_usernames(): void
+    public function testRegistrationRejectsCommasInUsernames(): void
     {
         $response = $this->post(route('register'), $this->registrationPayload([
             'username' => 'bad,name',
@@ -40,7 +41,7 @@ class AuthSecurityTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_registration_accepts_stronger_passphrases(): void
+    public function testRegistrationAcceptsStrongerPassphrases(): void
     {
         $response = $this->post(route('register'), $this->registrationPayload());
 
@@ -52,7 +53,7 @@ class AuthSecurityTest extends TestCase
         ]);
     }
 
-    public function test_profile_update_rejects_weak_new_passwords(): void
+    public function testProfileUpdateRejectsWeakNewPasswords(): void
     {
         $user = User::factory()->create();
 
@@ -73,7 +74,7 @@ class AuthSecurityTest extends TestCase
             ->assertSessionHasErrors('password');
     }
 
-    public function test_missing_profile_edit_returns_not_found(): void
+    public function testMissingProfileEditReturnsNotFound(): void
     {
         $user = User::factory()->create();
 
@@ -83,7 +84,7 @@ class AuthSecurityTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_missing_profile_update_returns_not_found(): void
+    public function testMissingProfileUpdateReturnsNotFound(): void
     {
         $user = User::factory()->create();
 
@@ -98,7 +99,7 @@ class AuthSecurityTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_user_props_do_not_require_a_github_api_request_for_profile_pictures(): void
+    public function testUserPropsDoNotRequireAGithubApiRequestForProfilePictures(): void
     {
         $user = User::factory()->withGithubAccount('invalid-token', 'octocat')->create();
 
@@ -111,7 +112,7 @@ class AuthSecurityTest extends TestCase
                 ->where('user.profilePicture', 'https://github.com/octocat.png?size=200'));
     }
 
-    public function test_login_attempts_are_throttled(): void
+    public function testLoginAttemptsAreThrottled(): void
     {
         $user = User::factory()->create([
             'username' => 'throttlecheck',
@@ -127,7 +128,7 @@ class AuthSecurityTest extends TestCase
         $response->assertSessionHasErrors('username');
     }
 
-    public function test_login_rejects_oversized_credentials_before_authentication(): void
+    public function testLoginRejectsOversizedCredentialsBeforeAuthentication(): void
     {
         $response = $this->post(route('login'), [
             'username' => str_repeat('a', 21),
@@ -138,7 +139,7 @@ class AuthSecurityTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_registration_attempts_are_rate_limited(): void
+    public function testRegistrationAttemptsAreRateLimited(): void
     {
         for ($attempt = 0; $attempt < 6; $attempt++) {
             $response = $this->post(route('register'), $this->registrationPayload([
@@ -152,7 +153,7 @@ class AuthSecurityTest extends TestCase
         $response->assertStatus(429);
     }
 
-    public function test_password_reset_email_attempts_are_rate_limited(): void
+    public function testPasswordResetEmailAttemptsAreRateLimited(): void
     {
         for ($attempt = 0; $attempt < 6; $attempt++) {
             $response = $this->post(route('password.email'), [
@@ -163,7 +164,7 @@ class AuthSecurityTest extends TestCase
         $response->assertStatus(429);
     }
 
-    public function test_password_reset_submission_attempts_are_rate_limited(): void
+    public function testPasswordResetSubmissionAttemptsAreRateLimited(): void
     {
         for ($attempt = 0; $attempt < 6; $attempt++) {
             $response = $this->post(route('password.update'), [
@@ -177,7 +178,7 @@ class AuthSecurityTest extends TestCase
         $response->assertStatus(429);
     }
 
-    public function test_github_revoke_requires_a_non_get_request(): void
+    public function testGithubRevokeRequiresANonGetRequest(): void
     {
         $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
@@ -193,20 +194,19 @@ class AuthSecurityTest extends TestCase
         $this->assertSame('octocat', $user->githubUsername());
     }
 
-    public function test_github_oauth_requests_only_public_repository_scope(): void
+    public function testGithubOauthRequestsOnlyPublicRepositoryScope(): void
     {
         $user = User::factory()->create();
-        $provider = Mockery::mock();
-        $provider->shouldReceive('scopes')
-            ->once()
+        $provider = $this->createMock(GithubProvider::class);
+        $provider->expects($this->once())
+            ->method('scopes')
             ->with(['public_repo'])
-            ->andReturnSelf();
-        $provider->shouldReceive('redirect')
-            ->once()
-            ->andReturn(redirect('https://github.com/login/oauth/authorize'));
+            ->willReturnSelf();
+        $provider->expects($this->once())
+            ->method('redirect')
+            ->willReturn(redirect('https://github.com/login/oauth/authorize'));
 
         Socialite::shouldReceive('driver')
-            ->once()
             ->with('github')
             ->andReturn($provider);
 
@@ -216,7 +216,7 @@ class AuthSecurityTest extends TestCase
             ->assertRedirect('https://github.com/login/oauth/authorize');
     }
 
-    public function test_github_tokens_are_encrypted_at_rest(): void
+    public function testGithubTokensAreEncryptedAtRest(): void
     {
         $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
@@ -230,18 +230,21 @@ class AuthSecurityTest extends TestCase
         $this->assertSame('github-token', $user->refresh()->githubToken());
     }
 
-    public function test_github_callback_stores_a_provider_account(): void
+    public function testGithubCallbackStoresAProviderAccount(): void
     {
         $user = User::factory()->create();
-        $providerUser = Mockery::mock();
-        $providerUser->token = 'github-token';
-        $providerUser->shouldReceive('getId')->once()->andReturn(123);
-        $providerUser->shouldReceive('getNickname')->once()->andReturn('octocat');
-        $provider = Mockery::mock();
-        $provider->shouldReceive('user')->once()->andReturn($providerUser);
+        $providerUser = (new SocialiteUser)
+            ->setToken('github-token')
+            ->map([
+                'id' => 123,
+                'nickname' => 'octocat',
+            ]);
+        $provider = $this->createMock(GithubProvider::class);
+        $provider->expects($this->once())
+            ->method('user')
+            ->willReturn($providerUser);
 
         Socialite::shouldReceive('driver')
-            ->once()
             ->with('github')
             ->andReturn($provider);
 
@@ -258,7 +261,7 @@ class AuthSecurityTest extends TestCase
         ]);
     }
 
-    public function test_github_revoke_clears_the_connected_account_with_csrf_protected_delete(): void
+    public function testGithubRevokeClearsTheConnectedAccountWithCsrfProtectedDelete(): void
     {
         $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 
@@ -273,7 +276,7 @@ class AuthSecurityTest extends TestCase
         ]);
     }
 
-    public function test_expired_form_submissions_redirect_with_a_status_message(): void
+    public function testExpiredFormSubmissionsRedirectWithAStatusMessage(): void
     {
         $user = User::factory()->create();
 
@@ -289,7 +292,7 @@ class AuthSecurityTest extends TestCase
             ->assertSessionHas('status', 'The page expired. Please try again.');
     }
 
-    public function test_invalid_encrypted_payloads_clear_session_cookies_and_redirect(): void
+    public function testInvalidEncryptedPayloadsClearSessionCookiesAndRedirect(): void
     {
         Route::get('/__test/invalid-encrypted-payload', fn () => throw new DecryptException('The payload is invalid.'));
 

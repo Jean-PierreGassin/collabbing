@@ -6,9 +6,6 @@ use App\Models\Idea;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/**
- * Class IdeaPolicy
- */
 class IdeaPolicy
 {
     use HandlesAuthorization;

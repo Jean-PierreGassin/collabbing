@@ -2,24 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\IdeaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/**
- * Class Idea
- */
 class Idea extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'title',
         'summary',
@@ -27,6 +20,11 @@ class Idea extends Model
         'content',
         'status',
     ];
+
+    protected static function newFactory(): IdeaFactory
+    {
+        return IdeaFactory::new();
+    }
 
     public function user(): BelongsTo
     {
@@ -53,23 +51,29 @@ class Idea extends Model
         return $this->applications()->where('status', 'approved');
     }
 
-    /**
-     * @return Model|HasMany|object|null
-     */
-    public function hasApplicationFromUser($userId, $type)
+    public function hasApplicationFromUser(int|string $userId, string $type): ?IdeaApplication
     {
-        return $this->applications()
+        $application = $this->applications()
             ->where('user_id', $userId)
             ->where('status', $type)
             ->first();
+
+        if (! $application instanceof IdeaApplication) {
+            return null;
+        }
+
+        return $application;
     }
 
-    /**
-     * @return Model|HasMany|object|null
-     */
-    public function hasSupportFromUser($userId)
+    public function hasSupportFromUser(int|string $userId): ?IdeaSupporter
     {
-        return $this->supporters()->where('user_id', $userId)->first();
+        $supporter = $this->supporters()->where('user_id', $userId)->first();
+
+        if (! $supporter instanceof IdeaSupporter) {
+            return null;
+        }
+
+        return $supporter;
     }
 
     public function supporters(): HasMany
@@ -85,5 +89,27 @@ class Idea extends Model
     public function codeRepository(): HasOne
     {
         return $this->hasOne(CodeRepository::class, 'idea_id')->latestOfMany();
+    }
+
+    public function owner(): ?User
+    {
+        $user = $this->user;
+
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function latestCodeRepository(): ?CodeRepository
+    {
+        $codeRepository = $this->codeRepository;
+
+        if (! $codeRepository instanceof CodeRepository) {
+            return null;
+        }
+
+        return $codeRepository;
     }
 }

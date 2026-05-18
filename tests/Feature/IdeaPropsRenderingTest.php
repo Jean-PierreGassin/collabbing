@@ -17,7 +17,7 @@ class IdeaPropsRenderingTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_idea_props_render_markdown_content(): void
+    public function testIdeaPropsRenderMarkdownContent(): void
     {
         $idea = $this->makeIdeaWithRelations('# Test title');
 
@@ -27,7 +27,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame("<h1 id=\"test-title\">Test title</h1>\n", $props['contentHtml']);
     }
 
-    public function test_idea_props_fall_back_to_plain_text_summary_for_existing_ideas(): void
+    public function testIdeaPropsFallBackToPlainTextSummaryForExistingIdeas(): void
     {
         $idea = $this->makeIdeaWithRelations('# Existing title');
         $idea->summary = null;
@@ -37,7 +37,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame('Existing title', $props['summary']);
     }
 
-    public function test_search_result_paginator_maps_rendered_markdown_content(): void
+    public function testSearchResultPaginatorMapsRenderedMarkdownContent(): void
     {
         $idea = $this->makeIdeaWithRelations('# Searchable idea');
         $paginator = new LengthAwarePaginator(new EloquentCollection([$idea]), 1, 10);
@@ -50,7 +50,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame("<h1 id=\"searchable-idea\">Searchable idea</h1>\n", $props['items'][0]['contentHtml']);
     }
 
-    public function test_comment_props_render_markdown_content(): void
+    public function testCommentPropsRenderMarkdownContent(): void
     {
         $user = $this->makeUser();
         $comment = new IdeaComment([
@@ -68,7 +68,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame("<p><strong>Useful</strong> comment</p>\n", $props['contentHtml']);
     }
 
-    public function test_comment_props_render_profile_links_for_mentions(): void
+    public function testCommentPropsRenderProfileLinksForMentions(): void
     {
         $commenter = $this->makeUser();
         User::factory()->create([
@@ -90,7 +90,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertStringContainsString('@target_user</a>', $props['contentHtml']);
     }
 
-    public function test_application_props_render_markdown_content(): void
+    public function testApplicationPropsRenderMarkdownContent(): void
     {
         $user = $this->makeUser();
         $application = new IdeaApplication([
@@ -107,7 +107,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame("<ul>\n<li>Can build APIs</li>\n</ul>\n", $props['contentHtml']);
     }
 
-    public function test_public_user_props_do_not_expose_email_addresses(): void
+    public function testPublicUserPropsDoNotExposeEmailAddresses(): void
     {
         $user = User::factory()->create([
             'email' => 'private@example.com',
@@ -120,7 +120,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertStringNotContainsString(md5('private@example.com'), $props['profilePicture']);
     }
 
-    public function test_user_props_include_email_for_their_own_profile(): void
+    public function testUserPropsIncludeEmailForTheirOwnProfile(): void
     {
         $user = User::factory()->create([
             'email' => 'owner@example.com',
@@ -134,7 +134,7 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertTrue($props['canUpdate']);
     }
 
-    public function test_user_props_include_connected_github_account_state(): void
+    public function testUserPropsIncludeConnectedGithubAccountState(): void
     {
         $user = User::factory()->withGithubAccount('github-token', 'octocat')->create();
 

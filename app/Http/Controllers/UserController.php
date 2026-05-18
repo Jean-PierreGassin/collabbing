@@ -6,29 +6,17 @@ use App\Http\Requests\StoreUser;
 use App\Models\User;
 use App\Services\Inertia\PagePropsService;
 use App\Services\UserService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class UserController
- */
 class UserController extends Controller
 {
-    private UserService $userService;
+    public function __construct(
+        private UserService $userService,
+        private PagePropsService $pageProps
+    ) {}
 
-    private PagePropsService $pageProps;
-
-    public function __construct(UserService $userService, PagePropsService $pageProps)
-    {
-        $this->userService = $userService;
-        $this->pageProps = $pageProps;
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $users = $this->userService->all();
@@ -38,9 +26,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user): Response
     {
         return Inertia::render('Users/Show', [
@@ -48,11 +33,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @throws AuthorizationException
-     */
     public function edit(User $user): Response
     {
         $this->authorize('manage', $user);
@@ -63,11 +43,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @throws AuthorizationException
-     */
     public function update(StoreUser $request, User $user): RedirectResponse
     {
         $this->authorize('update', $user);

@@ -13,7 +13,7 @@ class IdeaValidationTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_repository_name_rejects_spaces(): void
+    public function testRepositoryNameRejectsSpaces(): void
     {
         $user = User::factory()->create();
 
@@ -31,7 +31,7 @@ class IdeaValidationTest extends TestCase
         $response->assertSessionHasErrors('repository_name');
     }
 
-    public function test_idea_summary_is_required_and_limited(): void
+    public function testIdeaSummaryIsRequiredAndLimited(): void
     {
         $user = User::factory()->create();
 
@@ -61,7 +61,7 @@ class IdeaValidationTest extends TestCase
         $longSummary->assertSessionHasErrors('summary');
     }
 
-    public function test_repository_name_must_be_unique_for_connected_github_owner(): void
+    public function testRepositoryNameMustBeUniqueForConnectedGithubOwner(): void
     {
         $user = User::factory()->create();
 

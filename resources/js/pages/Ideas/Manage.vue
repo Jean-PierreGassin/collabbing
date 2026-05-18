@@ -12,13 +12,31 @@ import { Link } from '@inertiajs/vue3';
 import { Pencil } from '@lucide/vue';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
 
+type ManageTab = 'applications' | 'collaborators';
+
 defineProps<{
   idea: Idea;
   applications: Paginator<IdeaApplication>;
   collaborators: Paginator<IdeaApplication>;
 }>();
 
-const activeTab = ref<'applications' | 'collaborators'>(new URLSearchParams(window.location.search).has('collaborators') ? 'collaborators' : 'applications');
+function initialTab(): ManageTab {
+  if (new URLSearchParams(window.location.search).has('collaborators')) {
+    return 'collaborators';
+  }
+
+  return 'applications';
+}
+
+function tabVariant(tab: ManageTab): 'ghost' | 'secondary' {
+  if (activeTab.value === tab) {
+    return 'secondary';
+  }
+
+  return 'ghost';
+}
+
+const activeTab = ref<ManageTab>(initialTab());
 </script>
 
 <template>
@@ -27,8 +45,8 @@ const activeTab = ref<'applications' | 'collaborators'>(new URLSearchParams(wind
       <PageHeader :title="idea.title" />
 
       <div class="flex flex-wrap gap-1 rounded-md border border-border bg-card p-1">
-        <Button :variant="activeTab === 'applications' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'applications'" @click="activeTab = 'applications'">Applications</Button>
-        <Button :variant="activeTab === 'collaborators' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'collaborators'" @click="activeTab = 'collaborators'">Collaborators</Button>
+        <Button :variant="tabVariant('applications')" :aria-pressed="activeTab === 'applications'" @click="activeTab = 'applications'">Applications</Button>
+        <Button :variant="tabVariant('collaborators')" :aria-pressed="activeTab === 'collaborators'" @click="activeTab = 'collaborators'">Collaborators</Button>
       </div>
 
       <Transition name="content-fade" mode="out-in">

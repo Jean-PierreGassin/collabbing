@@ -114,6 +114,38 @@ function isActiveHeading(heading: MarkdownHeading): boolean {
   return activePitchAnchor.value === heading.anchor;
 }
 
+function hasPitchHeadingsClass(): string | undefined {
+  if (pitchHeadings.value.length > 0) {
+    return 'relative flex flex-col gap-4';
+  }
+
+  return undefined;
+}
+
+function mobileTocChevronClass(): string | undefined {
+  if (isMobileTocOpen.value) {
+    return 'rotate-180';
+  }
+
+  return undefined;
+}
+
+function headingLinkClass(heading: MarkdownHeading): string {
+  if (isActiveHeading(heading)) {
+    return 'border-primary text-primary';
+  }
+
+  return 'border-transparent text-muted-foreground hover:border-primary/50 hover:text-white';
+}
+
+function headingTextClass(heading: MarkdownHeading): string | undefined {
+  if (headingDepth(heading) > 0) {
+    return 'text-[0.8125rem]';
+  }
+
+  return undefined;
+}
+
 function resetPitchHeadingObserver(): void {
   if (observePitchTimer !== null) {
     window.clearTimeout(observePitchTimer);
@@ -253,14 +285,22 @@ async function openPitchHeading(anchor: string): Promise<void> {
 
   await nextTick();
 
+  let scrollDelay = 0;
+
+  if (shouldWaitForExpansion) {
+    scrollDelay = 280;
+  }
+
   window.setTimeout(() => requestAnimationFrame(() => {
     const heading = document.getElementById(anchor);
 
     if (heading) {
       const mobileContents = document.getElementById('mobile-pitch-contents');
-      const mobileOffset = window.matchMedia('(max-width: 1699px)').matches
-        ? (mobileContents?.getBoundingClientRect().height ?? 0) + 16
-        : 96;
+      let mobileOffset = 96;
+
+      if (window.matchMedia('(max-width: 1699px)').matches) {
+        mobileOffset = (mobileContents?.getBoundingClientRect().height ?? 0) + 16;
+      }
 
       window.scrollTo({
         top: heading.getBoundingClientRect().top + window.scrollY - mobileOffset,
@@ -269,7 +309,7 @@ async function openPitchHeading(anchor: string): Promise<void> {
     }
 
     window.history.replaceState(null, '', `#${anchor}`);
-  }), shouldWaitForExpansion ? 280 : 0);
+  }), scrollDelay);
 }
 
 watch([isPitchExpanded, pitchHeadings], async () => {
@@ -320,7 +360,7 @@ onBeforeUnmount(() => {
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <div class="flex flex-col gap-4">
-        <div :class="pitchHeadings.length > 0 ? 'relative flex flex-col gap-4' : undefined">
+        <div :class="hasPitchHeadingsClass()">
           <IdeaCard v-model:pitch-expanded="isPitchExpanded" :idea="idea" single hide-title />
 
           <Teleport to="body">
@@ -338,7 +378,7 @@ onBeforeUnmount(() => {
                     @click="isMobileTocOpen = !isMobileTocOpen"
                   >
                     Contents
-                    <ChevronDown :class="['size-4 text-primary transition-transform duration-200', isMobileTocOpen ? 'rotate-180' : undefined]" aria-hidden="true" />
+                    <ChevronDown :class="['size-4 text-primary transition-transform duration-200', mobileTocChevronClass()]" aria-hidden="true" />
                   </button>
 
                   <Transition name="toc-mobile">
@@ -351,11 +391,11 @@ onBeforeUnmount(() => {
                           :style="{ paddingLeft: `${0.75 + headingDepth(heading) * 0.9}rem` }"
                           :class="[
                             '-ml-px flex min-h-8 items-center border-l-2 py-1.5 pr-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-                            isActiveHeading(heading) ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-primary/50 hover:text-white',
+                            headingLinkClass(heading),
                           ]"
                           @click.prevent="openPitchHeading(heading.anchor)"
                         >
-                          <span class="truncate" :class="headingDepth(heading) > 0 ? 'text-[0.8125rem]' : undefined">{{ heading.title }}</span>
+                          <span class="truncate" :class="headingTextClass(heading)">{{ heading.title }}</span>
                         </a>
                       </TransitionGroup>
                     </nav>
@@ -378,11 +418,11 @@ onBeforeUnmount(() => {
                       :style="{ paddingLeft: `${0.75 + headingDepth(heading) * 0.9}rem` }"
                       :class="[
                         '-ml-px flex min-h-8 items-center border-l-2 py-1.5 pr-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-                        isActiveHeading(heading) ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-primary/50 hover:text-white',
+                        headingLinkClass(heading),
                       ]"
                       @click.prevent="openPitchHeading(heading.anchor)"
                     >
-                      <span class="truncate" :class="headingDepth(heading) > 0 ? 'text-[0.8125rem]' : undefined">{{ heading.title }}</span>
+                      <span class="truncate" :class="headingTextClass(heading)">{{ heading.title }}</span>
                     </a>
                   </TransitionGroup>
                 </nav>

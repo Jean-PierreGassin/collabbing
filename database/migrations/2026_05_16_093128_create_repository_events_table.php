@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('repository_events', function (Blueprint $table) {
@@ -24,13 +21,5 @@ return new class extends Migration
             $table->unique(['code_repository_id', 'dedupe_key']);
             $table->index(['code_repository_id', 'occurred_at']);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('repository_events');
     }
 };

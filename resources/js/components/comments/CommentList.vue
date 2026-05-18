@@ -5,11 +5,19 @@ import CommentThread from '@/components/comments/CommentThread.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import type { DomainUser, IdeaComment, Paginator } from '@/types/domain';
 
-defineProps<{
+const props = defineProps<{
   comments: Paginator<IdeaComment>;
   commentsStore: string;
   mentionableUsers: DomainUser[];
 }>();
+
+function commentsPanelClass(): string | undefined {
+  if (props.comments.items.length === 0) {
+    return undefined;
+  }
+
+  return 'min-h-[34rem]';
+}
 </script>
 
 <template>
@@ -35,7 +43,7 @@ defineProps<{
         textarea-id="comment-content"
       />
     </CardHeader>
-    <CardContent :class="comments.items.length > 0 ? 'min-h-[34rem]' : undefined">
+    <CardContent :class="commentsPanelClass()">
       <Transition name="page-fade" mode="out-in">
         <div :key="comments.currentPage" class="flex flex-col gap-3">
           <template v-if="comments.items.length > 0">

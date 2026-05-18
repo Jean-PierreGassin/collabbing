@@ -40,7 +40,13 @@ const emit = defineEmits<{
 const oldParentId = oldInputString('parent_id');
 const shouldUseOldContent = props.method === 'POST' && oldParentId === String(props.parentId ?? '');
 const textarea = ref<HTMLTextAreaElement | null>(null);
-const content = ref(shouldUseOldContent ? oldInputString('content', props.initialContent) : props.initialContent);
+let initialContent = props.initialContent;
+
+if (shouldUseOldContent) {
+  initialContent = oldInputString('content', props.initialContent);
+}
+
+const content = ref(initialContent);
 const cursorPosition = ref(content.value.length);
 
 const activeMention = computed(() => {
@@ -69,7 +75,13 @@ const mentionSuggestions = computed(() => {
 });
 
 const hasMentionSuggestions = computed(() => mentionSuggestions.value.length > 0);
-const overrideMethod = computed(() => (props.method === 'POST' ? null : props.method));
+const overrideMethod = computed(() => {
+  if (props.method === 'POST') {
+    return null;
+  }
+
+  return props.method;
+});
 
 function updateCursorPosition(): void {
   cursorPosition.value = textarea.value?.selectionStart ?? content.value.length;
@@ -86,7 +98,11 @@ function insertMention(username: string): void {
   const start = activeMention.value?.start ?? input.selectionStart ?? content.value.length;
   const end = activeMention.value?.end ?? input.selectionEnd ?? content.value.length;
   const prefix = content.value.slice(0, start);
-  const spacer = prefix.length === 0 || /\s$/.test(prefix) ? '' : ' ';
+  let spacer = ' ';
+
+  if (prefix.length === 0 || /\s$/.test(prefix)) {
+    spacer = '';
+  }
 
   content.value = `${prefix}${spacer}${mention}${content.value.slice(end)}`;
 

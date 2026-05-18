@@ -6,16 +6,11 @@ use App\Models\CodeRepository;
 use App\Models\RepositoryEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<RepositoryEvent>
- */
+/** @extends Factory<RepositoryEvent> */
 class RepositoryEventFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = RepositoryEvent::class;
+
     public function definition(): array
     {
         return [

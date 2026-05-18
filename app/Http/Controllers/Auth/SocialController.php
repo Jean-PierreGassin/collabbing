@@ -9,43 +9,40 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GithubProvider;
+use Laravel\Socialite\Two\User as SocialiteUser;
 
-/**
- * Class SocialController
- */
 class SocialController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct(private UserService $users)
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Redirect the user to the GitHub authentication page.
-     */
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('github')
+        return $this->githubProvider()
             ->scopes(['public_repo'])
             ->redirect();
     }
 
-    /**
-     * Obtain the user information from GitHub.
-     */
     public function handleProviderCallback(): RedirectResponse
     {
-        /* @var $user User */
         $user = Auth::user();
 
+        if (! $user instanceof User) {
+            return redirect()->route('login');
+        }
+
         try {
-            $providerUser = Socialite::driver('github')->user();
+            $providerUser = $this->githubProvider()->user();
         } catch (Exception) {
+            return redirect()
+                ->route('users.edit', $user->username)
+                ->withErrors(['github' => 'Unable to link GitHub account']);
+        }
+
+        if (! $providerUser instanceof SocialiteUser) {
             return redirect()
                 ->route('users.edit', $user->username)
                 ->withErrors(['github' => 'Unable to link GitHub account']);
@@ -58,7 +55,7 @@ class SocialController extends Controller
             User::PROVIDER_GITHUB,
             $providerUser->token,
             $providerUser->getNickname(),
-            is_scalar($providerUserId) ? (string) $providerUserId : null,
+            (string) $providerUserId,
             ['public_repo']
         );
 
@@ -67,17 +64,29 @@ class SocialController extends Controller
             ->with('status', 'Successfully linked GitHub account');
     }
 
-    /**
-     * Remove the provider token for this user.
-     */
     public function revokeProvider(): RedirectResponse
     {
-        /* @var $user User */
         $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return redirect()->route('login');
+        }
+
         $this->users->disconnectProvider($user, User::PROVIDER_GITHUB);
 
         return redirect()
             ->back()
             ->with('status', 'GitHub account unlinked.');
+    }
+
+    private function githubProvider(): GithubProvider
+    {
+        $provider = Socialite::driver('github');
+
+        if (! $provider instanceof GithubProvider) {
+            throw new Exception('GitHub OAuth provider is not configured.');
+        }
+
+        return $provider;
     }
 }

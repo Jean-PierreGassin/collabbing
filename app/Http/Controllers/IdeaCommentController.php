@@ -7,38 +7,19 @@ use App\Models\Idea;
 use App\Models\IdeaComment;
 use App\Services\Ideas\CommentService;
 use App\Services\Inertia\PagePropsService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class IdeaCommentController
- */
 class IdeaCommentController extends Controller
 {
-    private CommentService $commentService;
+    public function __construct(
+        private CommentService $commentService,
+        private PagePropsService $pageProps
+    ) {}
 
-    private PagePropsService $pageProps;
-
-    /**
-     * IdeaCommentController constructor.
-     */
-    public function __construct(CommentService $commentService, PagePropsService $pageProps)
-    {
-        $this->commentService = $commentService;
-        $this->pageProps = $pageProps;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     *
-     * @throws AuthorizationException
-     */
-    public function create(Request $request, Idea $idea)
+    public function create(Request $request, Idea $idea): Response
     {
         $this->authorize('storeComment', $idea);
 
@@ -47,11 +28,6 @@ class IdeaCommentController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @throws AuthorizationException
-     */
     public function store(StoreIdeaComment $request, Idea $idea): RedirectResponse
     {
         $this->authorize('storeComment', $idea);
@@ -63,14 +39,7 @@ class IdeaCommentController extends Controller
             ->with('status', 'Comment successfully created');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @return Response
-     *
-     * @throws AuthorizationException
-     */
-    public function edit(Idea $idea, IdeaComment $comment)
+    public function edit(Idea $idea, IdeaComment $comment): Response
     {
         $this->authorize('manage', $comment);
 
@@ -80,11 +49,6 @@ class IdeaCommentController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @throws AuthorizationException
-     */
     public function update(StoreIdeaComment $request, Idea $idea, IdeaComment $comment): RedirectResponse
     {
         $this->authorize('update', $comment);

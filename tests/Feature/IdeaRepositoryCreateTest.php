@@ -12,23 +12,22 @@ use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
-use Mockery;
 use Tests\TestCase;
 
 class IdeaRepositoryCreateTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_repository_create_failure_returns_to_dashboard_with_renderable_errors(): void
+    public function testRepositoryCreateFailureReturnsToDashboardWithRenderableErrors(): void
     {
         $user = User::factory()->create();
         $idea = Idea::factory()->for($user)->withCodeRepository('collab-idea')->create();
 
-        $repositoryService = Mockery::mock(RepositoryService::class);
-        $repositoryService->shouldReceive('create')
-            ->once()
-            ->with(Mockery::on(fn (Idea $candidate) => $candidate->is($idea)))
-            ->andThrow(new Exception('Repository creation failed'));
+        $repositoryService = $this->createMock(RepositoryService::class);
+        $repositoryService->expects($this->once())
+            ->method('create')
+            ->with($this->callback(fn (Idea $candidate) => $candidate->is($idea)))
+            ->willThrowException(new Exception('Repository creation failed'));
 
         $this->instance(RepositoryService::class, $repositoryService);
 
@@ -46,7 +45,7 @@ class IdeaRepositoryCreateTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Ideas/Manage'));
     }
 
-    public function test_repository_creation_cannot_be_triggered_by_get_requests(): void
+    public function testRepositoryCreationCannotBeTriggeredByGetRequests(): void
     {
         $user = User::factory()->create();
         $idea = Idea::factory()->for($user)->withCodeRepository('collab-idea')->create();
@@ -58,7 +57,7 @@ class IdeaRepositoryCreateTest extends TestCase
         $response->assertStatus(405);
     }
 
-    public function test_repository_creation_redirects_when_repository_already_exists(): void
+    public function testRepositoryCreationRedirectsWhenRepositoryAlreadyExists(): void
     {
         $user = User::factory()->create();
         $idea = Idea::factory()
@@ -72,7 +71,7 @@ class IdeaRepositoryCreateTest extends TestCase
             ->assertRedirect(route('ideas.dashboard', $idea));
     }
 
-    public function test_repository_invites_cannot_be_triggered_by_get_requests(): void
+    public function testRepositoryInvitesCannotBeTriggeredByGetRequests(): void
     {
         $user = User::factory()->create();
         $idea = Idea::factory()
@@ -87,7 +86,7 @@ class IdeaRepositoryCreateTest extends TestCase
         $response->assertStatus(405);
     }
 
-    public function test_repository_invite_failure_returns_actionable_status(): void
+    public function testRepositoryInviteFailureReturnsActionableStatus(): void
     {
         $user = User::factory()->create();
         $idea = Idea::factory()
@@ -95,11 +94,11 @@ class IdeaRepositoryCreateTest extends TestCase
             ->withCodeRepository('collab-idea', ['status' => CodeRepository::STATUS_ACTIVE])
             ->create();
 
-        $repositoryService = Mockery::mock(RepositoryService::class);
-        $repositoryService->shouldReceive('inviteUsers')
-            ->once()
-            ->with(Mockery::on(fn (Idea $candidate) => $candidate->is($idea)))
-            ->andReturnFalse();
+        $repositoryService = $this->createMock(RepositoryService::class);
+        $repositoryService->expects($this->once())
+            ->method('inviteUsers')
+            ->with($this->callback(fn (Idea $candidate) => $candidate->is($idea)))
+            ->willReturn(false);
 
         $this->instance(RepositoryService::class, $repositoryService);
 
@@ -110,7 +109,7 @@ class IdeaRepositoryCreateTest extends TestCase
             ->assertSessionHas('status', 'Repository invitations could not be sent. Please try again.');
     }
 
-    public function test_repository_invites_report_failure_when_any_collaborator_cannot_be_invited(): void
+    public function testRepositoryInvitesReportFailureWhenAnyCollaboratorCannotBeInvited(): void
     {
         $owner = User::factory()->withGithubAccount('owner-token', 'owner')->create();
         $collaborator = User::factory()->withGithubAccount(null, 'collaborator')->create();
@@ -125,22 +124,22 @@ class IdeaRepositoryCreateTest extends TestCase
                 'status' => 'approved',
             ]);
 
-        $github = Mockery::mock(GitHubRepositoryClient::class);
-        $github->shouldReceive('addCollaborator')
-            ->once()
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->once())
+            ->method('addCollaborator')
             ->with(
-                Mockery::on(fn (User $candidate) => $candidate->is($owner)),
+                $this->callback(fn (User $candidate) => $candidate->is($owner)),
                 'collab-idea',
                 'collaborator'
             )
-            ->andThrow(new Exception('GitHub invite failed'));
+            ->willThrowException(new Exception('GitHub invite failed'));
 
-        $service = new RepositoryService($github, Mockery::mock(IdeaRepositorySyncService::class));
+        $service = new RepositoryService($github, $this->syncService());
 
         $this->assertFalse($service->inviteUsers($idea));
     }
 
-    public function test_repository_invites_fail_when_collaborator_has_no_github_username(): void
+    public function testRepositoryInvitesFailWhenCollaboratorHasNoGithubUsername(): void
     {
         $owner = User::factory()->withGithubAccount('owner-token', 'owner')->create();
         $collaborator = User::factory()->create();
@@ -155,11 +154,16 @@ class IdeaRepositoryCreateTest extends TestCase
                 'status' => 'approved',
             ]);
 
-        $github = Mockery::mock(GitHubRepositoryClient::class);
-        $github->shouldNotReceive('addCollaborator');
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->never())->method('addCollaborator');
 
-        $service = new RepositoryService($github, Mockery::mock(IdeaRepositorySyncService::class));
+        $service = new RepositoryService($github, $this->syncService());
 
         $this->assertFalse($service->inviteUsers($idea));
+    }
+
+    private function syncService(): IdeaRepositorySyncService
+    {
+        return new IdeaRepositorySyncService($this->createStub(GitHubRepositoryClient::class));
     }
 }

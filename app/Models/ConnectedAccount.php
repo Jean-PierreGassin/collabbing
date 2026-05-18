@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ConnectedAccount extends Model
 {
-    /** @use HasFactory<ConnectedAccountFactory> */
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'provider',
         'provider_user_id',
         'provider_username',
@@ -20,6 +20,11 @@ class ConnectedAccount extends Model
         'scopes',
         'connected_at',
     ];
+
+    protected static function newFactory(): ConnectedAccountFactory
+    {
+        return ConnectedAccountFactory::new();
+    }
 
     protected function casts(): array
     {

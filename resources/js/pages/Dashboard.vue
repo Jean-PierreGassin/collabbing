@@ -8,6 +8,8 @@ import { useSessionStore } from '@/stores/session';
 import { Search, X } from '@lucide/vue';
 import type { Idea, Paginator } from '@/types/domain';
 
+type DashboardTab = 'ideas' | 'collaborations';
+
 defineProps<{
   keyword?: string | null;
   ideas: Paginator<Idea>;
@@ -15,7 +17,24 @@ defineProps<{
 }>();
 
 const session = useSessionStore();
-const activeTab = ref<'ideas' | 'collaborations'>(new URLSearchParams(window.location.search).has('collaborations') ? 'collaborations' : 'ideas');
+
+function initialTab(): DashboardTab {
+  if (new URLSearchParams(window.location.search).has('collaborations')) {
+    return 'collaborations';
+  }
+
+  return 'ideas';
+}
+
+function tabVariant(tab: DashboardTab): 'ghost' | 'secondary' {
+  if (activeTab.value === tab) {
+    return 'secondary';
+  }
+
+  return 'ghost';
+}
+
+const activeTab = ref<DashboardTab>(initialTab());
 </script>
 
 <template>
@@ -30,8 +49,8 @@ const activeTab = ref<'ideas' | 'collaborations'>(new URLSearchParams(window.loc
 
     <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)_minmax(0,1fr)] md:items-center">
       <div class="flex flex-wrap gap-1 rounded-md border border-border bg-card p-1 md:justify-self-start">
-        <Button :variant="activeTab === 'ideas' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'ideas'" @click="activeTab = 'ideas'">My Ideas</Button>
-        <Button :variant="activeTab === 'collaborations' ? 'secondary' : 'ghost'" :aria-pressed="activeTab === 'collaborations'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
+        <Button :variant="tabVariant('ideas')" :aria-pressed="activeTab === 'ideas'" @click="activeTab = 'ideas'">My Ideas</Button>
+        <Button :variant="tabVariant('collaborations')" :aria-pressed="activeTab === 'collaborations'" @click="activeTab = 'collaborations'">Ideas I'm collaborating on</Button>
       </div>
       <form :action="session.routes.dashboard" method="GET" class="relative w-full md:justify-self-center" role="search">
         <label for="dashboard-search" class="sr-only">Search dashboard ideas</label>

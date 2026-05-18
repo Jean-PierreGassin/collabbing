@@ -33,6 +33,50 @@ watch(
   }
 );
 
+function isToolbar(): boolean {
+  return props.placement === 'toolbar';
+}
+
+function navLayoutClass(): string {
+  if (isToolbar()) {
+    return 'flex-wrap items-center justify-start sm:justify-end';
+  }
+
+  return 'mt-4 flex-col sm:flex-row sm:items-center sm:justify-between';
+}
+
+function buttonSize(): 'default' | 'sm' {
+  if (isToolbar()) {
+    return 'sm';
+  }
+
+  return 'default';
+}
+
+function buttonClass(): string {
+  if (isToolbar()) {
+    return 'w-auto';
+  }
+
+  return 'w-full sm:w-auto';
+}
+
+function pageStatusClass(): string {
+  if (isToolbar()) {
+    return 'order-first py-1.5 sm:order-none';
+  }
+
+  return 'order-first py-2 sm:order-none';
+}
+
+function pageStatusText(): string {
+  if (isPaging.value) {
+    return 'Loading page...';
+  }
+
+  return `Page ${props.paginator.currentPage} of ${props.paginator.lastPage}`;
+}
+
 onUnmounted(stopFinishListener);
 </script>
 
@@ -41,9 +85,7 @@ onUnmounted(stopFinishListener);
     v-if="paginator.lastPage > 1"
     :class="cn(
       'flex gap-3',
-      placement === 'toolbar'
-        ? 'flex-wrap items-center justify-start sm:justify-end'
-        : 'mt-4 flex-col sm:flex-row sm:items-center sm:justify-between'
+      navLayoutClass()
     )"
     :aria-label="label ?? 'Pagination'"
   >
@@ -55,8 +97,8 @@ onUnmounted(stopFinishListener);
       preserve-scroll
       preserve-state
       variant="outline"
-      :size="placement === 'toolbar' ? 'sm' : 'default'"
-      :class="placement === 'toolbar' ? 'w-auto' : 'w-full sm:w-auto'"
+      :size="buttonSize()"
+      :class="buttonClass()"
       @click="startPaging"
     >
       <ChevronLeft class="size-4" aria-hidden="true" />
@@ -66,9 +108,9 @@ onUnmounted(stopFinishListener);
       v-else
       type="button"
       variant="outline"
-      :size="placement === 'toolbar' ? 'sm' : 'default'"
+      :size="buttonSize()"
       disabled
-      :class="placement === 'toolbar' ? 'w-auto' : 'w-full sm:w-auto'"
+      :class="buttonClass()"
     >
       <ChevronLeft class="size-4" aria-hidden="true" />
       Previous
@@ -76,11 +118,11 @@ onUnmounted(stopFinishListener);
     <span
       :class="cn(
         'rounded-md border border-border bg-card px-3 text-center text-sm text-muted-foreground transition-colors',
-        placement === 'toolbar' ? 'order-first py-1.5 sm:order-none' : 'order-first py-2 sm:order-none'
+        pageStatusClass()
       )"
       aria-live="polite"
     >
-      {{ isPaging ? 'Loading page...' : `Page ${paginator.currentPage} of ${paginator.lastPage}` }}
+      {{ pageStatusText() }}
     </span>
     <Button
       v-if="paginator.nextPageUrl"
@@ -90,8 +132,8 @@ onUnmounted(stopFinishListener);
       preserve-scroll
       preserve-state
       variant="outline"
-      :size="placement === 'toolbar' ? 'sm' : 'default'"
-      :class="placement === 'toolbar' ? 'w-auto' : 'w-full sm:w-auto'"
+      :size="buttonSize()"
+      :class="buttonClass()"
       @click="startPaging"
     >
       Next
@@ -101,9 +143,9 @@ onUnmounted(stopFinishListener);
       v-else
       type="button"
       variant="outline"
-      :size="placement === 'toolbar' ? 'sm' : 'default'"
+      :size="buttonSize()"
       disabled
-      :class="placement === 'toolbar' ? 'w-auto' : 'w-full sm:w-auto'"
+      :class="buttonClass()"
     >
       Next
       <ChevronRight class="size-4" aria-hidden="true" />

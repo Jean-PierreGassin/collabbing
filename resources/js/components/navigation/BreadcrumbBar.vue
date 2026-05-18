@@ -32,10 +32,16 @@ function parentCrumb(fallbackLabel: string, fallbackHref: string): BreadcrumbCru
 }
 
 function ideaCrumbs(idea: Idea, currentLabel?: string): BreadcrumbCrumb[] {
+  let href: string | undefined;
+
+  if (currentLabel) {
+    href = idea.routes.show;
+  }
+
   const crumbs: BreadcrumbCrumb[] = [
     parentCrumb('Ideas', session.routes.ideas),
     {
-      href: currentLabel ? idea.routes.show : undefined,
+      href,
       label: `Idea - ${idea.titleDisplay}`,
     },
   ];
@@ -48,10 +54,16 @@ function ideaCrumbs(idea: Idea, currentLabel?: string): BreadcrumbCrumb[] {
 }
 
 function userCrumbs(user: DomainUser, currentLabel?: string): BreadcrumbCrumb[] {
+  let href: string | undefined;
+
+  if (currentLabel) {
+    href = user.routes.show;
+  }
+
   const crumbs: BreadcrumbCrumb[] = [
     parentCrumb('Members', session.routes.users),
     {
-      href: currentLabel ? user.routes.show : undefined,
+      href,
       label: `Member - ${user.name}`,
     },
   ];
@@ -104,7 +116,13 @@ const breadcrumbs = computed<BreadcrumbCrumb[]>(() => {
   }
 
   if (idea && page.component === 'Comments/Form') {
-    return ideaCrumbs(idea, comment ? 'Edit comment' : 'Comment');
+    let commentLabel = 'Comment';
+
+    if (comment) {
+      commentLabel = 'Edit comment';
+    }
+
+    return ideaCrumbs(idea, commentLabel);
   }
 
   if (page.component === 'Users/Index') {
@@ -169,6 +187,14 @@ const breadcrumbs = computed<BreadcrumbCrumb[]>(() => {
 
   return [{ label: 'Collabbing' }];
 });
+
+function ariaCurrent(index: number): 'page' | undefined {
+  if (index === breadcrumbs.value.length - 1) {
+    return 'page';
+  }
+
+  return undefined;
+}
 </script>
 
 <template>
@@ -184,7 +210,7 @@ const breadcrumbs = computed<BreadcrumbCrumb[]>(() => {
           >
             {{ crumb.label }}
           </Link>
-          <span v-else class="max-w-64 truncate text-white" :aria-current="index === breadcrumbs.length - 1 ? 'page' : undefined">
+          <span v-else class="max-w-64 truncate text-white" :aria-current="ariaCurrent(index)">
             {{ crumb.label }}
           </span>
         </li>

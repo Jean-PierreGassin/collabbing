@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateIdeasTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'ideas',
@@ -31,15 +26,5 @@ class CreateIdeasTable extends Migration
                 $table->timestamps();
             }
         );
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('ideas');
     }
 }

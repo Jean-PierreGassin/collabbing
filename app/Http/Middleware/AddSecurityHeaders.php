@@ -17,11 +17,6 @@ class AddSecurityHeaders
         'X-Frame-Options' => 'DENY',
     ];
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);

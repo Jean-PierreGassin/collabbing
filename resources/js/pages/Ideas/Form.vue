@@ -25,6 +25,18 @@ const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
 const markdownFilePattern = /\.(md|markdown)$/i;
 const content = ref(stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)));
 
+let pageTitle = 'Share your idea';
+let formAction = session.routes.ideasStore;
+let submitVariant: 'default' | 'secondary' = 'default';
+let submitLabel = 'Share Idea';
+
+if (props.idea) {
+  pageTitle = 'Edit your idea';
+  formAction = props.idea.routes.update;
+  submitVariant = 'secondary';
+  submitLabel = 'Edit Idea';
+}
+
 function sanitizeRepositoryName(event: Event): void {
   const input = event.target as HTMLInputElement;
   const sanitized = input.value.replace(repositoryNameSanitizer, '');
@@ -228,10 +240,13 @@ async function insertMarkdownFiles(files: File[]): Promise<void> {
     .join('\n\n');
 
   const existingContent = contentBody.value.trim();
+  let nextContent = body;
 
-  content.value = stripGeneratedTableOfContents(
-    existingContent ? `${existingContent}\n\n${body}` : body
-  );
+  if (existingContent) {
+    nextContent = `${existingContent}\n\n${body}`;
+  }
+
+  content.value = stripGeneratedTableOfContents(nextContent);
 }
 
 function selectMarkdownFiles(event: Event): void {
@@ -261,13 +276,13 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
 <template>
   <section class="flex flex-col gap-5">
     <PageHeader
-      :title="idea ? 'Edit your idea' : 'Share your idea'"
+      :title="pageTitle"
       description="Describe the problem, the collaboration shape, and the repository plan."
     />
 
     <Card>
       <CardContent>
-        <form :action="idea ? idea.routes.update : session.routes.ideasStore" method="POST" class="flex flex-col gap-5">
+        <form :action="formAction" method="POST" class="flex flex-col gap-5">
           <CsrfField />
           <MethodField v-if="idea" method="PUT" />
 
@@ -372,8 +387,8 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
             </label>
             <span v-else />
 
-            <Button type="submit" size="sm" :variant="idea ? 'secondary' : 'default'" class="self-start">
-              {{ idea ? 'Edit Idea' : 'Share Idea' }}
+            <Button type="submit" size="sm" :variant="submitVariant" class="self-start">
+              {{ submitLabel }}
             </Button>
           </div>
         </form>

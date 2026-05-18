@@ -22,6 +22,50 @@ const isReplying = ref(false);
 const isEditing = ref(false);
 const areRepliesVisible = ref(false);
 
+function threadClass(depth: number): string[] {
+  const classes = ['flex flex-col gap-3 rounded-md border border-border bg-background/35 p-4'];
+
+  if (depth > 0) {
+    classes.push('ml-4 border-l-primary/45');
+  }
+
+  return classes;
+}
+
+function repliesToggleLabel(isVisible: boolean): string {
+  if (isVisible) {
+    return 'Hide';
+  }
+
+  return 'Show';
+}
+
+function replyCountLabel(count: number): string {
+  if (count === 1) {
+    return 'reply';
+  }
+
+  return 'replies';
+}
+
+function toggleReplying(): void {
+  if (isReplying.value) {
+    isReplying.value = false;
+
+    return;
+  }
+
+  startReply();
+}
+
+function replyButtonLabel(): string {
+  if (isReplying.value) {
+    return 'Cancel reply';
+  }
+
+  return 'Reply';
+}
+
 function startReply(): void {
   isReplying.value = true;
   areRepliesVisible.value = true;
@@ -29,7 +73,7 @@ function startReply(): void {
 </script>
 
 <template>
-  <article :class="['flex flex-col gap-3 rounded-md border border-border bg-background/35 p-4', depth > 0 ? 'ml-4 border-l-primary/45' : '']">
+  <article :class="threadClass(depth)">
     <header class="flex flex-wrap items-center justify-between gap-2 text-sm">
       <a class="font-medium text-primary hover:underline" :href="comment.user.routes.show">
         @{{ comment.user.username }}
@@ -59,10 +103,10 @@ function startReply(): void {
       <span v-else />
       <div class="flex flex-wrap gap-2">
         <Button v-if="comment.replies.length > 0" type="button" variant="ghost" size="sm" @click="areRepliesVisible = !areRepliesVisible">
-          {{ areRepliesVisible ? 'Hide' : 'Show' }} {{ comment.replies.length.toLocaleString() }} {{ comment.replies.length === 1 ? 'reply' : 'replies' }}
+          {{ repliesToggleLabel(areRepliesVisible) }} {{ comment.replies.length.toLocaleString() }} {{ replyCountLabel(comment.replies.length) }}
         </Button>
-        <Button type="button" variant="ghost" size="sm" @click="isReplying ? isReplying = false : startReply()">
-          {{ isReplying ? 'Cancel reply' : 'Reply' }}
+        <Button type="button" variant="ghost" size="sm" @click="toggleReplying">
+          {{ replyButtonLabel() }}
         </Button>
         <Button v-if="comment.can.update && !isEditing" type="button" variant="outline" size="sm" @click="isEditing = true">Edit</Button>
       </div>

@@ -15,14 +15,33 @@ const props = withDefaults(defineProps<{
 });
 
 const errors = computed(() => fieldErrors(props.errorKey ?? props.id));
-const helpId = computed(() => (props.help ? `${props.id}-help` : undefined));
-const errorId = computed(() => (errors.value.length > 0 ? `${props.id}-error` : undefined));
+const helpId = computed(() => {
+  if (props.help) {
+    return `${props.id}-help`;
+  }
+
+  return undefined;
+});
+const errorId = computed(() => {
+  if (errors.value.length > 0) {
+    return `${props.id}-error`;
+  }
+
+  return undefined;
+});
 const describedBy = computed(() => [helpId.value, errorId.value].filter(Boolean).join(' ') || undefined);
+const labelClass = computed(() => {
+  if (props.hideLabel) {
+    return 'sr-only';
+  }
+
+  return 'text-sm font-medium text-foreground';
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
-    <label :for="id" :class="hideLabel ? 'sr-only' : 'text-sm font-medium text-foreground'">{{ label }}</label>
+    <label :for="id" :class="labelClass">{{ label }}</label>
     <slot :invalid="errors.length > 0" :described-by="describedBy" />
     <p v-if="help" :id="helpId" class="text-sm text-muted-foreground">{{ help }}</p>
     <p v-if="errors.length > 0" :id="errorId" class="text-sm text-destructive" role="alert">

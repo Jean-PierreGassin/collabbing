@@ -8,9 +8,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * Class IdeaService
- */
 class IdeaService
 {
     public function __construct(private IdeaRepository $ideas) {}

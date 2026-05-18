@@ -2,25 +2,16 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
 class SearchIdeas extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -33,12 +24,16 @@ class SearchIdeas extends FormRequest
         $validated = $this->validated();
         $search = $validated['search'] ?? null;
 
-        return is_string($search) ? $search : null;
+        if (! is_string($search)) {
+            return null;
+        }
+
+        return $search;
     }
 
     protected function prepareForValidation(): void
     {
-        $search = $this->query('search');
+        $search = $this->input('search');
 
         if (! is_string($search)) {
             return;
@@ -46,8 +41,10 @@ class SearchIdeas extends FormRequest
 
         $search = Str::squish($search);
 
-        $this->merge([
-            'search' => $search === '' ? null : $search,
-        ]);
+        if ($search === '') {
+            $search = null;
+        }
+
+        $this->merge(['search' => $search]);
     }
 }

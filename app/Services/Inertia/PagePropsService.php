@@ -8,8 +8,9 @@ use App\Models\IdeaComment;
 use App\Models\IdeaSupporter;
 use App\Models\RepositoryEvent;
 use App\Models\User;
+use Carbon\Carbon;
 use GrahamCampbell\Markdown\Facades\Markdown;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -27,6 +28,16 @@ class PagePropsService
         }
 
         $canUpdate = Gate::allows('update', $user);
+        $email = null;
+        $bioHtml = null;
+
+        if ($canUpdate) {
+            $email = $user->email;
+        }
+
+        if ($user->bio) {
+            $bioHtml = (string) Markdown::convertToHtml($user->bio);
+        }
 
         return [
             'id' => $user->id,
@@ -34,13 +45,13 @@ class PagePropsService
             'firstName' => $user->first_name,
             'lastName' => $user->last_name,
             'name' => $user->name,
-            'email' => $canUpdate ? $user->email : null,
+            'email' => $email,
             'bio' => $user->bio,
-            'bioHtml' => $user->bio ? (string) Markdown::convertToHtml($user->bio) : null,
+            'bioHtml' => $bioHtml,
             'githubUsername' => $user->githubUsername(),
             'hasGithubToken' => $user->hasGithubToken(),
             'profilePicture' => $user->profilePicture(),
-            'createdAtFormatted' => date('d M - Y', $user->created_at->timestamp),
+            'createdAtFormatted' => $user->created_at->format('d M - Y'),
             'canUpdate' => $canUpdate,
             'routes' => [
                 'show' => route('users.show', $user->username),
@@ -59,10 +70,23 @@ class PagePropsService
             'codeRepository.events',
         ]);
 
-        $codeRepository = $idea->codeRepository;
+        $codeRepository = $idea->latestCodeRepository();
+        $owner = $idea->owner();
         $supportersCount = $this->relationCount($idea, 'supporters', 'supporters_count');
         $approvedApplicationsCount = $this->relationCount($idea, 'approvedApplications', 'approved_applications_count');
         $collaborators = $this->collaboratorPreview($idea);
+        $repositoryAvailable = false;
+        $repositoryCreateRoute = route('auth.github.login');
+        $repositoryInviteRoute = route('auth.github.login');
+
+        if ($codeRepository) {
+            $repositoryAvailable = $codeRepository->isAvailable();
+        }
+
+        if ($owner && $owner->hasGithubToken()) {
+            $repositoryCreateRoute = route('ideas.repository-create', $idea);
+            $repositoryInviteRoute = route('ideas.repository-invite', $idea);
+        }
 
         return [
             'id' => $idea->id,
@@ -74,11 +98,11 @@ class PagePropsService
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
             'status' => $idea->status,
             'statusDisplay' => ucfirst($idea->status),
-            'repository' => $codeRepository?->isAvailable() ?? false,
+            'repository' => $repositoryAvailable,
             'repositoryName' => $codeRepository?->name,
             'repositoryActivity' => $this->repositoryActivity($idea),
             'createdAtForHumans' => $idea->created_at->diffForHumans(),
-            'user' => $this->user($idea->user),
+            'user' => $this->user($owner),
             'supportersCount' => $supportersCount,
             'approvedApplicationsCount' => $approvedApplicationsCount,
             'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->application($application))->values(),
@@ -99,12 +123,8 @@ class PagePropsService
                 'applicationsStore' => route('ideas.applications.store', $idea),
                 'commentsStore' => route('ideas.comments.store', $idea),
                 'supportersStore' => route('ideas.supporters.store', $idea),
-                'repositoryCreate' => $idea->user->hasGithubToken()
-                    ? route('ideas.repository-create', $idea)
-                    : route('auth.github.login'),
-                'repositoryInvite' => $idea->user->hasGithubToken()
-                    ? route('ideas.repository-invite', $idea)
-                    : route('auth.github.login'),
+                'repositoryCreate' => $repositoryCreateRoute,
+                'repositoryInvite' => $repositoryInviteRoute,
             ],
         ];
     }
@@ -121,7 +141,11 @@ class PagePropsService
             strip_tags((string) Markdown::convertToHtml($idea->content))
         ));
 
-        return Str::limit($text ?: $idea->title, self::IDEA_SUMMARY_LIMIT, '');
+        if ($text === '') {
+            $text = $idea->title;
+        }
+
+        return Str::limit($text, self::IDEA_SUMMARY_LIMIT, '');
     }
 
     private function relationCount(Idea $idea, string $relation, string $countAttribute): int
@@ -141,13 +165,9 @@ class PagePropsService
 
     private function collaboratorPreview(Idea $idea): Collection
     {
-        if ($idea->relationLoaded('approvedApplications')) {
-            return $idea->approvedApplications
-                ->take(self::COLLABORATOR_PREVIEW_LIMIT)
-                ->values();
-        }
-
-        return $idea->approvedApplications()
+        return IdeaApplication::query()
+            ->where('idea_id', $idea->id)
+            ->where('status', 'approved')
             ->with('user')
             ->latest()
             ->limit(self::COLLABORATOR_PREVIEW_LIMIT)
@@ -156,11 +176,30 @@ class PagePropsService
 
     private function repositoryActivity(Idea $idea): array
     {
-        $codeRepository = $idea->codeRepository;
+        $codeRepository = $idea->latestCodeRepository();
 
-        $events = $codeRepository && ($codeRepository->isAvailable() || $codeRepository->missing_at)
-            ? $codeRepository->events()->latest('occurred_at')->limit(5)->get()
-            : collect();
+        $events = [];
+
+        if ($codeRepository && ($codeRepository->isAvailable() || $codeRepository->missing_at)) {
+            $events = RepositoryEvent::query()
+                ->where('code_repository_id', $codeRepository->id)
+                ->latest('occurred_at')
+                ->limit(5)
+                ->get()
+                ->map(fn (RepositoryEvent $event): array => [
+                    'id' => $event->id,
+                    'type' => $event->type,
+                    'summary' => $event->summary,
+                    'occurredAtForHumans' => $this->dateForHumans($event->occurred_at),
+                ])
+                ->values();
+        }
+
+        $latestCommitShortSha = null;
+
+        if ($codeRepository?->latest_commit_sha) {
+            $latestCommitShortSha = substr($codeRepository->latest_commit_sha, 0, 7);
+        }
 
         return [
             'htmlUrl' => $codeRepository?->html_url,
@@ -169,21 +208,23 @@ class PagePropsService
             'openIssuesCount' => (int) $codeRepository?->open_issues_count,
             'stargazersCount' => (int) $codeRepository?->stargazers_count,
             'forksCount' => (int) $codeRepository?->forks_count,
-            'lastPushedAtForHumans' => $codeRepository?->pushed_at?->diffForHumans(),
-            'lastSyncedAtForHumans' => $codeRepository?->synced_at?->diffForHumans(),
+            'lastPushedAtForHumans' => $this->dateForHumans($codeRepository?->pushed_at),
+            'lastSyncedAtForHumans' => $this->dateForHumans($codeRepository?->synced_at),
             'latestCommitSha' => $codeRepository?->latest_commit_sha,
-            'latestCommitShortSha' => $codeRepository?->latest_commit_sha
-                ? substr($codeRepository->latest_commit_sha, 0, 7)
-                : null,
+            'latestCommitShortSha' => $latestCommitShortSha,
             'latestCommitMessage' => $codeRepository?->latest_commit_message,
             'latestCommitAuthor' => $codeRepository?->latest_commit_author,
-            'events' => $events->map(fn (RepositoryEvent $event) => [
-                'id' => $event->id,
-                'type' => $event->type,
-                'summary' => $event->summary,
-                'occurredAtForHumans' => $event->occurred_at->diffForHumans(),
-            ])->values(),
+            'events' => $events,
         ];
+    }
+
+    private function dateForHumans(mixed $value): ?string
+    {
+        if (! $value instanceof Carbon) {
+            return null;
+        }
+
+        return $value->diffForHumans();
     }
 
     public function comment(IdeaComment $comment): array
@@ -200,9 +241,13 @@ class PagePropsService
             'createdAtForHumans' => $comment->created_at->diffForHumans(),
             'updatedAtForHumans' => $comment->updated_at->diffForHumans(),
             'wasEdited' => $comment->created_at->timestamp < $comment->updated_at->timestamp,
-            'user' => $this->user($comment->user),
-            'replies' => $comment->replies
-                ->map(fn (IdeaComment $reply) => $this->comment($reply))
+            'user' => $this->user($this->commentUser($comment)),
+            'replies' => IdeaComment::query()
+                ->where('parent_id', $comment->id)
+                ->with('user')
+                ->oldest()
+                ->get()
+                ->map(fn (IdeaComment $reply): array => $this->comment($reply))
                 ->values(),
             'can' => [
                 'update' => Gate::allows('update', $comment),
@@ -254,7 +299,7 @@ class PagePropsService
             'contentHtml' => (string) Markdown::convertToHtml($application->content),
             'status' => $application->status,
             'createdAtForHumans' => $application->created_at->diffForHumans(),
-            'user' => $this->user($application->user),
+            'user' => $this->user($this->applicationUser($application)),
             'routes' => [
                 'destroy' => route('ideas.applications.destroy', [$application->idea_id, $application]),
                 'approve' => route('ideas.applications.approve', [$application->idea_id, $application]),
@@ -274,6 +319,24 @@ class PagePropsService
                 'destroy' => route('ideas.supporters.destroy', [$supporter->idea_id, $supporter]),
             ],
         ];
+    }
+
+    private function commentUser(IdeaComment $comment): ?User
+    {
+        if (! $comment->user instanceof User) {
+            return null;
+        }
+
+        return $comment->user;
+    }
+
+    private function applicationUser(IdeaApplication $application): ?User
+    {
+        if (! $application->user instanceof User) {
+            return null;
+        }
+
+        return $application->user;
     }
 
     public function paginator(LengthAwarePaginator $paginator, callable $mapItem): array

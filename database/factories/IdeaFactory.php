@@ -4,8 +4,10 @@ namespace Database\Factories;
 
 use App\Models\CodeRepository;
 use App\Models\Idea;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<Idea> */
 class IdeaFactory extends Factory
 {
     protected $model = Idea::class;
@@ -23,10 +25,17 @@ class IdeaFactory extends Factory
     public function withCodeRepository(?string $name = null, array $attributes = []): static
     {
         return $this->afterCreating(function (Idea $idea) use ($name, $attributes): void {
+            $owner = $idea->user;
+            $repositoryOwner = null;
+
+            if ($owner instanceof User) {
+                $repositoryOwner = $owner->githubUsername();
+            }
+
             $idea->codeRepository()->create(array_merge([
                 'provider' => CodeRepository::PROVIDER_GITHUB,
                 'status' => CodeRepository::STATUS_PLANNED,
-                'owner' => $idea->user?->githubUsername(),
+                'owner' => $repositoryOwner,
                 'name' => $name ?? $this->faker->slug(2),
             ], $attributes));
         });

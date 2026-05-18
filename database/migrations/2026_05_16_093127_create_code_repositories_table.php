@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('code_repositories', function (Blueprint $table) {
@@ -37,13 +34,5 @@ return new class extends Migration
             $table->foreign('idea_id')->references('id')->on('ideas')->cascadeOnDelete();
             $table->unique(['provider', 'owner', 'name']);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('code_repositories');
     }
 };

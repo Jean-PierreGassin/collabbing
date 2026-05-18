@@ -11,7 +11,7 @@ class ProductWriteThrottleTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_authenticated_product_writes_are_rate_limited_per_user(): void
+    public function testAuthenticatedProductWritesAreRateLimitedPerUser(): void
     {
         $user = User::factory()->create();
 
@@ -34,7 +34,7 @@ class ProductWriteThrottleTest extends TestCase
             ->where('status', 429));
     }
 
-    public function test_throttle_does_not_block_reading_idea_pages(): void
+    public function testThrottleDoesNotBlockReadingIdeaPages(): void
     {
         $user = User::factory()->create();
 

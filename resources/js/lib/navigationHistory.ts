@@ -101,15 +101,18 @@ export function startNavigationHistory(initialUrl: string): void {
   const storedCurrentUrl = storedUrl(storageCurrentKey);
   const storedReturnUrl = storedUrl(storageReturnKey);
   const referrerUrl = sameOriginReferrer();
+  let initialReturnUrl: string | null = null;
+
+  if (storedCurrentUrl && storedCurrentUrl !== normalizedInitialUrl && ! isSameNavigationScope(storedCurrentUrl, normalizedInitialUrl)) {
+    initialReturnUrl = storedCurrentUrl;
+  } else if (storedReturnUrl && storedReturnUrl !== normalizedInitialUrl) {
+    initialReturnUrl = storedReturnUrl;
+  } else if (referrerUrl && referrerUrl !== normalizedInitialUrl && ! isSameNavigationScope(referrerUrl, normalizedInitialUrl)) {
+    initialReturnUrl = referrerUrl;
+  }
 
   currentUrl.value = normalizedInitialUrl;
-  returnUrl.value = storedCurrentUrl && storedCurrentUrl !== normalizedInitialUrl && ! isSameNavigationScope(storedCurrentUrl, normalizedInitialUrl)
-    ? storedCurrentUrl
-    : storedReturnUrl && storedReturnUrl !== normalizedInitialUrl
-      ? storedReturnUrl
-      : referrerUrl && referrerUrl !== normalizedInitialUrl && ! isSameNavigationScope(referrerUrl, normalizedInitialUrl)
-        ? referrerUrl
-        : null;
+  returnUrl.value = initialReturnUrl;
 
   storeUrl(storageCurrentKey, currentUrl.value);
   storeUrl(storageReturnKey, returnUrl.value);

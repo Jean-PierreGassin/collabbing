@@ -13,47 +13,22 @@ use App\Services\Ideas\SupporterService;
 use App\Services\Inertia\PagePropsService;
 use App\Services\RepositoryService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Class IdeaController
- */
 class IdeaController extends Controller
 {
-    private IdeaService $ideaService;
-
-    private ApplicationService $applicationService;
-
-    private SupporterService $supporterService;
-
-    private RepositoryService $repositoryService;
-
-    private PagePropsService $pageProps;
-
     public function __construct(
-        IdeaService $ideaService,
-        ApplicationService $applicationService,
-        SupporterService $supporterService,
-        RepositoryService $repositoryService,
-        PagePropsService $pageProps
-    ) {
-        $this->ideaService = $ideaService;
-        $this->applicationService = $applicationService;
-        $this->supporterService = $supporterService;
-        $this->repositoryService = $repositoryService;
-        $this->pageProps = $pageProps;
-    }
+        private IdeaService $ideaService,
+        private ApplicationService $applicationService,
+        private SupporterService $supporterService,
+        private RepositoryService $repositoryService,
+        private PagePropsService $pageProps
+    ) {}
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return Response
-     */
-    public function index(SearchIdeas $request)
+    public function index(SearchIdeas $request): Response
     {
         $searchResults = null;
         $keyword = $request->searchTerm();
@@ -66,23 +41,21 @@ class IdeaController extends Controller
         $trendingIdeas = $this->ideaService->getTrending();
 
         $ideas = $this->ideaService->getOpenRecent();
+        $searchResultsProps = null;
+
+        if ($searchResults) {
+            $searchResultsProps = $this->pageProps->paginator($searchResults, fn (Idea $idea) => $this->pageProps->idea($idea));
+        }
 
         return Inertia::render('Ideas/Index', [
             'keyword' => $keyword,
-            'searchResults' => $searchResults
-                ? $this->pageProps->paginator($searchResults, fn (Idea $idea) => $this->pageProps->idea($idea))
-                : null,
+            'searchResults' => $searchResultsProps,
             'trendingIdeas' => $trendingIdeas->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
             'ideas' => $this->pageProps->paginator($ideas, fn (Idea $idea) => $this->pageProps->idea($idea)),
         ]);
     }
 
-    /**
-     * Display the dashboard for an idea
-     *
-     * @return Response
-     */
-    public function dashboard(Idea $idea)
+    public function dashboard(Idea $idea): Response
     {
         $this->authorize('manage', $idea);
 
@@ -96,19 +69,11 @@ class IdeaController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
+    public function create(): Response
     {
         return Inertia::render('Ideas/Form');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreIdea $request): RedirectResponse
     {
         $idea = $this->ideaService->create($request->validated());
@@ -118,12 +83,7 @@ class IdeaController extends Controller
             ->with('status', 'Idea successfully created');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @return Response
-     */
-    public function show(Idea $idea)
+    public function show(Idea $idea): Response
     {
         if (! Auth::user()) {
             return Inertia::render('Ideas/Show', [
@@ -141,6 +101,16 @@ class IdeaController extends Controller
         $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
         $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
         $supporter = $this->supporterService->getSupportFromUser($idea);
+        $collaboratorProps = null;
+        $applicantProps = null;
+
+        if ($collaborator) {
+            $collaboratorProps = $this->pageProps->application($collaborator);
+        }
+
+        if ($applicant) {
+            $applicantProps = $this->pageProps->application($applicant);
+        }
 
         return Inertia::render('Ideas/Show', [
             'idea' => $this->pageProps->idea($idea),
@@ -148,20 +118,13 @@ class IdeaController extends Controller
                 $this->ideaService->getComments($idea),
                 fn (IdeaComment $comment) => $this->pageProps->comment($comment)
             ),
-            'collaborator' => $collaborator ? $this->pageProps->application($collaborator) : null,
-            'applicant' => $applicant ? $this->pageProps->application($applicant) : null,
+            'collaborator' => $collaboratorProps,
+            'applicant' => $applicantProps,
             'supporter' => $this->pageProps->supporter($supporter),
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @return Response
-     *
-     * @throws AuthorizationException
-     */
-    public function edit(Idea $idea)
+    public function edit(Idea $idea): Response
     {
         $this->authorize('manage', $idea);
 
@@ -170,11 +133,6 @@ class IdeaController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @throws AuthorizationException
-     */
     public function update(StoreIdea $request, Idea $idea): RedirectResponse
     {
         $this->authorize('update', $idea);
@@ -186,16 +144,13 @@ class IdeaController extends Controller
             ->with('status', 'Idea successfully edited');
     }
 
-    /**
-     * @throws AuthorizationException
-     */
     public function createRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('createRepository', $idea);
 
         $idea->loadMissing('codeRepository');
 
-        if ($idea->codeRepository?->isAvailable()) {
+        if ($idea->latestCodeRepository()?->isAvailable()) {
             return redirect()->route('ideas.dashboard', $idea);
         }
 
@@ -212,9 +167,6 @@ class IdeaController extends Controller
             ->with('status', 'Repository created.');
     }
 
-    /**
-     * @throws AuthorizationException
-     */
     public function inviteUsersToRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('inviteUsersToRepository', $idea);

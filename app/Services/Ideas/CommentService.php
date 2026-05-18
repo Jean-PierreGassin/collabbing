@@ -7,9 +7,6 @@ use App\Models\IdeaComment;
 use App\Repositories\Ideas\CommentRepository;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * Class CommentService
- */
 class CommentService
 {
     public function __construct(private CommentRepository $comments) {}

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('idea_comments', function (Blueprint $table) {
@@ -20,18 +17,6 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->index(['idea_id', 'parent_id', 'created_at']);
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('idea_comments', function (Blueprint $table) {
-            $table->dropForeign(['parent_id']);
-            $table->dropIndex(['idea_id', 'parent_id', 'created_at']);
-            $table->dropColumn('parent_id');
         });
     }
 };

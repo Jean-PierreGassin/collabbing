@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateIdeaCommentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'idea_comments',
@@ -34,15 +29,5 @@ class CreateIdeaCommentsTable extends Migration
                 $table->timestamps();
             }
         );
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('idea_comments');
     }
 }

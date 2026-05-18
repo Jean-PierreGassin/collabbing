@@ -11,7 +11,7 @@ class FormOldInputTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_old_input_is_shared_with_inertia_pages_without_sensitive_fields(): void
+    public function testOldInputIsSharedWithInertiaPagesWithoutSensitiveFields(): void
     {
         $user = User::factory()->create();
 
@@ -37,7 +37,7 @@ class FormOldInputTest extends TestCase
                 ->where('oldInput.title', 'Retained idea'));
     }
 
-    public function test_validation_redirects_repopulate_idea_form_input(): void
+    public function testValidationRedirectsRepopulateIdeaFormInput(): void
     {
         $user = User::factory()->create();
 

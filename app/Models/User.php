@@ -2,19 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-/**
- * Class User
- *
- * @property string $username
- * @property string $first_name
- * @property string $last_name
- */
 class User extends Authenticatable
 {
     use HasFactory;
@@ -24,11 +18,6 @@ class User extends Authenticatable
 
     private const DEFAULT_PROFILE_PICTURE = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'username',
         'first_name',
@@ -38,15 +27,15 @@ class User extends Authenticatable
         'password',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
 
     public function ideas(): HasMany
     {
@@ -58,10 +47,7 @@ class User extends Authenticatable
         return $this->hasMany(IdeaComment::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function collaborations()
+    public function collaborations(): HasMany
     {
         return $this->applications()->where('status', 'approved');
     }
@@ -106,12 +92,24 @@ class User extends Authenticatable
 
     public function githubToken(): ?string
     {
-        return $this->githubAccount?->token;
+        $account = $this->githubAccount;
+
+        if (! $account instanceof ConnectedAccount) {
+            return null;
+        }
+
+        return $account->token;
     }
 
     public function githubUsername(): ?string
     {
-        return $this->githubAccount?->provider_username;
+        $account = $this->githubAccount;
+
+        if (! $account instanceof ConnectedAccount) {
+            return null;
+        }
+
+        return $account->provider_username;
     }
 
     public function getGithubTokenAttribute(): ?string
