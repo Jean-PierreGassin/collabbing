@@ -227,4 +227,52 @@ describe('FormField', () => {
     expect(wrapper.get('textarea').attributes('aria-invalid')).toBe('true');
     expect(wrapper.get('#content-feedback').text()).toBe('Comment is required.');
   });
+
+  it('delays custom empty required validators until submit', async () => {
+    session.errors = {};
+    const validator = vi.fn((value: string) => {
+      if (value.trim() === '') {
+        return 'Enter a comment.';
+      }
+
+      return undefined;
+    });
+
+    const wrapper = mount(FormField, {
+      attachTo: document.body,
+      props: {
+        id: 'content',
+        label: 'Comment',
+        validator,
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <textarea id="content" form="custom-comment-form" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
+          </template>
+        `,
+      },
+    });
+
+    const form = document.createElement('form');
+    form.id = 'custom-comment-form';
+    document.body.append(form);
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('textarea').setValue('A useful thought.');
+    await wrapper.get('textarea').setValue('');
+
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBeUndefined();
+    expect(wrapper.find('#content-feedback').exists()).toBe(false);
+    expect(validator).toHaveBeenLastCalledWith('A useful thought.', expect.any(Object));
+
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    await nextTick();
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('#content-feedback').text()).toBe('Comment is required.');
+  });
 });

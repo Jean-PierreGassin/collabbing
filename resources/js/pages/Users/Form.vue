@@ -33,7 +33,25 @@ function submitProfile(event: SubmitEvent): void {
     return;
   }
 
-  router.post(props.user.routes.update, new FormData(event.currentTarget as HTMLFormElement), {
+  if (event.defaultPrevented) {
+    return;
+  }
+
+  const form = event.currentTarget;
+
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+
+    return;
+  }
+
+  event.preventDefault();
+
+  router.post(props.user.routes.update, new FormData(form), {
     preserveScroll: true,
   });
 }
@@ -43,7 +61,7 @@ function submitProfile(event: SubmitEvent): void {
   <Card class="mx-auto w-full max-w-4xl">
     <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
     <CardContent>
-      <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit.prevent="submitProfile">
+      <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit="submitProfile">
         <CsrfField />
         <MethodField v-if="user" method="PUT" />
 

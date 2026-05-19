@@ -179,6 +179,10 @@ function nativeValidationMessage(nextControl: FormControlElement, enforceRequire
   return nextControl.validationMessage || 'Check this field.';
 }
 
+function shouldSkipValidator(nextControl: FormControlElement, enforceRequired: boolean): boolean {
+  return !enforceRequired && nextControl.validity.valueMissing;
+}
+
 function setSpark(): void {
   positionSpark();
   window.clearTimeout(sparkTimer);
@@ -246,7 +250,7 @@ function validateControl(reveal: boolean, animate: boolean, enforceRequired = fa
 
   let message = nativeValidationMessage(nextControl, enforceRequired);
 
-  if (!message && props.validator) {
+  if (!message && props.validator && !shouldSkipValidator(nextControl, enforceRequired)) {
     message = props.validator(nextControl.value, {
       control: nextControl,
       form: nextControl.form,
