@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Runtime;
 
 use App\Http\Middleware\TrustHosts;
 use App\Jobs\SyncGitHubRepositories;

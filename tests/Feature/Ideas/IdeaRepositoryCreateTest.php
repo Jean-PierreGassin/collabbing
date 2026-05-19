@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Ideas;
 
 use App\Models\CodeRepository;
 use App\Models\Idea;
