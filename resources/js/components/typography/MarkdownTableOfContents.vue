@@ -246,6 +246,29 @@ function observeContent(): void {
   updateContentVisibility();
 }
 
+function isMobileViewport(): boolean {
+  return window.matchMedia('(max-width: 1699px)').matches;
+}
+
+function closeMobileAfterScroll(): void {
+  if (!isMobileViewport()) {
+    return;
+  }
+
+  let fallbackTimer: number | null = null;
+  const close = (): void => {
+    if (fallbackTimer !== null) {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
+
+    isMobileOpen.value = false;
+  };
+
+  window.addEventListener('scrollend', close, { once: true });
+  fallbackTimer = window.setTimeout(close, 650);
+}
+
 async function openHeading(anchor: string): Promise<void> {
   isMobileOpen.value = true;
   lockNavigation(anchor);
@@ -259,7 +282,7 @@ async function openHeading(anchor: string): Promise<void> {
       const mobileContents = document.getElementById(mobileContentsId.value);
       let mobileOffset = 96;
 
-      if (window.matchMedia('(max-width: 1699px)').matches) {
+      if (isMobileViewport()) {
         mobileOffset = (mobileContents?.getBoundingClientRect().height ?? 0) + 16;
       }
 
@@ -267,6 +290,8 @@ async function openHeading(anchor: string): Promise<void> {
         top: heading.getBoundingClientRect().top + window.scrollY - mobileOffset,
         behavior: 'smooth',
       });
+
+      closeMobileAfterScroll();
     }
 
     window.history.replaceState(null, '', `#${anchor}`);
