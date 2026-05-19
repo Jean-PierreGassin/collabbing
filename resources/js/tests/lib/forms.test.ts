@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { oldInputBoolean, oldInputString } from '@/lib/forms';
+import { passwordValidator, usernameValidator } from '@/lib/formValidation';
 
 const session = vi.hoisted(() => ({
   oldInput: {} as Record<string, boolean | number | string | string[] | null>,
@@ -40,5 +41,18 @@ describe('form helpers', () => {
     expect(oldInputBoolean('numeric')).toBe(true);
     expect(oldInputBoolean('explicit', true)).toBe(false);
     expect(oldInputBoolean('missing', true)).toBe(true);
+  });
+
+  it('validates shared zod-backed field rules', () => {
+    const control = document.createElement('input');
+    const context = {
+      control,
+      form: null,
+    };
+
+    expect(usernameValidator('bad name', context)).toBe('Use letters, numbers, dashes, or underscores.');
+    expect(usernameValidator('builder_2026', context)).toBeUndefined();
+    expect(passwordValidator('short1', context)).toBe('Use at least 12 characters.');
+    expect(passwordValidator('collabbing2026', context)).toBeUndefined();
   });
 });

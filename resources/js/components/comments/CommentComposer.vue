@@ -5,6 +5,7 @@ import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
 import { oldInputString } from '@/lib/forms';
+import { maxLengthValidator } from '@/lib/formValidation';
 import type { DomainUser } from '@/types/domain';
 
 const props = withDefaults(defineProps<{
@@ -48,6 +49,7 @@ if (shouldUseOldContent) {
 
 const content = ref(initialContent);
 const cursorPosition = ref(content.value.length);
+const contentValidator = maxLengthValidator(1500, 'a comment');
 
 const activeMention = computed(() => {
   const beforeCursor = content.value.slice(0, cursorPosition.value);
@@ -157,15 +159,15 @@ onMounted(focusTextarea);
     <CsrfField />
     <MethodField v-if="overrideMethod" :method="overrideMethod" />
     <input v-if="parentId" type="hidden" name="parent_id" :value="parentId">
-    <FormField :id="textareaId" error-key="content" :label="label" :hide-label="hideLabel" help="Markdown and @mentions are supported.">
-      <template #default="{ invalid, describedBy }">
+    <FormField :id="textareaId" error-key="content" :label="label" :hide-label="hideLabel" help="Markdown and @mentions are supported." :validator="contentValidator">
+      <template #default="{ invalid, describedBy, feedbackClass }">
         <div class="relative">
           <textarea
             :id="textareaId"
             ref="textarea"
             v-model="content"
             name="content"
-            class="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+            :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
             :placeholder="placeholder"
             maxlength="1500"
             :aria-invalid="invalid || undefined"
@@ -200,9 +202,9 @@ onMounted(focusTextarea);
       </template>
     </FormField>
 
-    <div class="flex flex-wrap gap-2">
-      <Button type="submit" class="self-start" size="sm">{{ buttonLabel }}</Button>
+    <div class="flex flex-wrap justify-end gap-2">
       <Button v-if="cancelLabel" type="button" variant="ghost" size="sm" @click="emit('cancel')">{{ cancelLabel }}</Button>
+      <Button type="submit" size="sm">{{ buttonLabel }}</Button>
     </div>
   </form>
 </template>
