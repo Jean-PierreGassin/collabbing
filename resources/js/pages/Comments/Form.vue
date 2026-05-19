@@ -53,9 +53,11 @@ if (props.comment) {
             />
           </template>
         </FormField>
-        <Button type="submit" size="sm" :variant="buttonVariant" class="self-start">
-          {{ buttonLabel }}
-        </Button>
+        <div class="flex justify-end">
+          <Button type="submit" size="sm" :variant="buttonVariant">
+            {{ buttonLabel }}
+          </Button>
+        </div>
       </form>
     </CardContent>
   </Card>

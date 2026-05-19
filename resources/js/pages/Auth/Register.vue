@@ -24,7 +24,7 @@ const session = useSessionStore();
         <CsrfField />
         <FormField id="username" label="Username" help="Use 3-20 letters, numbers, dashes, or underscores." :validator="usernameValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="username" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 sm:max-w-sm', feedbackClass]" name="username" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_-]+" :defaultValue="oldInputString('username')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input id="username" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="username" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_-]+" :defaultValue="oldInputString('username')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
           </template>
         </FormField>
         <div class="grid gap-4 sm:grid-cols-2">
@@ -56,7 +56,9 @@ const session = useSessionStore();
             </template>
           </FormField>
         </div>
-        <Button type="submit" class="self-start">Register</Button>
+        <div class="flex justify-end">
+          <Button type="submit">Register</Button>
+        </div>
       </form>
     </CardContent>
   </Card>

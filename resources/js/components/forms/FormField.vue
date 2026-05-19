@@ -32,6 +32,7 @@ const control = ref<FormControlElement | null>(null);
 const hasInteracted = ref(false);
 const feedbackState = ref<'idle' | 'invalid' | 'valid'>('idle');
 const validationMessage = ref<string | undefined>(undefined);
+const hasChanged = ref(false);
 const sparkKey = ref(0);
 const showSpark = ref(false);
 const sparkStyle = ref<Record<string, string>>({});
@@ -269,6 +270,13 @@ function validateControl(reveal: boolean, animate: boolean): boolean {
     return true;
   }
 
+  if (!hasChanged.value) {
+    feedbackState.value = 'idle';
+    validationMessage.value = undefined;
+
+    return true;
+  }
+
   feedbackState.value = 'valid';
 
   if (animate && previousState !== 'valid') {
@@ -279,6 +287,7 @@ function validateControl(reveal: boolean, animate: boolean): boolean {
 }
 
 function handleInput(): void {
+  hasChanged.value = true;
   syncValueState();
   positionClearButton();
   validateControl(true, true);
@@ -315,6 +324,7 @@ function clearControl(): void {
   }
 
   nextControl.value = '';
+  hasChanged.value = true;
   nextControl.dispatchEvent(new Event('input', { bubbles: true }));
   nextControl.dispatchEvent(new Event('change', { bubbles: true }));
   nextControl.focus();

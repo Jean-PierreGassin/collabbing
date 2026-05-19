@@ -128,4 +128,36 @@ describe('FormField', () => {
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('');
     expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
   });
+
+  it('does not show success just from touching an unchanged valid field', async () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      props: {
+        id: 'username',
+        label: 'Username',
+        validator: (value: string) => {
+          if (value === 'builder') {
+            return undefined;
+          }
+
+          return 'Use a valid username.';
+        },
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <input id="username" :defaultValue="'builder'" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+          </template>
+        `,
+      },
+    });
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('input').trigger('blur');
+
+    expect(wrapper.get('input').classes()).not.toContain('form-control-feedback-valid');
+    expect(wrapper.find('#username-feedback').exists()).toBe(false);
+  });
 });

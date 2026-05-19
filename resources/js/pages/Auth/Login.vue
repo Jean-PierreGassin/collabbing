@@ -30,9 +30,9 @@ const session = useSessionStore();
           <input type="checkbox" name="remember" class="size-4 rounded border-input bg-background" :checked="oldInputBoolean('remember')">
           Remember me
         </label>
-        <div class="flex flex-wrap items-center gap-3">
-          <Button type="submit">Login</Button>
+        <div class="flex flex-wrap items-center justify-end gap-3">
           <Button as="a" :href="session.routes.passwordRequest" variant="link">Forgot your password?</Button>
+          <Button type="submit">Login</Button>
         </div>
       </form>
     </CardContent>

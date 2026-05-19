@@ -40,7 +40,7 @@ function submitProfile(event: SubmitEvent): void {
 </script>
 
 <template>
-  <Card class="w-full max-w-4xl">
+  <Card class="mx-auto w-full max-w-4xl">
     <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
     <CardContent>
       <form :action="user?.routes.update" method="POST" class="flex flex-col gap-5" @submit.prevent="submitProfile">
@@ -62,7 +62,7 @@ function submitProfile(event: SubmitEvent): void {
 
         <FormField id="email" label="Email address" :validator="emailValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="email" name="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :defaultValue="oldInputString('email', user?.email)" placeholder="john.smith@apples.com" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <input id="email" name="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('email', user?.email)" placeholder="john.smith@apples.com" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
           </template>
         </FormField>
 
@@ -99,7 +99,9 @@ function submitProfile(event: SubmitEvent): void {
           </FormField>
         </div>
 
-        <Button type="submit" class="self-start">{{ submitLabel }}</Button>
+        <div class="flex justify-end">
+          <Button type="submit">{{ submitLabel }}</Button>
+        </div>
       </form>
       <form v-if="user?.hasGithubToken" id="github-revoke-form" :action="user.routes.githubRevoke" method="POST" class="hidden">
         <CsrfField />

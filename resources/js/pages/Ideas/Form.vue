@@ -307,7 +307,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
 
           <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores." :validator="repositoryNameValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :defaultValue="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
+              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
             </template>
           </FormField>
 
@@ -392,7 +392,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
             </label>
             <span v-else />
 
-            <Button type="submit" size="sm" :variant="submitVariant" class="self-start">
+            <Button type="submit" size="sm" :variant="submitVariant" class="self-end">
               {{ submitLabel }}
             </Button>
           </div>

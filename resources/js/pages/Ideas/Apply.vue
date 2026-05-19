@@ -38,7 +38,9 @@ const applicationValidator = maxLengthValidator(1500, 'an application');
               />
             </template>
           </FormField>
-          <Button type="submit" class="self-start">Submit Application</Button>
+          <div class="flex justify-end">
+            <Button type="submit">Submit Application</Button>
+          </div>
         </form>
       </CardContent>
     </Card>

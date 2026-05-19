@@ -39,7 +39,9 @@ const session = useSessionStore();
             </template>
           </FormField>
         </div>
-        <Button type="submit" class="self-start">Reset password</Button>
+        <div class="flex justify-end">
+          <Button type="submit">Reset password</Button>
+        </div>
       </form>
     </CardContent>
   </Card>

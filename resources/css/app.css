@@ -185,6 +185,59 @@ select {
     box-shadow 160ms ease;
 }
 
+input[type="checkbox"] {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  border: 1px solid color-mix(in oklab, var(--input) 68%, var(--foreground) 32%);
+  background: color-mix(in oklab, var(--card) 74%, var(--background) 26%);
+  accent-color: var(--primary);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+input[type="checkbox"]::before {
+  width: 0.72rem;
+  height: 0.72rem;
+  clip-path: polygon(14% 44%, 0 60%, 39% 100%, 100% 20%, 84% 5%, 37% 67%);
+  content: "";
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease;
+  background: var(--primary-foreground);
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--primary) !important;
+  background-color: var(--primary) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--primary) 18%, transparent);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:hover {
+  border-color: color-mix(in oklab, var(--primary) 58%, var(--foreground) 42%);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--ring) 32%, transparent);
+}
+
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 textarea {
   line-height: 1.65;
   resize: vertical;
@@ -214,6 +267,17 @@ select:focus {
 select option {
   background: var(--popover);
   color: var(--popover-foreground);
+}
+
+select option:checked {
+  background: color-mix(in oklab, var(--primary) 82%, var(--popover) 18%);
+  color: var(--primary-foreground);
+}
+
+select option:hover,
+select option:focus {
+  background: color-mix(in oklab, var(--primary) 28%, var(--popover) 72%);
+  color: var(--foreground);
 }
 
 [aria-invalid="true"] {

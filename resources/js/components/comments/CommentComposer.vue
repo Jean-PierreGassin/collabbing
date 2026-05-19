@@ -202,9 +202,9 @@ onMounted(focusTextarea);
       </template>
     </FormField>
 
-    <div class="flex flex-wrap gap-2">
-      <Button type="submit" class="self-start" size="sm">{{ buttonLabel }}</Button>
+    <div class="flex flex-wrap justify-end gap-2">
       <Button v-if="cancelLabel" type="button" variant="ghost" size="sm" @click="emit('cancel')">{{ cancelLabel }}</Button>
+      <Button type="submit" size="sm">{{ buttonLabel }}</Button>
     </div>
   </form>
 </template>
