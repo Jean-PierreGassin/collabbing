@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { CircleAlert, Info, TriangleAlert, X } from '@lucide/vue';
 import { fieldErrors } from '@/lib/forms';
 import type { FieldValidator, FormControlElement } from '@/lib/formValidation';
 
@@ -34,6 +35,9 @@ const validationMessage = ref<string | undefined>(undefined);
 const sparkKey = ref(0);
 const showSpark = ref(false);
 const sparkStyle = ref<Record<string, string>>({});
+const clearButtonStyle = ref<Record<string, string>>({});
+const hasValue = ref(false);
+const isClearable = ref(false);
 let sparkTimer: number | undefined;
 const cleanupCallbacks: (() => void)[] = [];
 
@@ -64,16 +68,24 @@ const invalid = computed(() => serverInvalid.value || feedbackState.value === 'i
 const valid = computed(() => !serverInvalid.value && feedbackState.value === 'valid');
 const describedBy = computed(() => [helpId.value, feedbackId.value, errorId.value].filter(Boolean).join(' ') || undefined);
 const feedbackClass = computed(() => {
+  let className = 'form-control-feedback';
+
+  if (isClearable.value) {
+    className = `${className} form-control-clearable`;
+  }
+
   if (invalid.value) {
-    return 'form-control-feedback form-control-feedback-invalid';
+    return `${className} form-control-feedback-invalid`;
   }
 
   if (valid.value) {
-    return 'form-control-feedback form-control-feedback-valid';
+    return `${className} form-control-feedback-valid`;
   }
 
-  return 'form-control-feedback';
+  return className;
 });
+const canClear = computed(() => isClearable.value && hasValue.value);
+const clearButtonLabel = computed(() => `Clear ${props.label.toLowerCase()}`);
 const labelClass = computed(() => {
   if (props.hideLabel) {
     return 'sr-only';
@@ -99,6 +111,37 @@ function findControl(): FormControlElement | null {
   }
 
   return null;
+}
+
+function isControlClearable(nextControl: FormControlElement): boolean {
+  if (nextControl.disabled) {
+    return false;
+  }
+
+  if (nextControl instanceof HTMLTextAreaElement) {
+    return !nextControl.readOnly;
+  }
+
+  if (!(nextControl instanceof HTMLInputElement)) {
+    return false;
+  }
+
+  if (nextControl.readOnly) {
+    return false;
+  }
+
+  return [
+    'email',
+    'password',
+    'search',
+    'tel',
+    'text',
+    'url',
+  ].includes(nextControl.type);
+}
+
+function syncValueState(): void {
+  hasValue.value = (control.value?.value ?? '').length > 0;
 }
 
 function nativeValidationMessage(nextControl: FormControlElement): string | undefined {
@@ -159,6 +202,25 @@ function positionSpark(): void {
   };
 }
 
+function positionClearButton(): void {
+  if (!field.value || !control.value) {
+    clearButtonStyle.value = {};
+
+    return;
+  }
+
+  const fieldBounds = field.value.getBoundingClientRect();
+  const controlBounds = control.value.getBoundingClientRect();
+  const buttonSize = 24;
+  const rightInset = 8;
+  const topInset = control.value instanceof HTMLTextAreaElement ? 8 : ((controlBounds.height - buttonSize) / 2);
+
+  clearButtonStyle.value = {
+    left: `${controlBounds.right - fieldBounds.left - rightInset - buttonSize}px`,
+    top: `${controlBounds.top - fieldBounds.top + topInset}px`,
+  };
+}
+
 function validateControl(reveal: boolean, animate: boolean): boolean {
   const nextControl = control.value;
 
@@ -170,6 +232,8 @@ function validateControl(reveal: boolean, animate: boolean): boolean {
     hasInteracted.value = true;
   }
 
+  syncValueState();
+  positionClearButton();
   nextControl.setCustomValidity('');
 
   let message = nativeValidationMessage(nextControl);
@@ -215,6 +279,8 @@ function validateControl(reveal: boolean, animate: boolean): boolean {
 }
 
 function handleInput(): void {
+  syncValueState();
+  positionClearButton();
   validateControl(true, true);
 }
 
@@ -232,6 +298,28 @@ function handleFormInput(event: Event): void {
   }
 
   validateControl(false, false);
+}
+
+function clearControl(): void {
+  const nextControl = control.value;
+
+  if (!nextControl || nextControl.disabled) {
+    return;
+  }
+
+  if (
+    (nextControl instanceof HTMLInputElement || nextControl instanceof HTMLTextAreaElement)
+    && nextControl.readOnly
+  ) {
+    return;
+  }
+
+  nextControl.value = '';
+  nextControl.dispatchEvent(new Event('input', { bubbles: true }));
+  nextControl.dispatchEvent(new Event('change', { bubbles: true }));
+  nextControl.focus();
+  syncValueState();
+  validateControl(true, false);
 }
 
 function handleFormSubmit(event: Event): void {
@@ -254,6 +342,9 @@ function wireControl(): void {
   addListener(control.value, 'change', handleInput);
   addListener(control.value, 'blur', handleBlur);
   addListener(control.value, 'invalid', handleInvalid);
+  isClearable.value = isControlClearable(control.value);
+  syncValueState();
+  positionClearButton();
 
   if (control.value.form) {
     addListener(control.value.form, 'input', handleFormInput);
@@ -304,11 +395,32 @@ watch(errors, () => {
       <span />
       <span />
     </span>
-    <p v-if="help" :id="helpId" class="text-sm text-muted-foreground">{{ help }}</p>
-    <p v-if="validationMessage" :id="feedbackId" class="text-sm text-destructive" role="alert">{{ validationMessage }}</p>
+    <button
+      v-if="canClear"
+      type="button"
+      class="form-field-clear-button absolute z-20 inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      :style="clearButtonStyle"
+      :aria-label="clearButtonLabel"
+      @click="clearControl"
+    >
+      <X class="size-4" aria-hidden="true" />
+    </button>
+    <div v-if="help || validationMessage || errors.length > 0" class="flex flex-col gap-1">
+      <p v-if="help" :id="helpId" class="flex gap-2 text-sm leading-5 text-muted-foreground">
+        <Info class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span>{{ help }}</span>
+      </p>
+      <p v-if="validationMessage" :id="feedbackId" class="flex gap-2 text-sm leading-5 text-destructive" role="alert">
+        <TriangleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        <span>{{ validationMessage }}</span>
+      </p>
+      <p v-if="errors.length > 0" :id="errorId" class="flex gap-2 text-sm leading-5 text-destructive" role="alert">
+        <CircleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        <span>
+          <span v-for="error in errors" :key="error" class="block">{{ error }}</span>
+        </span>
+      </p>
+    </div>
     <p v-else-if="valid" :id="feedbackId" class="sr-only" role="status">Looks good.</p>
-    <p v-if="errors.length > 0" :id="errorId" class="text-sm text-destructive" role="alert">
-      <span v-for="error in errors" :key="error" class="block">{{ error }}</span>
-    </p>
   </div>
 </template>

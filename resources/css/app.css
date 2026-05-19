@@ -235,6 +235,20 @@ select option {
     0 0 0 3px color-mix(in oklab, oklch(0.74 0.16 155) 22%, transparent) !important;
 }
 
+input.form-control-clearable:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+textarea.form-control-clearable {
+  padding-right: 2.75rem;
+}
+
+.form-field-clear-button {
+  background: transparent;
+}
+
+.form-field-clear-button:hover,
+.form-field-clear-button:focus-visible {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
 .form-field-sparks span {
   position: absolute;
   width: 0.2rem;

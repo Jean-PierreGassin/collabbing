@@ -122,5 +122,10 @@ describe('FormField', () => {
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('person@example.com');
     expect(wrapper.get('input').classes()).toContain('form-control-feedback-valid');
     expect(wrapper.findAll('.form-field-sparks span')).toHaveLength(8);
+
+    await wrapper.get('button[aria-label="Clear email address"]').trigger('click');
+
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
   });
 });
