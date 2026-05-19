@@ -29,6 +29,7 @@ const fieldErrors = ref<FieldErrors>({});
 const formError = ref<string | undefined>(undefined);
 const isSubmitting = ref(false);
 const phase = ref<AuthMorphPhase>('idle');
+const shouldRenderForm = ref(true);
 const shellStyle = ref<Record<string, string>>({});
 let measuredHeight = 64;
 
@@ -98,6 +99,7 @@ function setMeasuredShellSize(): void {
 
 async function playCompletion(): Promise<void> {
   setMeasuredShellSize();
+  shouldRenderForm.value = false;
   phase.value = 'collapsing';
   await nextTick();
   await animationFrame();
@@ -230,6 +232,7 @@ async function submitForm(event: SubmitEvent): Promise<void> {
       :style="shellStyle"
     >
       <div
+        v-if="shouldRenderForm"
         class="auth-morph-content"
         :class="{ 'auth-morph-content-hidden': isAnimating }"
         :aria-hidden="isAnimating || undefined"

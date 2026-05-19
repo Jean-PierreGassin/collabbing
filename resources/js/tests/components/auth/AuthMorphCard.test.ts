@@ -52,6 +52,7 @@ describe('AuthMorphCard', () => {
       },
       method: 'POST',
     }));
+    expect(wrapper.find('form').exists()).toBe(false);
     expect(wrapper.find('.auth-success-stage').exists()).toBe(true);
 
     await vi.advanceTimersByTimeAsync(2700);

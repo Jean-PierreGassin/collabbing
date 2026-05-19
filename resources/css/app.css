@@ -464,6 +464,7 @@ textarea.form-control-clearable {
   background: color-mix(in oklab, var(--card) 92%, var(--background) 8%);
   border-color: transparent;
   border-radius: 999px;
+  overflow: visible;
   box-shadow:
     0 22px 70px color-mix(in oklab, black 42%, transparent),
     0 0 0 1px color-mix(in oklab, white 8%, transparent);
