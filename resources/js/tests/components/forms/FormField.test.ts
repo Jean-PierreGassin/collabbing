@@ -127,7 +127,8 @@ describe('FormField', () => {
     await wrapper.get('button[aria-label="Clear email address"]').trigger('click');
 
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('');
-    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBeUndefined();
+    expect(wrapper.find('#email-feedback').exists()).toBe(false);
   });
 
   it('does not show success just from touching an unchanged valid field', async () => {
@@ -188,6 +189,42 @@ describe('FormField', () => {
     await wrapper.get('input').trigger('keydown', { key: 'Escape' });
 
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('');
-    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBeUndefined();
+  });
+
+  it('shows required messages on submit instead of while clearing live input', async () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      attachTo: document.body,
+      props: {
+        id: 'content',
+        label: 'Comment',
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <textarea id="content" form="comment-form" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
+          </template>
+        `,
+      },
+    });
+
+    const form = document.createElement('form');
+    form.id = 'comment-form';
+    document.body.append(form);
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('textarea').setValue('A useful thought.');
+    await wrapper.get('textarea').setValue('');
+
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBeUndefined();
+    expect(wrapper.find('#content-feedback').exists()).toBe(false);
+
+    await wrapper.get('textarea').trigger('invalid');
+
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('#content-feedback').text()).toBe('Comment is required.');
   });
 });

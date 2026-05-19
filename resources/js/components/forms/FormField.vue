@@ -145,7 +145,7 @@ function syncValueState(): void {
   hasValue.value = (control.value?.value ?? '').length > 0;
 }
 
-function nativeValidationMessage(nextControl: FormControlElement): string | undefined {
+function nativeValidationMessage(nextControl: FormControlElement, enforceRequired: boolean): string | undefined {
   const validity = nextControl.validity;
 
   if (validity.valid) {
@@ -153,6 +153,10 @@ function nativeValidationMessage(nextControl: FormControlElement): string | unde
   }
 
   if (validity.valueMissing) {
+    if (!enforceRequired) {
+      return undefined;
+    }
+
     return `${props.label} is required.`;
   }
 
@@ -225,7 +229,7 @@ function positionClearButton(): void {
   };
 }
 
-function validateControl(reveal: boolean, animate: boolean): boolean {
+function validateControl(reveal: boolean, animate: boolean, enforceRequired = false): boolean {
   const nextControl = control.value;
 
   if (!nextControl) {
@@ -240,7 +244,7 @@ function validateControl(reveal: boolean, animate: boolean): boolean {
   positionClearButton();
   nextControl.setCustomValidity('');
 
-  let message = nativeValidationMessage(nextControl);
+  let message = nativeValidationMessage(nextControl, enforceRequired);
 
   if (!message && props.validator) {
     message = props.validator(nextControl.value, {
@@ -301,7 +305,7 @@ function handleBlur(): void {
 }
 
 function handleInvalid(): void {
-  validateControl(true, false);
+  validateControl(true, false, true);
 }
 
 function handleKeydown(event: Event): void {
@@ -345,7 +349,7 @@ function clearControl(): void {
 }
 
 function handleFormSubmit(event: Event): void {
-  if (validateControl(true, false)) {
+  if (validateControl(true, false, true)) {
     return;
   }
 
