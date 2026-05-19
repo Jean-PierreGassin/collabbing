@@ -64,6 +64,10 @@ Route::get('ideas/{idea}', 'IdeaController@show')
     ->name('ideas.show')
     ->middleware(['web']);
 
+Route::get('ideas/{idea}/repository-activity', 'IdeaRepositoryEventController@index')
+    ->name('ideas.repository-activity')
+    ->middleware(['web']);
+
 Route::scopeBindings()->group(function () {
     Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
         ->name('ideas.dashboard')

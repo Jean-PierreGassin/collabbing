@@ -130,6 +130,9 @@ const supporterSentence = computed(() => {
             <span>{{ event.summary }}</span>
             <span class="text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</span>
           </div>
+          <Button as="a" :href="idea.routes.repositoryActivity" variant="outline" size="sm" class="mt-2 w-fit">
+            View activity archive
+          </Button>
         </div>
       </CardContent>
     </Card>

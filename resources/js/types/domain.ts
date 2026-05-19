@@ -120,6 +120,7 @@ export interface Idea {
     supportersStore: string;
     repositoryCreate: string;
     repositoryInvite: string;
+    repositoryActivity: string;
   };
 }
 

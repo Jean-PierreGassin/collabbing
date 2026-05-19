@@ -125,6 +125,7 @@ class PagePropsService
                 'supportersStore' => route('ideas.supporters.store', $idea),
                 'repositoryCreate' => $repositoryCreateRoute,
                 'repositoryInvite' => $repositoryInviteRoute,
+                'repositoryActivity' => route('ideas.repository-activity', $idea),
             ],
         ];
     }
@@ -215,6 +216,16 @@ class PagePropsService
             'latestCommitMessage' => $codeRepository?->latest_commit_message,
             'latestCommitAuthor' => $codeRepository?->latest_commit_author,
             'events' => $events,
+        ];
+    }
+
+    public function repositoryEvent(RepositoryEvent $event): array
+    {
+        return [
+            'id' => $event->id,
+            'type' => $event->type,
+            'summary' => $event->summary,
+            'occurredAtForHumans' => $this->dateForHumans($event->occurred_at),
         ];
     }
 
