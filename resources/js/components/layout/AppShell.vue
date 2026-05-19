@@ -5,6 +5,7 @@ import { LayoutDashboard, LogOut, Menu, Plus, Search, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FlashMessages from '@/components/layout/FlashMessages.vue';
+import ThemeModeToggle from '@/components/layout/ThemeModeToggle.vue';
 import BreadcrumbBar from '@/components/navigation/BreadcrumbBar.vue';
 import { useSharedPage } from '@/lib/page';
 import { useSessionStore } from '@/stores/session';
@@ -271,6 +272,8 @@ function toggleMobileSearch(): void {
             >
           </form>
 
+          <ThemeModeToggle />
+
           <Transition name="chrome-swap" mode="out-in">
             <nav v-if="session.isAuthenticated" key="workspace-navigation" aria-label="Workspace navigation" class="flex items-center gap-2">
               <Button :as="Link" :href="session.routes.ideasCreate">
@@ -353,6 +356,9 @@ function toggleMobileSearch(): void {
                 Logout
               </Button>
             </form>
+            <div class="mt-3 border-t border-border pt-3">
+              <ThemeModeToggle show-labels class="w-full" />
+            </div>
           </div>
         </Transition>
       </div>

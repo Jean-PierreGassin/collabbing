@@ -227,7 +227,7 @@ onBeforeUnmount(() => {
             :aria-selected="option.value === selectedValue"
             :class="[
               'flex min-h-9 w-full items-center justify-between gap-3 rounded-sm px-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-              option.value === selectedValue ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-secondary hover:text-white',
+              option.value === selectedValue ? 'bg-primary/18 text-accent-foreground dark:bg-primary dark:text-primary-foreground' : 'text-foreground hover:bg-secondary hover:text-foreground dark:hover:text-white',
               index === activeIndex && option.value !== selectedValue ? 'bg-secondary/80 text-white' : undefined,
             ]"
             @click="selectOption(option)"

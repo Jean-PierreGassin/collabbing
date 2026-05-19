@@ -4,6 +4,7 @@ import { createPinia } from 'pinia';
 import { createInertiaApp } from '@inertiajs/vue3';
 import AppShell from '@/components/layout/AppShell.vue';
 import { startNavigationHistory } from '@/lib/navigationHistory';
+import { startThemeMode } from '@/lib/theme';
 import './bootstrap';
 import '../css/app.css';
 
@@ -29,6 +30,7 @@ createInertiaApp({
   },
   setup({ el, App, props, plugin }) {
     startNavigationHistory(props.initialPage.url);
+    startThemeMode();
 
     createApp({ render: () => h(App, props) })
       .use(createPinia())

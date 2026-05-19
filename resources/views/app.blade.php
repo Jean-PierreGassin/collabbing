@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,6 +19,32 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#f4a51c">
     <title>Collabbing</title>
+    <script>
+        (() => {
+            const storageKey = 'collabbing.themeMode';
+            const modes = ['light', 'dark', 'system'];
+            let mode = 'system';
+
+            try {
+                const storedMode = window.localStorage.getItem(storageKey);
+
+                if (storedMode && modes.includes(storedMode)) {
+                    mode = storedMode;
+                }
+            } catch {
+                mode = 'system';
+            }
+
+            const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+            const theme = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
+            const root = document.documentElement;
+
+            root.classList.toggle('dark', theme === 'dark');
+            root.classList.toggle('light', theme === 'light');
+            root.dataset.theme = theme;
+            root.dataset.themeMode = mode;
+        })();
+    </script>
     <script type="application/ld+json">
         {
             "@@context": "https://schema.org",
