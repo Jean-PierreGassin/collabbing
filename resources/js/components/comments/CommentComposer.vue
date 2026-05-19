@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
@@ -50,6 +50,8 @@ if (shouldUseOldContent) {
 const content = ref(initialContent);
 const cursorPosition = ref(content.value.length);
 const contentValidator = maxLengthValidator(1500, 'a comment');
+const activeSuggestionIndex = ref(0);
+const isMentionListDismissed = ref(false);
 
 const activeMention = computed(() => {
   const beforeCursor = content.value.slice(0, cursorPosition.value);
@@ -76,7 +78,34 @@ const mentionSuggestions = computed(() => {
     .slice(0, 5);
 });
 
-const hasMentionSuggestions = computed(() => mentionSuggestions.value.length > 0);
+const activeMentionKey = computed(() => {
+  if (! activeMention.value) {
+    return null;
+  }
+
+  return [
+    activeMention.value.start,
+    activeMention.value.end,
+    activeMention.value.query,
+  ].join(':');
+});
+const visibleMentionSuggestions = computed(() => {
+  if (isMentionListDismissed.value) {
+    return [];
+  }
+
+  return mentionSuggestions.value;
+});
+const hasMentionSuggestions = computed(() => visibleMentionSuggestions.value.length > 0);
+const mentionListId = computed(() => `${props.textareaId}-mention-suggestions`);
+const activeSuggestion = computed(() => visibleMentionSuggestions.value[activeSuggestionIndex.value] ?? null);
+const activeSuggestionId = computed(() => {
+  if (! activeSuggestion.value) {
+    return undefined;
+  }
+
+  return `${mentionListId.value}-option-${activeSuggestion.value.id}`;
+});
 const overrideMethod = computed(() => {
   if (props.method === 'POST') {
     return null;
@@ -100,13 +129,18 @@ function insertMention(username: string): void {
   const start = activeMention.value?.start ?? input.selectionStart ?? content.value.length;
   const end = activeMention.value?.end ?? input.selectionEnd ?? content.value.length;
   const prefix = content.value.slice(0, start);
+  let suffix = content.value.slice(end);
   let spacer = ' ';
 
   if (prefix.length === 0 || /\s$/.test(prefix)) {
     spacer = '';
   }
 
-  content.value = `${prefix}${spacer}${mention}${content.value.slice(end)}`;
+  if (/^[ \t]/.test(suffix)) {
+    suffix = suffix.replace(/^[ \t]+/, '');
+  }
+
+  content.value = `${prefix}${spacer}${mention}${suffix}`;
 
   void nextTick(() => {
     const nextPosition = start + spacer.length + mention.length;
@@ -118,7 +152,7 @@ function insertMention(username: string): void {
 }
 
 function insertFirstMentionSuggestion(): void {
-  const suggestion = mentionSuggestions.value[0];
+  const suggestion = activeSuggestion.value ?? visibleMentionSuggestions.value[0];
 
   if (! suggestion) {
     return;
@@ -127,18 +161,32 @@ function insertFirstMentionSuggestion(): void {
   insertMention(suggestion.username);
 }
 
-function syncInput(event: Event): void {
-  content.value = (event.target as HTMLTextAreaElement).value;
-  updateCursorPosition();
-}
-
-function handleMentionTab(event: KeyboardEvent): void {
+function moveActiveSuggestion(direction: 1 | -1): void {
   if (! hasMentionSuggestions.value) {
     return;
   }
 
-  event.preventDefault();
-  insertFirstMentionSuggestion();
+  const nextIndex = activeSuggestionIndex.value + direction;
+  const suggestionCount = visibleMentionSuggestions.value.length;
+
+  if (nextIndex < 0) {
+    activeSuggestionIndex.value = suggestionCount - 1;
+
+    return;
+  }
+
+  if (nextIndex >= suggestionCount) {
+    activeSuggestionIndex.value = 0;
+
+    return;
+  }
+
+  activeSuggestionIndex.value = nextIndex;
+}
+
+function syncInput(event: Event): void {
+  content.value = (event.target as HTMLTextAreaElement).value;
+  updateCursorPosition();
 }
 
 function focusTextarea(): void {
@@ -150,6 +198,48 @@ function focusTextarea(): void {
     textarea.value?.focus();
   });
 }
+
+function handleMentionKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape' && hasMentionSuggestions.value) {
+    event.preventDefault();
+    isMentionListDismissed.value = true;
+    activeSuggestionIndex.value = 0;
+
+    return;
+  }
+
+  if (event.key === 'ArrowDown' && hasMentionSuggestions.value) {
+    event.preventDefault();
+    moveActiveSuggestion(1);
+
+    return;
+  }
+
+  if (event.key === 'ArrowUp' && hasMentionSuggestions.value) {
+    event.preventDefault();
+    moveActiveSuggestion(-1);
+
+    return;
+  }
+
+  if ((event.key === 'Enter' || event.key === 'Tab') && hasMentionSuggestions.value) {
+    event.preventDefault();
+    insertFirstMentionSuggestion();
+  }
+}
+
+watch(activeMentionKey, () => {
+  activeSuggestionIndex.value = 0;
+  isMentionListDismissed.value = false;
+});
+
+watch(visibleMentionSuggestions, (suggestions) => {
+  if (activeSuggestionIndex.value < suggestions.length) {
+    return;
+  }
+
+  activeSuggestionIndex.value = Math.max(suggestions.length - 1, 0);
+});
 
 onMounted(focusTextarea);
 </script>
@@ -170,6 +260,11 @@ onMounted(focusTextarea);
             :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
             :placeholder="placeholder"
             maxlength="1500"
+            role="combobox"
+            aria-autocomplete="list"
+            :aria-expanded="hasMentionSuggestions ? 'true' : 'false'"
+            :aria-controls="mentionListId"
+            :aria-activedescendant="activeSuggestionId"
             :aria-invalid="invalid || undefined"
             :aria-describedby="describedBy"
             required
@@ -177,27 +272,33 @@ onMounted(focusTextarea);
             @click="updateCursorPosition"
             @keyup="updateCursorPosition"
             @select="updateCursorPosition"
-            @keydown.tab="handleMentionTab"
+            @keydown="handleMentionKeydown"
           />
 
-          <div
+          <ul
             v-if="hasMentionSuggestions"
+            :id="mentionListId"
+            role="listbox"
+            :aria-label="`${label} mention suggestions`"
             class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-md border border-border bg-popover shadow-xl shadow-black/25"
           >
-            <button
-              v-for="user in mentionSuggestions"
+            <li
+              v-for="(user, index) in visibleMentionSuggestions"
               :key="user.id"
-              type="button"
-              class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-secondary focus:bg-secondary focus:outline-none"
-              @mousedown.prevent="insertMention(user.username)"
+              :id="`${mentionListId}-option-${user.id}`"
+              role="option"
+              :aria-selected="index === activeSuggestionIndex"
+              :class="[
+                'flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-sm',
+                index === activeSuggestionIndex ? 'bg-secondary' : 'hover:bg-secondary',
+              ]"
+              @pointerdown.prevent="insertMention(user.username)"
+              @mousemove="activeSuggestionIndex = index"
             >
               <span class="font-medium text-primary">@{{ user.username }}</span>
               <span class="truncate text-muted-foreground">{{ user.name }}</span>
-            </button>
-            <div class="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-              Press Tab to insert the first mention.
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </template>
     </FormField>
