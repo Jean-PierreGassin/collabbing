@@ -17,7 +17,6 @@ let pageTitle = 'Comment';
 let formAction = props.idea.routes.commentsStore;
 let fieldLabel = 'Content';
 let textareaPlaceholder: string | undefined = 'Add context, a suggestion, or a useful question.';
-let buttonVariant: 'default' | 'secondary' = 'default';
 let buttonLabel = 'Share Comment';
 const contentValidator = maxLengthValidator(1500, 'a comment');
 
@@ -26,7 +25,6 @@ if (props.comment) {
   formAction = props.comment.routes.update;
   fieldLabel = 'Comment';
   textareaPlaceholder = undefined;
-  buttonVariant = 'secondary';
   buttonLabel = 'Edit Comment';
 }
 </script>
@@ -54,7 +52,7 @@ if (props.comment) {
           </template>
         </FormField>
         <div class="flex justify-end">
-          <Button type="submit" size="sm" :variant="buttonVariant">
+          <Button type="submit" size="sm">
             {{ buttonLabel }}
           </Button>
         </div>

@@ -6,9 +6,10 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default: 'border border-primary/80 bg-primary text-primary-foreground shadow-sm shadow-primary/15 hover:-translate-y-px hover:bg-primary/92 hover:shadow-primary/25',
-        destructive: 'border border-destructive/80 bg-destructive text-white shadow-sm shadow-destructive/15 hover:-translate-y-px hover:bg-destructive/90 focus-visible:ring-destructive/20',
+        destructive: 'border border-destructive/60 bg-destructive/18 text-destructive shadow-sm shadow-destructive/10 hover:-translate-y-px hover:bg-destructive/26 hover:text-white focus-visible:ring-destructive/20',
         outline: 'border border-input bg-background/70 text-foreground shadow-sm shadow-black/5 hover:-translate-y-px hover:border-primary/55 hover:bg-accent/75 hover:text-accent-foreground',
         secondary: 'border border-secondary/80 bg-secondary text-secondary-foreground hover:-translate-y-px hover:bg-secondary/85',
+        success: 'border border-emerald-400/45 bg-emerald-500/18 text-emerald-200 shadow-sm shadow-emerald-950/15 hover:-translate-y-px hover:bg-emerald-500/28 hover:text-emerald-50 focus-visible:ring-emerald-400/25',
         ghost: 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },

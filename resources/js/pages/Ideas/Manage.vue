@@ -70,7 +70,7 @@ const activeTab = ref<ManageTab>(initialTab());
                   <form v-if="idea.can.updateApplication" :action="application.routes.approve" method="POST">
                     <CsrfField />
                     <MethodField method="PUT" />
-                    <Button type="submit" size="sm">Approve Application</Button>
+                    <Button type="submit" variant="success" size="sm">Approve Application</Button>
                   </form>
                 </div>
               </CardContent>

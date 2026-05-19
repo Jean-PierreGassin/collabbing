@@ -35,13 +35,11 @@ const contentValidator = maxLengthValidator(20000, 'a pitch');
 
 let pageTitle = 'Share your idea';
 let formAction = session.routes.ideasStore;
-let submitVariant: 'default' | 'secondary' = 'default';
 let submitLabel = 'Share Idea';
 
 if (props.idea) {
   pageTitle = 'Edit your idea';
   formAction = props.idea.routes.update;
-  submitVariant = 'secondary';
   submitLabel = 'Edit Idea';
 }
 
@@ -396,7 +394,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
             </div>
             <span v-else />
 
-            <Button type="submit" size="sm" :variant="submitVariant" class="self-end">
+            <Button type="submit" size="sm" class="self-end">
               {{ submitLabel }}
             </Button>
           </div>

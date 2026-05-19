@@ -6,6 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-white: var(--app-white);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -37,12 +38,13 @@
 
 :root {
   --radius: 0.5rem;
+  --app-white: oklch(0.91 0.006 245);
   --background: oklch(0.16 0.014 245);
-  --foreground: oklch(0.97 0.006 245);
+  --foreground: oklch(0.86 0.007 245);
   --card: oklch(0.2 0.017 245);
-  --card-foreground: oklch(0.97 0.006 245);
+  --card-foreground: oklch(0.86 0.007 245);
   --popover: oklch(0.2 0.017 245);
-  --popover-foreground: oklch(0.97 0.006 245);
+  --popover-foreground: oklch(0.86 0.007 245);
   --primary: oklch(0.76 0.17 58);
   --primary-foreground: oklch(0.13 0.012 245);
   --secondary: oklch(0.27 0.019 245);
@@ -102,7 +104,7 @@
 }
 
 .markdown-content :where(h1, h2, h3, h4) {
-  color: oklch(1 0 0);
+  color: var(--app-white);
   font-weight: 650;
   line-height: 1.2;
   scroll-margin-top: 6rem;
