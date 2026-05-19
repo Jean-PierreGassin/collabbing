@@ -5,6 +5,7 @@ import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { oldInputString } from '@/lib/forms';
+import { maxLengthValidator } from '@/lib/formValidation';
 import type { Idea, IdeaComment } from '@/types/domain';
 
 const props = defineProps<{
@@ -18,6 +19,7 @@ let fieldLabel = 'Content';
 let textareaPlaceholder: string | undefined = 'Add context, a suggestion, or a useful question.';
 let buttonVariant: 'default' | 'secondary' = 'default';
 let buttonLabel = 'Share Comment';
+const contentValidator = maxLengthValidator(1500, 'a comment');
 
 if (props.comment) {
   pageTitle = 'Edit comment';
@@ -30,18 +32,18 @@ if (props.comment) {
 </script>
 
 <template>
-  <Card>
+  <Card class="w-full max-w-3xl">
     <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
     <CardContent>
       <form :action="formAction" method="POST" class="flex flex-col gap-4">
         <CsrfField />
         <MethodField v-if="comment" method="PUT" />
-        <FormField id="content" :label="fieldLabel" help="Keep it specific and constructive. Markdown and @mentions are supported.">
-          <template #default="{ invalid, describedBy }">
+        <FormField id="content" :label="fieldLabel" help="Keep it specific and constructive. Markdown and @mentions are supported." :validator="contentValidator">
+          <template #default="{ invalid, describedBy, feedbackClass }">
             <textarea
               id="content"
               name="content"
-              class="min-h-40 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+              :class="['min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
               :placeholder="textareaPlaceholder"
               maxlength="1500"
               :value="oldInputString('content', comment?.content)"

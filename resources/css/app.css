@@ -221,6 +221,71 @@ select option {
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 22%, transparent) !important;
 }
 
+.form-control-feedback-invalid {
+  border-color: var(--destructive) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--destructive) 22%, transparent) !important;
+}
+
+.form-control-feedback-valid {
+  border-color: oklch(0.74 0.16 155) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    0 0 0 3px color-mix(in oklab, oklch(0.74 0.16 155) 22%, transparent) !important;
+}
+
+.form-field-sparks span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.2rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: oklch(0.84 0.17 155);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: form-field-spark 580ms ease-out both;
+}
+
+.form-field-sparks span:nth-child(1) {
+  rotate: -45deg;
+  animation-delay: 20ms;
+}
+
+.form-field-sparks span:nth-child(2) {
+  rotate: 0deg;
+}
+
+.form-field-sparks span:nth-child(3) {
+  rotate: 45deg;
+  animation-delay: 45ms;
+}
+
+@keyframes form-field-spark {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.6;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -1rem;
+    scale: 0.1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-field-sparks span {
+    animation: none;
+  }
+}
+
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition:

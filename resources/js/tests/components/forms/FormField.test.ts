@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { describe, expect, it, vi } from 'vitest';
 import FormField from '@/components/forms/FormField.vue';
 
@@ -56,5 +57,44 @@ describe('FormField', () => {
 
     expect(wrapper.get('label').classes()).toContain('sr-only');
     expect(wrapper.get('label').text()).toBe('Comment');
+  });
+
+  it('shares live validation state with the control', async () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      props: {
+        id: 'username',
+        label: 'Username',
+        validator: (value: string) => {
+          if (value === 'builder') {
+            return undefined;
+          }
+
+          return 'Use a valid username.';
+        },
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <input id="username" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+          </template>
+        `,
+      },
+    });
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('input').setValue('bad');
+
+    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('input').classes()).toContain('form-control-feedback-invalid');
+    expect(wrapper.get('#username-feedback').text()).toBe('Use a valid username.');
+
+    await wrapper.get('input').setValue('builder');
+
+    expect(wrapper.get('input').attributes('aria-invalid')).toBeUndefined();
+    expect(wrapper.get('input').classes()).toContain('form-control-feedback-valid');
+    expect(wrapper.get('#username-feedback').text()).toBe('Looks good.');
   });
 });

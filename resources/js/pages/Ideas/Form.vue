@@ -9,6 +9,7 @@ import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { oldInputString } from '@/lib/forms';
+import { maxLengthValidator, repositoryNameValidator } from '@/lib/formValidation';
 import { markdownHeadings, stripGeneratedTableOfContents, stripMarkdownFormatting, tableOfContentsEnd, tableOfContentsStart, uniqueMarkdownAnchor } from '@/lib/markdown';
 import { useSessionStore } from '@/stores/session';
 import type { Idea } from '@/types/domain';
@@ -24,6 +25,10 @@ const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
 const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
 const markdownFilePattern = /\.(md|markdown)$/i;
 const content = ref(stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)));
+const titleValidator = maxLengthValidator(100, 'a title');
+const communicationValidator = maxLengthValidator(50, 'a communication preference');
+const summaryValidator = maxLengthValidator(240, 'a summary');
+const contentValidator = maxLengthValidator(20000, 'a pitch');
 
 let pageTitle = 'Share your idea';
 let formAction = session.routes.ideasStore;
@@ -287,33 +292,33 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
           <MethodField v-if="idea" method="PUT" />
 
           <div class="grid gap-4 md:grid-cols-2">
-            <FormField id="title" label="Title">
-              <template #default="{ invalid, describedBy }">
-                <input id="title" name="title" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('title', idea?.title)" placeholder="A faster way to match design reviewers" maxlength="100" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <FormField id="title" label="Title" :validator="titleValidator">
+              <template #default="{ invalid, describedBy, feedbackClass }">
+                <input id="title" name="title" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('title', idea?.title)" placeholder="A faster way to match design reviewers" maxlength="100" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
               </template>
             </FormField>
 
-            <FormField id="communication" label="Communication">
-              <template #default="{ invalid, describedBy }">
-                <input id="communication" name="communication" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <FormField id="communication" label="Communication" :validator="communicationValidator">
+              <template #default="{ invalid, describedBy, feedbackClass }">
+                <input id="communication" name="communication" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
               </template>
             </FormField>
           </div>
 
-          <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores.">
-            <template #default="{ invalid, describedBy }">
-              <input id="repository_name" name="repository_name" type="text" class="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" :value="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
+          <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores." :validator="repositoryNameValidator">
+            <template #default="{ invalid, describedBy, feedbackClass }">
+              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :value="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
             </template>
           </FormField>
 
-          <FormField id="summary" label="Summary" help="Plain text only. This appears on idea cards.">
-            <template #default="{ invalid, describedBy }">
-              <textarea id="summary" name="summary" class="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :value="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
+          <FormField id="summary" label="Summary" help="Plain text only. This appears on idea cards." :validator="summaryValidator">
+            <template #default="{ invalid, describedBy, feedbackClass }">
+              <textarea id="summary" name="summary" :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :value="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
             </template>
           </FormField>
 
-          <FormField id="content" label="Pitch (supports markdown)" help="Drop in markdown files to append a generated table of contents and sectioned notes.">
-            <template #default="{ invalid, describedBy }">
+          <FormField id="content" label="Pitch (supports markdown)" help="Drop in markdown files to append a generated table of contents and sectioned notes." :validator="contentValidator">
+            <template #default="{ invalid, describedBy, feedbackClass }">
               <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-4">
                   <textarea
@@ -321,7 +326,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
                     ref="contentInput"
                     v-model="content"
                     name="content"
-                    class="min-h-[28rem] rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+                    :class="['min-h-[28rem] w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
                     placeholder="Explain the problem, who it helps, and what a first version should do."
                     maxlength="20000"
                     :aria-invalid="invalid || undefined"
