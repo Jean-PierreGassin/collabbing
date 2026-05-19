@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
-import MethodField from '@/components/forms/MethodField.vue';
+import ConfirmingDestructiveForm from '@/components/forms/ConfirmingDestructiveForm.vue';
+import ApplicationReviewCard from '@/components/ideas/ApplicationReviewCard.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
-import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Link } from '@inertiajs/vue3';
 import { GitBranch, Pencil } from '@lucide/vue';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
@@ -80,29 +79,13 @@ const activeTab = ref<ManageTab>(initialTab());
         <Transition name="content-fade" mode="out-in">
           <div v-if="activeTab === 'applications'" key="applications" class="flex flex-col gap-3">
             <template v-if="applications.items.length > 0">
-              <Card v-for="application in applications.items" :key="application.id">
-                <CardHeader>
-                  <h6 class="font-medium">
-                    <a class="text-primary hover:underline" :href="application.user.routes.show">{{ application.user.name }}'s Application</a>
-                  </h6>
-                </CardHeader>
-                <CardContent class="flex flex-col gap-4">
-                  <MarkdownContent :html="application.contentHtml" />
-                  <h6 class="text-right text-sm text-muted-foreground">Submitted {{ idea.createdAtForHumans }}</h6>
-                  <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
-                    <form v-if="idea.can.deleteApplication" :action="application.routes.destroy" method="POST">
-                      <CsrfField />
-                      <MethodField method="DELETE" />
-                      <Button type="submit" variant="destructive" size="sm">Decline Application</Button>
-                    </form>
-                    <form v-if="idea.can.updateApplication" :action="application.routes.approve" method="POST">
-                      <CsrfField />
-                      <MethodField method="PUT" />
-                      <Button type="submit" variant="success" size="sm">Approve Application</Button>
-                    </form>
-                  </div>
-                </CardContent>
-              </Card>
+              <ApplicationReviewCard
+                v-for="application in applications.items"
+                :key="application.id"
+                :application="application"
+                :can-delete="idea.can.deleteApplication"
+                :can-update="idea.can.updateApplication"
+              />
             </template>
             <p v-else>No pending applications.</p>
             <PaginationLinks :paginator="applications" :only="['applications']" label="Application pages" />
@@ -110,15 +93,24 @@ const activeTab = ref<ManageTab>(initialTab());
 
           <div v-else key="collaborators" class="flex flex-col gap-3">
             <template v-if="collaborators.items.length > 0">
-              <div v-for="collaborator in collaborators.items" :key="collaborator.id" class="flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3">
-                <a class="text-primary hover:underline" :href="collaborator.user.routes.show">
-                  {{ collaborator.user.firstName }} {{ collaborator.user.lastName }}
-                </a>
-                <form v-if="idea.can.deleteApplication" :action="collaborator.routes.destroy" method="POST">
-                  <CsrfField />
-                  <MethodField method="DELETE" />
-                  <Button type="submit" variant="destructive" size="sm">Remove Collaborator</Button>
-                </form>
+              <div v-for="collaborator in collaborators.items" :key="collaborator.id" class="flex flex-wrap items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  <img
+                    class="size-10 rounded-full border border-border object-cover"
+                    :src="collaborator.user.profilePicture"
+                    :alt="`${collaborator.user.name} profile picture`"
+                  >
+                  <a class="truncate text-primary hover:underline" :href="collaborator.user.routes.show">
+                    {{ collaborator.user.name }}
+                  </a>
+                </div>
+                <ConfirmingDestructiveForm
+                  v-if="idea.can.deleteApplication"
+                  :action="collaborator.routes.destroy"
+                  button-label="Remove Collaborator"
+                  confirm-label="Confirm removal"
+                  message="Removing this collaborator revokes their access."
+                />
               </div>
             </template>
             <p v-else>No collaborators have joined yet.</p>
