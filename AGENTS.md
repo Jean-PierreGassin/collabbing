@@ -49,7 +49,7 @@
   - Happy paths
   - Unhappy paths
   - Edge cases
-- Use data providers when applicable
+- Always consider using data providers when test cases repeat the same behaviour with different inputs
 - Unit tests must avoid database access
 - Use camel case method names, prefixed with `test`
 - Do not create long/verbose test method names
