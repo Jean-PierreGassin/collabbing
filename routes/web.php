@@ -58,6 +58,10 @@ Route::prefix('ideas')->name('ideas.')->group(function (): void {
         Route::match(['put', 'patch'], '{idea}', [IdeaController::class, 'update'])
             ->middleware('throttle:product-write')
             ->name('update');
+
+        Route::patch('{idea}/status', [IdeaController::class, 'updateStatus'])
+            ->middleware('throttle:product-write')
+            ->name('status.update');
     });
 
     Route::get('/', [IdeaController::class, 'index'])

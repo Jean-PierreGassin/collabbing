@@ -13,6 +13,21 @@ class Idea extends Model
 {
     use HasFactory;
 
+    public const STATUS_OPEN = 'open';
+
+    public const STATUS_PAUSED = 'suspended';
+
+    public const STATUS_SHIPPED = 'expired';
+
+    public const STATUS_CLOSED = 'closed';
+
+    public const STATUSES = [
+        self::STATUS_OPEN,
+        self::STATUS_PAUSED,
+        self::STATUS_SHIPPED,
+        self::STATUS_CLOSED,
+    ];
+
     protected $fillable = [
         'title',
         'tagline',
@@ -120,5 +135,10 @@ class Idea extends Model
         }
 
         return $codeRepository;
+    }
+
+    public function isOpen(): bool
+    {
+        return $this->status === self::STATUS_OPEN;
     }
 }

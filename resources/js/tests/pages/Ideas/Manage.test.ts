@@ -60,6 +60,11 @@ function idea(): Idea {
     contentHtml: '',
     status: 'open',
     statusDisplay: 'Open',
+    statusHelp: 'The idea is accepting support and applications.',
+    availableStatuses: [
+      { value: 'open', label: 'Open', description: 'The idea is accepting support and applications.' },
+      { value: 'closed', label: 'Closed', description: 'The idea is no longer accepting new activity.' },
+    ],
     repository: false,
     repositoryName: null,
     repositoryActivity: {
@@ -96,6 +101,7 @@ function idea(): Idea {
       edit: '/ideas/1/edit',
       dashboard: '/ideas/1/dashboard',
       update: '/ideas/1',
+      statusUpdate: '/ideas/1/status',
       applicationsCreate: '/ideas/1/apply',
       applicationsStore: '/ideas/1/applications',
       commentsStore: '/ideas/1/comments',

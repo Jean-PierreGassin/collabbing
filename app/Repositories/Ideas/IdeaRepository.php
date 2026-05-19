@@ -62,6 +62,13 @@ class IdeaRepository
         return $idea->save();
     }
 
+    public function updateStatus(Idea $idea, string $status): bool
+    {
+        return $idea->update([
+            'status' => $status,
+        ]);
+    }
+
     public function getTrending(): Collection
     {
         return Idea::where('status', 'open')

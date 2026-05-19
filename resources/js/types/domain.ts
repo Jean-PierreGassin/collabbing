@@ -83,6 +83,12 @@ export interface IdeaRepositoryActivity {
   events: RepositoryEvent[];
 }
 
+export interface IdeaStatusOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
 export interface Idea {
   id: number;
   title: string;
@@ -95,6 +101,8 @@ export interface Idea {
   contentHtml: string;
   status: string;
   statusDisplay: string;
+  statusHelp: string;
+  availableStatuses: IdeaStatusOption[];
   repository: boolean;
   repositoryName: string | null;
   repositoryActivity: IdeaRepositoryActivity;
@@ -117,6 +125,7 @@ export interface Idea {
     edit: string;
     dashboard: string;
     update: string;
+    statusUpdate: string;
     applicationsCreate: string;
     applicationsStore: string;
     commentsStore: string;

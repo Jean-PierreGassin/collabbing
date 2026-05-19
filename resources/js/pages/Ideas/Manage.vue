@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAccessibleTabs, type AccessibleTab } from '@/lib/tabs';
 import { Link } from '@inertiajs/vue3';
-import { GitBranch, Pencil } from '@lucide/vue';
+import { GitBranch, Pencil, RefreshCw } from '@lucide/vue';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
 
 type ManageTab = 'applications' | 'collaborators';
@@ -256,6 +256,35 @@ const {
       </div>
 
       <aside class="flex flex-col gap-3">
+        <Card>
+          <CardHeader>
+            <div class="flex flex-col gap-1">
+              <h2 class="text-lg font-semibold text-white">Lifecycle</h2>
+              <p class="text-sm text-muted-foreground">{{ idea.statusHelp }}</p>
+            </div>
+          </CardHeader>
+          <CardContent class="flex flex-col gap-3">
+            <div class="grid gap-2">
+              <form v-for="statusOption in idea.availableStatuses" :key="statusOption.value" :action="idea.routes.statusUpdate" method="POST">
+                <CsrfField />
+                <MethodField method="PATCH" />
+                <input type="hidden" name="status" :value="statusOption.value">
+                <Button
+                  type="submit"
+                  :variant="idea.status === statusOption.value ? 'secondary' : 'outline'"
+                  size="sm"
+                  class="w-full justify-start"
+                  :disabled="idea.status === statusOption.value"
+                >
+                  <RefreshCw class="size-4" aria-hidden="true" />
+                  {{ statusOption.label }}
+                </Button>
+                <p class="mt-1 text-xs text-muted-foreground">{{ statusOption.description }}</p>
+              </form>
+            </div>
+          </CardContent>
+        </Card>
+
         <IdeaSidebar :idea="idea" />
       </aside>
     </div>

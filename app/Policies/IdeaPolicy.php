@@ -32,7 +32,8 @@ class IdeaPolicy
 
     public function createApplication(User $user, Idea $idea): bool
     {
-        return $user->id !== $idea->user_id
+        return $idea->isOpen()
+            && $user->id !== $idea->user_id
             && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
@@ -48,13 +49,15 @@ class IdeaPolicy
 
     public function storeApplication(User $user, Idea $idea): bool
     {
-        return $user->id !== $idea->user_id
+        return $idea->isOpen()
+            && $user->id !== $idea->user_id
             && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
     public function storeSupporter(User $user, Idea $idea): bool
     {
-        return $user->id !== $idea->user_id;
+        return $idea->isOpen()
+            && $user->id !== $idea->user_id;
     }
 
     public function storeComment(User $user, Idea $idea): bool

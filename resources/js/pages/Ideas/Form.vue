@@ -391,14 +391,11 @@ function pasteRepositoryName(event: ClipboardEvent): void {
                 id="status"
                 name="status">
                 <option
-                  value="open"
-                  :selected="oldInputString('status', idea.status) === 'open'">
-                  Open
-                </option>
-                <option
-                  value="closed"
-                  :selected="oldInputString('status', idea.status) === 'closed'">
-                  Closed
+                  v-for="statusOption in idea.availableStatuses"
+                  :key="statusOption.value"
+                  :value="statusOption.value"
+                  :selected="oldInputString('status', idea.status) === statusOption.value">
+                  {{ statusOption.label }}
                 </option>
               </FormSelect>
             </div>

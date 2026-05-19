@@ -56,7 +56,7 @@ class StoreIdea extends FormRequest
             ],
             'communication' => 'required|max:50',
             'content' => 'required|max:20000',
-            'status' => 'in:open,closed',
+            'status' => ['nullable', 'string', Rule::in(Idea::STATUSES)],
         ];
     }
 
@@ -102,6 +102,12 @@ class StoreIdea extends FormRequest
     {
         $this->validated();
 
+        $status = $this->string('status')->toString();
+
+        if ($status === '') {
+            $status = Idea::STATUS_OPEN;
+        }
+
         return new IdeaData(
             title: $this->string('title')->toString(),
             tagline: $this->string('tagline')->toString(),
@@ -110,7 +116,7 @@ class StoreIdea extends FormRequest
             repositoryName: $this->string('repository_name')->toString(),
             communication: $this->string('communication')->toString(),
             content: $this->string('content')->toString(),
-            status: $this->string('status', 'open')->toString()
+            status: $status
         );
     }
 

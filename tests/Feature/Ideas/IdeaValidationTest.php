@@ -72,6 +72,29 @@ class IdeaValidationTest extends TestCase
         ]);
     }
 
+    #[DataProvider('editableIdeaStatuses')]
+    public function testIdeaCanBeEditedWithLifecycleStatus(string $status): void
+    {
+        $user = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($user, 'user')
+            ->withCodeRepository('original-repository')
+            ->create();
+
+        $this
+            ->actingAs($user)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'updated-collaboration-tool',
+                'status' => $status,
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        $this->assertDatabaseHas('ideas', [
+            'id' => $idea->id,
+            'status' => $status,
+        ]);
+    }
+
     #[DataProvider('invalidIdeaPayloads')]
     public function testIdeaPayloadRejectsInvalidInput(array $overrides, string $errorKey): void
     {
@@ -155,6 +178,16 @@ class IdeaValidationTest extends TestCase
                 ['tags' => 'one,two,three,four,five,six,seven,eight,nine'],
                 'tags',
             ],
+        ];
+    }
+
+    public static function editableIdeaStatuses(): array
+    {
+        return [
+            'open' => [Idea::STATUS_OPEN],
+            'paused' => [Idea::STATUS_PAUSED],
+            'shipped' => [Idea::STATUS_SHIPPED],
+            'closed' => [Idea::STATUS_CLOSED],
         ];
     }
 }
