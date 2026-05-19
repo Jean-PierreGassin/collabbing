@@ -50,10 +50,11 @@
   - Unhappy paths
   - Edge cases
 - Use data providers when applicable
-- Unit tests must avoid database access and prioritise critical application business logic over shape checks or framework/library behaviour
+- Unit tests must avoid database access
 - Use camel case method names, prefixed with `test`
 - Do not create long/verbose test method names
-- Tests should be brief and readable
+- Tests should be brief and readable/easy to follow, and well designed
+- Tests must prioritise critical application business logic over shape checks or framework/library behaviour
 
 ## Version Control
 - Never work directly off `dev` or `master`, create a branch targeting `dev` instead
