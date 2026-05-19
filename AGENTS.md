@@ -8,11 +8,28 @@
 - Vite 7 / Node 24
 
 ## Project Map
-- `app/Http` receives requests; keep controllers thin and delegate to services/repositories
-- `app/Data` contains DTOs, `app/Services` owns workflows, `app/Repositories` owns persistence queries, and `app/Models` owns Eloquent state/relations
-- `resources/js/pages` contains Inertia pages, `resources/js/components` shared Vue UI, `resources/js/lib` browser helpers, and `resources/js/tests` mirrors the frontend tree
-- `routes` defines web entrypoints, `database` owns migrations/factories/seeders, `tests/Feature` covers user-facing flows by concern, and `tests/Unit` covers database-free business logic
-- `docker` owns local/production runtime config and `.github/workflows` owns CI/deploy automation
+```
+.
+|-- app/
+|   |-- Data/          DTOs for typed service/controller payloads
+|   |-- Http/          Requests, controllers, middleware, and thin web entrypoints
+|   |-- Models/        Eloquent state, casts, and relationships
+|   |-- Repositories/  Persistence queries and model lookup/write boundaries
+|   +-- Services/      Application workflows and third-party integrations
+|-- database/          Migrations, factories, and seeders
+|-- resources/js/
+|   |-- pages/         Inertia page components
+|   |-- components/    Shared Vue UI
+|   |-- lib/           Frontend helpers
+|   +-- tests/         Frontend tests mirroring the resources/js tree
+|-- routes/            Web/API/console route definitions
+|-- tests/
+|   |-- Feature/       User-facing backend flows grouped by concern
+|   +-- Unit/          Database-free business logic tests
+|-- docker/            Local and production runtime configuration
++-- .github/
+    +-- workflows/     CI and deployment automation
+```
 
 ## Organisation
 - Prioritise organising files/classes/methods to ensure we are always in a clean workspace
