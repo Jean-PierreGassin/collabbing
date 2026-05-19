@@ -122,6 +122,7 @@ describe('FormField', () => {
     expect((wrapper.get('input').element as HTMLInputElement).value).toBe('person@example.com');
     expect(wrapper.get('input').classes()).toContain('form-control-feedback-valid');
     expect(wrapper.findAll('.form-field-sparks span')).toHaveLength(8);
+    expect(wrapper.get('button[aria-label="Clear email address"]').attributes('tabindex')).toBe('-1');
 
     await wrapper.get('button[aria-label="Clear email address"]').trigger('click');
 
@@ -159,5 +160,34 @@ describe('FormField', () => {
 
     expect(wrapper.get('input').classes()).not.toContain('form-control-feedback-valid');
     expect(wrapper.find('#username-feedback').exists()).toBe(false);
+  });
+
+  it('clears with escape while keeping the clear button out of tab flow', async () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      props: {
+        id: 'email',
+        label: 'Email address',
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <input id="email" type="email" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+          </template>
+        `,
+      },
+    });
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('input').setValue('person@example.com');
+
+    expect(wrapper.get('button[aria-label="Clear email address"]').attributes('tabindex')).toBe('-1');
+
+    await wrapper.get('input').trigger('keydown', { key: 'Escape' });
+
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('');
+    expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
   });
 });

@@ -301,6 +301,15 @@ function handleInvalid(): void {
   validateControl(true, false);
 }
 
+function handleKeydown(event: Event): void {
+  if (!(event instanceof KeyboardEvent) || event.key !== 'Escape' || !canClear.value) {
+    return;
+  }
+
+  event.preventDefault();
+  clearControl();
+}
+
 function handleFormInput(event: Event): void {
   if (!hasInteracted.value || event.target === control.value) {
     return;
@@ -352,6 +361,7 @@ function wireControl(): void {
   addListener(control.value, 'change', handleInput);
   addListener(control.value, 'blur', handleBlur);
   addListener(control.value, 'invalid', handleInvalid);
+  addListener(control.value, 'keydown', handleKeydown);
   isClearable.value = isControlClearable(control.value);
   syncValueState();
   positionClearButton();
@@ -411,6 +421,7 @@ watch(errors, () => {
       class="form-field-clear-button absolute z-20 inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       :style="clearButtonStyle"
       :aria-label="clearButtonLabel"
+      tabindex="-1"
       @click="clearControl"
     >
       <X class="size-4" aria-hidden="true" />
