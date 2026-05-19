@@ -264,6 +264,14 @@ textarea::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
 
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: color-mix(in oklab, var(--muted-foreground) 78%, transparent);
