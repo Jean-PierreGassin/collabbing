@@ -269,6 +269,13 @@ function closeMobileAfterScroll(): void {
   fallbackTimer = window.setTimeout(close, 650);
 }
 
+function mobileCollapsedOffset(): number {
+  const mobileContents = document.getElementById(mobileContentsId.value);
+  const mobileTrigger = mobileContents?.querySelector('button');
+
+  return (mobileTrigger?.getBoundingClientRect().height ?? 40) + 28;
+}
+
 async function openHeading(anchor: string): Promise<void> {
   isMobileOpen.value = true;
   lockNavigation(anchor);
@@ -279,11 +286,10 @@ async function openHeading(anchor: string): Promise<void> {
     const heading = document.getElementById(anchor);
 
     if (heading) {
-      const mobileContents = document.getElementById(mobileContentsId.value);
       let mobileOffset = 96;
 
       if (isMobileViewport()) {
-        mobileOffset = (mobileContents?.getBoundingClientRect().height ?? 0) + 16;
+        mobileOffset = mobileCollapsedOffset();
       }
 
       window.scrollTo({
