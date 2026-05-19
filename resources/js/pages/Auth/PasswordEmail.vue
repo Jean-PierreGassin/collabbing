@@ -18,7 +18,7 @@ const session = useSessionStore();
         <CsrfField />
         <FormField id="email" label="Email address" :validator="emailValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="email" autocomplete="email" maxlength="255" :value="oldInputString('email')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <input id="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="email" autocomplete="email" maxlength="255" :defaultValue="oldInputString('email')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
           </template>
         </FormField>
         <Button type="submit" class="self-start">Send password reset link</Button>

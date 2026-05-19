@@ -31,7 +31,7 @@ const applicationValidator = maxLengthValidator(1500, 'an application');
                 :class="['min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
                 placeholder="I can help with backend APIs and weekly planning."
                 maxlength="1500"
-                :value="oldInputString('content')"
+                :defaultValue="oldInputString('content')"
                 :aria-invalid="invalid || undefined"
                 :aria-describedby="describedBy"
                 required

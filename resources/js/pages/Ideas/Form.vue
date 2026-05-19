@@ -294,26 +294,26 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
           <div class="grid gap-4 md:grid-cols-2">
             <FormField id="title" label="Title" :validator="titleValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="title" name="title" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('title', idea?.title)" placeholder="A faster way to match design reviewers" maxlength="100" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input id="title" name="title" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('title', idea?.title)" placeholder="A faster way to match design reviewers" maxlength="100" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
               </template>
             </FormField>
 
             <FormField id="communication" label="Communication" :validator="communicationValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="communication" name="communication" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input id="communication" name="communication" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
               </template>
             </FormField>
           </div>
 
           <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores." :validator="repositoryNameValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :value="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
+              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :defaultValue="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
             </template>
           </FormField>
 
           <FormField id="summary" label="Summary" help="Plain text only. This appears on idea cards." :validator="summaryValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <textarea id="summary" name="summary" :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :value="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
+              <textarea id="summary" name="summary" :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :defaultValue="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
             </template>
           </FormField>
 

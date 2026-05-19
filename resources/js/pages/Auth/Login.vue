@@ -18,7 +18,7 @@ const session = useSessionStore();
         <CsrfField />
         <FormField id="username" label="Username" :validator="loginUsernameValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="username" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="username" autocomplete="username" maxlength="20" :value="oldInputString('username')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input id="username" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="username" autocomplete="username" maxlength="20" :defaultValue="oldInputString('username')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
           </template>
         </FormField>
         <FormField id="password" label="Password" :validator="loginPasswordValidator">

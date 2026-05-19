@@ -50,19 +50,19 @@ function submitProfile(event: SubmitEvent): void {
         <div class="grid gap-4 md:grid-cols-2">
           <FormField id="first_name" label="First name" :validator="personNameValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="first_name" name="first_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('first_name', user?.firstName)" placeholder="John" autocomplete="given-name" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input id="first_name" name="first_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('first_name', user?.firstName)" placeholder="John" autocomplete="given-name" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
           <FormField id="last_name" label="Last name" :validator="personNameValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="last_name" name="last_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :value="oldInputString('last_name', user?.lastName)" placeholder="Smith" autocomplete="family-name" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input id="last_name" name="last_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('last_name', user?.lastName)" placeholder="Smith" autocomplete="family-name" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
             </template>
           </FormField>
         </div>
 
         <FormField id="email" label="Email address" :validator="emailValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="email" name="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :value="oldInputString('email', user?.email)" placeholder="john.smith@apples.com" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+            <input id="email" name="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 md:max-w-xl', feedbackClass]" :defaultValue="oldInputString('email', user?.email)" placeholder="john.smith@apples.com" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
           </template>
         </FormField>
 
@@ -82,7 +82,7 @@ function submitProfile(event: SubmitEvent): void {
 
         <FormField id="bio" label="Bio (supports markdown)" :validator="optionalBioValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <textarea id="bio" name="bio" :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="Tell us what you're good at and what you enjoy..." maxlength="500" :value="oldInputString('bio', user?.bio)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" />
+            <textarea id="bio" name="bio" :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="Tell us what you're good at and what you enjoy..." maxlength="500" :defaultValue="oldInputString('bio', user?.bio)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" />
           </template>
         </FormField>
 

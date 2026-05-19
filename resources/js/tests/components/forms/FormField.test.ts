@@ -97,4 +97,30 @@ describe('FormField', () => {
     expect(wrapper.get('input').classes()).toContain('form-control-feedback-valid');
     expect(wrapper.get('#username-feedback').text()).toBe('Looks good.');
   });
+
+  it('does not reset typed values during live validation feedback', async () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      props: {
+        id: 'email',
+        label: 'Email address',
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <input id="email" :defaultValue="'saved@example.com'" type="email" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+          </template>
+        `,
+      },
+    });
+
+    await nextTick();
+    await nextTick();
+    await wrapper.get('input').setValue('person@example.com');
+
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('person@example.com');
+    expect(wrapper.get('input').classes()).toContain('form-control-feedback-valid');
+    expect(wrapper.findAll('.form-field-sparks span')).toHaveLength(8);
+  });
 });

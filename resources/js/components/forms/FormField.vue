@@ -152,8 +152,10 @@ function positionSpark(): void {
   const controlBounds = control.value.getBoundingClientRect();
 
   sparkStyle.value = {
-    left: `${controlBounds.right - fieldBounds.left - 22}px`,
-    top: `${controlBounds.top - fieldBounds.top + (controlBounds.height / 2)}px`,
+    height: `${controlBounds.height}px`,
+    left: `${controlBounds.left - fieldBounds.left}px`,
+    top: `${controlBounds.top - fieldBounds.top}px`,
+    width: `${controlBounds.width}px`,
   };
 }
 
@@ -289,10 +291,15 @@ watch(errors, () => {
     <span
       v-if="showSpark"
       :key="sparkKey"
-      class="form-field-sparks pointer-events-none absolute z-10 size-6 -translate-y-1/2"
+      class="form-field-sparks pointer-events-none absolute z-10"
       :style="sparkStyle"
       aria-hidden="true"
     >
+      <span />
+      <span />
+      <span />
+      <span />
+      <span />
       <span />
       <span />
       <span />

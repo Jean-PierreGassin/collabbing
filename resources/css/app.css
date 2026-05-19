@@ -237,29 +237,67 @@ select option {
 
 .form-field-sparks span {
   position: absolute;
-  left: 50%;
-  top: 50%;
   width: 0.2rem;
-  height: 0.48rem;
+  height: 0.54rem;
   border-radius: 999px;
   background: oklch(0.84 0.17 155);
   opacity: 0;
   transform-origin: 50% 100%;
-  animation: form-field-spark 580ms ease-out both;
+  animation: form-field-spark 640ms ease-out both;
 }
 
 .form-field-sparks span:nth-child(1) {
-  rotate: -45deg;
-  animation-delay: 20ms;
+  left: 10%;
+  top: -0.28rem;
+  rotate: -28deg;
 }
 
 .form-field-sparks span:nth-child(2) {
-  rotate: 0deg;
+  left: 33%;
+  top: -0.34rem;
+  rotate: 4deg;
 }
 
 .form-field-sparks span:nth-child(3) {
-  rotate: 45deg;
-  animation-delay: 45ms;
+  left: 66%;
+  top: -0.34rem;
+  rotate: -8deg;
+  animation-delay: 35ms;
+}
+
+.form-field-sparks span:nth-child(4) {
+  right: 10%;
+  top: -0.28rem;
+  rotate: 24deg;
+  animation-delay: 15ms;
+}
+
+.form-field-sparks span:nth-child(5) {
+  right: -0.22rem;
+  top: 50%;
+  rotate: 86deg;
+  animation-delay: 50ms;
+}
+
+.form-field-sparks span:nth-child(6) {
+  bottom: -0.32rem;
+  right: 28%;
+  rotate: 164deg;
+  animation-delay: 20ms;
+}
+
+.form-field-sparks span:nth-child(7) {
+  bottom: -0.32rem;
+  left: 28%;
+  rotate: 190deg;
+  animation-delay: 55ms;
+}
+
+.form-field-sparks span:nth-child(8) {
+  left: -0.22rem;
+  top: 50%;
+  rotate: -86deg;
+  animation-delay: 30ms;
 }
 
 @keyframes form-field-spark {
@@ -275,7 +313,7 @@ select option {
 
   100% {
     opacity: 0;
-    translate: 0 -1rem;
+    translate: 0 -0.9rem;
     scale: 0.1;
   }
 }

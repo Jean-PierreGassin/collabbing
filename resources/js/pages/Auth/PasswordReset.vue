@@ -24,7 +24,7 @@ const session = useSessionStore();
         <input type="hidden" name="token" :value="token ?? ''">
         <FormField id="email" label="Email address" :validator="emailValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="email" :value="oldInputString('email', email)" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input id="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="email" :defaultValue="oldInputString('email', email)" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
           </template>
         </FormField>
         <div class="grid gap-4 sm:grid-cols-2">
