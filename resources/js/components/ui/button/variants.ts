@@ -5,7 +5,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border border-primary/80 bg-primary text-primary-foreground shadow-sm shadow-primary/15 hover:-translate-y-px hover:bg-primary/92 hover:shadow-primary/25',
+        default: 'border border-primary/50 bg-primary/86 text-primary-foreground shadow-sm shadow-primary/12 hover:-translate-y-px hover:bg-primary/78 hover:shadow-primary/20 dark:border-primary/80 dark:bg-primary dark:text-primary-foreground dark:shadow-primary/15 dark:hover:bg-primary/92 dark:hover:shadow-primary/25',
         destructive: 'border border-destructive/60 bg-destructive/18 text-destructive shadow-sm shadow-destructive/10 hover:-translate-y-px hover:bg-destructive/26 hover:text-white focus-visible:ring-destructive/20',
         outline: 'border border-input bg-background/70 text-foreground shadow-sm shadow-black/5 hover:-translate-y-px hover:border-primary/55 hover:bg-accent/75 hover:text-accent-foreground',
         secondary: 'border border-secondary/80 bg-secondary text-secondary-foreground hover:-translate-y-px hover:bg-secondary/85',

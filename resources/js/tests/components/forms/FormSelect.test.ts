@@ -30,7 +30,7 @@ describe('FormSelect', () => {
     const options = Array.from(document.body.querySelectorAll<HTMLElement>('[role="option"]'));
 
     expect(options).toHaveLength(2);
-    expect(options[0].classList.contains('bg-primary')).toBe(true);
+    expect(options[0].classList.contains('bg-primary/18')).toBe(true);
 
     options[1].click();
     await nextTick();

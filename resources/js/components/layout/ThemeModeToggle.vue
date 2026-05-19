@@ -40,7 +40,7 @@ function buttonClass(mode: ThemeMode): string {
   return cn(
     'inline-flex h-9 items-center justify-center gap-2 rounded-sm px-2.5 text-sm font-medium text-muted-foreground transition-[background-color,color,box-shadow,transform] duration-150 ease-out hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
     props.showLabels ? 'flex-1' : 'w-9',
-    themeMode.value === mode && 'bg-primary text-primary-foreground shadow-sm shadow-primary/15 hover:bg-primary hover:text-primary-foreground',
+    themeMode.value === mode && 'bg-primary/18 text-accent-foreground shadow-sm shadow-primary/10 hover:bg-primary/24 hover:text-accent-foreground dark:bg-primary dark:text-primary-foreground dark:shadow-primary/15 dark:hover:bg-primary dark:hover:text-primary-foreground',
   );
 }
 </script>
