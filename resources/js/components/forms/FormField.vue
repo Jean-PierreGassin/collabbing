@@ -6,6 +6,7 @@ import type { FieldValidator, FormControlElement } from '@/lib/formValidation';
 
 const props = withDefaults(defineProps<{
   errorKey?: string;
+  externalErrors?: string[];
   id: string;
   label: string;
   hideLabel?: boolean;
@@ -13,6 +14,7 @@ const props = withDefaults(defineProps<{
   validator?: FieldValidator;
 }>(), {
   errorKey: undefined,
+  externalErrors: () => [],
   hideLabel: false,
   help: undefined,
   validator: undefined,
@@ -42,7 +44,10 @@ const isClearable = ref(false);
 let sparkTimer: number | undefined;
 const cleanupCallbacks: (() => void)[] = [];
 
-const errors = computed(() => fieldErrors(props.errorKey ?? props.id));
+const errors = computed(() => [
+  ...fieldErrors(props.errorKey ?? props.id),
+  ...props.externalErrors,
+]);
 const helpId = computed(() => {
   if (props.help) {
     return `${props.id}-help`;

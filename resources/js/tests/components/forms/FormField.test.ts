@@ -41,6 +41,31 @@ describe('FormField', () => {
     expect(wrapper.get('#title-error').text()).toBe('Choose a clearer title.');
   });
 
+  it('connects external async errors to the form control', () => {
+    session.errors = {};
+
+    const wrapper = mount(FormField, {
+      props: {
+        id: 'username',
+        label: 'Username',
+        externalErrors: ['These credentials do not match our records.'],
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy }">
+            <input id="username" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+          </template>
+        `,
+      },
+    });
+
+    const input = wrapper.get('input');
+
+    expect(input.attributes('aria-invalid')).toBe('true');
+    expect(input.attributes('aria-describedby')).toBe('username-error');
+    expect(wrapper.get('#username-error').text()).toBe('These credentials do not match our records.');
+  });
+
   it('can visually hide labels without dropping accessible label text', () => {
     session.errors = {};
 

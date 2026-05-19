@@ -7,6 +7,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
@@ -52,6 +53,16 @@ class AuthSecurityTest extends TestCase
             'username' => 'builder_2026',
             'email' => 'builder@example.com',
         ]);
+    }
+
+    public function testRegistrationSupportsJsonSuccessResponses(): void
+    {
+        $response = $this->post(route('register'), $this->registrationPayload(), [
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertCreated();
+        $this->assertAuthenticated();
     }
 
     public function testProfileUpdateRejectsWeakNewPasswords(): void
@@ -138,6 +149,24 @@ class AuthSecurityTest extends TestCase
 
         $response->assertSessionHasErrors(['username', 'password']);
         $this->assertGuest();
+    }
+
+    public function testLoginSupportsJsonSuccessResponses(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('collabbing2026'),
+            'username' => 'jsonlogin',
+        ]);
+
+        $response = $this->post(route('login'), [
+            'password' => 'collabbing2026',
+            'username' => $user->username,
+        ], [
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertNoContent();
+        $this->assertAuthenticatedAs($user);
     }
 
     #[DataProvider('rateLimitedAuthEndpoints')]

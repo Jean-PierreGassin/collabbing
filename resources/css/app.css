@@ -443,6 +443,258 @@ textarea.form-control-clearable {
   }
 }
 
+.auth-morph-card {
+  transform-origin: center;
+  transition:
+    width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms ease,
+    border-radius 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 420ms ease,
+    box-shadow 420ms ease,
+    opacity 220ms ease,
+    scale 220ms ease;
+  will-change: width, height, translate, border-radius, background-color, opacity, scale;
+}
+
+.auth-morph-card-active {
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--card) 92%, var(--background) 8%);
+  border-color: transparent;
+  border-radius: 999px;
+  box-shadow:
+    0 22px 70px color-mix(in oklab, black 42%, transparent),
+    0 0 0 1px color-mix(in oklab, white 8%, transparent);
+}
+
+.auth-morph-card-fill {
+  background: oklch(0.74 0.16 155);
+  box-shadow:
+    0 24px 80px color-mix(in oklab, oklch(0.74 0.16 155) 24%, transparent),
+    0 0 0 1px color-mix(in oklab, white 14%, transparent);
+}
+
+.auth-morph-card-leaving {
+  opacity: 0;
+  scale: 0.92;
+}
+
+.auth-morph-content {
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease,
+    translate 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-morph-content-hidden {
+  opacity: 0;
+  filter: blur(10px);
+  pointer-events: none;
+  translate: 0 0.35rem;
+}
+
+.auth-success-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  scale: 0.86;
+  transition:
+    opacity 180ms ease,
+    scale 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-success-stage-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.auth-success-svg {
+  width: 3.25rem;
+  height: 3.25rem;
+  overflow: visible;
+}
+
+.auth-success-ring {
+  fill: transparent;
+  stroke: oklch(0.74 0.16 155);
+  stroke-width: 3;
+  stroke-dasharray: 139;
+  stroke-dashoffset: 139;
+  animation: auth-circle-draw 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition:
+    fill 320ms ease,
+    stroke 320ms ease;
+}
+
+.auth-success-check {
+  fill: none;
+  stroke: oklch(0.84 0.17 155);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: auth-check-draw 500ms cubic-bezier(0.22, 1, 0.36, 1) 360ms forwards;
+  transition: stroke 260ms ease;
+}
+
+.auth-success-stage-fill .auth-success-ring {
+  fill: oklch(0.74 0.16 155);
+  stroke: oklch(0.74 0.16 155);
+}
+
+.auth-success-stage-fill .auth-success-check {
+  stroke: oklch(0.17 0.02 155);
+}
+
+.auth-success-sparks {
+  position: absolute;
+  inset: -1rem;
+  pointer-events: none;
+}
+
+.auth-success-sparks span {
+  position: absolute;
+  width: 0.24rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  background: oklch(0.88 0.16 155);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: auth-success-spark 680ms ease-out both;
+}
+
+.auth-success-sparks span:nth-child(1) {
+  left: 10%;
+  top: 0.2rem;
+  rotate: -30deg;
+}
+
+.auth-success-sparks span:nth-child(2) {
+  left: 32%;
+  top: -0.22rem;
+  rotate: -6deg;
+  animation-delay: 35ms;
+}
+
+.auth-success-sparks span:nth-child(3) {
+  right: 32%;
+  top: -0.22rem;
+  rotate: 8deg;
+  animation-delay: 10ms;
+}
+
+.auth-success-sparks span:nth-child(4) {
+  right: 10%;
+  top: 0.2rem;
+  rotate: 30deg;
+  animation-delay: 55ms;
+}
+
+.auth-success-sparks span:nth-child(5) {
+  right: -0.18rem;
+  top: 38%;
+  rotate: 84deg;
+  animation-delay: 25ms;
+}
+
+.auth-success-sparks span:nth-child(6) {
+  bottom: 10%;
+  right: 6%;
+  rotate: 128deg;
+  animation-delay: 60ms;
+}
+
+.auth-success-sparks span:nth-child(7) {
+  bottom: -0.24rem;
+  right: 32%;
+  rotate: 172deg;
+  animation-delay: 20ms;
+}
+
+.auth-success-sparks span:nth-child(8) {
+  bottom: -0.24rem;
+  left: 32%;
+  rotate: 188deg;
+  animation-delay: 45ms;
+}
+
+.auth-success-sparks span:nth-child(9) {
+  bottom: 10%;
+  left: 6%;
+  rotate: 232deg;
+  animation-delay: 15ms;
+}
+
+.auth-success-sparks span:nth-child(10) {
+  left: -0.18rem;
+  top: 38%;
+  rotate: -84deg;
+  animation-delay: 55ms;
+}
+
+.auth-success-sparks span:nth-child(11) {
+  left: 0.4rem;
+  top: 14%;
+  rotate: -52deg;
+  animation-delay: 75ms;
+}
+
+.auth-success-sparks span:nth-child(12) {
+  right: 0.4rem;
+  top: 14%;
+  rotate: 52deg;
+  animation-delay: 70ms;
+}
+
+@keyframes auth-circle-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes auth-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes auth-success-spark {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.6;
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -1.35rem;
+    scale: 0.1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-morph-card,
+  .auth-morph-content,
+  .auth-success-stage {
+    transition-duration: 1ms;
+  }
+
+  .auth-success-check,
+  .auth-success-ring,
+  .auth-success-sparks span {
+    animation-duration: 1ms;
+  }
+}
+
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition:
