@@ -357,11 +357,13 @@ function toggleMobileSearch(): void {
 
     <main id="main-content" tabindex="-1" class="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 outline-none sm:px-6 lg:px-8">
       <FlashMessages />
-      <Transition name="page-fade" mode="out-in">
-        <div :key="transitionKey" class="page-transition-panel">
-          <slot />
-        </div>
-      </Transition>
+      <div class="route-transition-frame">
+        <Transition name="route-fade" appear>
+          <div :key="transitionKey" class="route-transition-panel">
+            <slot />
+          </div>
+        </Transition>
+      </div>
     </main>
 
     <footer class="border-t border-border bg-card/30">
