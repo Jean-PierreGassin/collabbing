@@ -241,6 +241,27 @@ input[type="checkbox"]:disabled {
 textarea {
   line-height: 1.65;
   resize: vertical;
+  scrollbar-color: color-mix(in oklab, var(--primary) 72%, var(--foreground) 28%) color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+  scrollbar-width: thin;
+}
+
+textarea::-webkit-scrollbar {
+  width: 0.72rem;
+}
+
+textarea::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border: 2px solid color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 72%, var(--foreground) 28%);
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 input::placeholder,

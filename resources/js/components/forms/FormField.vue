@@ -213,8 +213,11 @@ function positionClearButton(): void {
   const fieldBounds = field.value.getBoundingClientRect();
   const controlBounds = control.value.getBoundingClientRect();
   const buttonSize = 24;
-  const rightInset = 8;
-  const topInset = control.value instanceof HTMLTextAreaElement ? 8 : ((controlBounds.height - buttonSize) / 2);
+  const textareaScrollbarWidth = control.value instanceof HTMLTextAreaElement
+    ? Math.max(0, control.value.offsetWidth - control.value.clientWidth)
+    : 0;
+  const rightInset = 8 + textareaScrollbarWidth;
+  const topInset = control.value instanceof HTMLTextAreaElement ? 10 : ((controlBounds.height - buttonSize) / 2);
 
   clearButtonStyle.value = {
     left: `${controlBounds.right - fieldBounds.left - rightInset - buttonSize}px`,

@@ -309,17 +309,16 @@ function leaveDescription(element: Element, done: () => void): void {
     </div>
 
     <div v-if="!single && (idea.can.update || idea.repository)" :class="cardActionsClass">
-      <div class="flex flex-wrap items-center gap-3">
-        <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="ml-auto">
-          <GitBranch class="size-4" aria-hidden="true" />
-          Manage
-        </Button>
-
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div v-if="idea.repository" class="inline-flex items-center gap-2 text-sm text-muted-foreground">
           <GitBranch class="size-4 text-primary" aria-hidden="true" />
           Repository linked
         </div>
 
+        <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="ml-auto">
+          <GitBranch class="size-4" aria-hidden="true" />
+          Manage
+        </Button>
       </div>
     </div>
   </Card>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { ChevronDown, Upload } from '@lucide/vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import FormSelect from '@/components/forms/FormSelect.vue';
@@ -20,6 +21,8 @@ const props = defineProps<{
 
 const session = useSessionStore();
 const contentInput = ref<HTMLTextAreaElement | null>(null);
+const markdownFileInput = ref<HTMLInputElement | null>(null);
+const isPreviewTocOpen = ref(true);
 const repositoryNamePattern = '[A-Za-z0-9_-]+';
 const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
 const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
@@ -262,6 +265,10 @@ function selectMarkdownFiles(event: Event): void {
   input.value = '';
 }
 
+function openMarkdownFilePicker(): void {
+  markdownFileInput.value?.click();
+}
+
 function dropMarkdownFiles(event: DragEvent): void {
   void insertMarkdownFiles(Array.from(event.dataTransfer?.files ?? []));
 }
@@ -285,7 +292,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
       description="Describe the problem, the collaboration shape, and the repository plan."
     />
 
-    <Card>
+    <Card class="overflow-visible">
       <CardContent>
         <form :action="formAction" method="POST" class="flex flex-col gap-5">
           <CsrfField />
@@ -342,16 +349,68 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
                     <div class="pt-1">
                       <input
                         id="content_markdown_files"
+                        ref="markdownFileInput"
                         type="file"
-                        class="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+                        class="sr-only"
                         accept=".md,.markdown,text/markdown,text/plain"
                         multiple
                         @change="selectMarkdownFiles"
                       >
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="w-fit"
+                        aria-controls="content_markdown_files"
+                        @click="openMarkdownFilePicker"
+                      >
+                        <Upload class="size-4 text-primary" aria-hidden="true" />
+                        Choose markdown files
+                      </Button>
                     </div>
                   </div>
                 </div>
-                <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_16rem]">
+                <div class="relative flex min-w-0 flex-col gap-3">
+                  <aside class="rounded-2xl border border-border bg-background/55 px-3 py-2 shadow-lg shadow-background/20 backdrop-blur min-[1700px]:hidden" aria-label="Preview table of contents">
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-between gap-3 rounded-full border-l-2 border-primary/70 py-1.5 pl-3 pr-1 text-left text-xs font-semibold uppercase text-white transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                      :aria-expanded="isPreviewTocOpen"
+                      @click="isPreviewTocOpen = !isPreviewTocOpen"
+                    >
+                      Contents
+                      <ChevronDown :class="['size-4 text-primary transition-transform duration-200', { 'rotate-180': isPreviewTocOpen }]" aria-hidden="true" />
+                    </button>
+                    <nav v-if="isPreviewTocOpen && previewHeadings.length > 0" aria-label="Preview table of contents" class="mt-2 flex max-h-[min(18rem,55dvh)] flex-col gap-1 overflow-y-auto overscroll-contain border-l border-border py-2 text-sm">
+                      <a
+                        v-for="heading in previewHeadings"
+                        :key="heading.anchor"
+                        :href="`#${heading.anchor}`"
+                        class="-ml-px flex min-h-8 items-center border-l-2 border-transparent py-1.5 pr-2 text-muted-foreground transition-colors hover:border-primary/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        :style="{ paddingLeft: `${0.75 + Math.max(0, heading.level - minimumPreviewHeadingLevel) * 0.9}rem` }"
+                      >
+                        <span class="truncate" :class="{ 'text-[0.8125rem]': heading.level > minimumPreviewHeadingLevel }">{{ heading.title }}</span>
+                      </a>
+                    </nav>
+                    <p v-else-if="isPreviewTocOpen" class="mt-2 border-l border-border py-1.5 pl-3 text-sm text-muted-foreground">Headings appear here.</p>
+                  </aside>
+                  <aside class="hidden min-[1700px]:absolute min-[1700px]:inset-y-0 min-[1700px]:right-full min-[1700px]:mr-4 min-[1700px]:block min-[1700px]:w-56" aria-label="Preview table of contents">
+                    <div class="sticky top-24 p-2">
+                      <h2 class="pb-2 pl-3 text-sm font-semibold text-white">Contents</h2>
+                      <nav v-if="previewHeadings.length > 0" aria-label="Preview table of contents" class="flex flex-col gap-1 border-l border-border text-sm">
+                        <a
+                          v-for="heading in previewHeadings"
+                          :key="heading.anchor"
+                          :href="`#${heading.anchor}`"
+                          class="-ml-px flex min-h-8 items-center border-l-2 border-transparent py-1.5 pr-2 text-muted-foreground transition-colors hover:border-primary/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                          :style="{ paddingLeft: `${0.75 + Math.max(0, heading.level - minimumPreviewHeadingLevel) * 0.9}rem` }"
+                        >
+                          <span class="truncate" :class="{ 'text-[0.8125rem]': heading.level > minimumPreviewHeadingLevel }">{{ heading.title }}</span>
+                        </a>
+                      </nav>
+                      <p v-else class="border-l border-border py-1.5 pl-3 text-sm text-muted-foreground">Headings appear here.</p>
+                    </div>
+                  </aside>
                   <section class="flex min-h-[28rem] min-w-0 flex-col gap-3 rounded-md border border-border bg-background/35 p-4" aria-label="Markdown preview">
                     <div class="flex items-center justify-between gap-3 border-b border-border pb-3">
                       <h2 class="text-sm font-semibold text-white">Preview</h2>
@@ -362,34 +421,19 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
                       <p v-else class="text-sm text-muted-foreground">Start writing to preview the markdown here.</p>
                     </div>
                   </section>
-                  <aside class="rounded-md border border-border bg-background/35 p-4 xl:sticky xl:top-24 xl:self-start" aria-label="Preview table of contents">
-                    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Contents</h3>
-                    <nav v-if="previewHeadings.length > 0" class="flex flex-col gap-1 text-sm">
-                      <a
-                        v-for="heading in previewHeadings"
-                        :key="heading.anchor"
-                        :href="`#${heading.anchor}`"
-                        class="truncate rounded-sm py-1 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                        :style="{ paddingLeft: `${Math.max(0, heading.level - minimumPreviewHeadingLevel) * 0.75}rem` }"
-                      >
-                        {{ heading.title }}
-                      </a>
-                    </nav>
-                    <p v-else class="text-sm text-muted-foreground">Headings appear here.</p>
-                  </aside>
                 </div>
               </div>
             </template>
           </FormField>
 
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <label v-if="idea" for="status" class="flex items-center gap-2 text-sm">
-              Status:
+            <div v-if="idea" class="flex items-center gap-2 text-sm">
+              <label for="status">Status:</label>
               <FormSelect id="status" name="status">
                 <option value="open" :selected="oldInputString('status', idea.status) === 'open'">Open</option>
                 <option value="closed" :selected="oldInputString('status', idea.status) === 'closed'">Closed</option>
               </FormSelect>
-            </label>
+            </div>
             <span v-else />
 
             <Button type="submit" size="sm" :variant="submitVariant" class="self-end">
