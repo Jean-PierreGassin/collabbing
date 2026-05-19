@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { AlertTriangle, ExternalLink, GitCommit, RefreshCw } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import UserAvatar from '@/components/users/UserAvatar.vue';
-import type { Idea, IdeaApplication, IdeaSupporter } from '@/types/domain';
+import type { Idea, IdeaApplication, IdeaSupporter, RepositoryEvent } from '@/types/domain';
 
 const props = defineProps<{
   idea: Idea;
@@ -29,6 +30,105 @@ const supporterSentence = computed(() => {
 
   return `There ${verb} ${props.idea.supportersCount.toLocaleString()} ${noun} supporting this idea.`;
 });
+
+const repositoryPreviewEventLimit = 3;
+const olderRepositoryEventsExpanded = ref(false);
+
+const repositoryTimelineId = computed(() => `repository-activity-timeline-${props.idea.id}`);
+const olderRepositoryEventsId = computed(() => `repository-older-events-${props.idea.id}`);
+const recentRepositoryEvents = computed(() => props.idea.repositoryActivity.events.slice(0, repositoryPreviewEventLimit));
+const olderRepositoryEvents = computed(() => props.idea.repositoryActivity.events.slice(repositoryPreviewEventLimit));
+const hasRepositoryActivity = computed(() => props.idea.repositoryActivity.events.length > 0);
+
+const repositoryState = computed(() => {
+  if (props.idea.repositoryActivity.isMissing) {
+    return {
+      label: 'Missing',
+      title: 'Repository unavailable',
+      description: 'GitHub no longer reports this repository as available.',
+      tone: 'destructive',
+      icon: AlertTriangle,
+    };
+  }
+
+  if (props.idea.repositoryActivity.latestCommitMessage) {
+    let description = 'Latest commit captured from GitHub.';
+
+    if (props.idea.repositoryActivity.latestCommitAuthor && props.idea.repositoryActivity.latestCommitShortSha) {
+      description = `${props.idea.repositoryActivity.latestCommitAuthor} - ${props.idea.repositoryActivity.latestCommitShortSha}`;
+    } else if (props.idea.repositoryActivity.latestCommitAuthor) {
+      description = props.idea.repositoryActivity.latestCommitAuthor;
+    } else if (props.idea.repositoryActivity.latestCommitShortSha) {
+      description = props.idea.repositoryActivity.latestCommitShortSha;
+    }
+
+    return {
+      label: 'Latest commit',
+      title: props.idea.repositoryActivity.latestCommitMessage,
+      description,
+      tone: 'default',
+      icon: GitCommit,
+    };
+  }
+
+  if (props.idea.repositoryActivity.lastSyncedAtForHumans) {
+    return {
+      label: 'Synced',
+      title: 'Repository sync is current',
+      description: `Synced ${props.idea.repositoryActivity.lastSyncedAtForHumans}.`,
+      tone: 'default',
+      icon: RefreshCw,
+    };
+  }
+
+  return {
+    label: 'Waiting for sync',
+    title: 'Repository linked',
+    description: 'Activity will appear after the next GitHub sync.',
+    tone: 'muted',
+    icon: RefreshCw,
+  };
+});
+
+function repositoryEventLabel(event: RepositoryEvent): string {
+  if (event.type === 'repository_commit') {
+    return 'Commit';
+  }
+
+  if (event.type === 'repository_synced') {
+    return 'Sync';
+  }
+
+  if (event.type === 'repository_missing') {
+    return 'Missing';
+  }
+
+  if (event.type === 'repository_restored') {
+    return 'Restored';
+  }
+
+  if (event.type === 'repository_branch_changed') {
+    return 'Branch';
+  }
+
+  if (event.type === 'repository_issues_changed') {
+    return 'Issues';
+  }
+
+  return 'Activity';
+}
+
+function repositoryEventMarkerClass(event: RepositoryEvent): string {
+  if (event.type === 'repository_missing') {
+    return 'border-destructive/50 bg-destructive/20 text-destructive';
+  }
+
+  if (event.type === 'repository_commit') {
+    return 'border-primary/50 bg-primary/15 text-primary';
+  }
+
+  return 'border-border bg-background text-muted-foreground';
+}
 </script>
 
 <template>
@@ -66,8 +166,11 @@ const supporterSentence = computed(() => {
 
     <Card v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0">
       <CardHeader>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Repository</h2>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-lg font-semibold text-white">Repository</h2>
+            <p v-if="idea.repositoryName" class="break-all text-sm text-muted-foreground">{{ idea.repositoryName }}</p>
+          </div>
           <Button
             v-if="idea.repositoryActivity.htmlUrl"
             as="a"
@@ -76,59 +179,110 @@ const supporterSentence = computed(() => {
             rel="noopener noreferrer"
             variant="outline"
             size="sm"
+            class="w-full sm:w-auto"
           >
-            View on GitHub
+            Open repository on GitHub
+            <ExternalLink aria-hidden="true" />
           </Button>
         </div>
       </CardHeader>
       <CardContent class="flex flex-col gap-4 text-sm">
-        <div v-if="idea.repositoryActivity.isMissing" class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive">
-          Repository is no longer available on GitHub.
+        <div
+          :class="[
+            'flex gap-3 rounded-md border px-3 py-3',
+            repositoryState.tone === 'destructive' ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-border bg-background/35',
+          ]"
+        >
+          <component
+            :is="repositoryState.icon"
+            :class="[
+              'mt-0.5 size-4 shrink-0',
+              repositoryState.tone === 'destructive' ? 'text-destructive' : 'text-primary',
+            ]"
+            aria-hidden="true"
+          />
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-medium uppercase text-muted-foreground">{{ repositoryState.label }}</div>
+            <div class="mt-1 break-words font-medium text-foreground">{{ repositoryState.title }}</div>
+            <div class="mt-1 break-words text-muted-foreground">{{ repositoryState.description }}</div>
+          </div>
         </div>
 
-        <template v-else>
-          <div v-if="idea.repositoryActivity.latestCommitMessage" class="flex flex-col gap-1">
-            <span class="text-xs uppercase text-muted-foreground">Latest commit</span>
-            <span>{{ idea.repositoryActivity.latestCommitMessage }}</span>
-            <span class="text-muted-foreground">
-              <template v-if="idea.repositoryActivity.latestCommitAuthor">
-                {{ idea.repositoryActivity.latestCommitAuthor }}
-              </template>
-              <template v-if="idea.repositoryActivity.latestCommitShortSha">
-                - {{ idea.repositoryActivity.latestCommitShortSha }}
-              </template>
-            </span>
+        <div class="grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
+          <div class="rounded-md border border-border px-2 py-2">
+            <div class="font-semibold">{{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}</div>
+            <div class="text-xs text-muted-foreground">Issues</div>
+          </div>
+          <div class="rounded-md border border-border px-2 py-2">
+            <div class="font-semibold">{{ idea.repositoryActivity.stargazersCount.toLocaleString() }}</div>
+            <div class="text-xs text-muted-foreground">Stars</div>
+          </div>
+          <div class="rounded-md border border-border px-2 py-2">
+            <div class="font-semibold">{{ idea.repositoryActivity.forksCount.toLocaleString() }}</div>
+            <div class="text-xs text-muted-foreground">Forks</div>
+          </div>
+        </div>
+
+        <dl v-if="idea.repositoryActivity.lastPushedAtForHumans || idea.repositoryActivity.lastSyncedAtForHumans" class="grid grid-cols-1 gap-2 text-muted-foreground sm:grid-cols-2">
+          <div v-if="idea.repositoryActivity.lastPushedAtForHumans" class="rounded-md border border-border px-3 py-2">
+            <dt class="text-xs uppercase">Last pushed</dt>
+            <dd class="mt-1 text-foreground">{{ idea.repositoryActivity.lastPushedAtForHumans }}</dd>
+          </div>
+          <div v-if="idea.repositoryActivity.lastSyncedAtForHumans" class="rounded-md border border-border px-3 py-2">
+            <dt class="text-xs uppercase">Last synced</dt>
+            <dd class="mt-1 text-foreground">{{ idea.repositoryActivity.lastSyncedAtForHumans }}</dd>
+          </div>
+        </dl>
+
+        <div class="border-t border-border pt-4">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-foreground">Activity timeline</h3>
+            <span v-if="hasRepositoryActivity" class="text-xs text-muted-foreground">{{ idea.repositoryActivity.events.length.toLocaleString() }} events</span>
           </div>
 
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Issues</div>
-            </div>
-            <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.stargazersCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Stars</div>
-            </div>
-            <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.forksCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Forks</div>
-            </div>
-          </div>
+          <p v-if="!hasRepositoryActivity" class="mt-2 text-muted-foreground">No repository events have been recorded yet.</p>
 
-          <div class="text-muted-foreground">
-            <template v-if="idea.repositoryActivity.lastPushedAtForHumans">
-              Last pushed {{ idea.repositoryActivity.lastPushedAtForHumans }}.
-            </template>
-            <template v-if="idea.repositoryActivity.lastSyncedAtForHumans">
-              Synced {{ idea.repositoryActivity.lastSyncedAtForHumans }}.
-            </template>
-          </div>
-        </template>
+          <ol v-else :id="repositoryTimelineId" class="mt-3 flex flex-col gap-3" aria-label="Repository activity timeline">
+            <li v-for="event in recentRepositoryEvents" :key="event.id" class="grid grid-cols-[auto_1fr] gap-3">
+              <span :class="['mt-0.5 inline-flex h-7 min-w-14 items-center justify-center rounded-full border px-2 text-[0.7rem] font-medium', repositoryEventMarkerClass(event)]">
+                {{ repositoryEventLabel(event) }}
+              </span>
+              <div class="min-w-0 border-l border-border pl-3">
+                <p class="break-words text-foreground">{{ event.summary }}</p>
+                <p class="mt-1 text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</p>
+              </div>
+            </li>
+          </ol>
 
-        <div v-if="idea.repositoryActivity.events.length > 0" class="flex flex-col gap-2 border-t border-border pt-3">
-          <div v-for="event in idea.repositoryActivity.events" :key="event.id" class="flex flex-col gap-1">
-            <span>{{ event.summary }}</span>
-            <span class="text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</span>
+          <div v-if="olderRepositoryEvents.length > 0" class="mt-3 flex flex-col gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              class="w-full justify-center sm:w-auto"
+              :aria-expanded="olderRepositoryEventsExpanded.toString()"
+              :aria-controls="olderRepositoryEventsId"
+              @click="olderRepositoryEventsExpanded = !olderRepositoryEventsExpanded"
+            >
+              {{ olderRepositoryEventsExpanded ? 'Hide older events' : `Show ${olderRepositoryEvents.length.toLocaleString()} older events` }}
+            </Button>
+
+            <ol
+              v-show="olderRepositoryEventsExpanded"
+              :id="olderRepositoryEventsId"
+              class="flex flex-col gap-3"
+              aria-label="Older repository activity"
+            >
+              <li v-for="event in olderRepositoryEvents" :key="event.id" class="grid grid-cols-[auto_1fr] gap-3">
+                <span :class="['mt-0.5 inline-flex h-7 min-w-14 items-center justify-center rounded-full border px-2 text-[0.7rem] font-medium', repositoryEventMarkerClass(event)]">
+                  {{ repositoryEventLabel(event) }}
+                </span>
+                <div class="min-w-0 border-l border-border pl-3">
+                  <p class="break-words text-foreground">{{ event.summary }}</p>
+                  <p class="mt-1 text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</p>
+                </div>
+              </li>
+            </ol>
           </div>
         </div>
       </CardContent>
