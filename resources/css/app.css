@@ -72,6 +72,7 @@
 
   html {
     overflow-x: clip;
+    scrollbar-gutter: stable;
     color-scheme: dark;
   }
 
