@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Shared;
 
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Tests\TestCase;

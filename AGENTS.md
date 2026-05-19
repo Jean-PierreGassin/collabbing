@@ -1,11 +1,35 @@
 # Project Overview
 
 ## Stack
-- PHP 8.5
-- MySQL 
-- Vue 3/TypeScript
-- Tailwind
-- Vite
+- Laravel 13 / PHP 8.5
+- MySQL 9.7 / Redis 8.6 via Docker
+- Vue 3 / TypeScript / Inertia
+- Tailwind CSS 4
+- Vite 7 / Node 24
+
+## Project Map
+```
+.
+|-- app/
+|   |-- Data/          DTOs for typed service/controller payloads
+|   |-- Http/          Requests, controllers, middleware, and thin web entrypoints
+|   |-- Models/        Eloquent state, casts, and relationships
+|   |-- Repositories/  Persistence queries and model lookup/write boundaries
+|   +-- Services/      Application workflows and third-party integrations
+|-- database/          Migrations, factories, and seeders
+|-- resources/js/
+|   |-- pages/         Inertia page components
+|   |-- components/    Shared Vue UI
+|   |-- lib/           Frontend helpers
+|   +-- tests/         Frontend tests mirroring the resources/js tree
+|-- routes/            Web/API/console route definitions
+|-- tests/
+|   |-- Feature/       User-facing backend flows grouped by concern
+|   +-- Unit/          Database-free business logic tests
+|-- docker/            Local and production runtime configuration
++-- .github/
+    +-- workflows/     CI and deployment automation
+```
 
 ## Organisation
 - Prioritise organising files/classes/methods to ensure we are always in a clean workspace
@@ -49,10 +73,12 @@
   - Happy paths
   - Unhappy paths
   - Edge cases
-- Use data providers when applicable
+- Always consider using data providers when test cases repeat the same behaviour with different inputs
+- Unit tests must avoid database access
 - Use camel case method names, prefixed with `test`
 - Do not create long/verbose test method names
-- Tests should be brief and readable
+- Tests should be brief and readable/easy to follow, and well designed
+- Tests must prioritise critical application business logic over shape checks or framework/library behaviour
 
 ## Version Control
 - Never work directly off `dev` or `master`, create a branch targeting `dev` instead

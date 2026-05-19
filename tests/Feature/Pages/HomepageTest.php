@@ -1,8 +1,9 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Pages;
 
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class HomepageTest extends TestCase
@@ -38,19 +39,23 @@ class HomepageTest extends TestCase
                 ->has('flash.status'));
     }
 
-    public function testResourcePagesLoadTheInertiaAppShell(): void
+    #[DataProvider('resourcePages')]
+    public function testResourcePagesLoadTheInertiaAppShell(string $path, string $component): void
     {
-        foreach ([
-            '/resources/feedback' => 'Feedback',
-            '/resources/contact' => 'Contact',
-            '/resources/pricing' => 'Pricing',
-        ] as $path => $component) {
-            $response = $this->get($path);
+        $response = $this->get($path);
 
-            $response
-                ->assertOk()
-                ->assertDontSee('@inertia', false)
-                ->assertInertia(fn (Assert $page) => $page->component($component));
-        }
+        $response
+            ->assertOk()
+            ->assertDontSee('@inertia', false)
+            ->assertInertia(fn (Assert $page) => $page->component($component));
+    }
+
+    public static function resourcePages(): array
+    {
+        return [
+            'feedback' => ['/resources/feedback', 'Feedback'],
+            'contact' => ['/resources/contact', 'Contact'],
+            'pricing' => ['/resources/pricing', 'Pricing'],
+        ];
     }
 }
