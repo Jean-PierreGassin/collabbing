@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { AlertTriangle, CheckCircle2, X } from '@lucide/vue';
+import { AlertTriangle, CheckCircle2, Sparkles, X } from '@lucide/vue';
 import { useSessionStore } from '@/stores/session';
 
 const session = useSessionStore();
@@ -76,15 +76,23 @@ function toastTitle(tone: ToastTone): string {
     return 'Needs attention';
   }
 
-  return 'Saved';
+  return 'Success';
 }
 
 function toastClass(tone: ToastTone): string {
   if (tone === 'error') {
-    return 'border-destructive/70 text-foreground';
+    return 'border-destructive/35 text-foreground';
   }
 
-  return 'border-primary/70 text-foreground';
+  return 'border-primary/35 text-foreground';
+}
+
+function toastAccentClass(tone: ToastTone): string {
+  if (tone === 'error') {
+    return 'bg-destructive';
+  }
+
+  return 'bg-primary';
 }
 
 function toastRole(tone: ToastTone): 'alert' | 'status' {
@@ -105,10 +113,10 @@ function toastAriaLive(tone: ToastTone): 'assertive' | 'polite' {
 
 function toastIconClass(tone: ToastTone): string {
   if (tone === 'error') {
-    return 'bg-destructive/15 text-destructive';
+    return 'bg-destructive/12 text-destructive ring-destructive/30';
   }
 
-  return 'bg-primary/15 text-primary';
+  return 'bg-primary/12 text-primary ring-primary/30';
 }
 
 watch(flashSignature, () => {
@@ -136,13 +144,13 @@ onBeforeUnmount(() => {
   <TransitionGroup
     tag="div"
     name="toast-slide"
-    class="pointer-events-none fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[calc(100vw-2rem)] sm:max-w-md sm:gap-3"
+    class="pointer-events-none fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[calc(100vw-2rem)] sm:max-w-[27rem] sm:gap-3"
     aria-label="Notifications"
   >
     <div
       v-for="toast in toasts"
       :key="toast.id"
-      class="pointer-events-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-md border bg-popover px-4 py-3 text-sm shadow-2xl shadow-black/35 ring-1 ring-white/10 sm:min-h-24 sm:grid-cols-[auto_1fr_auto] sm:items-start sm:gap-4 sm:p-5 sm:text-base"
+      class="pointer-events-auto relative grid min-h-24 grid-cols-[auto_1fr_auto] items-start gap-3 overflow-hidden rounded-lg border bg-zinc-950/95 px-4 py-3 text-sm shadow-[0_22px_60px_rgba(0,0,0,0.42)] ring-1 ring-white/10 backdrop-blur-md sm:gap-4 sm:px-5 sm:py-4"
       :class="toastClass(toast.tone)"
       :role="toastRole(toast.tone)"
       :aria-live="toastAriaLive(toast.tone)"
@@ -151,20 +159,28 @@ onBeforeUnmount(() => {
       @focusin="pauseToast(toast)"
       @focusout="resumeToast(toast)"
     >
+      <span
+        class="absolute inset-y-3 left-0 w-1 rounded-r-full"
+        :class="toastAccentClass(toast.tone)"
+        aria-hidden="true"
+      />
       <div
-        class="hidden size-10 shrink-0 items-center justify-center rounded-md sm:flex"
+        class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full ring-1"
         :class="toastIconClass(toast.tone)"
       >
-        <AlertTriangle v-if="toast.tone === 'error'" class="size-5" aria-hidden="true" />
-        <CheckCircle2 v-else class="size-5" aria-hidden="true" />
+        <AlertTriangle v-if="toast.tone === 'error'" class="size-4" aria-hidden="true" />
+        <CheckCircle2 v-else class="size-4" aria-hidden="true" />
       </div>
-      <div class="min-w-0">
-        <p class="sr-only font-semibold text-white sm:not-sr-only">{{ toastTitle(toast.tone) }}</p>
-        <p class="line-clamp-2 leading-5 text-foreground sm:mt-1 sm:line-clamp-none sm:leading-6 sm:text-muted-foreground">{{ toast.message }}</p>
+      <div class="min-w-0 space-y-1">
+        <div class="flex min-w-0 items-center gap-2">
+          <Sparkles class="size-3.5 shrink-0 text-muted-foreground/80" aria-hidden="true" />
+          <p class="truncate font-semibold leading-5 text-white">{{ toastTitle(toast.tone) }}</p>
+        </div>
+        <p class="line-clamp-3 leading-5 text-muted-foreground sm:line-clamp-none">{{ toast.message }}</p>
       </div>
       <button
         type="button"
-        class="-mr-2 flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:-mr-1 sm:-mt-1 sm:size-auto sm:p-1.5"
+        class="-mr-1 -mt-1 flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         aria-label="Dismiss notification"
         @click="dismissToast(toast.id)"
       >
