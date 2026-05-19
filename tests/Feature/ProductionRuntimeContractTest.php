@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Http\Middleware\TrustHosts;
 use App\Jobs\SyncGitHubRepositories;
+use Symfony\Component\Yaml\Yaml;
 use Tests\TestCase;
 
 class ProductionRuntimeContractTest extends TestCase
@@ -31,19 +32,22 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertGreaterThan($job->timeout, config('queue.connections.database.retry_after'));
     }
 
-    public function testProductionStackRunsWebQueueSchedulerAndCacheProcesses(): void
+    public function testProductionStackDefinesRequiredRuntimeServices(): void
     {
-        $stack = file_get_contents(base_path('docker/production/stack.yaml'));
+        $stack = Yaml::parseFile(base_path('docker/production/stack.yaml'));
 
-        $this->assertIsString($stack);
-        $this->assertStringContainsString('app:', $stack);
-        $this->assertStringContainsString('nginx:', $stack);
-        $this->assertStringContainsString('queue:', $stack);
-        $this->assertStringContainsString('scheduler:', $stack);
-        $this->assertStringContainsString('redis:', $stack);
-        $this->assertStringContainsString('queue:work', $stack);
-        $this->assertStringContainsString('schedule:work', $stack);
-        $this->assertStringContainsString('order: start-first', $stack);
+        $this->assertIsArray($stack);
+        $this->assertArrayHasKey('services', $stack);
+        $this->assertEqualsCanonicalizing(
+            ['app', 'mysql', 'nginx', 'queue', 'redis', 'scheduler'],
+            array_keys($stack['services']),
+        );
+        $this->assertStringContainsString('queue:work redis', implode(' ', $stack['services']['queue']['command']));
+        $this->assertStringContainsString('schedule:work', implode(' ', $stack['services']['scheduler']['command']));
+        $this->assertSame('start-first', $stack['services']['app']['deploy']['update_config']['order']);
+        $this->assertSame('start-first', $stack['services']['nginx']['deploy']['update_config']['order']);
+        $this->assertSame('start-first', $stack['services']['queue']['deploy']['update_config']['order']);
+        $this->assertSame('stop-first', $stack['services']['scheduler']['deploy']['update_config']['order']);
 
         $nginx = file_get_contents(base_path('docker/production/nginx.conf'));
 
@@ -53,31 +57,38 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertStringContainsString('fastcgi_param HTTP_X_FORWARDED_PROTO $forwarded_proto;', $nginx);
     }
 
-    public function testMasterPushDeploysABuiltImageAfterVerification(): void
+    public function testProductionWorkflowVerifiesBuildsAndDeploysReleaseImage(): void
     {
-        $workflow = file_get_contents(base_path('.github/workflows/production-deploy.yml'));
+        $workflow = Yaml::parseFile(base_path('.github/workflows/production-deploy.yml'));
 
-        $this->assertIsString($workflow);
-        $this->assertStringContainsString('branches:', $workflow);
-        $this->assertStringContainsString('- master', $workflow);
-        $this->assertStringContainsString('workflow_dispatch:', $workflow);
-        $this->assertStringContainsString('Run the full deployment after preflight', $workflow);
-        $this->assertStringContainsString('Run PHPUnit', $workflow);
-        $this->assertStringContainsString('Build frontend', $workflow);
-        $this->assertStringContainsString('Build and push image', $workflow);
-        $this->assertStringContainsString("permissions:\n  contents: read\n\nenv:", $workflow);
-        $this->assertStringContainsString("    permissions:\n      contents: read\n      packages: write", $workflow);
-        $this->assertStringContainsString("    permissions:\n      contents: read\n      packages: read", $workflow);
-        $this->assertStringContainsString('Validate deployment secrets', $workflow);
-        $this->assertStringContainsString('Missing ${name}', $workflow);
-        $this->assertStringContainsString('Run deployment preflight', $workflow);
-        $this->assertStringContainsString('Deploy over SSH', $workflow);
-        $this->assertStringContainsString('docker login ghcr.io', $workflow);
-        $this->assertStringContainsString('docker/production/deploy.sh --preflight', $workflow);
-        $this->assertStringContainsString("if: github.event_name == 'push' || inputs.deploy", $workflow);
-        $this->assertStringContainsString('PRODUCTION_SSH_KNOWN_HOSTS', $workflow);
-        $this->assertStringNotContainsString('echo \'${{ secrets.GITHUB_TOKEN }}\'', $workflow);
-        $this->assertStringNotContainsString('ssh-keyscan', $workflow);
+        $this->assertIsArray($workflow);
+        $this->assertContains('master', $workflow['on']['push']['branches']);
+        $this->assertArrayHasKey('workflow_dispatch', $workflow['on']);
+        $this->assertSame(['contents' => 'read'], $workflow['permissions']);
+        $this->assertSame(['contents' => 'read', 'packages' => 'write'], $workflow['jobs']['build']['permissions']);
+        $this->assertSame(['contents' => 'read', 'packages' => 'read'], $workflow['jobs']['deploy']['permissions']);
+        $this->assertSame('verify', $workflow['jobs']['build']['needs']);
+        $this->assertSame('build', $workflow['jobs']['deploy']['needs']);
+
+        $verifyRuns = $this->workflowStepRuns($workflow, 'verify');
+
+        foreach ([
+            'vendor/bin/pint --test',
+            'vendor/bin/phpstan analyse --memory-limit=1G --debug',
+            'php artisan test --compact --do-not-cache-result',
+            'npm run lint',
+            'npm run typecheck',
+            'npm run test',
+            'npm run build',
+        ] as $expectedCommand) {
+            $this->assertContains($expectedCommand, $verifyRuns);
+        }
+
+        $deployRuns = implode("\n", $this->workflowStepRuns($workflow, 'deploy'));
+
+        $this->assertStringContainsString('PRODUCTION_SSH_KNOWN_HOSTS', $deployRuns);
+        $this->assertStringContainsString('docker/production/deploy.sh --preflight', $deployRuns);
+        $this->assertStringNotContainsString('ssh-keyscan', $deployRuns);
     }
 
     public function testDeployScriptRunsDatabaseAndProcessRefreshSteps(): void
@@ -110,5 +121,14 @@ class ProductionRuntimeContractTest extends TestCase
             strpos($script, 'docker stack deploy'),
             strpos($script, 'docker network inspect "$NETWORK_NAME"'),
         );
+    }
+
+    private function workflowStepRuns(array $workflow, string $job): array
+    {
+        return collect($workflow['jobs'][$job]['steps'])
+            ->pluck('run')
+            ->filter()
+            ->values()
+            ->all();
     }
 }

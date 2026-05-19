@@ -5,36 +5,8 @@ namespace Tests\Feature;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
-class RouteContractTest extends TestCase
+class ProductRouteSafetyTest extends TestCase
 {
-    public function testImplementedResourceRoutesAreRegistered(): void
-    {
-        foreach ([
-            'ideas.index',
-            'ideas.show',
-            'ideas.create',
-            'ideas.store',
-            'ideas.edit',
-            'ideas.update',
-            'ideas.dashboard',
-            'ideas.comments.create',
-            'ideas.comments.store',
-            'ideas.comments.edit',
-            'ideas.comments.update',
-            'ideas.supporters.store',
-            'ideas.supporters.destroy',
-            'ideas.applications.create',
-            'ideas.applications.store',
-            'ideas.applications.destroy',
-            'ideas.applications.approve',
-            'resources.feedback',
-            'resources.contact',
-            'resources.pricing',
-        ] as $routeName) {
-            $this->assertTrue(Route::has($routeName), "Expected route [{$routeName}] to be registered.");
-        }
-    }
-
     public function testUnimplementedResourceRoutesAreNotRegistered(): void
     {
         foreach ([

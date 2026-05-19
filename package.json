@@ -6,8 +6,9 @@
     "dev": "vite --host 0.0.0.0",
     "lint": "eslint resources/js --max-warnings=0",
     "lint:fix": "eslint resources/js --fix",
+    "test": "vitest run --config vitest.config.ts",
     "typecheck": "vue-tsc --noEmit",
-    "quality": "npm run lint && npm run typecheck && npm run build",
+    "quality": "npm run lint && npm run typecheck && npm run test && npm run build",
     "build": "vue-tsc --noEmit && vite build"
   },
   "dependencies": {
@@ -27,14 +28,17 @@
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^25.8.0",
     "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/test-utils": "^2.4.10",
     "eslint": "^10.4.0",
     "eslint-plugin-vue": "^10.9.1",
     "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
     "laravel-vite-plugin": "^2.0.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
     "vite": "^7.0.0",
+    "vitest": "^4.1.6",
     "vue-component-type-helpers": "^3.2.9",
     "vue-tsc": "^3.2.9"
   }
