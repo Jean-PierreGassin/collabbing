@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SearchIdeas;
 use App\Http\Requests\StoreIdea;
+use App\Http\Requests\UpdateIdeaStatus;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\IdeaComment;
@@ -142,6 +143,17 @@ class IdeaController extends Controller
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully edited');
+    }
+
+    public function updateStatus(UpdateIdeaStatus $request, Idea $idea): RedirectResponse
+    {
+        $this->authorize('update', $idea);
+
+        $this->ideaService->updateStatus($idea, $request->toData());
+
+        return redirect()
+            ->route('ideas.dashboard', compact('idea'))
+            ->with('status', 'Idea status updated.');
     }
 
     public function createRepository(Idea $idea): RedirectResponse

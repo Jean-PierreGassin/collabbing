@@ -97,7 +97,9 @@ class PagePropsService
             'content' => $idea->content,
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
             'status' => $idea->status,
-            'statusDisplay' => ucfirst($idea->status),
+            'statusDisplay' => $this->ideaStatusDisplay($idea->status),
+            'statusHelp' => $this->ideaStatusHelp($idea->status),
+            'availableStatuses' => $this->availableIdeaStatuses(),
             'repository' => $repositoryAvailable,
             'repositoryName' => $codeRepository?->name,
             'repositoryActivity' => $this->repositoryActivity($idea),
@@ -119,6 +121,7 @@ class PagePropsService
                 'edit' => route('ideas.edit', $idea),
                 'dashboard' => route('ideas.dashboard', $idea),
                 'update' => route('ideas.update', $idea),
+                'statusUpdate' => route('ideas.status.update', $idea),
                 'applicationsCreate' => route('ideas.applications.create', $idea),
                 'applicationsStore' => route('ideas.applications.store', $idea),
                 'commentsStore' => route('ideas.comments.store', $idea),
@@ -146,6 +149,38 @@ class PagePropsService
         }
 
         return Str::limit($text, self::IDEA_SUMMARY_LIMIT, '');
+    }
+
+    private function availableIdeaStatuses(): array
+    {
+        return collect(Idea::STATUSES)
+            ->map(fn (string $status): array => [
+                'value' => $status,
+                'label' => $this->ideaStatusDisplay($status),
+                'description' => $this->ideaStatusHelp($status),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function ideaStatusDisplay(string $status): string
+    {
+        return match ($status) {
+            Idea::STATUS_PAUSED => 'Paused',
+            Idea::STATUS_SHIPPED => 'Shipped',
+            Idea::STATUS_CLOSED => 'Closed',
+            default => 'Open',
+        };
+    }
+
+    private function ideaStatusHelp(string $status): string
+    {
+        return match ($status) {
+            Idea::STATUS_PAUSED => 'Collaboration is temporarily paused.',
+            Idea::STATUS_SHIPPED => 'The idea has reached a shipped milestone.',
+            Idea::STATUS_CLOSED => 'The idea is no longer accepting new activity.',
+            default => 'The idea is accepting support and applications.',
+        };
     }
 
     private function relationCount(Idea $idea, string $relation, string $countAttribute): int

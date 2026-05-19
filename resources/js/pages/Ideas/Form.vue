@@ -388,8 +388,9 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
             <div v-if="idea" class="flex items-center gap-2 text-sm">
               <label for="status">Status:</label>
               <FormSelect id="status" name="status">
-                <option value="open" :selected="oldInputString('status', idea.status) === 'open'">Open</option>
-                <option value="closed" :selected="oldInputString('status', idea.status) === 'closed'">Closed</option>
+                <option v-for="statusOption in idea.availableStatuses" :key="statusOption.value" :value="statusOption.value" :selected="oldInputString('status', idea.status) === statusOption.value">
+                  {{ statusOption.label }}
+                </option>
               </FormSelect>
             </div>
             <span v-else />

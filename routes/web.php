@@ -56,6 +56,10 @@ Route::match(['put', 'patch'], 'ideas/{idea}', 'IdeaController@update')
     ->name('ideas.update')
     ->middleware(['web', 'auth', 'throttle:product-write']);
 
+Route::patch('ideas/{idea}/status', 'IdeaController@updateStatus')
+    ->name('ideas.status.update')
+    ->middleware(['web', 'auth', 'throttle:product-write']);
+
 Route::get('ideas', 'IdeaController@index')
     ->name('ideas.index')
     ->middleware(['web']);
