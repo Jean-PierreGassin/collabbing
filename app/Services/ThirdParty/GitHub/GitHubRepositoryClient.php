@@ -17,6 +17,14 @@ class GitHubRepositoryClient
             ->create($repositoryName);
     }
 
+    public function createReadme(User $owner, string $repositoryName, string $content): void
+    {
+        $this->client($owner)
+            ->repo()
+            ->contents()
+            ->create($this->username($owner), $repositoryName, 'README.md', $content, 'Add idea README');
+    }
+
     public function show(User $owner, string $repositoryName): array
     {
         return $this->client($owner)
