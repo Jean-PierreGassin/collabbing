@@ -6,6 +6,7 @@ use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
 use App\Repositories\Ideas\ApplicationRepository;
+use App\Services\Ideas\IdeaRepositoryReadmeService;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use RuntimeException;
@@ -16,7 +17,8 @@ class RepositoryService
     public function __construct(
         private GitHubRepositoryClient $github,
         private IdeaRepositorySyncService $sync,
-        private ApplicationRepository $applications
+        private ApplicationRepository $applications,
+        private IdeaRepositoryReadmeService $readmes
     ) {}
 
     public function create(Idea $idea): bool
@@ -31,6 +33,7 @@ class RepositoryService
         }
 
         $repository = $this->github->create($owner, $codeRepository->name);
+        $this->github->createReadme($owner, $codeRepository->name, $this->readmes->build($idea, $codeRepository));
 
         $this->sync->recordCreated($codeRepository, $repository);
 

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\CodeRepositories\CodeRepositoryRepository;
 use App\Repositories\CodeRepositories\RepositoryEventRepository;
 use App\Repositories\Ideas\ApplicationRepository;
+use App\Services\Ideas\IdeaRepositoryReadmeService;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\RepositoryService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
@@ -137,7 +138,12 @@ class IdeaRepositoryCreateTest extends TestCase
             )
             ->willThrowException(new Exception('GitHub invite failed'));
 
-        $service = new RepositoryService($github, $this->syncService(), app(ApplicationRepository::class));
+        $service = new RepositoryService(
+            $github,
+            $this->syncService(),
+            app(ApplicationRepository::class),
+            new IdeaRepositoryReadmeService
+        );
 
         $this->assertFalse($service->inviteUsers($idea));
     }
@@ -160,7 +166,12 @@ class IdeaRepositoryCreateTest extends TestCase
         $github = $this->createMock(GitHubRepositoryClient::class);
         $github->expects($this->never())->method('addCollaborator');
 
-        $service = new RepositoryService($github, $this->syncService(), app(ApplicationRepository::class));
+        $service = new RepositoryService(
+            $github,
+            $this->syncService(),
+            app(ApplicationRepository::class),
+            new IdeaRepositoryReadmeService
+        );
 
         $this->assertFalse($service->inviteUsers($idea));
     }

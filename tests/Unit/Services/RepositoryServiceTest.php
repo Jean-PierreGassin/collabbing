@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\CodeRepositories\CodeRepositoryRepository;
 use App\Repositories\CodeRepositories\RepositoryEventRepository;
 use App\Repositories\Ideas\ApplicationRepository;
+use App\Services\Ideas\IdeaRepositoryReadmeService;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\RepositoryService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
@@ -18,6 +19,59 @@ use PHPUnit\Framework\TestCase;
 
 class RepositoryServiceTest extends TestCase
 {
+    public function testCreateBootstrapsRepositoryReadmeFromIdea(): void
+    {
+        $owner = $this->githubUser('owner');
+        $idea = $this->idea($owner);
+
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->once())
+            ->method('create')
+            ->with(
+                $this->callback(fn (User $candidate) => $candidate->is($owner)),
+                'collab-idea',
+            )
+            ->willReturn($this->repositoryPayload());
+        $github->expects($this->once())
+            ->method('createReadme')
+            ->with(
+                $this->callback(fn (User $candidate) => $candidate->is($owner)),
+                'collab-idea',
+                $this->callback(fn (string $content): bool => str_contains($content, '# Useful collaboration idea')
+                    && str_contains($content, 'A short summary for collaborators.')
+                    && str_contains($content, 'Preferred communication: Slack.')
+                    && str_contains($content, '## Pitch')
+                    && str_contains($content, 'A focused pitch for the team.')),
+            );
+
+        $sync = $this->createMock(IdeaRepositorySyncService::class);
+        $sync->expects($this->once())
+            ->method('recordCreated')
+            ->with(
+                $this->callback(fn (CodeRepository $candidate) => $candidate->name === 'collab-idea'),
+                $this->repositoryPayload(),
+            );
+
+        $this->assertTrue($this->service($github, $sync)->create($idea));
+    }
+
+    public function testCreateDoesNotWriteReadmeWhenRepositoryCreationFails(): void
+    {
+        $owner = $this->githubUser('owner');
+        $idea = $this->idea($owner);
+
+        $github = $this->createMock(GitHubRepositoryClient::class);
+        $github->expects($this->once())
+            ->method('create')
+            ->willThrowException(new Exception('GitHub create failed'));
+        $github->expects($this->never())->method('createReadme');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('GitHub create failed');
+
+        $this->service($github)->create($idea);
+    }
+
     public function testInviteUserInvitesGithubCollaborator(): void
     {
         $owner = $this->githubUser('owner');
@@ -66,16 +120,17 @@ class RepositoryServiceTest extends TestCase
         $this->assertFalse($this->service($github)->inviteUser($idea, $application));
     }
 
-    private function service(GitHubRepositoryClient $github): RepositoryService
+    private function service(GitHubRepositoryClient $github, ?IdeaRepositorySyncService $sync = null): RepositoryService
     {
         return new RepositoryService(
             github: $github,
-            sync: new IdeaRepositorySyncService(
+            sync: $sync ?? new IdeaRepositorySyncService(
                 github: $this->createStub(GitHubRepositoryClient::class),
                 codeRepositories: $this->createStub(CodeRepositoryRepository::class),
                 repositoryEvents: $this->createStub(RepositoryEventRepository::class)
             ),
-            applications: new ApplicationRepository
+            applications: new ApplicationRepository,
+            readmes: new IdeaRepositoryReadmeService,
         );
     }
 
@@ -101,6 +156,12 @@ class RepositoryServiceTest extends TestCase
         };
 
         $idea->setRelation('user', $owner);
+        $idea->forceFill([
+            'title' => 'Useful collaboration idea',
+            'summary' => 'A short summary for collaborators.',
+            'communication' => 'Slack',
+            'content' => 'A focused pitch for the team.',
+        ]);
         $idea->setRelation('codeRepository', new CodeRepository([
             'provider' => CodeRepository::PROVIDER_GITHUB,
             'status' => CodeRepository::STATUS_ACTIVE,
@@ -108,6 +169,20 @@ class RepositoryServiceTest extends TestCase
         ]));
 
         return $idea;
+    }
+
+    private function repositoryPayload(): array
+    {
+        return [
+            'id' => 123,
+            'name' => 'collab-idea',
+            'full_name' => 'owner/collab-idea',
+            'html_url' => 'https://github.com/owner/collab-idea',
+            'default_branch' => 'main',
+            'open_issues_count' => 0,
+            'stargazers_count' => 0,
+            'forks_count' => 0,
+        ];
     }
 
     private function application(User $collaborator): IdeaApplication
