@@ -153,9 +153,11 @@
 }
 
 .markdown-content code {
-  border-radius: 0.25rem;
-  background: color-mix(in oklab, var(--secondary) 82%, black);
-  padding: 0.1rem 0.3rem;
+  border: 1px solid color-mix(in oklab, var(--chart-2) 28%, var(--border) 72%);
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--background) 72%, black 28%);
+  color: color-mix(in oklab, var(--chart-2) 72%, white 28%);
+  padding: 0.08rem 0.34rem;
   font-size: 0.9em;
 }
 
@@ -163,13 +165,21 @@
   overflow-x: auto;
   white-space: pre-wrap;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--background) 82%, black);
+  border: 1px solid color-mix(in oklab, var(--chart-2) 25%, var(--border) 75%);
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--card) 35%, transparent), transparent),
+    color-mix(in oklab, var(--background) 62%, black 38%);
+  box-shadow:
+    inset 3px 0 0 color-mix(in oklab, var(--chart-2) 62%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 8%, transparent);
+  color: color-mix(in oklab, var(--foreground) 92%, var(--chart-2) 8%);
   padding: 1rem;
 }
 
 .markdown-content pre code {
+  border: 0;
   background: transparent;
+  color: inherit;
   padding: 0;
 }
 
@@ -551,30 +561,29 @@ textarea.form-control-clearable {
   translate: 0 0;
 }
 
-.toc-item-enter-active,
-.toc-item-leave-active,
-.toc-item-move {
-  transition:
-    max-height 180ms ease,
-    opacity 180ms ease,
-    translate 180ms ease;
-}
-
-.toc-item-enter-active,
-.toc-item-leave-active {
+.toc-item-shell {
   max-height: 2.75rem;
   overflow: hidden;
+  transform: translateX(0);
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    transform 220ms ease,
+    margin-top 220ms ease;
 }
 
-.toc-item-leave-active {
-  position: relative;
+.toc-item-shell-visible {
+  max-height: 2.75rem;
+  opacity: 1;
+  transform: translateX(0);
 }
 
-.toc-item-enter-from,
-.toc-item-leave-to {
+.toc-item-shell-hidden {
+  margin-top: -0.25rem;
   max-height: 0;
   opacity: 0;
-  translate: -0.25rem 0;
+  pointer-events: none;
+  transform: translateX(-0.25rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -591,9 +600,7 @@ textarea.form-control-clearable {
   .toc-float-leave-active,
   .toc-mobile-enter-active,
   .toc-mobile-leave-active,
-  .toc-item-enter-active,
-  .toc-item-leave-active,
-  .toc-item-move {
+  .toc-item-shell {
     transition-duration: 1ms;
   }
 }
