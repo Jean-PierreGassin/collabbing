@@ -38,6 +38,33 @@
 
 :root {
   --radius: 0.5rem;
+  --app-white: oklch(0.23 0.012 245);
+  --background: oklch(0.98 0.004 245);
+  --foreground: oklch(0.28 0.012 245);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.012 245);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.012 245);
+  --primary: oklch(0.7 0.17 58);
+  --primary-foreground: oklch(0.13 0.012 245);
+  --secondary: oklch(0.93 0.006 245);
+  --secondary-foreground: oklch(0.24 0.012 245);
+  --muted: oklch(0.94 0.006 245);
+  --muted-foreground: oklch(0.52 0.018 245);
+  --accent: oklch(0.91 0.052 72);
+  --accent-foreground: oklch(0.28 0.055 58);
+  --destructive: oklch(0.58 0.19 24);
+  --border: oklch(0.18 0.014 245 / 13%);
+  --input: oklch(0.18 0.014 245 / 18%);
+  --ring: oklch(0.7 0.17 58);
+  --chart-1: oklch(0.7 0.17 58);
+  --chart-2: oklch(0.58 0.13 230);
+  --chart-3: oklch(0.62 0.14 145);
+  --chart-4: oklch(0.62 0.17 35);
+  --chart-5: oklch(0.58 0.12 300);
+}
+
+.dark {
   --app-white: oklch(0.91 0.006 245);
   --background: oklch(0.16 0.014 245);
   --foreground: oklch(0.86 0.007 245);
@@ -73,6 +100,10 @@
   html {
     overflow-x: clip;
     scrollbar-gutter: stable;
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
 
