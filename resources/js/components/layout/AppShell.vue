@@ -160,11 +160,7 @@ const transitionKey = computed(() => {
 
   return nextUrl;
 });
-const chromeTransitionKey = computed(() => {
-  const sessionState = session.isAuthenticated ? 'authenticated' : 'guest';
-
-  return `${sessionState}:${transitionKey.value}`;
-});
+const chromeTransitionKey = computed(() => session.isAuthenticated ? 'authenticated' : 'guest');
 
 function closeMobileNavigation(): void {
   isMobileMenuOpen.value = false;
@@ -214,9 +210,7 @@ function toggleMobileSearch(): void {
     </a>
 
     <header class="border-b border-border bg-background/95 backdrop-blur">
-      <div class="topbar-transition-frame">
-        <Transition name="topbar-fade" appear>
-          <div :key="chromeTransitionKey" class="topbar-transition-panel mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 lg:py-4">
+      <div class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 lg:py-4">
         <div class="flex min-h-11 items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
             <Link
@@ -227,10 +221,12 @@ function toggleMobileSearch(): void {
             >
               Collabbing
             </Link>
-            <Button v-if="session.isAuthenticated" :as="Link" :href="session.routes.dashboard" variant="ghost" size="sm" class="hidden lg:inline-flex">
-              <LayoutDashboard class="size-4" aria-hidden="true" />
-              Dashboard
-            </Button>
+            <Transition name="chrome-swap">
+              <Button v-if="session.isAuthenticated" :as="Link" :href="session.routes.dashboard" variant="ghost" size="sm" class="hidden lg:inline-flex">
+                <LayoutDashboard class="size-4" aria-hidden="true" />
+                Dashboard
+              </Button>
+            </Transition>
           </div>
 
           <div class="flex items-center gap-2 lg:hidden">
@@ -275,22 +271,24 @@ function toggleMobileSearch(): void {
             >
           </form>
 
-          <nav v-if="session.isAuthenticated" aria-label="Workspace navigation" class="flex items-center gap-2">
-            <Button :as="Link" :href="session.routes.ideasCreate">
-              <Plus class="size-4" aria-hidden="true" />
-              Create an Idea
-            </Button>
-          </nav>
-          <nav v-else aria-label="Main navigation" class="flex items-center gap-2">
-            <Button variant="ghost" :as="Link" :href="session.routes.ideas">
-              Browse Ideas
-            </Button>
-            <Button variant="ghost" :as="Link" :href="session.routes.login">Login</Button>
-            <Button :as="Link" :href="session.routes.register">Register</Button>
-          </nav>
+          <Transition name="chrome-swap" mode="out-in">
+            <nav v-if="session.isAuthenticated" key="workspace-navigation" aria-label="Workspace navigation" class="flex items-center gap-2">
+              <Button :as="Link" :href="session.routes.ideasCreate">
+                <Plus class="size-4" aria-hidden="true" />
+                Create an Idea
+              </Button>
+            </nav>
+            <nav v-else key="main-navigation" aria-label="Main navigation" class="flex items-center gap-2">
+              <Button variant="ghost" :as="Link" :href="session.routes.ideas">
+                Browse Ideas
+              </Button>
+              <Button variant="ghost" :as="Link" :href="session.routes.login">Login</Button>
+              <Button :as="Link" :href="session.routes.register">Register</Button>
+            </nav>
+          </Transition>
 
-          <template v-if="session.isAuthenticated">
-            <div class="flex min-w-0 items-center justify-end gap-2">
+          <Transition name="chrome-swap">
+            <div v-if="session.isAuthenticated" class="flex min-w-0 items-center justify-end gap-2">
               <Button
                 variant="outline"
                 :as="Link"
@@ -306,7 +304,7 @@ function toggleMobileSearch(): void {
                 </Button>
               </form>
             </div>
-          </template>
+          </Transition>
         </div>
 
         <Transition name="mobile-panel">
@@ -355,8 +353,6 @@ function toggleMobileSearch(): void {
                 Logout
               </Button>
             </form>
-          </div>
-        </Transition>
           </div>
         </Transition>
       </div>

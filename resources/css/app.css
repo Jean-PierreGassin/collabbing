@@ -773,20 +773,17 @@ textarea.form-control-clearable {
   scale: 0.996;
 }
 
-.topbar-transition-frame,
 .breadcrumb-transition-frame,
 .footer-transition-frame {
   position: relative;
   overflow: hidden;
 }
 
-.topbar-transition-panel,
 .breadcrumb-transition-panel,
 .footer-transition-panel {
   will-change: opacity, translate, scale;
 }
 
-.topbar-fade-enter-active,
 .breadcrumb-fade-enter-active,
 .footer-fade-enter-active {
   z-index: 1;
@@ -796,7 +793,6 @@ textarea.form-control-clearable {
     scale 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.topbar-fade-leave-active,
 .breadcrumb-fade-leave-active,
 .footer-fade-leave-active {
   position: absolute;
@@ -810,7 +806,6 @@ textarea.form-control-clearable {
     scale 220ms ease;
 }
 
-.topbar-fade-enter-from,
 .breadcrumb-fade-enter-from,
 .footer-fade-enter-from {
   opacity: 0;
@@ -818,12 +813,31 @@ textarea.form-control-clearable {
   scale: 0.997;
 }
 
-.topbar-fade-leave-to,
 .breadcrumb-fade-leave-to,
 .footer-fade-leave-to {
   opacity: 0;
   translate: 0 -0.2rem;
   scale: 0.998;
+}
+
+.chrome-swap-enter-active,
+.chrome-swap-leave-active {
+  transition:
+    opacity 220ms ease,
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chrome-swap-enter-from {
+  opacity: 0;
+  translate: 0 0.25rem;
+  scale: 0.99;
+}
+
+.chrome-swap-leave-to {
+  opacity: 0;
+  translate: 0 -0.2rem;
+  scale: 0.995;
 }
 
 .toast-slide-enter-active,
@@ -948,8 +962,8 @@ textarea.form-control-clearable {
   .page-fade-leave-active,
   .route-fade-enter-active,
   .route-fade-leave-active,
-  .topbar-fade-enter-active,
-  .topbar-fade-leave-active,
+  .chrome-swap-enter-active,
+  .chrome-swap-leave-active,
   .breadcrumb-fade-enter-active,
   .breadcrumb-fade-leave-active,
   .footer-fade-enter-active,
