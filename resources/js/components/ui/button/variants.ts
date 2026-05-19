@@ -9,7 +9,7 @@ export const buttonVariants = cva(
         destructive: 'border border-destructive/60 bg-destructive/18 text-destructive shadow-sm shadow-destructive/10 hover:-translate-y-px hover:bg-destructive/26 hover:text-white focus-visible:ring-destructive/20',
         outline: 'border border-input bg-background/70 text-foreground shadow-sm shadow-black/5 hover:-translate-y-px hover:border-primary/55 hover:bg-accent/75 hover:text-accent-foreground',
         secondary: 'border border-secondary/80 bg-secondary text-secondary-foreground hover:-translate-y-px hover:bg-secondary/85',
-        success: 'border border-emerald-400/45 bg-emerald-500/18 text-emerald-200 shadow-sm shadow-emerald-950/15 hover:-translate-y-px hover:bg-emerald-500/28 hover:text-emerald-50 focus-visible:ring-emerald-400/25',
+        success: 'border border-emerald-600/35 bg-emerald-500/14 text-emerald-800 shadow-sm shadow-emerald-950/10 hover:-translate-y-px hover:bg-emerald-500/22 hover:text-emerald-950 focus-visible:ring-emerald-500/25 dark:border-emerald-400/45 dark:bg-emerald-500/18 dark:text-emerald-200 dark:shadow-emerald-950/15 dark:hover:bg-emerald-500/28 dark:hover:text-emerald-50 dark:focus-visible:ring-emerald-400/25',
         ghost: 'text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
