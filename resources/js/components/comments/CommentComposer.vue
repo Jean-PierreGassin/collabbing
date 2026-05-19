@@ -38,18 +38,21 @@ const emit = defineEmits<{
 }>();
 
 const {
+  activeSuggestionId,
+  activeSuggestionIndex,
   content,
   contentValidator,
   form,
-  handleMentionTab,
+  handleMentionKeydown,
   hasMentionSuggestions,
   insertMention,
-  mentionSuggestions,
+  mentionListId,
   overrideMethod,
   submitComment,
   syncInput,
   textarea,
   updateCursorPosition,
+  visibleMentionSuggestions,
 } = useCommentComposer(props, emit);
 </script>
 
@@ -88,6 +91,11 @@ const {
             ]"
             :placeholder="placeholder"
             maxlength="1500"
+            role="combobox"
+            aria-autocomplete="list"
+            :aria-expanded="hasMentionSuggestions ? 'true' : 'false'"
+            :aria-controls="mentionListId"
+            :aria-activedescendant="activeSuggestionId"
             :aria-invalid="invalid || undefined"
             :aria-describedby="describedBy"
             required
@@ -95,27 +103,33 @@ const {
             @click="updateCursorPosition"
             @keyup="updateCursorPosition"
             @select="updateCursorPosition"
-            @keydown.tab="handleMentionTab"
+            @keydown="handleMentionKeydown"
           />
 
-          <div
+          <ul
             v-if="hasMentionSuggestions"
+            :id="mentionListId"
+            role="listbox"
+            :aria-label="`${label} mention suggestions`"
             class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-md border border-border bg-popover shadow-xl shadow-black/25"
           >
-            <button
-              v-for="user in mentionSuggestions"
+            <li
+              v-for="(user, index) in visibleMentionSuggestions"
               :key="user.id"
-              type="button"
-              class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-secondary focus:bg-secondary focus:outline-none"
-              @mousedown.prevent="insertMention(user.username)"
+              :id="`${mentionListId}-option-${user.id}`"
+              role="option"
+              :aria-selected="index === activeSuggestionIndex"
+              :class="[
+                'flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-sm',
+                index === activeSuggestionIndex ? 'bg-secondary' : 'hover:bg-secondary',
+              ]"
+              @pointerdown.prevent="insertMention(user.username)"
+              @mousemove="activeSuggestionIndex = index"
             >
               <span class="font-medium text-primary">@{{ user.username }}</span>
               <span class="truncate text-muted-foreground">{{ user.name }}</span>
-            </button>
-            <div class="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-              Press Tab to insert the first mention.
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </template>
     </FormField>

@@ -1,4 +1,4 @@
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { oldInputString } from '@/lib/forms';
 import { maxLengthValidator } from '@/lib/formValidation';
@@ -11,6 +11,7 @@ export interface CommentComposerOptions {
   mentionableUsers: DomainUser[];
   method: 'POST' | 'PUT' | 'PATCH';
   parentId: number | null;
+  textareaId: string;
 }
 
 interface CommentComposerEvents {
@@ -30,6 +31,8 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
   const content = ref(initialContent);
   const cursorPosition = ref(content.value.length);
   const contentValidator = maxLengthValidator(1500, 'a comment');
+  const activeSuggestionIndex = ref(0);
+  const isMentionListDismissed = ref(false);
   const form = useForm({
     content: content.value,
     parent_id: options.parentId,
@@ -60,7 +63,36 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
       .slice(0, 5);
   });
 
-  const hasMentionSuggestions = computed(() => mentionSuggestions.value.length > 0);
+  const activeMentionKey = computed(() => {
+    if (!activeMention.value) {
+      return null;
+    }
+
+    return [
+      activeMention.value.start,
+      activeMention.value.end,
+      activeMention.value.query,
+    ].join(':');
+  });
+
+  const visibleMentionSuggestions = computed(() => {
+    if (isMentionListDismissed.value) {
+      return [];
+    }
+
+    return mentionSuggestions.value;
+  });
+
+  const hasMentionSuggestions = computed(() => visibleMentionSuggestions.value.length > 0);
+  const mentionListId = computed(() => `${options.textareaId}-mention-suggestions`);
+  const activeSuggestion = computed(() => visibleMentionSuggestions.value[activeSuggestionIndex.value] ?? null);
+  const activeSuggestionId = computed(() => {
+    if (!activeSuggestion.value) {
+      return undefined;
+    }
+
+    return `${mentionListId.value}-option-${activeSuggestion.value.id}`;
+  });
 
   const overrideMethod = computed(() => {
     if (options.method === 'POST') {
@@ -85,13 +117,19 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
     const start = activeMention.value?.start ?? input.selectionStart ?? content.value.length;
     const end = activeMention.value?.end ?? input.selectionEnd ?? content.value.length;
     const prefix = content.value.slice(0, start);
+    let suffix = content.value.slice(end);
     let spacer = ' ';
 
     if (prefix.length === 0 || /\s$/.test(prefix)) {
       spacer = '';
     }
 
-    content.value = `${prefix}${spacer}${mention}${content.value.slice(end)}`;
+    if (/^[ \t]/.test(suffix)) {
+      suffix = suffix.replace(/^[ \t]+/, '');
+    }
+
+    content.value = `${prefix}${spacer}${mention}${suffix}`;
+    form.content = content.value;
 
     void nextTick(() => {
       const nextPosition = start + spacer.length + mention.length;
@@ -103,7 +141,7 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
   }
 
   function insertFirstMentionSuggestion(): void {
-    const suggestion = mentionSuggestions.value[0];
+    const suggestion = activeSuggestion.value ?? visibleMentionSuggestions.value[0];
 
     if (!suggestion) {
       return;
@@ -118,13 +156,56 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
     updateCursorPosition();
   }
 
-  function handleMentionTab(event: KeyboardEvent): void {
+  function moveActiveSuggestion(direction: 1 | -1): void {
     if (!hasMentionSuggestions.value) {
       return;
     }
 
-    event.preventDefault();
-    insertFirstMentionSuggestion();
+    const nextIndex = activeSuggestionIndex.value + direction;
+    const suggestionCount = visibleMentionSuggestions.value.length;
+
+    if (nextIndex < 0) {
+      activeSuggestionIndex.value = suggestionCount - 1;
+
+      return;
+    }
+
+    if (nextIndex >= suggestionCount) {
+      activeSuggestionIndex.value = 0;
+
+      return;
+    }
+
+    activeSuggestionIndex.value = nextIndex;
+  }
+
+  function handleMentionKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && hasMentionSuggestions.value) {
+      event.preventDefault();
+      isMentionListDismissed.value = true;
+      activeSuggestionIndex.value = 0;
+
+      return;
+    }
+
+    if (event.key === 'ArrowDown' && hasMentionSuggestions.value) {
+      event.preventDefault();
+      moveActiveSuggestion(1);
+
+      return;
+    }
+
+    if (event.key === 'ArrowUp' && hasMentionSuggestions.value) {
+      event.preventDefault();
+      moveActiveSuggestion(-1);
+
+      return;
+    }
+
+    if ((event.key === 'Enter' || event.key === 'Tab') && hasMentionSuggestions.value) {
+      event.preventDefault();
+      insertFirstMentionSuggestion();
+    }
   }
 
   function focusTextarea(): void {
@@ -172,18 +253,35 @@ export function useCommentComposer(options: CommentComposerOptions, emit: Commen
 
   onMounted(focusTextarea);
 
+  watch(activeMentionKey, () => {
+    activeSuggestionIndex.value = 0;
+    isMentionListDismissed.value = false;
+  });
+
+  watch(visibleMentionSuggestions, (suggestions) => {
+    if (activeSuggestionIndex.value < suggestions.length) {
+      return;
+    }
+
+    activeSuggestionIndex.value = Math.max(suggestions.length - 1, 0);
+  });
+
   return {
+    activeSuggestionId,
+    activeSuggestionIndex,
     content,
     contentValidator,
     form,
-    handleMentionTab,
+    handleMentionKeydown,
     hasMentionSuggestions,
     insertMention,
+    mentionListId,
     mentionSuggestions,
     overrideMethod,
     submitComment,
     syncInput,
     textarea,
     updateCursorPosition,
+    visibleMentionSuggestions,
   };
 }
