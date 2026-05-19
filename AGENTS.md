@@ -1,11 +1,18 @@
 # Project Overview
 
 ## Stack
-- PHP 8.5
-- MySQL 
-- Vue 3/TypeScript
-- Tailwind
-- Vite
+- Laravel 13 / PHP 8.5
+- MySQL 9.7 / Redis 8.6 via Docker
+- Vue 3 / TypeScript / Inertia
+- Tailwind CSS 4
+- Vite 7 / Node 24
+
+## Project Map
+- `app/Http` receives requests; keep controllers thin and delegate to services/repositories
+- `app/Data` contains DTOs, `app/Services` owns workflows, `app/Repositories` owns persistence queries, and `app/Models` owns Eloquent state/relations
+- `resources/js/pages` contains Inertia pages, `resources/js/components` shared Vue UI, `resources/js/lib` browser helpers, and `resources/js/tests` mirrors the frontend tree
+- `routes` defines web entrypoints, `database` owns migrations/factories/seeders, `tests/Feature` covers user-facing flows by concern, and `tests/Unit` covers database-free business logic
+- `docker` owns local/production runtime config and `.github/workflows` owns CI/deploy automation
 
 ## Organisation
 - Prioritise organising files/classes/methods to ensure we are always in a clean workspace

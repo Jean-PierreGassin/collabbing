@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Runtime;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
@@ -12,18 +13,20 @@ class SecurityHeadersTest extends TestCase
         $this->assertSame('lax', config('session.same_site'));
     }
 
-    public function testWebResponsesIncludeSecurityHeaders(): void
+    #[DataProvider('webResponseSecurityHeaders')]
+    public function testWebResponsesIncludeSecurityHeaders(string $path, int $status, array $expectedHeaders, array $missingHeaders): void
     {
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertHeader('Content-Security-Policy', "base-uri 'self'; frame-ancestors 'none'; object-src 'none'")
-            ->assertHeader('Cross-Origin-Opener-Policy', 'same-origin')
-            ->assertHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-            ->assertHeader('X-Content-Type-Options', 'nosniff')
-            ->assertHeader('X-Frame-Options', 'DENY')
-            ->assertHeaderMissing('Strict-Transport-Security')
-            ->assertHeaderMissing('X-Powered-By');
+        $response = $this->get($path);
+
+        $response->assertStatus($status);
+
+        foreach ($expectedHeaders as $header => $value) {
+            $response->assertHeader($header, $value);
+        }
+
+        foreach ($missingHeaders as $header) {
+            $response->assertHeaderMissing($header);
+        }
     }
 
     public function testSecureWebResponsesIncludeStrictTransportSecurity(): void
@@ -33,12 +36,35 @@ class SecurityHeadersTest extends TestCase
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
 
-    public function testNotFoundResponsesIncludeSecurityHeaders(): void
+    public static function webResponseSecurityHeaders(): array
     {
-        $this->get('/missing-page')
-            ->assertNotFound()
-            ->assertHeader('Content-Security-Policy', "base-uri 'self'; frame-ancestors 'none'; object-src 'none'")
-            ->assertHeader('X-Content-Type-Options', 'nosniff')
-            ->assertHeader('X-Frame-Options', 'DENY');
+        return [
+            'home page' => [
+                '/',
+                200,
+                [
+                    'Content-Security-Policy' => "base-uri 'self'; frame-ancestors 'none'; object-src 'none'",
+                    'Cross-Origin-Opener-Policy' => 'same-origin',
+                    'Permissions-Policy' => 'camera=(), microphone=(), geolocation=()',
+                    'Referrer-Policy' => 'strict-origin-when-cross-origin',
+                    'X-Content-Type-Options' => 'nosniff',
+                    'X-Frame-Options' => 'DENY',
+                ],
+                [
+                    'Strict-Transport-Security',
+                    'X-Powered-By',
+                ],
+            ],
+            'not found page' => [
+                '/missing-page',
+                404,
+                [
+                    'Content-Security-Policy' => "base-uri 'self'; frame-ancestors 'none'; object-src 'none'",
+                    'X-Content-Type-Options' => 'nosniff',
+                    'X-Frame-Options' => 'DENY',
+                ],
+                [],
+            ],
+        ];
     }
 }

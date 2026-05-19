@@ -3,49 +3,58 @@
 namespace Tests\Feature\Runtime;
 
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ProductRouteSafetyTest extends TestCase
 {
-    public function testUnimplementedResourceRoutesAreNotRegistered(): void
+    #[DataProvider('unimplementedResourceRoutes')]
+    public function testUnimplementedResourceRoutesAreNotRegistered(string $routeName): void
     {
-        foreach ([
-            'ideas.destroy',
-            'ideas.comments.index',
-            'ideas.comments.show',
-            'ideas.comments.destroy',
-            'ideas.supporters.index',
-            'ideas.supporters.show',
-            'ideas.applications.index',
-            'ideas.applications.show',
-            'ideas.applications.edit',
-            'ideas.applications.update',
-        ] as $routeName) {
-            $this->assertFalse(Route::has($routeName), "Unexpected route [{$routeName}] is registered.");
-        }
+        $this->assertFalse(Route::has($routeName), "Unexpected route [{$routeName}] is registered.");
     }
 
-    public function testMutatingProductRoutesAreRateLimited(): void
+    #[DataProvider('mutatingProductRoutes')]
+    public function testMutatingProductRoutesAreRateLimited(string $routeName, string $middleware): void
     {
-        foreach ([
-            'users.update' => 'throttle:product-write',
-            'ideas.store' => 'throttle:product-write',
-            'ideas.update' => 'throttle:product-write',
-            'ideas.comments.store' => 'throttle:product-write',
-            'ideas.comments.update' => 'throttle:product-write',
-            'ideas.supporters.store' => 'throttle:product-write',
-            'ideas.supporters.destroy' => 'throttle:product-write',
-            'ideas.applications.store' => 'throttle:product-write',
-            'ideas.applications.destroy' => 'throttle:product-write',
-            'ideas.applications.approve' => 'throttle:product-write',
-            'ideas.repository-create' => 'throttle:integration-write',
-            'ideas.repository-invite' => 'throttle:integration-write',
-            'auth.github.revoke' => 'throttle:integration-write',
-        ] as $routeName => $middleware) {
-            $route = Route::getRoutes()->getByName($routeName);
+        $route = Route::getRoutes()->getByName($routeName);
 
-            $this->assertNotNull($route, "Expected route [{$routeName}] to be registered.");
-            $this->assertContains($middleware, $route->gatherMiddleware(), "Expected route [{$routeName}] to use [{$middleware}].");
-        }
+        $this->assertNotNull($route, "Expected route [{$routeName}] to be registered.");
+        $this->assertContains($middleware, $route->gatherMiddleware(), "Expected route [{$routeName}] to use [{$middleware}].");
+    }
+
+    public static function unimplementedResourceRoutes(): array
+    {
+        return [
+            'idea deletion' => ['ideas.destroy'],
+            'comment index' => ['ideas.comments.index'],
+            'comment show' => ['ideas.comments.show'],
+            'comment deletion' => ['ideas.comments.destroy'],
+            'supporter index' => ['ideas.supporters.index'],
+            'supporter show' => ['ideas.supporters.show'],
+            'application index' => ['ideas.applications.index'],
+            'application show' => ['ideas.applications.show'],
+            'application edit' => ['ideas.applications.edit'],
+            'application update' => ['ideas.applications.update'],
+        ];
+    }
+
+    public static function mutatingProductRoutes(): array
+    {
+        return [
+            'profile update' => ['users.update', 'throttle:product-write'],
+            'idea create' => ['ideas.store', 'throttle:product-write'],
+            'idea update' => ['ideas.update', 'throttle:product-write'],
+            'comment create' => ['ideas.comments.store', 'throttle:product-write'],
+            'comment update' => ['ideas.comments.update', 'throttle:product-write'],
+            'supporter create' => ['ideas.supporters.store', 'throttle:product-write'],
+            'supporter delete' => ['ideas.supporters.destroy', 'throttle:product-write'],
+            'application create' => ['ideas.applications.store', 'throttle:product-write'],
+            'application delete' => ['ideas.applications.destroy', 'throttle:product-write'],
+            'application approval' => ['ideas.applications.approve', 'throttle:product-write'],
+            'repository create' => ['ideas.repository-create', 'throttle:integration-write'],
+            'repository invite' => ['ideas.repository-invite', 'throttle:integration-write'],
+            'github revoke' => ['auth.github.revoke', 'throttle:integration-write'],
+        ];
     }
 }

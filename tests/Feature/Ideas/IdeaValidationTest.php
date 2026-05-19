@@ -7,6 +7,7 @@ use App\Models\ConnectedAccount;
 use App\Models\Idea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class IdeaValidationTest extends TestCase
@@ -67,36 +68,16 @@ class IdeaValidationTest extends TestCase
         ]);
     }
 
-    public function testRepositoryNameRejectsSpaces(): void
+    #[DataProvider('invalidIdeaPayloads')]
+    public function testIdeaPayloadRejectsInvalidInput(array $overrides, string $errorKey): void
     {
         $user = User::factory()->create();
 
         $response = $this
             ->actingAs($user)
-            ->post(route('ideas.store'), $this->ideaPayload([
-                'repository_name' => 'repo with spaces',
-            ]));
+            ->post(route('ideas.store'), $this->ideaPayload($overrides));
 
-        $response->assertSessionHasErrors('repository_name');
-    }
-
-    public function testIdeaSummaryIsRequiredAndLimited(): void
-    {
-        $user = User::factory()->create();
-
-        $missingSummary = $this
-            ->actingAs($user)
-            ->post(route('ideas.store'), $this->ideaPayload(['summary' => null]));
-
-        $missingSummary->assertSessionHasErrors('summary');
-
-        $longSummary = $this
-            ->actingAs($user)
-            ->post(route('ideas.store'), $this->ideaPayload([
-                'summary' => str_repeat('a', 241),
-            ]));
-
-        $longSummary->assertSessionHasErrors('summary');
+        $response->assertSessionHasErrors($errorKey);
     }
 
     public function testRepositoryNameMustBeUniqueForConnectedGithubOwner(): void
@@ -139,5 +120,23 @@ class IdeaValidationTest extends TestCase
             'content' => 'A focused pitch for a useful collaboration tool.',
             'status' => 'open',
         ], $overrides);
+    }
+
+    public static function invalidIdeaPayloads(): array
+    {
+        return [
+            'repository name with spaces' => [
+                ['repository_name' => 'repo with spaces'],
+                'repository_name',
+            ],
+            'missing summary' => [
+                ['summary' => null],
+                'summary',
+            ],
+            'long summary' => [
+                ['summary' => str_repeat('a', 241)],
+                'summary',
+            ],
+        ];
     }
 }

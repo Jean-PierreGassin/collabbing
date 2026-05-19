@@ -12,6 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GithubProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AuthSecurityTest extends TestCase
@@ -139,40 +140,11 @@ class AuthSecurityTest extends TestCase
         $this->assertGuest();
     }
 
-    public function testRegistrationAttemptsAreRateLimited(): void
+    #[DataProvider('rateLimitedAuthEndpoints')]
+    public function testAuthEndpointsAreRateLimited(string $routeName, array $payload): void
     {
         for ($attempt = 0; $attempt < 6; $attempt++) {
-            $response = $this->post(route('register'), $this->registrationPayload([
-                'username' => 'rate_limited_user',
-                'email' => 'rate-limited@example.com',
-                'password' => 'short1',
-                'password_confirmation' => 'short1',
-            ]));
-        }
-
-        $response->assertStatus(429);
-    }
-
-    public function testPasswordResetEmailAttemptsAreRateLimited(): void
-    {
-        for ($attempt = 0; $attempt < 6; $attempt++) {
-            $response = $this->post(route('password.email'), [
-                'email' => 'missing@example.com',
-            ]);
-        }
-
-        $response->assertStatus(429);
-    }
-
-    public function testPasswordResetSubmissionAttemptsAreRateLimited(): void
-    {
-        for ($attempt = 0; $attempt < 6; $attempt++) {
-            $response = $this->post(route('password.update'), [
-                'token' => 'invalid-token',
-                'email' => 'missing@example.com',
-                'password' => 'collabbing2026',
-                'password_confirmation' => 'collabbing2026',
-            ]);
+            $response = $this->post(route($routeName), $payload);
         }
 
         $response->assertStatus(429);
@@ -315,5 +287,37 @@ class AuthSecurityTest extends TestCase
             'password' => 'collabbing2026',
             'password_confirmation' => 'collabbing2026',
         ], $overrides);
+    }
+
+    public static function rateLimitedAuthEndpoints(): array
+    {
+        return [
+            'registration' => [
+                'register',
+                [
+                    'username' => 'rate_limited_user',
+                    'first_name' => 'Ada',
+                    'last_name' => 'Lovelace',
+                    'email' => 'rate-limited@example.com',
+                    'password' => 'short1',
+                    'password_confirmation' => 'short1',
+                ],
+            ],
+            'password reset email' => [
+                'password.email',
+                [
+                    'email' => 'missing@example.com',
+                ],
+            ],
+            'password reset submission' => [
+                'password.update',
+                [
+                    'token' => 'invalid-token',
+                    'email' => 'missing@example.com',
+                    'password' => 'collabbing2026',
+                    'password_confirmation' => 'collabbing2026',
+                ],
+            ],
+        ];
     }
 }
