@@ -202,11 +202,17 @@ function openDesktopSearch(): void {
 }
 
 function closeDesktopSearchIfEmpty(): void {
-  if (desktopSearchValue.value.trim() !== '') {
+  isDesktopSearchOpen.value = false;
+}
+
+function closeDesktopSearchAfterFocusLeaves(event: FocusEvent): void {
+  const nextTarget = event.relatedTarget;
+
+  if (nextTarget instanceof Node && (event.currentTarget as HTMLElement).contains(nextTarget)) {
     return;
   }
 
-  isDesktopSearchOpen.value = false;
+  window.setTimeout(closeDesktopSearchIfEmpty, 80);
 }
 
 function updateDesktopSearch(event: Event): void {
@@ -286,7 +292,7 @@ onBeforeUnmount(() => {
       Skip to main content
     </a>
 
-    <header class="border-b border-border bg-background/95 backdrop-blur">
+    <header class="relative z-50 border-b border-border bg-background/95 backdrop-blur">
       <div class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 lg:py-4">
         <div class="flex min-h-11 items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
@@ -344,6 +350,7 @@ onBeforeUnmount(() => {
             :action="session.routes.ideas"
             method="GET"
             role="search"
+            @focusout="closeDesktopSearchAfterFocusLeaves"
           >
             <label for="site-search" class="sr-only">Search ideas</label>
             <Button
@@ -366,9 +373,8 @@ onBeforeUnmount(() => {
                 name="search"
                 type="search"
                 class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
-                placeholder="Search ideas"
+                placeholder="Search ideas (Ctrl/Cmd+K)"
                 @input="updateDesktopSearch"
-                @blur="closeDesktopSearchIfEmpty"
               >
             </div>
           </form>
@@ -407,7 +413,7 @@ onBeforeUnmount(() => {
                   <div
                     v-if="isAccountMenuOpen"
                     id="account-menu"
-                    class="absolute right-0 top-full z-40 mt-2 flex w-72 flex-col gap-2 rounded-md border border-border bg-popover p-2 text-sm shadow-xl shadow-black/25"
+                    class="absolute right-0 top-full z-[60] mt-2 flex w-72 flex-col gap-2 rounded-md border border-border bg-popover p-2 text-sm shadow-xl shadow-black/25"
                     @click.stop
                   >
                     <Button :as="Link" :href="session.user?.routes.show ?? session.routes.dashboard" variant="ghost" class="h-10 justify-start" @click="closeAccountMenu">

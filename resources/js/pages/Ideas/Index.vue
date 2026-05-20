@@ -42,17 +42,17 @@ function scrollToSection(id: string): void {
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <nav class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" aria-label="Idea discovery sections">
-          <Button v-if="searchResults" type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('search-results')">
+        <nav class="flex w-full flex-wrap gap-2 sm:w-auto" aria-label="Idea discovery sections">
+          <Button v-if="searchResults" type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('search-results')">
             <SearchX class="size-4" aria-hidden="true" />
             Search results
           </Button>
           <template v-else>
-            <Button type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('trending-ideas')">
+            <Button type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('trending-ideas')">
               <Flame class="size-4" aria-hidden="true" />
               Trending
             </Button>
-            <Button type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('ideas')">
+            <Button type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('ideas')">
               <ListFilter class="size-4" aria-hidden="true" />
               Recent
             </Button>

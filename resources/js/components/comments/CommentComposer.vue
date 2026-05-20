@@ -37,6 +37,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   cancel: [];
+  submitted: [];
 }>();
 
 const oldParentId = oldInputString('parent_id');
@@ -164,6 +165,8 @@ function submitComment(): void {
   const options = {
     preserveScroll: true,
     onSuccess: () => {
+      emit('submitted');
+
       if (props.method !== 'POST') {
         return;
       }

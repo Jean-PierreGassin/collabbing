@@ -95,6 +95,7 @@ function startReply(): void {
       method="PUT"
       :textarea-id="`edit-comment-content-${comment.id}`"
       @cancel="isEditing = false"
+      @submitted="isEditing = false"
     />
     <MarkdownContent v-else :html="comment.contentHtml" />
 
@@ -121,6 +122,7 @@ function startReply(): void {
       :parent-id="comment.id"
       :placeholder="`Reply to @${comment.user.username}`"
       :textarea-id="`reply-content-${comment.id}`"
+      @submitted="isReplying = false"
     />
 
     <div v-if="comment.replies.length > 0 && areRepliesVisible" class="flex flex-col gap-3">

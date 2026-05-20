@@ -37,6 +37,16 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame('Existing title', $props['summary']);
     }
 
+    public function testIdeaCardTaglineDoesNotFallBackToSummary(): void
+    {
+        $idea = $this->makeIdeaWithRelations('# Existing title');
+        $idea->tagline = null;
+
+        $props = app(PagePropsService::class)->idea($idea);
+
+        $this->assertSame('Open for collaborators around Test title.', $props['tagline']);
+    }
+
     public function testSearchResultPaginatorMapsRenderedMarkdownContent(): void
     {
         $idea = $this->makeIdeaWithRelations('# Searchable idea');

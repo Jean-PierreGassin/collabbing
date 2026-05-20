@@ -157,7 +157,7 @@ class PagePropsService
             return $idea->tagline;
         }
 
-        return $this->ideaSummary($idea);
+        return "Open for collaborators around {$idea->title}.";
     }
 
     private function ideaTags(Idea $idea): array

@@ -71,7 +71,7 @@ const cardClasses = computed(() => {
   if (isDetailed.value) {
     classes.push('group relative transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
   } else if (! props.single) {
-    classes.push('group relative flex h-full min-h-[14rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
+    classes.push('group relative flex h-full min-h-[10rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
   }
 
   return classes;
@@ -83,7 +83,7 @@ const headerClass = computed(() => {
   }
 
   if (isCompact.value) {
-    return 'relative z-10 gap-3 pointer-events-none p-5';
+    return 'relative z-10 gap-2 pointer-events-none p-4 pb-2';
   }
 
   return 'relative z-10 gap-4 pointer-events-none';
@@ -91,7 +91,7 @@ const headerClass = computed(() => {
 
 const summaryContentClass = computed(() => {
   if (isCompact.value) {
-    return 'relative z-10 flex flex-1 flex-col gap-3 p-5 pt-0 pointer-events-none';
+    return 'relative z-10 flex flex-1 flex-col gap-2 p-4 pt-0 pointer-events-none';
   }
 
   return 'relative z-10 flex flex-1 flex-col gap-4 pointer-events-none';
@@ -99,7 +99,7 @@ const summaryContentClass = computed(() => {
 
 const cardStatsClass = computed(() => {
   if (isCompact.value) {
-    return 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-5 py-3 text-sm text-muted-foreground';
+    return 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-4 py-2 text-xs text-muted-foreground';
   }
 
   return 'pointer-events-none relative z-10 flex flex-wrap items-center justify-start gap-2 border-t border-border bg-background/12 px-6 py-3 text-sm text-muted-foreground';
@@ -107,7 +107,7 @@ const cardStatsClass = computed(() => {
 
 const cardActionsClass = computed(() => {
   if (isCompact.value) {
-    return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-5 py-3';
+    return 'relative z-20 flex flex-col gap-2 border-t border-border bg-background/18 px-4 py-2';
   }
 
   return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-6 py-4';
@@ -223,7 +223,7 @@ function leaveDescription(element: Element, done: () => void): void {
       :aria-label="`Open ${idea.titleDisplay}`"
     />
 
-    <div v-if="isDetailed" class="relative z-10 grid gap-0 lg:grid-cols-[minmax(0,1fr)_17rem]">
+    <div v-if="isDetailed" class="relative z-10 grid gap-0 lg:grid-cols-[minmax(0,1fr)_15rem]">
       <div class="pointer-events-none flex min-w-0 flex-col gap-4 p-5 sm:p-6">
         <div class="flex min-w-0 flex-col gap-2">
           <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
@@ -241,19 +241,28 @@ function leaveDescription(element: Element, done: () => void): void {
           </p>
         </div>
 
-        <p class="max-w-3xl break-words text-base leading-7 text-foreground [overflow-wrap:anywhere]">
-          {{ idea.tagline }}
-        </p>
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <section class="flex min-w-0 flex-col gap-1">
+            <h3 class="text-xs font-semibold uppercase text-primary">Tagline</h3>
+            <p class="break-words text-base leading-7 text-foreground [overflow-wrap:anywhere]">
+              {{ idea.tagline }}
+            </p>
+          </section>
 
-        <div v-if="idea.tags.length > 0" class="pointer-events-none flex flex-wrap gap-2">
-          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
-            {{ tag }}
-          </Badge>
+          <section class="flex min-w-0 flex-col gap-1">
+            <h3 class="text-xs font-semibold uppercase text-primary">Summary</h3>
+            <p class="line-clamp-3 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
+              {{ idea.summary }}
+            </p>
+          </section>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Badge :variant="statusBadgeVariant" class="w-fit">
             {{ idea.statusDisplay }}
+          </Badge>
+          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+            {{ tag }}
           </Badge>
           <span v-if="idea.repository" class="inline-flex items-center gap-2">
             <GitBranch class="size-4 text-primary" aria-hidden="true" />
@@ -262,21 +271,23 @@ function leaveDescription(element: Element, done: () => void): void {
         </div>
       </div>
 
-      <aside class="pointer-events-none flex flex-col justify-between gap-4 border-t border-border bg-background/14 p-5 lg:border-l lg:border-t-0 sm:p-6">
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-          <div class="rounded-md border border-border bg-card/60 p-4">
-            <span class="flex items-center gap-2 text-sm text-muted-foreground">
+      <aside class="pointer-events-none flex flex-col gap-5 border-t border-border bg-background/14 p-5 lg:border-l lg:border-t-0 sm:p-6">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <div class="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
+            <span class="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
               <Users class="size-4 text-primary" aria-hidden="true" />
               Supporters
             </span>
-            <strong class="mt-2 block text-2xl font-semibold text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
+            <strong class="text-3xl font-semibold text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
+            <span class="text-xs text-muted-foreground">People who want this built.</span>
           </div>
-          <div class="rounded-md border border-border bg-card/60 p-4">
-            <span class="flex items-center gap-2 text-sm text-muted-foreground">
+          <div class="flex flex-col gap-2">
+            <span class="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
               <MessageSquare class="size-4 text-primary" aria-hidden="true" />
               Collaborators
             </span>
-            <strong class="mt-2 block text-2xl font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
+            <strong class="text-3xl font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
+            <span class="text-xs text-muted-foreground">Approved builders already helping.</span>
           </div>
         </div>
 
@@ -288,7 +299,7 @@ function leaveDescription(element: Element, done: () => void): void {
     </div>
 
     <CardHeader v-else :class="headerClass">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-col gap-2">
           <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
             <Sparkles class="size-3.5" aria-hidden="true" />
@@ -302,7 +313,7 @@ function leaveDescription(element: Element, done: () => void): void {
           <CardTitle v-else-if="!single" class="leading-tight">
             <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
           </CardTitle>
-          <p class="text-sm text-muted-foreground">
+          <p class="text-xs text-muted-foreground">
             by
             <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
             <span aria-hidden="true"> · </span>
@@ -363,10 +374,10 @@ function leaveDescription(element: Element, done: () => void): void {
     </CardContent>
 
     <CardContent v-else-if="!isDetailed" :class="summaryContentClass">
-      <p class="min-h-12 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
+      <p class="line-clamp-2 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
         {{ idea.tagline }}
       </p>
-      <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-2">
+      <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-1.5">
         <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
           {{ tag }}
         </Badge>
