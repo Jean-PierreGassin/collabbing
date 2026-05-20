@@ -19,6 +19,8 @@ class PagePropsService
 {
     private const IDEA_SUMMARY_LIMIT = 240;
 
+    private const IDEA_TAGLINE_LIMIT = 60;
+
     private const COLLABORATOR_PREVIEW_LIMIT = 12;
 
     public function user(?User $user): ?array
@@ -154,10 +156,10 @@ class PagePropsService
     private function ideaTagline(Idea $idea): string
     {
         if ($idea->tagline) {
-            return $idea->tagline;
+            return Str::limit($idea->tagline, self::IDEA_TAGLINE_LIMIT, '');
         }
 
-        return "Open for collaborators around {$idea->title}.";
+        return Str::limit("Open for collaborators around {$idea->title}.", self::IDEA_TAGLINE_LIMIT, '');
     }
 
     private function ideaTags(Idea $idea): array

@@ -41,7 +41,7 @@ class StoreIdea extends FormRequest
 
         return [
             'title' => 'required|max:100',
-            'tagline' => 'required|string|max:140',
+            'tagline' => 'required|string|max:60',
             'summary' => 'required|string|max:240',
             'tags' => 'nullable|string|max:240',
             'repository_name' => [
@@ -64,7 +64,7 @@ class StoreIdea extends FormRequest
     {
         return [
             'tagline.required' => 'The tagline field is required',
-            'tagline.max' => 'The tagline may not be greater than 140 characters.',
+            'tagline.max' => 'The tagline may not be greater than 60 characters.',
             'summary.required' => 'The summary field is required',
             'summary.max' => 'The summary may not be greater than 240 characters.',
             'tags.max' => 'Tags may not be greater than 240 characters in total.',

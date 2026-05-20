@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import IdeaList from '@/components/ideas/IdeaList.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import { Button } from '@/components/ui/button';
-import { Flame, Grid2X2, ListFilter, SearchX } from '@lucide/vue';
+import { Flame, LayoutGrid, ListFilter, Rows3, SearchX } from '@lucide/vue';
 import type { Idea, Paginator } from '@/types/domain';
 
 const props = defineProps<{
@@ -61,11 +61,11 @@ function scrollToSection(id: string): void {
 
         <div class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" role="group" aria-label="Idea card density">
           <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="viewMode = 'detailed'">
-            <Grid2X2 class="size-4" aria-hidden="true" />
+            <Rows3 class="size-4" aria-hidden="true" />
             Detailed
           </Button>
           <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="viewMode = 'compact'">
-            <ListFilter class="size-4" aria-hidden="true" />
+            <LayoutGrid class="size-4" aria-hidden="true" />
             Compact
           </Button>
         </div>

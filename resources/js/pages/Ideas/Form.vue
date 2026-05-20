@@ -31,7 +31,7 @@ const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
 const markdownFilePattern = /\.(md|markdown)$/i;
 const content = ref(stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)));
 const titleValidator = maxLengthValidator(100, 'a title');
-const taglineValidator = maxLengthValidator(140, 'a tagline');
+const taglineValidator = maxLengthValidator(60, 'a tagline');
 const communicationValidator = maxLengthValidator(50, 'a communication preference');
 const summaryValidator = maxLengthValidator(240, 'a summary');
 const tagsValidator = maxLengthValidator(240, 'tags');
@@ -431,7 +431,7 @@ const markdownImportFeedbackClass = computed(() => {
 
             <FormField id="tagline" label="Tagline" help="Short card copy for scanning the ideas list." :validator="taglineValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="tagline" name="tagline" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tagline', idea?.tagline)" placeholder="Match reviewers with work that needs focused feedback" maxlength="140" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input id="tagline" name="tagline" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tagline', idea?.tagline)" placeholder="Match reviewers with focused feedback" maxlength="60" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
               </template>
             </FormField>
 

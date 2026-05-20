@@ -143,6 +143,10 @@ class IdeaValidationTest extends TestCase
                 ['tagline' => null],
                 'tagline',
             ],
+            'long tagline' => [
+                ['tagline' => str_repeat('a', 61)],
+                'tagline',
+            ],
             'long summary' => [
                 ['summary' => str_repeat('a', 241)],
                 'summary',

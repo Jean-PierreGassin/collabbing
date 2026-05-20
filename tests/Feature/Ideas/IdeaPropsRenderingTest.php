@@ -47,6 +47,16 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame('Open for collaborators around Test title.', $props['tagline']);
     }
 
+    public function testIdeaCardTaglineIsCappedForCards(): void
+    {
+        $idea = $this->makeIdeaWithRelations('# Existing title');
+        $idea->tagline = str_repeat('a', 61);
+
+        $props = app(PagePropsService::class)->idea($idea);
+
+        $this->assertSame(str_repeat('a', 60), $props['tagline']);
+    }
+
     public function testSearchResultPaginatorMapsRenderedMarkdownContent(): void
     {
         $idea = $this->makeIdeaWithRelations('# Searchable idea');
