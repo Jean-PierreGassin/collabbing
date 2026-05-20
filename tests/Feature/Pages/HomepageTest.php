@@ -14,6 +14,7 @@ class HomepageTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertSee('href="/llms.txt"', false)
             ->assertDontSee('@inertia', false)
             ->assertInertia(fn (Assert $page) => $page->component('Home'));
     }
