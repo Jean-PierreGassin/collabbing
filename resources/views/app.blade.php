@@ -17,6 +17,7 @@
     <link data-inertia="canonical" rel="canonical" href="{{ config('app.url') }}">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/site.webmanifest">
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs.txt">
     <meta name="theme-color" content="#f4a51c">
     <title>Collabbing</title>
     <script>
