@@ -71,7 +71,7 @@ const cardClasses = computed(() => {
   if (isDetailed.value) {
     classes.push('group relative transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
   } else if (! props.single) {
-    classes.push('group relative flex h-full min-h-[10rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
+    classes.push('group relative flex flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
   }
 
   return classes;
@@ -91,7 +91,7 @@ const headerClass = computed(() => {
 
 const summaryContentClass = computed(() => {
   if (isCompact.value) {
-    return 'relative z-10 flex flex-1 flex-col gap-2 p-4 pt-0 pointer-events-none';
+    return 'relative z-10 flex flex-col gap-2 p-4 pt-0 pointer-events-none';
   }
 
   return 'relative z-10 flex flex-1 flex-col gap-4 pointer-events-none';
@@ -223,71 +223,73 @@ function leaveDescription(element: Element, done: () => void): void {
       :aria-label="`Open ${idea.titleDisplay}`"
     />
 
-    <div v-if="isDetailed" class="relative z-10 grid gap-0 lg:grid-cols-[minmax(0,1fr)_15rem]">
+    <div v-if="isDetailed" class="relative z-10 grid min-h-0 gap-0 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div class="pointer-events-none flex min-w-0 flex-col gap-4 p-5 sm:p-6">
-        <div class="flex min-w-0 flex-col gap-2">
-          <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
-            <Sparkles class="size-3.5" aria-hidden="true" />
-            Trending
+        <div class="flex min-w-0 flex-col gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
+            <span v-if="featured" class="inline-flex items-center gap-1.5 text-primary">
+              <Sparkles class="size-3.5" aria-hidden="true" />
+              Trending
+            </span>
+            <Badge :variant="statusBadgeVariant" class="w-fit">
+              {{ idea.statusDisplay }}
+            </Badge>
+            <span v-if="idea.repository" class="inline-flex items-center gap-1.5">
+              <GitBranch class="size-4 text-primary" aria-hidden="true" />
+              Repository linked
+            </span>
           </div>
-          <CardTitle class="leading-tight">
-            <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
-          </CardTitle>
-          <p class="text-sm text-muted-foreground">
-            by
-            <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
-            <span aria-hidden="true"> · </span>
-            {{ idea.createdAtForHumans }}
-          </p>
-        </div>
 
-        <div class="grid gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <section class="flex min-w-0 flex-col gap-1">
-            <h3 class="text-xs font-semibold uppercase text-primary">Tagline</h3>
-            <p class="break-words text-base leading-7 text-foreground [overflow-wrap:anywhere]">
+          <div class="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,0.72fr)_minmax(18rem,1fr)]">
+            <div class="flex min-w-0 flex-col gap-2">
+              <CardTitle class="text-xl leading-tight">
+                <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
+              </CardTitle>
+              <p class="text-sm text-muted-foreground">
+                by
+                <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+                <span aria-hidden="true"> · </span>
+                {{ idea.createdAtForHumans }}
+              </p>
+            </div>
+
+            <p class="min-w-0 break-words text-base leading-7 text-foreground [overflow-wrap:anywhere]">
               {{ idea.tagline }}
             </p>
-          </section>
+          </div>
+        </div>
 
+        <div class="grid gap-4 border-t border-border pt-4 xl:grid-cols-[minmax(0,1fr)_minmax(14rem,0.5fr)]">
           <section class="flex min-w-0 flex-col gap-1">
             <h3 class="text-xs font-semibold uppercase text-primary">Summary</h3>
-            <p class="line-clamp-3 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
+            <p class="break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
               {{ idea.summary }}
             </p>
           </section>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Badge :variant="statusBadgeVariant" class="w-fit">
-            {{ idea.statusDisplay }}
-          </Badge>
-          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
-            {{ tag }}
-          </Badge>
-          <span v-if="idea.repository" class="inline-flex items-center gap-2">
-            <GitBranch class="size-4 text-primary" aria-hidden="true" />
-            Repository linked
-          </span>
+          <section class="flex min-w-0 flex-col gap-2">
+            <h3 class="text-xs font-semibold uppercase text-primary">Tags</h3>
+            <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-1.5">
+              <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+                {{ tag }}
+              </Badge>
+            </div>
+            <span v-else class="text-sm text-muted-foreground">No tags yet.</span>
+          </section>
         </div>
       </div>
 
-      <aside class="pointer-events-none flex flex-col gap-5 border-t border-border bg-background/14 p-5 lg:border-l lg:border-t-0 sm:p-6">
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <div class="flex flex-col gap-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
-            <span class="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
-              <Users class="size-4 text-primary" aria-hidden="true" />
-              Supporters
-            </span>
-            <strong class="text-3xl font-semibold text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
-            <span class="text-xs text-muted-foreground">People who want this built.</span>
+      <aside class="pointer-events-none flex flex-col justify-between gap-4 border-t border-border bg-background/14 p-5 lg:border-l lg:border-t-0 sm:p-6">
+        <div class="grid gap-3">
+          <div class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 rounded-md border border-border bg-card/55 p-3">
+            <Users class="row-span-2 size-5 text-primary" aria-hidden="true" />
+            <strong class="text-2xl font-semibold leading-none text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
+            <span class="text-xs text-muted-foreground">supporters</span>
           </div>
-          <div class="flex flex-col gap-2">
-            <span class="flex items-center gap-2 text-xs font-semibold uppercase text-primary">
-              <MessageSquare class="size-4 text-primary" aria-hidden="true" />
-              Collaborators
-            </span>
-            <strong class="text-3xl font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
-            <span class="text-xs text-muted-foreground">Approved builders already helping.</span>
+          <div class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 rounded-md border border-border bg-card/55 p-3">
+            <MessageSquare class="row-span-2 size-5 text-primary" aria-hidden="true" />
+            <strong class="text-2xl font-semibold leading-none text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
+            <span class="text-xs text-muted-foreground">collaborators</span>
           </div>
         </div>
 
@@ -374,7 +376,7 @@ function leaveDescription(element: Element, done: () => void): void {
     </CardContent>
 
     <CardContent v-else-if="!isDetailed" :class="summaryContentClass">
-      <p class="line-clamp-2 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
+      <p class="break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
         {{ idea.tagline }}
       </p>
       <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-1.5">

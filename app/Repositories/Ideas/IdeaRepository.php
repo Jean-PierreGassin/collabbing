@@ -81,13 +81,11 @@ class IdeaRepository
 
     public function search(string $search): LengthAwarePaginator
     {
-        $search = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search);
-
         return Idea::where('status', 'open')
             ->with(self::INDEX_RELATIONS)
             ->withCount(self::INDEX_COUNTS)
             ->orderBy('created_at', 'desc')
-            ->where('title', 'like', "{$search}%")
+            ->where(fn (Builder $query): Builder => $this->applyIdeaSearch($query, $search))
             ->paginate(10);
     }
 
@@ -156,7 +154,8 @@ class IdeaRepository
         return $query->where(function (Builder $query) use ($search): void {
             $query->where('title', 'like', "{$search}%")
                 ->orWhere('tagline', 'like', "%{$search}%")
-                ->orWhere('summary', 'like', "%{$search}%");
+                ->orWhere('summary', 'like', "%{$search}%")
+                ->orWhere('tags', 'like', "%{$search}%");
         });
     }
 }

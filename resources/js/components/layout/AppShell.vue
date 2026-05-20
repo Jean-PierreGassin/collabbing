@@ -201,18 +201,12 @@ function openDesktopSearch(): void {
   });
 }
 
-function closeDesktopSearchIfEmpty(): void {
+function closeDesktopSearch(): void {
   isDesktopSearchOpen.value = false;
 }
 
-function closeDesktopSearchAfterFocusLeaves(event: FocusEvent): void {
-  const nextTarget = event.relatedTarget;
-
-  if (nextTarget instanceof Node && (event.currentTarget as HTMLElement).contains(nextTarget)) {
-    return;
-  }
-
-  window.setTimeout(closeDesktopSearchIfEmpty, 80);
+function closeDesktopSearchAfterBlur(): void {
+  window.setTimeout(closeDesktopSearch, 100);
 }
 
 function updateDesktopSearch(event: Event): void {
@@ -350,7 +344,6 @@ onBeforeUnmount(() => {
             :action="session.routes.ideas"
             method="GET"
             role="search"
-            @focusout="closeDesktopSearchAfterFocusLeaves"
           >
             <label for="site-search" class="sr-only">Search ideas</label>
             <Button
@@ -375,6 +368,7 @@ onBeforeUnmount(() => {
                 class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
                 placeholder="Search ideas (Ctrl/Cmd+K)"
                 @input="updateDesktopSearch"
+                @blur="closeDesktopSearchAfterBlur"
               >
             </div>
           </form>

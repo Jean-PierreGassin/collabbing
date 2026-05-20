@@ -67,6 +67,35 @@ class IdeaSearchTest extends TestCase
                 ->has('searchResults.items', 0));
     }
 
+    public function testIdeasCanBeSearchedByTags(): void
+    {
+        $owner = User::factory()->create();
+        $matchingIdea = Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Unrelated title',
+                'summary' => 'Unrelated summary.',
+                'tags' => ['design-system', 'workflow'],
+            ]);
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Another unrelated idea',
+                'summary' => 'Nothing relevant here.',
+                'tags' => ['operations'],
+            ]);
+
+        $this
+            ->get(route('ideas.index', ['search' => 'design-system']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('keyword', 'design-system')
+                ->has('searchResults.items', 1)
+                ->where('searchResults.items.0.id', $matchingIdea->id));
+    }
+
     public function testSearchQueryIsLimitedToAReasonableLength(): void
     {
         $this
