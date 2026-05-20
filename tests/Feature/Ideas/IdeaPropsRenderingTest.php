@@ -151,7 +151,9 @@ class IdeaPropsRenderingTest extends TestCase
 
         $idea = new Idea([
             'title' => 'Test title',
+            'tagline' => 'Plain tagline for the idea card.',
             'summary' => 'Plain summary for the idea card.',
+            'tags' => ['testing', 'markdown'],
             'communication' => 'Slack',
             'content' => $content,
             'status' => 'open',

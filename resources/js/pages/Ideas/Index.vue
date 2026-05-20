@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import IdeaList from '@/components/ideas/IdeaList.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import { Button } from '@/components/ui/button';
-import { Grid2X2, ListFilter, SearchX } from '@lucide/vue';
+import { Flame, Grid2X2, ListFilter, SearchX } from '@lucide/vue';
 import type { Idea, Paginator } from '@/types/domain';
 
 const props = defineProps<{
@@ -15,14 +15,8 @@ const props = defineProps<{
 
 const trendingIdeaIds = computed(() => new Set(props.trendingIdeas.map((idea) => idea.id)));
 const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingIdeaIds.value.has(idea.id)));
-const viewMode = ref<'detailed' | 'compact'>('detailed');
-const ideaListVariant = computed(() => {
-  if (viewMode.value === 'compact') {
-    return 'compact';
-  }
-
-  return 'default';
-});
+const viewMode = ref<'detailed' | 'compact'>('compact');
+const ideaListVariant = computed(() => viewMode.value);
 
 function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' {
   if (viewMode.value === mode) {
@@ -30,6 +24,13 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
   }
 
   return 'ghost';
+}
+
+function scrollToSection(id: string): void {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 }
 </script>
 
@@ -41,18 +42,18 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <nav class="flex flex-wrap gap-2" aria-label="Idea discovery sections">
-          <Button v-if="searchResults" as="a" href="#search-results" variant="outline" size="sm">
+        <nav class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" aria-label="Idea discovery sections">
+          <Button v-if="searchResults" type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('search-results')">
             <SearchX class="size-4" aria-hidden="true" />
             Search results
           </Button>
           <template v-else>
-            <Button as="a" href="#trending-ideas" variant="outline" size="sm">
-              <ListFilter class="size-4" aria-hidden="true" />
+            <Button type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('trending-ideas')">
+              <Flame class="size-4" aria-hidden="true" />
               Trending
             </Button>
-            <Button as="a" href="#ideas" variant="outline" size="sm">
-              <Grid2X2 class="size-4" aria-hidden="true" />
+            <Button type="button" variant="ghost" size="sm" class="flex-1 sm:flex-none" @click="scrollToSection('ideas')">
+              <ListFilter class="size-4" aria-hidden="true" />
               Recent
             </Button>
           </template>
@@ -71,7 +72,7 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
       </div>
     </div>
 
-    <div v-if="searchResults" id="search-results" class="flex flex-col gap-4">
+      <div v-if="searchResults" id="search-results" class="flex scroll-mt-24 flex-col gap-4">
       <div class="flex flex-col gap-1">
         <h2 class="text-xl font-semibold text-white">Results for "{{ keyword }}"</h2>
         <p class="text-sm text-muted-foreground">Open ideas matching your search, newest first.</p>
@@ -88,7 +89,7 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
     </div>
 
     <template v-else>
-      <div id="trending-ideas" class="flex flex-col gap-4">
+      <div id="trending-ideas" class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
           <h2 class="text-xl font-semibold text-white">Trending ideas</h2>
           <p class="text-sm text-muted-foreground">Recently active ideas with the strongest support signals.</p>
@@ -100,7 +101,7 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
         </div>
       </div>
 
-      <div id="ideas" class="flex flex-col gap-4">
+      <div id="ideas" class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
           <h2 class="text-xl font-semibold text-white">Recent ideas</h2>
           <p class="text-sm text-muted-foreground">Fresh open ideas not already featured above.</p>

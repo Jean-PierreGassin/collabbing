@@ -15,14 +15,14 @@ const props = withDefaults(defineProps<{
   pitchExpanded?: boolean;
   single?: boolean;
   showComments?: boolean;
-  variant?: 'default' | 'compact';
+  variant?: 'compact' | 'detailed';
 }>(), {
   featured: false,
   hideTitle: false,
   pitchExpanded: false,
   single: false,
   showComments: false,
-  variant: 'default',
+  variant: 'compact',
 });
 
 const emit = defineEmits<{
@@ -30,6 +30,7 @@ const emit = defineEmits<{
 }>();
 
 const isCompact = computed(() => props.variant === 'compact' && ! props.single);
+const isDetailed = computed(() => props.variant === 'detailed' && ! props.single);
 const descriptionId = computed(() => `idea-${props.idea.id}-description`);
 const isDescriptionExpanded = computed({
   get: () => props.pitchExpanded,
@@ -67,8 +68,10 @@ const cardClasses = computed(() => {
     classes.push('bg-card/90');
   }
 
-  if (! props.single) {
-    classes.push('group relative flex h-full min-h-[18rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
+  if (isDetailed.value) {
+    classes.push('group relative transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
+  } else if (! props.single) {
+    classes.push('group relative flex h-full min-h-[14rem] flex-col transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35');
   }
 
   return classes;
@@ -220,7 +223,71 @@ function leaveDescription(element: Element, done: () => void): void {
       :aria-label="`Open ${idea.titleDisplay}`"
     />
 
-    <CardHeader :class="headerClass">
+    <div v-if="isDetailed" class="relative z-10 grid gap-0 lg:grid-cols-[minmax(0,1fr)_17rem]">
+      <div class="pointer-events-none flex min-w-0 flex-col gap-4 p-5 sm:p-6">
+        <div class="flex min-w-0 flex-col gap-2">
+          <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
+            <Sparkles class="size-3.5" aria-hidden="true" />
+            Trending
+          </div>
+          <CardTitle class="leading-tight">
+            <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
+          </CardTitle>
+          <p class="text-sm text-muted-foreground">
+            by
+            <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+            <span aria-hidden="true"> · </span>
+            {{ idea.createdAtForHumans }}
+          </p>
+        </div>
+
+        <p class="max-w-3xl break-words text-base leading-7 text-foreground [overflow-wrap:anywhere]">
+          {{ idea.tagline }}
+        </p>
+
+        <div v-if="idea.tags.length > 0" class="pointer-events-none flex flex-wrap gap-2">
+          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+            {{ tag }}
+          </Badge>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <Badge :variant="statusBadgeVariant" class="w-fit">
+            {{ idea.statusDisplay }}
+          </Badge>
+          <span v-if="idea.repository" class="inline-flex items-center gap-2">
+            <GitBranch class="size-4 text-primary" aria-hidden="true" />
+            Repository linked
+          </span>
+        </div>
+      </div>
+
+      <aside class="pointer-events-none flex flex-col justify-between gap-4 border-t border-border bg-background/14 p-5 lg:border-l lg:border-t-0 sm:p-6">
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div class="rounded-md border border-border bg-card/60 p-4">
+            <span class="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users class="size-4 text-primary" aria-hidden="true" />
+              Supporters
+            </span>
+            <strong class="mt-2 block text-2xl font-semibold text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
+          </div>
+          <div class="rounded-md border border-border bg-card/60 p-4">
+            <span class="flex items-center gap-2 text-sm text-muted-foreground">
+              <MessageSquare class="size-4 text-primary" aria-hidden="true" />
+              Collaborators
+            </span>
+            <strong class="mt-2 block text-2xl font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
+          </div>
+        </div>
+
+        <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="pointer-events-auto relative z-20 w-full">
+          <GitBranch class="size-4" aria-hidden="true" />
+          Manage
+        </Button>
+      </aside>
+    </div>
+
+    <CardHeader v-else :class="headerClass">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-col gap-2">
           <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
@@ -257,6 +324,11 @@ function leaveDescription(element: Element, done: () => void): void {
         <p class="break-words text-base leading-7 text-white [overflow-wrap:anywhere]">
           {{ idea.summary }}
         </p>
+        <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-2 pt-1">
+          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+            {{ tag }}
+          </Badge>
+        </div>
       </section>
 
       <section class="flex flex-col gap-3">
@@ -290,13 +362,18 @@ function leaveDescription(element: Element, done: () => void): void {
       </section>
     </CardContent>
 
-    <CardContent v-else :class="summaryContentClass">
-      <p class="min-h-24 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
-        {{ idea.summary }}
+    <CardContent v-else-if="!isDetailed" :class="summaryContentClass">
+      <p class="min-h-12 break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
+        {{ idea.tagline }}
       </p>
+      <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-2">
+        <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+          {{ tag }}
+        </Badge>
+      </div>
     </CardContent>
 
-    <div v-if="!single" :class="cardStatsClass">
+    <div v-if="!single && !isDetailed" :class="cardStatsClass">
       <span class="inline-flex items-center gap-2">
         <Users class="size-4 text-primary" aria-hidden="true" />
         {{ supportersLabel }}
@@ -308,7 +385,7 @@ function leaveDescription(element: Element, done: () => void): void {
       </span>
     </div>
 
-    <div v-if="!single && (idea.can.update || idea.repository)" :class="cardActionsClass">
+    <div v-if="!single && !isDetailed && (idea.can.update || idea.repository)" :class="cardActionsClass">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div v-if="idea.repository" class="inline-flex items-center gap-2 text-sm text-muted-foreground">
           <GitBranch class="size-4 text-primary" aria-hidden="true" />

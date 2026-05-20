@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import CsrfField from '@/components/forms/CsrfField.vue';
-import MethodField from '@/components/forms/MethodField.vue';
+import { computed, ref, watch } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import UserAvatar from '@/components/users/UserAvatar.vue';
@@ -14,21 +13,76 @@ const props = defineProps<{
   supporter?: IdeaSupporter | null;
 }>();
 
+const supportForm = useForm({});
+const localSupporter = ref<IdeaSupporter | null>(props.supporter ?? null);
+const localSupportersCount = ref(props.idea.supportersCount);
+const supportSparkKey = ref(0);
+const showSupportSparks = ref(false);
+
 const supporterSentence = computed(() => {
-  if (props.idea.supportersCount === 0) {
+  if (localSupportersCount.value === 0) {
     return 'No one is supporting this idea yet.';
   }
 
   let verb = 'is';
   let noun = 'person';
 
-  if (props.idea.supportersCount > 1) {
+  if (localSupportersCount.value > 1) {
     verb = 'are';
     noun = 'people';
   }
 
-  return `There ${verb} ${props.idea.supportersCount.toLocaleString()} ${noun} supporting this idea.`;
+  return `There ${verb} ${localSupportersCount.value.toLocaleString()} ${noun} supporting this idea.`;
 });
+
+watch(
+  () => props.supporter,
+  (supporter) => {
+    localSupporter.value = supporter ?? null;
+  }
+);
+
+watch(
+  () => props.idea.supportersCount,
+  (count) => {
+    localSupportersCount.value = count;
+  }
+);
+
+function playSupportSparks(): void {
+  supportSparkKey.value += 1;
+  showSupportSparks.value = true;
+
+  window.setTimeout(() => {
+    showSupportSparks.value = false;
+  }, 760);
+}
+
+function supportIdea(): void {
+  supportForm.post(props.idea.routes.supportersStore, {
+    preserveScroll: true,
+    onSuccess: () => {
+      localSupportersCount.value = props.idea.supportersCount;
+      playSupportSparks();
+    },
+  });
+}
+
+function removeSupport(): void {
+  const supporter = localSupporter.value;
+
+  if (! supporter) {
+    return;
+  }
+
+  supportForm.delete(supporter.routes.destroy, {
+    preserveScroll: true,
+    onSuccess: () => {
+      localSupporter.value = null;
+      localSupportersCount.value = props.idea.supportersCount;
+    },
+  });
+}
 </script>
 
 <template>
@@ -138,16 +192,12 @@ const supporterSentence = computed(() => {
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 class="text-lg font-semibold text-white">Supporters</h2>
-          <div v-if="idea.can.storeSupporter">
-            <form v-if="supporter" :action="supporter.routes.destroy" method="POST">
-              <CsrfField />
-              <MethodField method="DELETE" />
-              <Button type="submit" size="sm" variant="outline">Remove Support</Button>
-            </form>
-            <form v-else :action="idea.routes.supportersStore" method="POST">
-              <CsrfField />
-              <Button type="submit" size="sm" variant="outline">Support Idea</Button>
-            </form>
+          <div v-if="idea.can.storeSupporter" class="relative">
+            <Button v-if="localSupporter" type="button" size="sm" variant="outline" :disabled="supportForm.processing" @click="removeSupport">Remove Support</Button>
+            <Button v-else type="button" size="sm" variant="outline" :disabled="supportForm.processing" @click="supportIdea">Support Idea</Button>
+            <span v-if="showSupportSparks" :key="supportSparkKey" class="auth-success-sparks" aria-hidden="true">
+              <span v-for="index in 12" :key="index" />
+            </span>
           </div>
         </div>
       </CardHeader>

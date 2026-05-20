@@ -78,7 +78,7 @@ function hasPitchHeadingsClass(): string | undefined {
           />
         </div>
 
-        <template v-if="idea.can.update || collaborator">
+        <template v-if="idea.can.storeComment">
           <CommentList :comments="comments" :comments-store="idea.routes.commentsStore" :mentionable-users="mentionableUsers" />
         </template>
       </div>

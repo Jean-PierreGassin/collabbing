@@ -155,6 +155,7 @@ class IdeaRepository
 
         return $query->where(function (Builder $query) use ($search): void {
             $query->where('title', 'like', "{$search}%")
+                ->orWhere('tagline', 'like', "%{$search}%")
                 ->orWhere('summary', 'like', "%{$search}%");
         });
     }

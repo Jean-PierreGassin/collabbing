@@ -92,7 +92,9 @@ class PagePropsService
             'id' => $idea->id,
             'title' => $idea->title,
             'titleDisplay' => ucfirst($idea->title),
+            'tagline' => $this->ideaTagline($idea),
             'summary' => $this->ideaSummary($idea),
+            'tags' => $this->ideaTags($idea),
             'communication' => $idea->communication,
             'content' => $idea->content,
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
@@ -113,6 +115,7 @@ class PagePropsService
                 'storeSupporter' => Gate::allows('storeSupporter', $idea),
                 'deleteApplication' => Gate::allows('deleteApplication', $idea),
                 'updateApplication' => Gate::allows('updateApplication', $idea),
+                'storeComment' => Gate::allows('storeComment', $idea),
             ],
             'routes' => [
                 'show' => route('ideas.show', $idea),
@@ -146,6 +149,31 @@ class PagePropsService
         }
 
         return Str::limit($text, self::IDEA_SUMMARY_LIMIT, '');
+    }
+
+    private function ideaTagline(Idea $idea): string
+    {
+        if ($idea->tagline) {
+            return $idea->tagline;
+        }
+
+        return $this->ideaSummary($idea);
+    }
+
+    private function ideaTags(Idea $idea): array
+    {
+        $tags = $idea->getAttributeValue('tags');
+
+        if (! is_array($tags)) {
+            return [];
+        }
+
+        return collect($tags)
+            ->filter(fn (mixed $tag): bool => is_string($tag) && trim($tag) !== '')
+            ->map(fn (string $tag): string => Str::of($tag)->squish()->lower()->toString())
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function relationCount(Idea $idea, string $relation, string $countAttribute): int

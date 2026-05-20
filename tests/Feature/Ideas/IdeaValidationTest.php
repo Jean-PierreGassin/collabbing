@@ -48,7 +48,9 @@ class IdeaValidationTest extends TestCase
             ->actingAs($user)
             ->put(route('ideas.update', $idea), $this->ideaPayload([
                 'title' => 'An updated collaboration tool',
+                'tagline' => 'A sharper card tagline for the update.',
                 'summary' => 'A better summary for the updated collaboration tool.',
+                'tags' => 'design, launch',
                 'repository_name' => 'updated-collaboration-tool',
                 'status' => 'closed',
             ]));
@@ -58,9 +60,11 @@ class IdeaValidationTest extends TestCase
             'id' => $idea->id,
             'user_id' => $user->id,
             'title' => 'An updated collaboration tool',
+            'tagline' => 'A sharper card tagline for the update.',
             'summary' => 'A better summary for the updated collaboration tool.',
             'status' => 'closed',
         ]);
+        $this->assertSame(['design', 'launch'], $idea->fresh()->tags);
         $this->assertDatabaseHas('code_repositories', [
             'idea_id' => $idea->id,
             'provider' => CodeRepository::PROVIDER_GITHUB,
@@ -114,7 +118,9 @@ class IdeaValidationTest extends TestCase
     {
         return array_merge([
             'title' => 'A useful collaboration tool',
+            'tagline' => 'Match collaborators around useful product work.',
             'summary' => 'A short summary for a useful collaboration tool.',
+            'tags' => 'product, collaboration',
             'repository_name' => 'useful-collaboration-tool',
             'communication' => 'Slack',
             'content' => 'A focused pitch for a useful collaboration tool.',
@@ -133,9 +139,17 @@ class IdeaValidationTest extends TestCase
                 ['summary' => null],
                 'summary',
             ],
+            'missing tagline' => [
+                ['tagline' => null],
+                'tagline',
+            ],
             'long summary' => [
                 ['summary' => str_repeat('a', 241)],
                 'summary',
+            ],
+            'too many tags' => [
+                ['tags' => 'one,two,three,four,five,six,seven,eight,nine'],
+                'tags',
             ],
         ];
     }

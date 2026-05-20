@@ -6,7 +6,9 @@ final readonly class IdeaData
 {
     public function __construct(
         public string $title,
+        public string $tagline,
         public string $summary,
+        public array $tags,
         public string $repositoryName,
         public string $communication,
         public string $content,
@@ -17,7 +19,9 @@ final readonly class IdeaData
     {
         return [
             'title' => $this->title,
+            'tagline' => $this->tagline,
             'summary' => $this->summary,
+            'tags' => $this->tags,
             'communication' => $this->communication,
             'content' => $this->content,
             'status' => $this->status,

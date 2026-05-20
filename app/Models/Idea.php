@@ -15,11 +15,20 @@ class Idea extends Model
 
     protected $fillable = [
         'title',
+        'tagline',
         'summary',
+        'tags',
         'communication',
         'content',
         'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'tags' => 'array',
+        ];
+    }
 
     protected static function newFactory(): IdeaFactory
     {
