@@ -88,10 +88,10 @@ function idea(overrides: Partial<Idea> = {}): Idea {
   };
 }
 
-function mountCard(variant: 'compact' | 'detailed') {
+function mountCard(variant: 'compact' | 'detailed', overrides: Partial<Idea> = {}) {
   return mount(IdeaCard, {
     props: {
-      idea: idea(),
+      idea: idea(overrides),
       variant,
     },
     global: {
@@ -146,5 +146,25 @@ describe('IdeaCard', () => {
     expect(detailed.find('.pointer-events-none.relative.z-10').exists()).toBe(true);
     expect(compact.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
     expect(detailed.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
+  });
+
+  it('shows the manage action once at the top of compact and detailed cards', () => {
+    const compact = mountCard('compact', {
+      can: {
+        ...idea().can,
+        update: true,
+      },
+    });
+    const detailed = mountCard('detailed', {
+      can: {
+        ...idea().can,
+        update: true,
+      },
+    });
+
+    expect(compact.findAll('a[href="/ideas/1/dashboard"]')).toHaveLength(1);
+    expect(detailed.findAll('a[href="/ideas/1/dashboard"]')).toHaveLength(1);
+    expect(compact.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
+    expect(detailed.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
   });
 });

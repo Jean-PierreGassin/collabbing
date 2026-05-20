@@ -225,11 +225,15 @@ function leaveDescription(element: Element, done: () => void): void {
 
     <div v-if="isCompact" class="pointer-events-none relative z-10 flex h-full flex-col gap-2.5 p-3.5">
       <div class="pointer-events-none flex min-w-0 flex-col gap-1.5">
-        <div v-if="featured" class="flex flex-wrap items-center gap-2">
-          <span v-if="featured" class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase text-primary">
+        <div v-if="featured || idea.can.update" class="flex min-w-0 items-start justify-between gap-3">
+          <span v-if="featured" class="inline-flex min-h-9 items-center gap-1.5 text-xs font-semibold uppercase text-primary">
             <Sparkles class="size-3.5" aria-hidden="true" />
             Trending
           </span>
+          <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="pointer-events-auto relative z-20 ml-auto">
+            <GitBranch class="size-4" aria-hidden="true" />
+            Manage
+          </Button>
         </div>
 
         <CardTitle class="leading-tight">
@@ -264,36 +268,36 @@ function leaveDescription(element: Element, done: () => void): void {
           {{ collaboratorsLabel }}
         </span>
       </div>
-
-      <div v-if="idea.can.update" class="pointer-events-auto relative z-20 flex justify-end border-t border-border pt-2.5">
-        <Button :as="Link" :href="idea.routes.dashboard" size="sm">
-          <GitBranch class="size-4" aria-hidden="true" />
-          Manage
-        </Button>
-      </div>
     </div>
 
     <div v-else-if="isDetailed" class="pointer-events-none relative z-10 flex flex-col gap-2.5 p-4 sm:px-5">
       <div class="flex min-w-0 flex-col gap-2.5">
-        <div class="flex min-w-0 flex-col gap-2">
-          <div v-if="featured" class="flex flex-wrap items-center gap-1.5">
-            <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase text-primary">
-              <Sparkles class="size-3.5" aria-hidden="true" />
-              Trending
-            </span>
+        <div class="flex min-w-0 items-start justify-between gap-4">
+          <div class="flex min-w-0 flex-col gap-2">
+            <div v-if="featured" class="flex flex-wrap items-center gap-1.5">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase text-primary">
+                <Sparkles class="size-3.5" aria-hidden="true" />
+                Trending
+              </span>
+            </div>
+
+            <div class="flex min-w-0 flex-col gap-1">
+              <CardTitle class="text-lg leading-tight sm:text-xl">
+                <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
+              </CardTitle>
+              <p class="text-sm text-muted-foreground">
+                by
+                <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+                <span aria-hidden="true"> · </span>
+                {{ idea.createdAtForHumans }}
+              </p>
+            </div>
           </div>
 
-          <div class="flex min-w-0 flex-col gap-1">
-            <CardTitle class="text-lg leading-tight sm:text-xl">
-              <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
-            </CardTitle>
-            <p class="text-sm text-muted-foreground">
-              by
-              <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
-              <span aria-hidden="true"> · </span>
-              {{ idea.createdAtForHumans }}
-            </p>
-          </div>
+          <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="pointer-events-auto relative z-20 shrink-0">
+            <GitBranch class="size-4" aria-hidden="true" />
+            Manage
+          </Button>
         </div>
 
         <p class="break-words text-base leading-6 text-foreground [overflow-wrap:anywhere]">
