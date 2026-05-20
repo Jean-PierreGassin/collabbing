@@ -118,6 +118,7 @@ describe('IdeaCard', () => {
     expect(occurrences(text, 'design-systems')).toBe(1);
     expect(occurrences(text, '42 supporters')).toBe(1);
     expect(occurrences(text, '7 collaborators')).toBe(1);
+    expect(text).not.toContain('Repository');
   });
 
   it('renders detailed cards as slim rows without summary or labels', () => {
@@ -128,10 +129,22 @@ describe('IdeaCard', () => {
     expect(occurrences(text, 'design-systems')).toBe(1);
     expect(text).not.toContain('A summary that belongs on the full idea page.');
     expect(text).not.toContain('Tagline');
+    expect(text).not.toContain('Repository');
+    expect(text).not.toContain('Copy link');
     expect(text).toContain('42');
     expect(text).toContain('supporters');
     expect(text).toContain('7');
     expect(text).toContain('collaborators');
-    expect(text).toContain('Copy link');
+    expect(wrapper.findAll('a[href="/ideas/1"]')).toHaveLength(1);
+  });
+
+  it('keeps card body layers pass-through so cards remain clickable', () => {
+    const compact = mountCard('compact');
+    const detailed = mountCard('detailed');
+
+    expect(compact.find('.pointer-events-none.relative.z-10').exists()).toBe(true);
+    expect(detailed.find('.pointer-events-none.relative.z-10').exists()).toBe(true);
+    expect(compact.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
+    expect(detailed.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
   });
 });

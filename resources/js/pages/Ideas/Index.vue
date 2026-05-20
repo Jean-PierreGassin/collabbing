@@ -13,12 +13,37 @@ const props = defineProps<{
   ideas: Paginator<Idea>;
 }>();
 
+type IdeaViewMode = 'detailed' | 'compact';
+
+const ideaViewModeStorageKey = 'collabbing.ideaViewMode';
 const trendingIdeaIds = computed(() => new Set(props.trendingIdeas.map((idea) => idea.id)));
 const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingIdeaIds.value.has(idea.id)));
-const viewMode = ref<'detailed' | 'compact'>('compact');
+const viewMode = ref<IdeaViewMode>(storedIdeaViewMode());
 const ideaListVariant = computed(() => viewMode.value);
 
-function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' {
+function storedIdeaViewMode(): IdeaViewMode {
+  if (typeof window === 'undefined') {
+    return 'compact';
+  }
+
+  const storedMode = window.localStorage.getItem(ideaViewModeStorageKey);
+
+  if (storedMode === 'detailed' || storedMode === 'compact') {
+    return storedMode;
+  }
+
+  return 'compact';
+}
+
+function setViewMode(mode: IdeaViewMode): void {
+  viewMode.value = mode;
+
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(ideaViewModeStorageKey, mode);
+  }
+}
+
+function viewButtonVariant(mode: IdeaViewMode): 'secondary' | 'ghost' {
   if (viewMode.value === mode) {
     return 'secondary';
   }
@@ -60,11 +85,11 @@ function scrollToSection(id: string): void {
         </nav>
 
         <div class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" role="group" aria-label="Idea card density">
-          <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="viewMode = 'detailed'">
+          <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="setViewMode('detailed')">
             <Rows3 class="size-4" aria-hidden="true" />
             Detailed
           </Button>
-          <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="viewMode = 'compact'">
+          <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="setViewMode('compact')">
             <LayoutGrid class="size-4" aria-hidden="true" />
             Compact
           </Button>
