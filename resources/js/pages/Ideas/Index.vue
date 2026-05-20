@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import IdeaList from '@/components/ideas/IdeaList.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
+import { Button } from '@/components/ui/button';
+import { Grid2X2, ListFilter, SearchX } from '@lucide/vue';
 import type { Idea, Paginator } from '@/types/domain';
 
 const props = defineProps<{
@@ -13,15 +15,60 @@ const props = defineProps<{
 
 const trendingIdeaIds = computed(() => new Set(props.trendingIdeas.map((idea) => idea.id)));
 const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingIdeaIds.value.has(idea.id)));
+const viewMode = ref<'detailed' | 'compact'>('detailed');
+const ideaListVariant = computed(() => {
+  if (viewMode.value === 'compact') {
+    return 'compact';
+  }
+
+  return 'default';
+});
+
+function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' {
+  if (viewMode.value === mode) {
+    return 'secondary';
+  }
+
+  return 'ghost';
+}
 </script>
 
 <template>
   <section class="flex flex-col gap-10">
-    <div class="flex flex-col gap-3 border-b border-border pb-6">
+    <div class="flex flex-col gap-4 border-b border-border pb-6">
       <h1 class="sr-only">Ideas</h1>
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <nav class="flex flex-wrap gap-2" aria-label="Idea discovery sections">
+          <Button v-if="searchResults" as="a" href="#search-results" variant="outline" size="sm">
+            <SearchX class="size-4" aria-hidden="true" />
+            Search results
+          </Button>
+          <template v-else>
+            <Button as="a" href="#trending-ideas" variant="outline" size="sm">
+              <ListFilter class="size-4" aria-hidden="true" />
+              Trending
+            </Button>
+            <Button as="a" href="#ideas" variant="outline" size="sm">
+              <Grid2X2 class="size-4" aria-hidden="true" />
+              Recent
+            </Button>
+          </template>
+        </nav>
+
+        <div class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" role="group" aria-label="Idea card density">
+          <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="viewMode = 'detailed'">
+            <Grid2X2 class="size-4" aria-hidden="true" />
+            Detailed
+          </Button>
+          <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="viewMode = 'compact'">
+            <ListFilter class="size-4" aria-hidden="true" />
+            Compact
+          </Button>
+        </div>
+      </div>
     </div>
 
     <div v-if="searchResults" id="search-results" class="flex flex-col gap-4">
@@ -29,8 +76,14 @@ const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingI
         <h2 class="text-xl font-semibold text-white">Results for "{{ keyword }}"</h2>
         <p class="text-sm text-muted-foreground">Open ideas matching your search, newest first.</p>
       </div>
-      <IdeaList v-if="searchResults.items.length > 0" :ideas="searchResults.items" />
-      <p v-else class="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">No ideas matched "{{ keyword }}".</p>
+      <IdeaList v-if="searchResults.items.length > 0" :ideas="searchResults.items" :variant="ideaListVariant" />
+      <div v-else class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
+        <p>No ideas matched "{{ keyword }}".</p>
+        <div class="flex flex-wrap gap-2">
+          <Button as="a" href="/ideas" variant="outline" size="sm">Clear search</Button>
+          <Button as="a" href="/ideas/create" size="sm">Share an idea</Button>
+        </div>
+      </div>
       <PaginationLinks :paginator="searchResults" />
     </div>
 
@@ -40,8 +93,11 @@ const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingI
           <h2 class="text-xl font-semibold text-white">Trending ideas</h2>
           <p class="text-sm text-muted-foreground">Recently active ideas with the strongest support signals.</p>
         </div>
-        <IdeaList v-if="trendingIdeas.length > 0" :ideas="trendingIdeas" featured />
-        <p v-else class="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">No ideas are trending yet.</p>
+        <IdeaList v-if="trendingIdeas.length > 0" :ideas="trendingIdeas" featured :variant="ideaListVariant" />
+        <div v-else class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
+          <p>No ideas are trending yet.</p>
+          <Button as="a" href="/ideas/create" size="sm" class="w-fit">Share an idea</Button>
+        </div>
       </div>
 
       <div id="ideas" class="flex flex-col gap-4">
@@ -49,8 +105,11 @@ const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingI
           <h2 class="text-xl font-semibold text-white">Recent ideas</h2>
           <p class="text-sm text-muted-foreground">Fresh open ideas not already featured above.</p>
         </div>
-        <IdeaList v-if="recentIdeas.length > 0" :ideas="recentIdeas" />
-        <p v-else class="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">No additional recent ideas are available yet.</p>
+        <IdeaList v-if="recentIdeas.length > 0" :ideas="recentIdeas" :variant="ideaListVariant" />
+        <div v-else class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
+          <p>No additional recent ideas are available yet.</p>
+          <Button as="a" href="/ideas/create" size="sm" class="w-fit">Share an idea</Button>
+        </div>
         <PaginationLinks :paginator="ideas" />
       </div>
     </template>

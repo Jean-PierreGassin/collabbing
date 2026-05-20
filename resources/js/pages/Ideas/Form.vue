@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { Upload } from '@lucide/vue';
+import { computed, nextTick, ref, type Component } from 'vue';
+import { Handshake, Lightbulb, Rocket, Upload, Users } from '@lucide/vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import FormSelect from '@/components/forms/FormSelect.vue';
@@ -23,6 +23,8 @@ const props = defineProps<{
 const session = useSessionStore();
 const contentInput = ref<HTMLTextAreaElement | null>(null);
 const markdownFileInput = ref<HTMLInputElement | null>(null);
+const markdownImportFeedback = ref('');
+const markdownImportFeedbackTone = ref<'muted' | 'success' | 'warning'>('muted');
 const repositoryNamePattern = '[A-Za-z0-9_-]+';
 const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
 const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
@@ -32,6 +34,40 @@ const titleValidator = maxLengthValidator(100, 'a title');
 const communicationValidator = maxLengthValidator(50, 'a communication preference');
 const summaryValidator = maxLengthValidator(240, 'a summary');
 const contentValidator = maxLengthValidator(20000, 'a pitch');
+
+type WritingSection = {
+  description: string;
+  icon: Component;
+  label: string;
+  markdown: string;
+};
+
+const writingSections: WritingSection[] = [
+  {
+    description: 'Add the user pain and why current workarounds fall short.',
+    icon: Lightbulb,
+    label: 'Problem',
+    markdown: '## Problem\n\nWho feels this pain today, and what makes the current workaround frustrating?',
+  },
+  {
+    description: 'Add the first people this idea should help.',
+    icon: Users,
+    label: 'Audience',
+    markdown: '## Audience\n\nWho should care about this first, and what context do they bring?',
+  },
+  {
+    description: 'Add the smallest useful version of the idea.',
+    icon: Rocket,
+    label: 'First version',
+    markdown: '## First version\n\n- What is the smallest useful workflow?\n- What can wait until later?',
+  },
+  {
+    description: 'Add the help needed from collaborators.',
+    icon: Handshake,
+    label: 'Collaboration',
+    markdown: '## Collaboration\n\nWhat kind of help would move this forward, and how should collaborators join in?',
+  },
+];
 
 let pageTitle = 'Share your idea';
 let formAction = session.routes.ideasStore;
@@ -229,10 +265,84 @@ function isMarkdownFile(file: File): boolean {
   return markdownFilePattern.test(file.name) || ['text/markdown', 'text/plain'].includes(file.type);
 }
 
+function insertionBoundaryBefore(value: string): string {
+  if (!value.trim()) {
+    return '';
+  }
+
+  if (value.endsWith('\n\n')) {
+    return '';
+  }
+
+  if (value.endsWith('\n')) {
+    return '\n';
+  }
+
+  return '\n\n';
+}
+
+function insertionBoundaryAfter(value: string): string {
+  if (!value.trim()) {
+    return '';
+  }
+
+  if (value.startsWith('\n\n')) {
+    return '';
+  }
+
+  if (value.startsWith('\n')) {
+    return '\n';
+  }
+
+  return '\n\n';
+}
+
+function focusContentAt(position: number): void {
+  void nextTick(() => {
+    const textarea = contentInput.value;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.focus();
+    textarea.setSelectionRange(position, position);
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+}
+
+function insertWritingSection(section: WritingSection): void {
+  const textarea = contentInput.value;
+  const currentContent = content.value;
+  const selectionStart = textarea?.selectionStart ?? currentContent.length;
+  const selectionEnd = textarea?.selectionEnd ?? currentContent.length;
+  const before = currentContent.slice(0, selectionStart);
+  const after = currentContent.slice(selectionEnd);
+  const prefix = insertionBoundaryBefore(before);
+  const suffix = insertionBoundaryAfter(after);
+  const insertion = section.markdown.trim();
+  const cursorPosition = before.length + prefix.length + insertion.length;
+
+  content.value = `${before}${prefix}${insertion}${suffix}${after}`;
+  focusContentAt(cursorPosition);
+}
+
+function setMarkdownImportFeedback(message: string, tone: 'success' | 'warning'): void {
+  markdownImportFeedback.value = message;
+  markdownImportFeedbackTone.value = tone;
+}
+
 async function insertMarkdownFiles(files: File[]): Promise<void> {
+  if (files.length === 0) {
+    return;
+  }
+
   const markdownFiles = files.filter(isMarkdownFile);
+  const skippedCount = files.length - markdownFiles.length;
 
   if (markdownFiles.length === 0) {
+    setMarkdownImportFeedback('No markdown files were imported. Choose .md or .markdown files.', 'warning');
+
     return;
   }
 
@@ -253,6 +363,14 @@ async function insertMarkdownFiles(files: File[]): Promise<void> {
   }
 
   content.value = stripGeneratedTableOfContents(nextContent);
+
+  let feedback = `Imported ${markdownFiles.length.toLocaleString()} markdown ${markdownFiles.length === 1 ? 'file' : 'files'}.`;
+
+  if (skippedCount > 0) {
+    feedback = `${feedback} Skipped ${skippedCount.toLocaleString()} unsupported ${skippedCount === 1 ? 'file' : 'files'}.`;
+  }
+
+  setMarkdownImportFeedback(feedback, 'success');
 }
 
 function selectMarkdownFiles(event: Event): void {
@@ -275,6 +393,17 @@ const contentBody = computed(() => stripGeneratedTableOfContents(content.value))
 const previewHeadings = computed(() => markdownHeadings(contentBody.value));
 const previewDescriptionId = 'idea-form-preview-description';
 const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
+const markdownImportFeedbackClass = computed(() => {
+  if (markdownImportFeedbackTone.value === 'success') {
+    return 'text-emerald-300';
+  }
+
+  if (markdownImportFeedbackTone.value === 'warning') {
+    return 'text-amber-300';
+  }
+
+  return 'text-muted-foreground';
+});
 </script>
 
 <template>
@@ -320,6 +449,29 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
             <template #default="{ invalid, describedBy, feedbackClass }">
               <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-4">
+                  <div class="flex flex-col gap-3 rounded-md border border-border bg-background/35 p-3">
+                    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <span class="text-sm font-medium text-foreground">Writing aids</span>
+                      <span class="text-xs text-muted-foreground">Insert useful pitch sections</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2" role="toolbar" aria-label="Pitch section inserts">
+                      <Button
+                        v-for="section in writingSections"
+                        :key="section.label"
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="h-8 gap-1.5 px-2 text-xs"
+                        :aria-label="`Insert ${section.label} section`"
+                        :title="section.description"
+                        @mousedown.prevent
+                        @click="insertWritingSection(section)"
+                      >
+                        <component :is="section.icon" class="size-3.5 text-primary" aria-hidden="true" />
+                        {{ section.label }}
+                      </Button>
+                    </div>
+                  </div>
                   <textarea
                     id="content"
                     ref="contentInput"
@@ -337,7 +489,7 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
                     @dragover.prevent
                     @drop.prevent="dropMarkdownFiles"
                   >
-                    <span class="font-medium text-white">Import markdown files</span>
+                    <span class="font-medium text-foreground">Import markdown files</span>
                     <div class="pt-1">
                       <input
                         id="content_markdown_files"
@@ -360,6 +512,15 @@ const previewHtml = computed(() => renderMarkdownPreview(contentBody.value));
                         Choose markdown files
                       </Button>
                     </div>
+                    <p
+                      v-if="markdownImportFeedback"
+                      class="text-xs"
+                      :class="markdownImportFeedbackClass"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {{ markdownImportFeedback }}
+                    </p>
                   </div>
                 </div>
                 <div class="relative flex min-w-0 flex-col gap-3">
