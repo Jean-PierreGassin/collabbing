@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ChevronDown, LayoutDashboard, LogOut, Menu, Pencil, Plus, Search, UserCircle, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
@@ -167,6 +167,13 @@ const transitionKey = computed(() => {
   return nextUrl;
 });
 const chromeTransitionKey = computed(() => session.isAuthenticated ? 'authenticated' : 'guest');
+const currentSearchTerm = computed(() => {
+  const [, query = ''] = page.url.split('?');
+  const params = new URLSearchParams(query.split('#')[0]);
+  const search = params.get('search');
+
+  return search ?? '';
+});
 
 function closeMobileNavigation(): void {
   isMobileMenuOpen.value = false;
@@ -206,7 +213,11 @@ function closeDesktopSearch(): void {
 }
 
 function closeDesktopSearchAfterBlur(): void {
-  window.setTimeout(closeDesktopSearch, 100);
+  window.setTimeout(() => {
+    if (desktopSearchValue.value.trim() === '') {
+      closeDesktopSearch();
+    }
+  }, 100);
 }
 
 function updateDesktopSearch(event: Event): void {
@@ -259,6 +270,18 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleDocumentClick);
   window.removeEventListener('keydown', handleShellShortcut);
 });
+
+watch(
+  currentSearchTerm,
+  (search) => {
+    desktopSearchValue.value = search;
+
+    if (search) {
+      isDesktopSearchOpen.value = true;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -338,7 +361,7 @@ onBeforeUnmount(() => {
         <div class="hidden w-full flex-col gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center lg:justify-end">
           <form
             :class="[
-              'relative flex h-10 items-center justify-end transition-[width] duration-200 ease-out',
+              'relative flex h-10 items-center justify-end overflow-hidden transition-[width] duration-200 ease-out',
               isDesktopSearchOpen ? 'w-72 xl:w-80' : 'w-10',
             ]"
             :action="session.routes.ideas"
@@ -347,17 +370,24 @@ onBeforeUnmount(() => {
           >
             <label for="site-search" class="sr-only">Search ideas</label>
             <Button
-              v-if="!isDesktopSearchOpen"
               type="button"
               variant="ghost"
               size="icon"
-              class="size-10"
+              :class="[
+                'absolute right-0 top-0 z-10 size-10 transition-opacity duration-150',
+                isDesktopSearchOpen ? 'pointer-events-none opacity-0' : 'opacity-100',
+              ]"
               aria-label="Search ideas"
               @click="openDesktopSearch"
             >
               <Search class="size-4" aria-hidden="true" />
             </Button>
-            <div v-else class="relative w-full">
+            <div
+              :class="[
+                'relative w-full transition-[opacity,transform] duration-200 ease-out',
+                isDesktopSearchOpen ? 'opacity-100 translate-x-0' : 'pointer-events-none translate-x-2 opacity-0',
+              ]"
+            >
               <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <input
                 id="site-search"
