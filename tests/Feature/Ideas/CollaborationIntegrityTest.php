@@ -180,6 +180,25 @@ class CollaborationIntegrityTest extends TestCase
         ]);
     }
 
+    public function testAuthenticatedUserCanCommentOnAnyIdea(): void
+    {
+        $owner = User::factory()->create();
+        $commenter = User::factory()->create();
+        $idea = Idea::factory()->for($owner, 'user')->create();
+
+        $this->actingAs($commenter)
+            ->post(route('ideas.comments.store', $idea), [
+                'content' => 'A useful note from outside the collaborator group.',
+            ])
+            ->assertRedirect(route('ideas.show', $idea));
+
+        $this->assertDatabaseHas('idea_comments', [
+            'idea_id' => $idea->id,
+            'user_id' => $commenter->id,
+            'content' => 'A useful note from outside the collaborator group.',
+        ]);
+    }
+
     public function testCommentReplyParentMustBelongToTheSameIdea(): void
     {
         $owner = User::factory()->create();

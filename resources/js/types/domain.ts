@@ -87,7 +87,9 @@ export interface Idea {
   id: number;
   title: string;
   titleDisplay: string;
+  tagline: string;
   summary: string;
+  tags: string[];
   communication: string | null;
   content: string;
   contentHtml: string;
@@ -108,6 +110,7 @@ export interface Idea {
     storeSupporter: boolean;
     deleteApplication: boolean;
     updateApplication: boolean;
+    storeComment: boolean;
   };
   routes: {
     show: string;

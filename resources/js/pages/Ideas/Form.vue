@@ -31,9 +31,12 @@ const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
 const markdownFilePattern = /\.(md|markdown)$/i;
 const content = ref(stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)));
 const titleValidator = maxLengthValidator(100, 'a title');
+const taglineValidator = maxLengthValidator(60, 'a tagline');
 const communicationValidator = maxLengthValidator(50, 'a communication preference');
 const summaryValidator = maxLengthValidator(240, 'a summary');
+const tagsValidator = maxLengthValidator(240, 'tags');
 const contentValidator = maxLengthValidator(20000, 'a pitch');
+const tagsText = computed(() => props.idea?.tags.join(', ') ?? '');
 
 type WritingSection = {
   description: string;
@@ -426,9 +429,21 @@ const markdownImportFeedbackClass = computed(() => {
               </template>
             </FormField>
 
+            <FormField id="tagline" label="Tagline" help="Short card copy for scanning the ideas list." :validator="taglineValidator">
+              <template #default="{ invalid, describedBy, feedbackClass }">
+                <input id="tagline" name="tagline" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tagline', idea?.tagline)" placeholder="Match reviewers with focused feedback" maxlength="60" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              </template>
+            </FormField>
+
             <FormField id="communication" label="Communication" :validator="communicationValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
                 <input id="communication" name="communication" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              </template>
+            </FormField>
+
+            <FormField id="tags" label="Tags" help="Separate tags with commas." :validator="tagsValidator">
+              <template #default="{ invalid, describedBy, feedbackClass }">
+                <input id="tags" name="tags" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tags', tagsText)" placeholder="design, review, workflow" maxlength="240" autocomplete="off" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
               </template>
             </FormField>
           </div>
@@ -439,7 +454,7 @@ const markdownImportFeedbackClass = computed(() => {
             </template>
           </FormField>
 
-          <FormField id="summary" label="Summary" help="Plain text only. This appears on idea cards." :validator="summaryValidator">
+          <FormField id="summary" label="Summary" help="Plain text only. This appears on the idea page." :validator="summaryValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
               <textarea id="summary" name="summary" :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :defaultValue="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
             </template>
@@ -448,28 +463,24 @@ const markdownImportFeedbackClass = computed(() => {
           <FormField id="content" label="Pitch (supports markdown)" help="Drop in markdown files to append a generated table of contents and sectioned notes." :validator="contentValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
               <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-4">
-                  <div class="flex flex-col gap-3 rounded-md border border-border bg-background/35 p-3">
-                    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <span class="text-sm font-medium text-foreground">Writing aids</span>
-                      <span class="text-xs text-muted-foreground">Insert useful pitch sections</span>
-                    </div>
-                    <div class="flex flex-wrap gap-2" role="toolbar" aria-label="Pitch section inserts">
+                <div class="flex flex-col gap-3">
+                  <div class="flex flex-wrap gap-2" role="toolbar" aria-label="Pitch section inserts">
+                    <div v-for="section in writingSections" :key="section.label" class="group relative">
                       <Button
-                        v-for="section in writingSections"
-                        :key="section.label"
                         type="button"
                         variant="outline"
-                        size="sm"
-                        class="h-8 gap-1.5 px-2 text-xs"
+                        size="icon"
+                        class="size-9"
                         :aria-label="`Insert ${section.label} section`"
-                        :title="section.description"
                         @mousedown.prevent
                         @click="insertWritingSection(section)"
                       >
-                        <component :is="section.icon" class="size-3.5 text-primary" aria-hidden="true" />
-                        {{ section.label }}
+                        <component :is="section.icon" class="size-4 text-primary" aria-hidden="true" />
                       </Button>
+                      <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-52 -translate-x-1/2 rounded-md border border-border bg-popover px-3 py-2 text-xs leading-5 text-popover-foreground opacity-0 shadow-xl shadow-black/20 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+                        <span class="block font-semibold text-primary">{{ section.label }}</span>
+                        {{ section.description }}
+                      </span>
                     </div>
                   </div>
                   <textarea

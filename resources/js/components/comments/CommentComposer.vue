@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
@@ -36,6 +37,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   cancel: [];
+  submitted: [];
 }>();
 
 const oldParentId = oldInputString('parent_id');
@@ -50,6 +52,10 @@ if (shouldUseOldContent) {
 const content = ref(initialContent);
 const cursorPosition = ref(content.value.length);
 const contentValidator = maxLengthValidator(1500, 'a comment');
+const form = useForm({
+  content: content.value,
+  parent_id: props.parentId,
+});
 
 const activeMention = computed(() => {
   const beforeCursor = content.value.slice(0, cursorPosition.value);
@@ -129,6 +135,7 @@ function insertFirstMentionSuggestion(): void {
 
 function syncInput(event: Event): void {
   content.value = (event.target as HTMLTextAreaElement).value;
+  form.content = content.value;
   updateCursorPosition();
 }
 
@@ -151,11 +158,44 @@ function focusTextarea(): void {
   });
 }
 
+function submitComment(): void {
+  form.content = content.value;
+  form.parent_id = props.parentId;
+
+  const options = {
+    preserveScroll: true,
+    onSuccess: () => {
+      emit('submitted');
+
+      if (props.method !== 'POST') {
+        return;
+      }
+
+      content.value = '';
+      form.content = '';
+    },
+  };
+
+  if (props.method === 'POST') {
+    form.post(props.action, options);
+
+    return;
+  }
+
+  if (props.method === 'PUT') {
+    form.put(props.action, options);
+
+    return;
+  }
+
+  form.patch(props.action, options);
+}
+
 onMounted(focusTextarea);
 </script>
 
 <template>
-  <form :action="action" method="POST" class="flex flex-col gap-4">
+  <form :action="action" method="POST" class="flex flex-col gap-4" @submit.prevent="submitComment">
     <CsrfField />
     <MethodField v-if="overrideMethod" :method="overrideMethod" />
     <input v-if="parentId" type="hidden" name="parent_id" :value="parentId">
@@ -204,7 +244,7 @@ onMounted(focusTextarea);
 
     <div class="flex flex-wrap justify-end gap-2">
       <Button v-if="cancelLabel" type="button" variant="ghost" size="sm" @click="emit('cancel')">{{ cancelLabel }}</Button>
-      <Button type="submit" size="sm">{{ buttonLabel }}</Button>
+      <Button type="submit" size="sm" :disabled="form.processing">{{ buttonLabel }}</Button>
     </div>
   </form>
 </template>

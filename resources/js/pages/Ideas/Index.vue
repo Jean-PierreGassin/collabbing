@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import IdeaList from '@/components/ideas/IdeaList.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import { Button } from '@/components/ui/button';
-import { Grid2X2, ListFilter, SearchX } from '@lucide/vue';
+import { Flame, LayoutGrid, ListFilter, Rows3, SearchX } from '@lucide/vue';
 import type { Idea, Paginator } from '@/types/domain';
 
 const props = defineProps<{
@@ -13,23 +13,49 @@ const props = defineProps<{
   ideas: Paginator<Idea>;
 }>();
 
+type IdeaViewMode = 'detailed' | 'compact';
+
+const ideaViewModeStorageKey = 'collabbing.ideaViewMode';
 const trendingIdeaIds = computed(() => new Set(props.trendingIdeas.map((idea) => idea.id)));
 const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingIdeaIds.value.has(idea.id)));
-const viewMode = ref<'detailed' | 'compact'>('detailed');
-const ideaListVariant = computed(() => {
-  if (viewMode.value === 'compact') {
+const viewMode = ref<IdeaViewMode>(storedIdeaViewMode());
+const ideaListVariant = computed(() => viewMode.value);
+
+function storedIdeaViewMode(): IdeaViewMode {
+  if (typeof window === 'undefined') {
     return 'compact';
   }
 
-  return 'default';
-});
+  const storedMode = window.localStorage.getItem(ideaViewModeStorageKey);
 
-function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' {
+  if (storedMode === 'detailed' || storedMode === 'compact') {
+    return storedMode;
+  }
+
+  return 'compact';
+}
+
+function setViewMode(mode: IdeaViewMode): void {
+  viewMode.value = mode;
+
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(ideaViewModeStorageKey, mode);
+  }
+}
+
+function viewButtonVariant(mode: IdeaViewMode): 'secondary' | 'ghost' {
   if (viewMode.value === mode) {
     return 'secondary';
   }
 
   return 'ghost';
+}
+
+function scrollToSection(id: string): void {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 }
 </script>
 
@@ -41,37 +67,37 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <nav class="flex flex-wrap gap-2" aria-label="Idea discovery sections">
-          <Button v-if="searchResults" as="a" href="#search-results" variant="outline" size="sm">
+        <nav class="flex w-full flex-wrap gap-2 sm:w-auto" aria-label="Idea discovery sections">
+          <Button v-if="searchResults" type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('search-results')">
             <SearchX class="size-4" aria-hidden="true" />
             Search results
           </Button>
           <template v-else>
-            <Button as="a" href="#trending-ideas" variant="outline" size="sm">
-              <ListFilter class="size-4" aria-hidden="true" />
+            <Button type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('trending-ideas')">
+              <Flame class="size-4" aria-hidden="true" />
               Trending
             </Button>
-            <Button as="a" href="#ideas" variant="outline" size="sm">
-              <Grid2X2 class="size-4" aria-hidden="true" />
+            <Button type="button" variant="ghost" size="sm" class="flex-1 rounded-md border border-transparent sm:flex-none" @click="scrollToSection('ideas')">
+              <ListFilter class="size-4" aria-hidden="true" />
               Recent
             </Button>
           </template>
         </nav>
 
         <div class="flex w-full flex-wrap gap-1 rounded-md border border-border bg-card p-1 sm:w-auto" role="group" aria-label="Idea card density">
-          <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="viewMode = 'detailed'">
-            <Grid2X2 class="size-4" aria-hidden="true" />
+          <Button type="button" :variant="viewButtonVariant('detailed')" size="sm" :aria-pressed="viewMode === 'detailed'" class="flex-1 sm:flex-none" @click="setViewMode('detailed')">
+            <Rows3 class="size-4" aria-hidden="true" />
             Detailed
           </Button>
-          <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="viewMode = 'compact'">
-            <ListFilter class="size-4" aria-hidden="true" />
+          <Button type="button" :variant="viewButtonVariant('compact')" size="sm" :aria-pressed="viewMode === 'compact'" class="flex-1 sm:flex-none" @click="setViewMode('compact')">
+            <LayoutGrid class="size-4" aria-hidden="true" />
             Compact
           </Button>
         </div>
       </div>
     </div>
 
-    <div v-if="searchResults" id="search-results" class="flex flex-col gap-4">
+      <div v-if="searchResults" id="search-results" class="flex scroll-mt-24 flex-col gap-4">
       <div class="flex flex-col gap-1">
         <h2 class="text-xl font-semibold text-white">Results for "{{ keyword }}"</h2>
         <p class="text-sm text-muted-foreground">Open ideas matching your search, newest first.</p>
@@ -88,7 +114,7 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
     </div>
 
     <template v-else>
-      <div id="trending-ideas" class="flex flex-col gap-4">
+      <div id="trending-ideas" class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
           <h2 class="text-xl font-semibold text-white">Trending ideas</h2>
           <p class="text-sm text-muted-foreground">Recently active ideas with the strongest support signals.</p>
@@ -100,7 +126,7 @@ function viewButtonVariant(mode: 'detailed' | 'compact'): 'secondary' | 'ghost' 
         </div>
       </div>
 
-      <div id="ideas" class="flex flex-col gap-4">
+      <div id="ideas" class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
           <h2 class="text-xl font-semibold text-white">Recent ideas</h2>
           <p class="text-sm text-muted-foreground">Fresh open ideas not already featured above.</p>

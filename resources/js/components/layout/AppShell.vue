@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { LayoutDashboard, LogOut, Menu, Plus, Search, X } from '@lucide/vue';
+import { ChevronDown, LayoutDashboard, LogOut, Menu, Pencil, Plus, Search, UserCircle, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FlashMessages from '@/components/layout/FlashMessages.vue';
@@ -15,6 +15,11 @@ const session = useSessionStore();
 const page = useSharedPage();
 const isMobileMenuOpen = ref(false);
 const isMobileSearchOpen = ref(false);
+const isAccountMenuOpen = ref(false);
+const isDesktopSearchOpen = ref(false);
+const desktopSearchValue = ref('');
+const desktopSearchInput = ref<HTMLInputElement | null>(null);
+const accountMenu = ref<HTMLElement | null>(null);
 
 const brandHref = computed(() => {
   if (session.isAuthenticated) {
@@ -162,10 +167,21 @@ const transitionKey = computed(() => {
   return nextUrl;
 });
 const chromeTransitionKey = computed(() => session.isAuthenticated ? 'authenticated' : 'guest');
+const currentSearchTerm = computed(() => {
+  const [, query = ''] = page.url.split('?');
+  const params = new URLSearchParams(query.split('#')[0]);
+  const search = params.get('search');
+
+  return search ?? '';
+});
 
 function closeMobileNavigation(): void {
   isMobileMenuOpen.value = false;
   isMobileSearchOpen.value = false;
+}
+
+function closeAccountMenu(): void {
+  isAccountMenuOpen.value = false;
 }
 
 function toggleMobileMenu(): void {
@@ -183,6 +199,89 @@ function toggleMobileSearch(): void {
     isMobileMenuOpen.value = false;
   }
 }
+
+function openDesktopSearch(): void {
+  isDesktopSearchOpen.value = true;
+
+  void nextTick(() => {
+    desktopSearchInput.value?.focus();
+  });
+}
+
+function closeDesktopSearch(): void {
+  isDesktopSearchOpen.value = false;
+}
+
+function closeDesktopSearchAfterBlur(): void {
+  window.setTimeout(() => {
+    if (desktopSearchValue.value.trim() === '') {
+      closeDesktopSearch();
+    }
+  }, 100);
+}
+
+function updateDesktopSearch(event: Event): void {
+  desktopSearchValue.value = (event.target as HTMLInputElement).value;
+}
+
+function toggleAccountMenu(): void {
+  isAccountMenuOpen.value = !isAccountMenuOpen.value;
+}
+
+function handleDocumentClick(event: MouseEvent): void {
+  const target = event.target;
+
+  if (!(target instanceof Node)) {
+    return;
+  }
+
+  if (accountMenu.value?.contains(target)) {
+    return;
+  }
+
+  closeAccountMenu();
+}
+
+function handleShellShortcut(event: KeyboardEvent): void {
+  const target = event.target;
+
+  if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+    return;
+  }
+
+  if (event.key.toLowerCase() !== 'k') {
+    return;
+  }
+
+  if (!event.metaKey && !event.ctrlKey) {
+    return;
+  }
+
+  event.preventDefault();
+  openDesktopSearch();
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick);
+  window.addEventListener('keydown', handleShellShortcut);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick);
+  window.removeEventListener('keydown', handleShellShortcut);
+});
+
+watch(
+  currentSearchTerm,
+  (search) => {
+    desktopSearchValue.value = search;
+
+    if (search) {
+      isDesktopSearchOpen.value = true;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -210,7 +309,7 @@ function toggleMobileSearch(): void {
       Skip to main content
     </a>
 
-    <header class="border-b border-border bg-background/95 backdrop-blur">
+    <header class="relative z-50 border-b border-border bg-background/95 backdrop-blur">
       <div class="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 lg:py-4">
         <div class="flex min-h-11 items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
@@ -260,19 +359,49 @@ function toggleMobileSearch(): void {
         </div>
 
         <div class="hidden w-full flex-col gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center lg:justify-end">
-          <form class="relative w-full lg:w-72 xl:w-80" :action="session.routes.ideas" method="GET" role="search">
+          <form
+            :class="[
+              'relative flex h-10 items-center justify-end overflow-hidden transition-[width] duration-200 ease-out',
+              isDesktopSearchOpen ? 'w-72 xl:w-80' : 'w-10',
+            ]"
+            :action="session.routes.ideas"
+            method="GET"
+            role="search"
+          >
             <label for="site-search" class="sr-only">Search ideas</label>
-            <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <input
-              id="site-search"
-              name="search"
-              type="search"
-              class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
-              placeholder="Search ideas"
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              :class="[
+                'absolute right-0 top-0 z-10 size-10 transition-opacity duration-150',
+                isDesktopSearchOpen ? 'pointer-events-none opacity-0' : 'opacity-100',
+              ]"
+              aria-label="Search ideas"
+              @click="openDesktopSearch"
             >
+              <Search class="size-4" aria-hidden="true" />
+            </Button>
+            <div
+              :class="[
+                'relative w-full transition-[opacity,transform] duration-200 ease-out',
+                isDesktopSearchOpen ? 'opacity-100 translate-x-0' : 'pointer-events-none translate-x-2 opacity-0',
+              ]"
+            >
+              <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <input
+                id="site-search"
+                ref="desktopSearchInput"
+                v-model="desktopSearchValue"
+                name="search"
+                type="search"
+                class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40"
+                placeholder="Search ideas (Ctrl/Cmd+K)"
+                @input="updateDesktopSearch"
+                @blur="closeDesktopSearchAfterBlur"
+              >
+            </div>
           </form>
-
-          <ThemeModeToggle />
 
           <Transition name="chrome-swap" mode="out-in">
             <nav v-if="session.isAuthenticated" key="workspace-navigation" aria-label="Workspace navigation" class="flex items-center gap-2">
@@ -292,20 +421,46 @@ function toggleMobileSearch(): void {
 
           <Transition name="chrome-swap">
             <div v-if="session.isAuthenticated" class="flex min-w-0 items-center justify-end gap-2">
-              <Button
-                variant="outline"
-                :as="Link"
-                :href="session.user?.routes.show ?? session.routes.dashboard"
-                class="max-w-56"
-              >
-                <span class="truncate">{{ session.user?.name }}</span>
-              </Button>
-              <form :action="session.routes.logout" method="POST">
-                <CsrfField />
-                <Button type="submit" variant="ghost" size="icon" aria-label="Logout">
-                  <LogOut class="size-4" aria-hidden="true" />
+              <div ref="accountMenu" class="relative max-w-56">
+                <Button
+                  variant="outline"
+                  type="button"
+                  class="w-full"
+                  :aria-expanded="isAccountMenuOpen"
+                  aria-controls="account-menu"
+                  @click.stop="toggleAccountMenu"
+                >
+                  <span class="truncate">{{ session.user?.name }}</span>
+                  <ChevronDown class="size-4" aria-hidden="true" />
                 </Button>
-              </form>
+                <Transition name="mobile-panel">
+                  <div
+                    v-if="isAccountMenuOpen"
+                    id="account-menu"
+                    class="absolute right-0 top-full z-[60] mt-2 flex w-72 flex-col gap-2 rounded-md border border-border bg-popover p-2 text-sm shadow-xl shadow-black/25"
+                    @click.stop
+                  >
+                    <Button :as="Link" :href="session.user?.routes.show ?? session.routes.dashboard" variant="ghost" class="h-10 justify-start" @click="closeAccountMenu">
+                      <UserCircle class="size-4" aria-hidden="true" />
+                      View profile
+                    </Button>
+                    <Button :as="Link" :href="session.user?.routes.edit ?? session.routes.dashboard" variant="ghost" class="h-10 justify-start" @click="closeAccountMenu">
+                      <Pencil class="size-4" aria-hidden="true" />
+                      Edit profile
+                    </Button>
+                    <div class="border-y border-border py-2">
+                      <ThemeModeToggle show-labels class="w-full" />
+                    </div>
+                    <form :action="session.routes.logout" method="POST">
+                      <CsrfField />
+                      <Button type="submit" variant="ghost" class="h-10 w-full justify-start">
+                        <LogOut class="size-4" aria-hidden="true" />
+                        Logout
+                      </Button>
+                    </form>
+                  </div>
+                </Transition>
+              </div>
             </div>
           </Transition>
         </div>
@@ -342,6 +497,10 @@ function toggleMobileSearch(): void {
               </Button>
               <Button :as="Link" :href="session.user?.routes.show ?? session.routes.dashboard" variant="outline" class="h-11 justify-start" @click="closeMobileNavigation">
                 <span class="truncate">{{ session.user?.name }}</span>
+              </Button>
+              <Button :as="Link" :href="session.user?.routes.edit ?? session.routes.dashboard" variant="ghost" class="h-11 justify-start" @click="closeMobileNavigation">
+                <Pencil class="size-4" aria-hidden="true" />
+                Edit profile
               </Button>
             </nav>
             <nav v-else aria-label="Mobile main navigation" class="grid gap-2">

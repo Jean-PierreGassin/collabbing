@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import IdeasIndex from '@/pages/Ideas/Index.vue';
 import type { DomainUser, Idea, Paginator } from '@/types/domain';
 
@@ -33,7 +33,9 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     id: 1,
     title: 'Useful idea',
     titleDisplay: 'Useful idea',
+    tagline: 'A useful card tagline.',
     summary: 'A useful idea for collaborators.',
+    tags: ['design', 'workflow'],
     communication: 'Slack',
     content: 'A focused pitch.',
     contentHtml: '<p>A focused pitch.</p>',
@@ -68,6 +70,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
       storeSupporter: true,
       deleteApplication: false,
       updateApplication: false,
+      storeComment: true,
     },
     routes: {
       show: '/ideas/1',
@@ -125,6 +128,10 @@ function mountIndex(props: {
 }
 
 describe('Ideas/Index', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it('keeps trending ideas out of the recent list', () => {
     const trending = idea({ id: 1, title: 'Trending idea' });
     const recent = idea({ id: 2, title: 'Recent idea' });
@@ -140,7 +147,7 @@ describe('Ideas/Index', () => {
     expect(lists[1].text()).toBe('2');
   });
 
-  it('lets users switch discovery cards into compact mode', async () => {
+  it('lets users switch discovery cards into detailed mode', async () => {
     const wrapper = mountIndex({
       trendingIdeas: [idea({ id: 1 })],
       ideas: paginator([idea({ id: 2 })]),
@@ -148,8 +155,21 @@ describe('Ideas/Index', () => {
 
     await wrapper.get('button[aria-pressed="false"]').trigger('click');
 
-    expect(wrapper.findAll('[data-list]').every((list) => list.attributes('data-variant') === 'compact')).toBe(true);
-    expect(wrapper.get('button[aria-pressed="true"]').text()).toContain('Compact');
+    expect(wrapper.findAll('[data-list]').every((list) => list.attributes('data-variant') === 'detailed')).toBe(true);
+    expect(wrapper.get('button[aria-pressed="true"]').text()).toContain('Detailed');
+    expect(window.localStorage.getItem('collabbing.ideaViewMode')).toBe('detailed');
+  });
+
+  it('restores the users card density preference', () => {
+    window.localStorage.setItem('collabbing.ideaViewMode', 'detailed');
+
+    const wrapper = mountIndex({
+      trendingIdeas: [idea({ id: 1 })],
+      ideas: paginator([idea({ id: 2 })]),
+    });
+
+    expect(wrapper.findAll('[data-list]').every((list) => list.attributes('data-variant') === 'detailed')).toBe(true);
+    expect(wrapper.get('button[aria-pressed="true"]').text()).toContain('Detailed');
   });
 
   it('gives empty search results clear recovery actions', () => {

@@ -52,7 +52,9 @@ function idea(): Idea {
     id: 1,
     title: 'Build a better dashboard',
     titleDisplay: 'Build a better dashboard',
+    tagline: 'A focused dashboard card line',
     summary: 'A focused idea',
+    tags: ['dashboard'],
     communication: null,
     content: '',
     contentHtml: '',
@@ -87,6 +89,7 @@ function idea(): Idea {
       storeSupporter: false,
       deleteApplication: false,
       updateApplication: false,
+      storeComment: true,
     },
     routes: {
       show: '/ideas/1',

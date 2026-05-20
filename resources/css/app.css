@@ -100,6 +100,7 @@
   html {
     overflow-x: clip;
     scrollbar-gutter: stable;
+    scroll-behavior: smooth;
     color-scheme: light;
   }
 

@@ -59,15 +59,7 @@ class IdeaPolicy
 
     public function storeComment(User $user, Idea $idea): bool
     {
-        if ($idea->hasApplicationFromUser($user->id, 'approved')) {
-            return true;
-        }
-
-        if ($idea->user_id === $user->id) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     private function hasActiveApplicationFrom(User $user, Idea $idea): bool

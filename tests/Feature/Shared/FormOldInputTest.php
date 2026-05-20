@@ -46,7 +46,9 @@ class FormOldInputTest extends TestCase
             ->from(route('ideas.create'))
             ->post(route('ideas.store'), [
                 'title' => '',
+                'tagline' => 'A retained tagline after validation fails.',
                 'summary' => 'A retained summary after validation fails.',
+                'tags' => 'testing, forms',
                 'repository_name' => 'retained-repository',
                 'communication' => 'Discord',
                 'content' => 'The long-form idea pitch should still be here.',
@@ -56,7 +58,9 @@ class FormOldInputTest extends TestCase
         $response
             ->assertRedirect(route('ideas.create'))
             ->assertSessionHasErrors('title')
+            ->assertSessionHasInput('tagline', 'A retained tagline after validation fails.')
             ->assertSessionHasInput('summary', 'A retained summary after validation fails.')
+            ->assertSessionHasInput('tags', 'testing, forms')
             ->assertSessionHasInput('content', 'The long-form idea pitch should still be here.');
 
         $this
@@ -65,7 +69,9 @@ class FormOldInputTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Ideas/Form')
+                ->where('oldInput.tagline', 'A retained tagline after validation fails.')
                 ->where('oldInput.summary', 'A retained summary after validation fails.')
+                ->where('oldInput.tags', 'testing, forms')
                 ->where('oldInput.repository_name', 'retained-repository')
                 ->where('oldInput.content', 'The long-form idea pitch should still be here.'));
     }
