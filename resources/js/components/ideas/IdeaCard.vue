@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Link } from '@inertiajs/vue3';
 import { ChevronDown, GitBranch, MessageSquare, Sparkles, Users } from '@lucide/vue';
+import { useCollapsiblePanelTransition } from '@/composables/useCollapsiblePanelTransition';
 import type { Idea } from '@/types/domain';
 
 const props = withDefaults(defineProps<{
@@ -28,6 +29,12 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:pitchExpanded': [value: boolean];
 }>();
+
+const {
+  beforeEnter: beforeDescriptionEnter,
+  enter: enterDescription,
+  leave: leaveDescription,
+} = useCollapsiblePanelTransition();
 
 const isCompact = computed(() => props.variant === 'compact' && ! props.single);
 const isDetailed = computed(() => props.variant === 'detailed' && ! props.single);
@@ -136,82 +143,6 @@ const pitchChevronClass = computed(() => {
 
   return undefined;
 });
-
-function resetPanelStyles(element: HTMLElement): void {
-  element.style.height = '';
-  element.style.opacity = '';
-  element.style.overflow = '';
-  element.style.transform = '';
-  element.style.transition = '';
-  element.style.willChange = '';
-}
-
-function finishPanelTransition(panel: HTMLElement, propertyName: string, done: () => void, fallbackDelay: number): void {
-  let isFinished = false;
-  const timer = window.setTimeout(finish, fallbackDelay);
-
-  function finish(): void {
-    if (isFinished) {
-      return;
-    }
-
-    isFinished = true;
-    window.clearTimeout(timer);
-    panel.removeEventListener('transitionend', handleTransitionEnd);
-    resetPanelStyles(panel);
-    done();
-  }
-
-  function handleTransitionEnd(event: TransitionEvent): void {
-    if (event.target === panel && event.propertyName === propertyName) {
-      finish();
-    }
-  }
-
-  panel.addEventListener('transitionend', handleTransitionEnd);
-}
-
-function beforeDescriptionEnter(element: Element): void {
-  const panel = element as HTMLElement;
-
-  panel.style.height = '0';
-  panel.style.opacity = '0';
-  panel.style.overflow = 'hidden';
-  panel.style.transform = 'translateY(-0.35rem)';
-  panel.style.willChange = 'height, opacity, transform';
-}
-
-function enterDescription(element: Element, done: () => void): void {
-  const panel = element as HTMLElement;
-
-  panel.style.transition = 'height 240ms ease, opacity 220ms ease, transform 220ms ease';
-
-  requestAnimationFrame(() => {
-    panel.style.height = `${panel.scrollHeight}px`;
-    panel.style.opacity = '1';
-    panel.style.transform = 'translateY(0)';
-  });
-
-  finishPanelTransition(panel, 'height', done, 320);
-}
-
-function leaveDescription(element: Element, done: () => void): void {
-  const panel = element as HTMLElement;
-
-  panel.style.height = `${panel.scrollHeight}px`;
-  panel.style.opacity = '1';
-  panel.style.overflow = 'hidden';
-  panel.style.transform = 'translateY(0)';
-  panel.style.transition = 'height 220ms ease, opacity 180ms ease, transform 180ms ease';
-
-  requestAnimationFrame(() => {
-    panel.style.height = '0';
-    panel.style.opacity = '0';
-    panel.style.transform = 'translateY(-0.25rem)';
-  });
-
-  finishPanelTransition(panel, 'height', done, 300);
-}
 </script>
 
 <template>
