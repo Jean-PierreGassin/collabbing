@@ -31,7 +31,11 @@ if (props.comment) {
 
 <template>
   <Card class="w-full max-w-3xl">
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
+    <CardHeader>
+      <h1 class="text-2xl font-semibold text-white">
+        {{ pageTitle }}
+      </h1>
+    </CardHeader>
     <CardContent>
       <form
         :action="formAction"

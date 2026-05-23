@@ -39,6 +39,7 @@ export default [
         baseIndent: 1,
         closeBracket: 0,
       }],
+      'vue/multiline-html-element-content-newline': 'error',
       'vue/max-attributes-per-line': ['error', {
         multiline: {
           max: 1,
@@ -49,6 +50,9 @@ export default [
       }],
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
+      'vue/singleline-html-element-content-newline': ['error', {
+        ignoreWhenNoAttributes: false,
+      }],
     },
   },
 ];

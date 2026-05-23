@@ -51,7 +51,9 @@ function hasPitchHeadingsClass(): string | undefined {
   <section class="flex flex-col gap-5">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex min-w-0 flex-col gap-1">
-        <h1 class="text-2xl font-semibold leading-tight text-white">Idea - {{ idea.titleDisplay }}</h1>
+        <h1 class="text-2xl font-semibold leading-tight text-white">
+          Idea - {{ idea.titleDisplay }}
+        </h1>
       </div>
       <div
         v-if="idea.can.update"

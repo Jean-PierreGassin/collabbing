@@ -259,7 +259,9 @@ function leaveDescription(element: Element, done: () => void): void {
           by
           <Link
             class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
-            :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+            :href="idea.user.routes.show">
+            @{{ idea.user.username }}
+          </Link>
           <span aria-hidden="true"> · </span>
           {{ idea.createdAtForHumans }}
         </p>
@@ -322,7 +324,9 @@ function leaveDescription(element: Element, done: () => void): void {
                 by
                 <Link
                   class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
-                  :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+                  :href="idea.user.routes.show">
+                  @{{ idea.user.username }}
+                </Link>
                 <span aria-hidden="true"> · </span>
                 {{ idea.createdAtForHumans }}
               </p>
@@ -407,7 +411,9 @@ function leaveDescription(element: Element, done: () => void): void {
             by
             <Link
               class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
-              :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+              :href="idea.user.routes.show">
+              @{{ idea.user.username }}
+            </Link>
             <span aria-hidden="true"> · </span>
             {{ idea.createdAtForHumans }}
           </p>
@@ -431,7 +437,9 @@ function leaveDescription(element: Element, done: () => void): void {
       <section
         class="flex flex-col gap-2"
         aria-label="Idea summary">
-        <h2 class="text-sm font-semibold text-white">Summary</h2>
+        <h2 class="text-sm font-semibold text-white">
+          Summary
+        </h2>
         <p class="break-words text-base leading-7 text-white [overflow-wrap:anywhere]">
           {{ idea.summary }}
         </p>

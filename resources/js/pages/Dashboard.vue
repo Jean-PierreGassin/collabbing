@@ -60,7 +60,9 @@ const {
 
 <template>
   <section class="flex flex-col gap-5">
-    <h1 class="sr-only">Dashboard</h1>
+    <h1 class="sr-only">
+      Dashboard
+    </h1>
 
     <div class="flex flex-col gap-1">
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -138,7 +140,9 @@ const {
         :as="Link"
         :href="session.routes.ideasCreate"
         size="sm"
-        class="justify-self-center md:justify-self-end">Create an Idea</Button>
+        class="justify-self-center md:justify-self-end">
+        Create an Idea
+      </Button>
     </div>
 
     <div
@@ -151,9 +155,13 @@ const {
       <IdeaList
         v-if="ideas.items.length > 0"
         :ideas="ideas.items" />
-      <p v-else>You have not shared any ideas yet. <Link
-        class="text-primary hover:underline"
-        :href="session.routes.ideasCreate">Create one</Link></p>
+      <p v-else>
+        You have not shared any ideas yet. <Link
+          class="text-primary hover:underline"
+          :href="session.routes.ideasCreate">
+          Create one
+        </Link>
+      </p>
       <PaginationLinks
         :paginator="ideas"
         :only="['ideas']"
@@ -170,9 +178,13 @@ const {
       <IdeaList
         v-if="collaborations.items.length > 0"
         :ideas="collaborations.items" />
-      <p v-else>You are not collaborating on any ideas yet. <Link
-        class="text-primary hover:underline"
-        :href="session.routes.ideas">Browse ideas</Link></p>
+      <p v-else>
+        You are not collaborating on any ideas yet. <Link
+          class="text-primary hover:underline"
+          :href="session.routes.ideas">
+          Browse ideas
+        </Link>
+      </p>
       <PaginationLinks
         :paginator="collaborations"
         :only="['collaborations']"

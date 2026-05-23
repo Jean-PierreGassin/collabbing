@@ -129,7 +129,9 @@ function startReply(): void {
           type="button"
           variant="outline"
           size="sm"
-          @click="isEditing = true">Edit</Button>
+          @click="isEditing = true">
+          Edit
+        </Button>
       </div>
     </div>
 

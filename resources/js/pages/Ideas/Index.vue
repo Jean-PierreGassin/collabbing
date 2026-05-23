@@ -62,7 +62,9 @@ function scrollToSection(id: string): void {
 <template>
   <section class="flex flex-col gap-10">
     <div class="flex flex-col gap-4 border-b border-border pb-6">
-      <h1 class="sr-only">Ideas</h1>
+      <h1 class="sr-only">
+        Ideas
+      </h1>
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
         Browse product ideas, find collaborators, and support work you want to see built.
       </p>
@@ -145,8 +147,12 @@ function scrollToSection(id: string): void {
       id="search-results"
       class="flex scroll-mt-24 flex-col gap-4">
       <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-semibold text-white">Results for "{{ keyword }}"</h2>
-        <p class="text-sm text-muted-foreground">Open ideas matching your search, newest first.</p>
+        <h2 class="text-xl font-semibold text-white">
+          Results for "{{ keyword }}"
+        </h2>
+        <p class="text-sm text-muted-foreground">
+          Open ideas matching your search, newest first.
+        </p>
       </div>
       <IdeaList
         v-if="searchResults.items.length > 0"
@@ -155,17 +161,23 @@ function scrollToSection(id: string): void {
       <div
         v-else
         class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
-        <p>No ideas matched "{{ keyword }}".</p>
+        <p>
+          No ideas matched "{{ keyword }}".
+        </p>
         <div class="flex flex-wrap gap-2">
           <Button
             as="a"
             href="/ideas"
             variant="outline"
-            size="sm">Clear search</Button>
+            size="sm">
+            Clear search
+          </Button>
           <Button
             as="a"
             href="/ideas/create"
-            size="sm">Share an idea</Button>
+            size="sm">
+            Share an idea
+          </Button>
         </div>
       </div>
       <PaginationLinks :paginator="searchResults" />
@@ -176,8 +188,12 @@ function scrollToSection(id: string): void {
         id="trending-ideas"
         class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
-          <h2 class="text-xl font-semibold text-white">Trending ideas</h2>
-          <p class="text-sm text-muted-foreground">Recently active ideas with the strongest support signals.</p>
+          <h2 class="text-xl font-semibold text-white">
+            Trending ideas
+          </h2>
+          <p class="text-sm text-muted-foreground">
+            Recently active ideas with the strongest support signals.
+          </p>
         </div>
         <IdeaList
           v-if="trendingIdeas.length > 0"
@@ -187,12 +203,16 @@ function scrollToSection(id: string): void {
         <div
           v-else
           class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
-          <p>No ideas are trending yet.</p>
+          <p>
+            No ideas are trending yet.
+          </p>
           <Button
             as="a"
             href="/ideas/create"
             size="sm"
-            class="w-fit">Share an idea</Button>
+            class="w-fit">
+            Share an idea
+          </Button>
         </div>
       </div>
 
@@ -200,8 +220,12 @@ function scrollToSection(id: string): void {
         id="ideas"
         class="flex scroll-mt-24 flex-col gap-4">
         <div class="flex flex-col gap-1">
-          <h2 class="text-xl font-semibold text-white">Recent ideas</h2>
-          <p class="text-sm text-muted-foreground">Fresh open ideas not already featured above.</p>
+          <h2 class="text-xl font-semibold text-white">
+            Recent ideas
+          </h2>
+          <p class="text-sm text-muted-foreground">
+            Fresh open ideas not already featured above.
+          </p>
         </div>
         <IdeaList
           v-if="recentIdeas.length > 0"
@@ -210,12 +234,16 @@ function scrollToSection(id: string): void {
         <div
           v-else
           class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
-          <p>No additional recent ideas are available yet.</p>
+          <p>
+            No additional recent ideas are available yet.
+          </p>
           <Button
             as="a"
             href="/ideas/create"
             size="sm"
-            class="w-fit">Share an idea</Button>
+            class="w-fit">
+            Share an idea
+          </Button>
         </div>
         <PaginationLinks :paginator="ideas" />
       </div>

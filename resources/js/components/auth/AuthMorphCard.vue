@@ -240,7 +240,9 @@ async function submitForm(event: SubmitEvent): Promise<void> {
         :aria-hidden="isAnimating || undefined"
       >
         <div class="flex flex-col gap-1.5 border-b border-border p-6">
-          <h1 class="text-2xl font-semibold text-white">{{ title }}</h1>
+          <h1 class="text-2xl font-semibold text-white">
+            {{ title }}
+          </h1>
         </div>
         <form
           method="POST"

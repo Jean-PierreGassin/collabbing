@@ -264,11 +264,15 @@ onMounted(focusTextarea);
         type="button"
         variant="ghost"
         size="sm"
-        @click="emit('cancel')">{{ cancelLabel }}</Button>
+        @click="emit('cancel')">
+        {{ cancelLabel }}
+      </Button>
       <Button
         type="submit"
         size="sm"
-        :disabled="form.processing">{{ buttonLabel }}</Button>
+        :disabled="form.processing">
+        {{ buttonLabel }}
+      </Button>
     </div>
   </form>
 </template>

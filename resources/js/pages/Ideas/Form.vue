@@ -654,7 +654,9 @@ const markdownImportFeedbackClass = computed(() => {
                     class="flex min-h-[28rem] min-w-0 flex-col gap-3 rounded-md border border-border bg-background/35 p-4"
                     aria-label="Markdown preview">
                     <div class="flex items-center justify-between gap-3 border-b border-border pb-3">
-                      <h2 class="text-sm font-semibold text-white">Preview</h2>
+                      <h2 class="text-sm font-semibold text-white">
+                        Preview
+                      </h2>
                       <span class="text-xs text-muted-foreground">{{ contentBody.length.toLocaleString() }} / 20,000</span>
                     </div>
                     <div class="min-w-0">
@@ -663,7 +665,9 @@ const markdownImportFeedbackClass = computed(() => {
                         :html="previewHtml" />
                       <p
                         v-else
-                        class="text-sm text-muted-foreground">Start writing to preview the markdown here.</p>
+                        class="text-sm text-muted-foreground">
+                        Start writing to preview the markdown here.
+                      </p>
                     </div>
                   </section>
                 </div>
@@ -681,10 +685,14 @@ const markdownImportFeedbackClass = computed(() => {
                 name="status">
                 <option
                   value="open"
-                  :selected="oldInputString('status', idea.status) === 'open'">Open</option>
+                  :selected="oldInputString('status', idea.status) === 'open'">
+                  Open
+                </option>
                 <option
                   value="closed"
-                  :selected="oldInputString('status', idea.status) === 'closed'">Closed</option>
+                  :selected="oldInputString('status', idea.status) === 'closed'">
+                  Closed
+                </option>
               </FormSelect>
             </div>
             <span v-else />

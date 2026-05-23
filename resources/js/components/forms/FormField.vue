@@ -494,6 +494,8 @@ watch(errors, () => {
       v-else-if="valid"
       :id="feedbackId"
       class="sr-only"
-      role="status">Looks good.</p>
+      role="status">
+      Looks good.
+    </p>
   </div>
 </template>

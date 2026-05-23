@@ -21,8 +21,12 @@ defineProps<{
           size="lg"
           loading="eager" />
         <div class="min-w-0">
-          <h1 class="truncate text-2xl font-semibold text-white">{{ user.name }}</h1>
-          <p class="truncate text-sm text-muted-foreground">@{{ user.username }}</p>
+          <h1 class="truncate text-2xl font-semibold text-white">
+            {{ user.name }}
+          </h1>
+          <p class="truncate text-sm text-muted-foreground">
+            @{{ user.username }}
+          </p>
           <p class="mt-1 text-sm text-muted-foreground">
             Member since {{ user.createdAtFormatted }}
             <template v-if="user.githubUsername">
@@ -42,7 +46,9 @@ defineProps<{
           :as="Link"
           :href="user.routes.edit"
           variant="secondary"
-          size="sm">Edit Profile</Button>
+          size="sm">
+          Edit Profile
+        </Button>
       </div>
     </CardHeader>
 
@@ -55,7 +61,9 @@ defineProps<{
           :html="user.bioHtml" />
         <p
           v-else
-          class="mb-0 text-muted-foreground">This member has not added a bio yet.</p>
+          class="mb-0 text-muted-foreground">
+          This member has not added a bio yet.
+        </p>
       </section>
     </CardContent>
   </Card>

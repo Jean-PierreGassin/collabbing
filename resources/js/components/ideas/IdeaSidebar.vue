@@ -90,24 +90,32 @@ function removeSupport(): void {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Collaborators</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Collaborators
+          </h2>
           <div v-if="collaborator || applicant || idea.can.storeApplication">
             <Button
               v-if="collaborator"
               type="button"
               size="sm"
-              disabled>Collaborator</Button>
+              disabled>
+              Collaborator
+            </Button>
             <Button
               v-else-if="applicant"
               type="button"
               size="sm"
-              disabled>Application pending</Button>
+              disabled>
+              Application pending
+            </Button>
             <Button
               v-else
               as="a"
               :href="idea.routes.applicationsCreate"
               variant="outline"
-              size="sm">Apply to Collaborate</Button>
+              size="sm">
+              Apply to Collaborate
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -141,7 +149,9 @@ function removeSupport(): void {
     <Card v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0">
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Repository</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Repository
+          </h2>
           <Button
             v-if="idea.repositoryActivity.htmlUrl"
             as="a"
@@ -180,16 +190,28 @@ function removeSupport(): void {
 
           <div class="grid grid-cols-3 gap-2 text-center">
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Issues</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Issues
+              </div>
             </div>
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.stargazersCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Stars</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.stargazersCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Stars
+              </div>
             </div>
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.forksCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Forks</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.forksCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Forks
+              </div>
             </div>
           </div>
 
@@ -220,7 +242,9 @@ function removeSupport(): void {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Supporters</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Supporters
+          </h2>
           <div
             v-if="idea.can.storeSupporter"
             class="relative">
@@ -230,14 +254,18 @@ function removeSupport(): void {
               size="sm"
               variant="outline"
               :disabled="supportForm.processing"
-              @click="removeSupport">Remove Support</Button>
+              @click="removeSupport">
+              Remove Support
+            </Button>
             <Button
               v-else
               type="button"
               size="sm"
               variant="outline"
               :disabled="supportForm.processing"
-              @click="supportIdea">Support Idea</Button>
+              @click="supportIdea">
+              Support Idea
+            </Button>
             <span
               v-if="showSupportSparks"
               :key="supportSparkKey"

@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 <template>
   <section class="flex max-w-3xl flex-col gap-5">
     <div class="flex flex-col gap-1">
-      <h1 class="text-2xl font-semibold text-white">Contact</h1>
+      <h1 class="text-2xl font-semibold text-white">
+        Contact
+      </h1>
       <p class="text-sm leading-6 text-muted-foreground">
         Send a general enquiry about Collabbing, partnerships, or anything that does not fit as product feedback.
       </p>
@@ -21,7 +23,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
               class="size-5"
               aria-hidden="true" />
           </span>
-          <CardTitle>Email enquiry</CardTitle>
+          <CardTitle>
+            Email enquiry
+          </CardTitle>
         </div>
       </CardHeader>
       <CardContent class="flex flex-col gap-4">

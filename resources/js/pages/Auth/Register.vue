@@ -161,7 +161,9 @@ const successHref = computed(() => {
       <div class="flex justify-end">
         <Button
           type="submit"
-          :disabled="isSubmitting">{{ isSubmitting ? 'Creating...' : 'Register' }}</Button>
+          :disabled="isSubmitting">
+          {{ isSubmitting ? 'Creating...' : 'Register' }}
+        </Button>
       </div>
     </template>
   </AuthMorphCard>

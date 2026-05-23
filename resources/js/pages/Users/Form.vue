@@ -59,7 +59,11 @@ function submitProfile(event: SubmitEvent): void {
 
 <template>
   <Card class="mx-auto w-full max-w-4xl">
-    <CardHeader><h1 class="text-2xl font-semibold text-white">{{ pageTitle }}</h1></CardHeader>
+    <CardHeader>
+      <h1 class="text-2xl font-semibold text-white">
+        {{ pageTitle }}
+      </h1>
+    </CardHeader>
     <CardContent>
       <form
         :action="user?.routes.update"
@@ -135,7 +139,9 @@ function submitProfile(event: SubmitEvent): void {
         <div
           v-if="user"
           class="flex flex-col gap-3">
-          <h4 class="text-xl font-semibold">Integrations</h4>
+          <h4 class="text-xl font-semibold">
+            Integrations
+          </h4>
           <p class="text-sm text-muted-foreground">
             Link GitHub to create repositories from ideas and invite approved collaborators.
             <a
@@ -220,7 +226,9 @@ function submitProfile(event: SubmitEvent): void {
         </div>
 
         <div class="flex justify-end">
-          <Button type="submit">{{ submitLabel }}</Button>
+          <Button type="submit">
+            {{ submitLabel }}
+          </Button>
         </div>
       </form>
       <form

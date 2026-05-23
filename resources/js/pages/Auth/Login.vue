@@ -67,10 +67,14 @@ const session = useSessionStore();
         <Button
           as="a"
           :href="session.routes.passwordRequest"
-          variant="link">Forgot your password?</Button>
+          variant="link">
+          Forgot your password?
+        </Button>
         <Button
           type="submit"
-          :disabled="isSubmitting">{{ isSubmitting ? 'Checking...' : 'Login' }}</Button>
+          :disabled="isSubmitting">
+          {{ isSubmitting ? 'Checking...' : 'Login' }}
+        </Button>
       </div>
     </template>
   </AuthMorphCard>

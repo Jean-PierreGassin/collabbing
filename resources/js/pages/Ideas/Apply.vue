@@ -46,7 +46,9 @@ const applicationValidator = maxLengthValidator(1500, 'an application');
             </template>
           </FormField>
           <div class="flex justify-end">
-            <Button type="submit">Submit Application</Button>
+            <Button type="submit">
+              Submit Application
+            </Button>
           </div>
         </form>
       </CardContent>

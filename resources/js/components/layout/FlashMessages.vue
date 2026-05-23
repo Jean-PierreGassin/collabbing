@@ -169,8 +169,12 @@ onBeforeUnmount(() => {
           aria-hidden="true" />
       </div>
       <div class="min-w-0">
-        <p class="truncate font-semibold leading-5 text-foreground">{{ toastTitle(toast.tone) }}</p>
-        <p class="line-clamp-2 leading-5 text-muted-foreground">{{ toast.message }}</p>
+        <p class="truncate font-semibold leading-5 text-foreground">
+          {{ toastTitle(toast.tone) }}
+        </p>
+        <p class="line-clamp-2 leading-5 text-muted-foreground">
+          {{ toast.message }}
+        </p>
       </div>
       <button
         type="button"

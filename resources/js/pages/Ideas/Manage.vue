@@ -63,7 +63,9 @@ const {
   <section class="flex flex-col gap-5">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex min-w-0 flex-col gap-1">
-        <h1 class="text-2xl font-semibold leading-tight text-white">{{ idea.title }}</h1>
+        <h1 class="text-2xl font-semibold leading-tight text-white">
+          {{ idea.title }}
+        </h1>
       </div>
       <div class="flex shrink-0 flex-wrap justify-end gap-2 sm:pt-0.5">
         <Button
@@ -165,7 +167,9 @@ const {
                 </CardHeader>
                 <CardContent class="flex flex-col gap-4">
                   <MarkdownContent :html="application.contentHtml" />
-                  <h6 class="text-right text-sm text-muted-foreground">Submitted {{ idea.createdAtForHumans }}</h6>
+                  <h6 class="text-right text-sm text-muted-foreground">
+                    Submitted {{ idea.createdAtForHumans }}
+                  </h6>
                   <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
                     <form
                       v-if="idea.can.deleteApplication"
@@ -176,7 +180,9 @@ const {
                       <Button
                         type="submit"
                         variant="destructive"
-                        size="sm">Decline Application</Button>
+                        size="sm">
+                        Decline Application
+                      </Button>
                     </form>
                     <form
                       v-if="idea.can.updateApplication"
@@ -187,13 +193,17 @@ const {
                       <Button
                         type="submit"
                         variant="success"
-                        size="sm">Approve Application</Button>
+                        size="sm">
+                        Approve Application
+                      </Button>
                     </form>
                   </div>
                 </CardContent>
               </Card>
             </template>
-            <p v-else>No pending applications.</p>
+            <p v-else>
+              No pending applications.
+            </p>
             <PaginationLinks
               :paginator="applications"
               :only="['applications']"
@@ -228,11 +238,15 @@ const {
                   <Button
                     type="submit"
                     variant="destructive"
-                    size="sm">Remove Collaborator</Button>
+                    size="sm">
+                    Remove Collaborator
+                  </Button>
                 </form>
               </div>
             </template>
-            <p v-else>No collaborators have joined yet.</p>
+            <p v-else>
+              No collaborators have joined yet.
+            </p>
             <PaginationLinks
               :paginator="collaborators"
               :only="['collaborators']"

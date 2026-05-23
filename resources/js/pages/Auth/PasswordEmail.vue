@@ -12,7 +12,11 @@ const session = useSessionStore();
 
 <template>
   <Card class="mx-auto w-full max-w-md">
-    <CardHeader><h1 class="text-2xl font-semibold text-white">Reset password</h1></CardHeader>
+    <CardHeader>
+      <h1 class="text-2xl font-semibold text-white">
+        Reset password
+      </h1>
+    </CardHeader>
     <CardContent>
       <form
         method="POST"
@@ -38,7 +42,9 @@ const session = useSessionStore();
           </template>
         </FormField>
         <div class="flex justify-end">
-          <Button type="submit">Send password reset link</Button>
+          <Button type="submit">
+            Send password reset link
+          </Button>
         </div>
       </form>
     </CardContent>

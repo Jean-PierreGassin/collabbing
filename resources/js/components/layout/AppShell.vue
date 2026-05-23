@@ -498,10 +498,14 @@ watch(
               <Button
                 variant="ghost"
                 :as="Link"
-                :href="session.routes.login">Login</Button>
+                :href="session.routes.login">
+                Login
+              </Button>
               <Button
                 :as="Link"
-                :href="session.routes.register">Register</Button>
+                :href="session.routes.register">
+                Register
+              </Button>
             </nav>
           </Transition>
 
@@ -621,13 +625,17 @@ watch(
                 :href="session.routes.ideas"
                 variant="ghost"
                 class="h-11 justify-start"
-                @click="closeMobileNavigation">Ideas</Button>
+                @click="closeMobileNavigation">
+                Ideas
+              </Button>
               <Button
                 :as="Link"
                 :href="session.routes.dashboard"
                 variant="ghost"
                 class="h-11 justify-start"
-                @click="closeMobileNavigation">Dashboard</Button>
+                @click="closeMobileNavigation">
+                Dashboard
+              </Button>
               <Button
                 :as="Link"
                 :href="session.routes.ideasCreate"
@@ -667,18 +675,24 @@ watch(
                 :href="session.routes.ideas"
                 variant="ghost"
                 class="h-11 justify-start"
-                @click="closeMobileNavigation">Browse Ideas</Button>
+                @click="closeMobileNavigation">
+                Browse Ideas
+              </Button>
               <Button
                 :as="Link"
                 :href="session.routes.login"
                 variant="ghost"
                 class="h-11 justify-start"
-                @click="closeMobileNavigation">Login</Button>
+                @click="closeMobileNavigation">
+                Login
+              </Button>
               <Button
                 :as="Link"
                 :href="session.routes.register"
                 class="h-11 justify-start"
-                @click="closeMobileNavigation">Register</Button>
+                @click="closeMobileNavigation">
+                Register
+              </Button>
             </nav>
             <form
               v-if="session.isAuthenticated"
@@ -747,65 +761,93 @@ watch(
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-foreground">Explore</h2>
+                <h2 class="text-sm font-semibold text-foreground">
+                  Explore
+                </h2>
                 <nav
                   aria-label="Explore links"
                   class="flex flex-col gap-2 text-muted-foreground">
                   <Link
                     class="w-fit transition-colors hover:text-primary"
-                    :href="session.routes.ideas">Ideas</Link>
+                    :href="session.routes.ideas">
+                    Ideas
+                  </Link>
                   <Link
                     class="w-fit transition-colors hover:text-primary"
-                    :href="session.routes.users">Members</Link>
+                    :href="session.routes.users">
+                    Members
+                  </Link>
                   <Link
                     class="w-fit transition-colors hover:text-primary"
-                    :href="session.routes.pricing">Pricing</Link>
+                    :href="session.routes.pricing">
+                    Pricing
+                  </Link>
                 </nav>
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-foreground">Workspace</h2>
+                <h2 class="text-sm font-semibold text-foreground">
+                  Workspace
+                </h2>
                 <nav
                   aria-label="Workspace footer links"
                   class="flex flex-col gap-2 text-muted-foreground">
                   <template v-if="session.isAuthenticated">
                     <Link
                       class="w-fit transition-colors hover:text-primary"
-                      :href="session.routes.dashboard">Dashboard</Link>
+                      :href="session.routes.dashboard">
+                      Dashboard
+                    </Link>
                     <Link
                       class="w-fit transition-colors hover:text-primary"
-                      :href="session.routes.ideasCreate">Create an Idea</Link>
+                      :href="session.routes.ideasCreate">
+                      Create an Idea
+                    </Link>
                   </template>
                   <template v-else>
                     <Link
                       class="w-fit transition-colors hover:text-primary"
-                      :href="session.routes.login">Login</Link>
+                      :href="session.routes.login">
+                      Login
+                    </Link>
                     <Link
                       class="w-fit transition-colors hover:text-primary"
-                      :href="session.routes.register">Register</Link>
+                      :href="session.routes.register">
+                      Register
+                    </Link>
                   </template>
                 </nav>
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-foreground">Support</h2>
+                <h2 class="text-sm font-semibold text-foreground">
+                  Support
+                </h2>
                 <nav
                   aria-label="Support links"
                   class="flex flex-col gap-2 text-muted-foreground">
                   <Link
                     class="w-fit transition-colors hover:text-primary"
-                    :href="session.routes.feedback">Feedback</Link>
+                    :href="session.routes.feedback">
+                    Feedback
+                  </Link>
                   <Link
                     class="w-fit transition-colors hover:text-primary"
-                    :href="session.routes.contact">Contact</Link>
+                    :href="session.routes.contact">
+                    Contact
+                  </Link>
                 </nav>
               </div>
             </div>
 
             <div class="border-t border-border">
               <div class="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <p>&copy; 2026 Collabbing. Built for people turning ideas into shared momentum.</p>
-                <p>Community-first collaboration for early-stage builders.</p>
+                <p>
+                  &copy; 2026 Collabbing. Built for people turning ideas into shared momentum.
+                </p>
+                <p>
+                  Community-first collaboration for early-stage builders.
+                </p>
               </div>
             </div>
           </div>

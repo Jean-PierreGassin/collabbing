@@ -157,8 +157,12 @@ const { canvasRef, sparks } = useCollaborationCanvas();
           </div>
 
           <div class="flex min-w-0 flex-col gap-2 pt-1 md:pt-0">
-            <h3 class="text-lg font-semibold text-foreground">{{ step.title }}</h3>
-            <p class="text-sm leading-relaxed text-muted-foreground">{{ step.description }}</p>
+            <h3 class="text-lg font-semibold text-foreground">
+              {{ step.title }}
+            </h3>
+            <p class="text-sm leading-relaxed text-muted-foreground">
+              {{ step.description }}
+            </p>
           </div>
         </li>
       </ol>

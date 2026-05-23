@@ -121,7 +121,9 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
 <template>
   <section class="flex flex-col gap-5">
     <div class="flex flex-col gap-1">
-      <h1 class="text-2xl font-semibold text-white">Members</h1>
+      <h1 class="text-2xl font-semibold text-white">
+        Members
+      </h1>
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
         Find people building, supporting, and collaborating on ideas.
       </p>
@@ -242,7 +244,9 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
     <p
       class="sr-only"
       aria-live="polite">
-      <template v-if="copiedUserId !== null">Profile link copied.</template>
+      <template v-if="copiedUserId !== null">
+        Profile link copied.
+      </template>
     </p>
 
     <PaginationLinks :paginator="props.users" />

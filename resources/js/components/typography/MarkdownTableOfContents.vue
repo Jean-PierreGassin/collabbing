@@ -400,7 +400,9 @@ onBeforeUnmount(() => {
       class="hidden min-[1700px]:absolute min-[1700px]:inset-y-0 min-[1700px]:right-full min-[1700px]:mr-4 min-[1700px]:block min-[1700px]:w-56"
     >
       <div class="sticky top-24 p-2">
-        <h2 class="pb-2 pl-3 text-sm font-semibold text-white">Contents</h2>
+        <h2 class="pb-2 pl-3 text-sm font-semibold text-white">
+          Contents
+        </h2>
         <nav
           :aria-label="navLabel"
           class="scrollbar-hidden flex max-h-[calc(100svh-10rem)] flex-col gap-1 overflow-y-auto overscroll-contain border-l border-border pb-3 text-sm">
