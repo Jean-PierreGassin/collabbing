@@ -53,6 +53,28 @@ export default [
         'error',
         2,
       ],
+      'padding-line-between-statements': [
+        'error',
+        {
+          blankLine: 'always',
+          prev: [
+            'const',
+            'let',
+            'var',
+          ],
+          next: 'function',
+        },
+        {
+          blankLine: 'always',
+          prev: 'function',
+          next: [
+            'const',
+            'let',
+            'var',
+            'function',
+          ],
+        },
+      ],
       'vue/array-bracket-newline': [
         'error',
         {
@@ -68,6 +90,27 @@ export default [
       'vue/comma-dangle': [
         'error',
         'always-multiline',
+      ],
+      'vue/block-order': [
+        'error',
+        {
+          order: [
+            'script',
+            'template',
+            'style',
+          ],
+        },
+      ],
+      'vue/define-macros-order': [
+        'error',
+        {
+          order: [
+            'defineOptions',
+            'defineProps',
+            'defineEmits',
+            'defineSlots',
+          ],
+        },
       ],
       'vue/first-attribute-linebreak': [
         'error',

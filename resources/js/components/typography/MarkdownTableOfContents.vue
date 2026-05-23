@@ -60,6 +60,7 @@ const activePathAnchors = computed(() => {
 
   return path;
 });
+
 function parentHeadingAnchor(index: number): string | null {
   const heading = props.headings[index];
 

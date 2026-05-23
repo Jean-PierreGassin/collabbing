@@ -7,12 +7,11 @@ import CsrfField from '@/components/forms/CsrfField.vue';
 import FlashMessages from '@/components/layout/FlashMessages.vue';
 import ThemeModeToggle from '@/components/layout/ThemeModeToggle.vue';
 import BreadcrumbBar from '@/components/navigation/BreadcrumbBar.vue';
-import { useSharedPage } from '@/lib/page';
+import { useAppShellPageState } from '@/composables/useAppShellPageState';
 import { useSessionStore } from '@/stores/session';
-import type { Idea, DomainUser } from '@/types/domain';
 
 const session = useSessionStore();
-const page = useSharedPage();
+
 const isMobileMenuOpen = ref(false);
 const isMobileSearchOpen = ref(false);
 const isAccountMenuOpen = ref(false);
@@ -20,6 +19,13 @@ const isDesktopSearchOpen = ref(false);
 const desktopSearchValue = ref('');
 const desktopSearchInput = ref<HTMLInputElement | null>(null);
 const accountMenu = ref<HTMLElement | null>(null);
+
+const {
+  canonicalUrl,
+  currentSearchTerm,
+  seo,
+  transitionKey,
+} = useAppShellPageState();
 
 const brandHref = computed(() => {
   if (session.isAuthenticated) {
@@ -36,6 +42,7 @@ const brandLabel = computed(() => {
 
   return 'Collabbing home';
 });
+
 const mobileSearchLabel = computed(() => {
   if (isMobileSearchOpen.value) {
     return 'Close search';
@@ -43,6 +50,7 @@ const mobileSearchLabel = computed(() => {
 
   return 'Search ideas';
 });
+
 const mobileMenuLabel = computed(() => {
   if (isMobileMenuOpen.value) {
     return 'Close navigation menu';
@@ -51,137 +59,7 @@ const mobileMenuLabel = computed(() => {
   return 'Open navigation menu';
 });
 
-const defaultDescription = 'Share early product ideas, find collaborators, and move promising projects toward real work.';
-
-function excerpt(value: string | null | undefined, fallback: string): string {
-  if (!value) {
-    return fallback;
-  }
-
-  return value
-    .replace(/[#*_`>\-[\]()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 155) || fallback;
-}
-
-const seo = computed(() => {
-  const idea = page.props.idea as Idea | undefined;
-  const user = page.props.user as DomainUser | undefined;
-
-  if (idea && page.component === 'Ideas/Show') {
-    return {
-      title: idea.titleDisplay,
-      pageTitle: `${idea.titleDisplay} | Collabbing`,
-      description: excerpt(idea.summary, defaultDescription),
-      type: 'article',
-    };
-  }
-
-  if (user && page.component === 'Users/Show') {
-    return {
-      title: `${user.name} (@${user.username})`,
-      pageTitle: `${user.name} (@${user.username}) | Collabbing`,
-      description: excerpt(user.bio, `${user.name} is a member of the Collabbing builder community.`),
-      type: 'profile',
-    };
-  }
-
-  let ideaFormTitle = 'Share an Idea';
-  let ideaManageTitle = 'Manage Idea';
-  let userFormTitle = 'Create Profile';
-
-  if (idea) {
-    ideaFormTitle = 'Edit Idea';
-    ideaManageTitle = `Manage ${idea.titleDisplay}`;
-  }
-
-  if (user) {
-    userFormTitle = 'Edit Profile';
-  }
-
-  const titles: Record<string, string> = {
-    'Auth/Login': 'Login',
-    'Auth/PasswordEmail': 'Reset Password',
-    'Auth/PasswordReset': 'Choose a New Password',
-    'Auth/Register': 'Register',
-    'Comments/Form': 'Comment',
-    Contact: 'Contact',
-    Dashboard: 'Dashboard',
-    Error: 'Page Error',
-    Feedback: 'Feedback',
-    Home: 'Collabbing',
-    'Ideas/Apply': 'Apply to Collaborate',
-    'Ideas/Form': ideaFormTitle,
-    'Ideas/Index': 'Ideas',
-    'Ideas/Manage': ideaManageTitle,
-    'Pricing': 'Pricing',
-    'Resources': 'Resources',
-    'Users/Form': userFormTitle,
-    'Users/Index': 'Members',
-  };
-
-  const title = titles[page.component] ?? 'Collabbing';
-
-  let pageTitle = `${title} | Collabbing`;
-
-  if (title === 'Collabbing') {
-    pageTitle = title;
-  }
-
-  return {
-    title,
-    pageTitle,
-    description: defaultDescription,
-    type: 'website',
-  };
-});
-
-const canonicalUrl = computed(() => {
-  if (typeof window === 'undefined') {
-    return undefined;
-  }
-
-  return `${window.location.origin}${page.url.split('#')[0]}`;
-});
-
-const transitionKey = computed(() => {
-  const [
-    pathAndQuery,
-    hash = '',
-  ] = page.url.split('#');
-  const [
-    path,
-    query = '',
-  ] = pathAndQuery.split('?');
-  const params = new URLSearchParams(query);
-
-  params.delete('comments');
-
-  const nextQuery = params.toString();
-
-  let nextUrl = path;
-
-  if (nextQuery) {
-    nextUrl = `${nextUrl}?${nextQuery}`;
-  }
-
-  if (hash) {
-    nextUrl = `${nextUrl}#${hash}`;
-  }
-
-  return nextUrl;
-});
 const chromeTransitionKey = computed(() => session.isAuthenticated ? 'authenticated' : 'guest');
-const currentSearchTerm = computed(() => {
-  const [
-    , query = '',
-  ] = page.url.split('?');
-  const params = new URLSearchParams(query.split('#')[0]);
-  const search = params.get('search');
-
-  return search ?? '';
-});
 
 function closeMobileNavigation(): void {
   isMobileMenuOpen.value = false;
@@ -299,61 +177,21 @@ watch(
 <template>
   <div class="flex min-h-screen flex-col bg-background text-foreground">
     <Head :title="seo.title">
-      <meta
-        head-key="description"
-        name="description"
-        :content="seo.description">
-      <meta
-        head-key="robots"
-        name="robots"
-        content="index,follow">
-      <meta
-        head-key="og:title"
-        property="og:title"
-        :content="seo.pageTitle">
-      <meta
-        head-key="og:description"
-        property="og:description"
-        :content="seo.description">
-      <meta
-        head-key="og:type"
-        property="og:type"
-        :content="seo.type">
-      <meta
-        v-if="canonicalUrl"
-        head-key="og:url"
-        property="og:url"
-        :content="canonicalUrl">
-      <meta
-        head-key="og:site_name"
-        property="og:site_name"
-        content="Collabbing">
-      <meta
-        head-key="twitter:card"
-        name="twitter:card"
-        content="summary">
-      <meta
-        head-key="twitter:title"
-        name="twitter:title"
-        :content="seo.pageTitle">
-      <meta
-        head-key="twitter:description"
-        name="twitter:description"
-        :content="seo.description">
-      <link
-        v-if="canonicalUrl"
-        head-key="canonical"
-        rel="canonical"
-        :href="canonicalUrl">
-      <link
-        head-key="favicon-svg"
-        rel="icon"
-        type="image/svg+xml"
-        href="/favicon.svg">
-      <link
-        head-key="manifest"
-        rel="manifest"
-        href="/site.webmanifest">
+      <!-- eslint-disable vue/max-attributes-per-line -->
+      <meta head-key="description" name="description" :content="seo.description">
+      <meta head-key="robots" name="robots" content="index,follow">
+      <meta head-key="og:title" property="og:title" :content="seo.pageTitle">
+      <meta head-key="og:description" property="og:description" :content="seo.description">
+      <meta head-key="og:type" property="og:type" :content="seo.type">
+      <meta v-if="canonicalUrl" head-key="og:url" property="og:url" :content="canonicalUrl">
+      <meta head-key="og:site_name" property="og:site_name" content="Collabbing">
+      <meta head-key="twitter:card" name="twitter:card" content="summary">
+      <meta head-key="twitter:title" name="twitter:title" :content="seo.pageTitle">
+      <meta head-key="twitter:description" name="twitter:description" :content="seo.description">
+      <link v-if="canonicalUrl" head-key="canonical" rel="canonical" :href="canonicalUrl">
+      <link head-key="favicon-svg" rel="icon" type="image/svg+xml" href="/favicon.svg">
+      <link head-key="manifest" rel="manifest" href="/site.webmanifest">
+      <!-- eslint-enable vue/max-attributes-per-line -->
     </Head>
 
     <a
