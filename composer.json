@@ -20,6 +20,7 @@
   },
   "require-dev": {
     "fakerphp/faker": "^1.24",
+    "jean-pierre-gassin/ai-context": "^0.1",
     "larastan/larastan": "^3.9",
     "laravel/boost": "*",
     "laravel/pail": "^1.2",
@@ -68,7 +69,13 @@
     ],
     "test": "phpunit --colors=always",
     "test-integration": "phpunit --testsuite=integration --colors=always",
-    "test-all": "phpunit --testsuite=stable,integration --colors=always"
+    "test-all": "phpunit --testsuite=stable,integration --colors=always",
+    "post-install-cmd": [
+      "JeanPierreGassin\\AiContext\\Installer::installFromComposer"
+    ],
+    "post-update-cmd": [
+      "JeanPierreGassin\\AiContext\\Installer::installFromComposer"
+    ]
   },
   "config": {
     "preferred-install": "dist",
