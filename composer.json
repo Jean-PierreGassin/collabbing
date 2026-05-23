@@ -71,10 +71,10 @@
     "test-integration": "phpunit --testsuite=integration --colors=always",
     "test-all": "phpunit --testsuite=stable,integration --colors=always",
     "post-install-cmd": [
-      "JeanPierreGassin\\AiContext\\Installer::installFromComposer"
+      "App\\Composer\\AiContextInstaller::install"
     ],
     "post-update-cmd": [
-      "JeanPierreGassin\\AiContext\\Installer::installFromComposer"
+      "App\\Composer\\AiContextInstaller::install"
     ]
   },
   "config": {
