@@ -2,97 +2,123 @@
 
 namespace App\Models;
 
+use Database\Factories\IdeaFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/**
- * Class Idea
- * @package App
- */
 class Idea extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    use HasFactory;
+
     protected $fillable = [
         'title',
+        'tagline',
+        'summary',
+        'tags',
         'communication',
         'content',
         'status',
-        'repository',
-        'repository_name',
     ];
 
-    /**
-     * @return BelongsTo
-     */
+    protected function casts(): array
+    {
+        return [
+            'tags' => 'array',
+        ];
+    }
+
+    protected static function newFactory(): IdeaFactory
+    {
+        return IdeaFactory::new();
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(IdeaComment::class, 'idea_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function pendingApplications(): HasMany
     {
         return $this->applications()->where('status', 'pending');
     }
 
-    /**
-     * @return HasMany
-     */
     public function applications(): HasMany
     {
         return $this->hasMany(IdeaApplication::class, 'idea_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function approvedApplications(): HasMany
     {
         return $this->applications()->where('status', 'approved');
     }
 
-    /**
-     * @param $userId
-     * @param $type
-     * @return Model|HasMany|object|null
-     */
-    public function hasApplicationFromUser($userId, $type)
+    public function hasApplicationFromUser(int|string $userId, string $type): ?IdeaApplication
     {
-        return $this->applications()
+        $application = $this->applications()
             ->where('user_id', $userId)
             ->where('status', $type)
             ->first();
+
+        if (! $application instanceof IdeaApplication) {
+            return null;
+        }
+
+        return $application;
     }
 
-    /**
-     * @param $userId
-     * @return Model|HasMany|object|null
-     */
-    public function hasSupportFromUser($userId)
+    public function hasSupportFromUser(int|string $userId): ?IdeaSupporter
     {
-        return $this->supporters()->where('user_id', $userId)->first();
+        $supporter = $this->supporters()->where('user_id', $userId)->first();
+
+        if (! $supporter instanceof IdeaSupporter) {
+            return null;
+        }
+
+        return $supporter;
     }
 
-    /**
-     * @return HasMany
-     */
     public function supporters(): HasMany
     {
         return $this->hasMany(IdeaSupporter::class, 'idea_id');
+    }
+
+    public function codeRepositories(): HasMany
+    {
+        return $this->hasMany(CodeRepository::class, 'idea_id');
+    }
+
+    public function codeRepository(): HasOne
+    {
+        return $this->hasOne(CodeRepository::class, 'idea_id')->latestOfMany();
+    }
+
+    public function owner(): ?User
+    {
+        $user = $this->user;
+
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function latestCodeRepository(): ?CodeRepository
+    {
+        $codeRepository = $this->codeRepository;
+
+        if (! $codeRepository instanceof CodeRepository) {
+            return null;
+        }
+
+        return $codeRepository;
     }
 }

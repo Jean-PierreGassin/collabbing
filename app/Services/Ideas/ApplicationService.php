@@ -2,77 +2,59 @@
 
 namespace App\Services\Ideas;
 
+use App\Data\Ideas\IdeaApplicationData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User;
+use App\Repositories\Ideas\ApplicationRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
-/**
- * Class ApplicationService
- * @package App\Services\Ideas
- */
 class ApplicationService
 {
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return bool
-     */
-    public function create(Idea $idea, array $data): bool
-    {
-        $data['user_id'] = Auth::user()->id;
-        $application = $idea->applications()->create($data);
+    public function __construct(private ApplicationRepository $applications) {}
 
-        return $application->save();
+    public function create(Idea $idea, IdeaApplicationData $data): bool
+    {
+        $application = $this->applications->create($idea, $this->authenticatedUser(), $data);
+
+        return $application->exists;
     }
 
-    /**
-     * @param IdeaApplication $application
-     * @return bool
-     */
     public function approve(IdeaApplication $application): bool
     {
-        $application->status = 'approved';
-        return $application->save();
+        return $this->applications->approve($application);
     }
 
-    /**
-     * @param IdeaApplication $application
-     * @return bool
-     * @throws \Exception
-     */
     public function destroy(IdeaApplication $application): bool
     {
-        return $application->delete();
+        return $this->applications->destroy($application);
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
-    public function getPendingApplications(Idea $idea): Collection
+    public function getPendingApplications(Idea $idea): LengthAwarePaginator
     {
-        return $idea->pendingApplications()->get();
+        return $this->applications->getPendingApplications($idea);
     }
 
-    /**
-     * @param Idea $idea
-     * @return Collection
-     */
-    public function getApprovedApplications(Idea $idea): Collection
+    public function getApprovedApplications(Idea $idea): LengthAwarePaginator
     {
-        return $idea->approvedApplications()->get();
+        return $this->applications->getApprovedApplications($idea);
     }
 
-    /**
-     * @param Idea $idea
-     * @param string $type
-     * @return Model|HasMany|object|null
-     */
-    public function getApplicationFromUser(Idea $idea, string $type)
+    public function getApplicationFromUser(Idea $idea, string $type): ?IdeaApplication
     {
-        return $idea->hasApplicationFromUser(Auth::user()->id, $type);
+        return $this->applications->getApplicationFromUser($idea, $this->authenticatedUser(), $type);
+    }
+
+    private function authenticatedUser(): User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            throw new RuntimeException('An authenticated user is required.');
+        }
+
+        return $user;
     }
 }

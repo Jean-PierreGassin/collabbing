@@ -3,41 +3,48 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ResetPasswordRequest;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Inertia\Inertia;
+use Inertia\Response;
 
-/**
- * Class ResetPasswordController
- * @package App\Http\Controllers\Auth
- */
 class ResetPasswordController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset requests
-    | and uses a simple trait to include this behavior. You're free to
-    | explore this trait and override any methods you wish to tweak.
-    |
-    */
-
     use ResetsPasswords;
 
-    /**
-     * Where to redirect users after resetting their password.
-     *
-     * @var string
-     */
     protected $redirectTo = '/ideas';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
+        $this->middleware('throttle:5,1')->only('reset');
+    }
+
+    public function reset(ResetPasswordRequest $request): RedirectResponse|JsonResponse
+    {
+        $response = $this->broker()->reset(
+            $request->validated(),
+            function ($user, string $password): void {
+                $this->resetPassword($user, $password);
+            }
+        );
+
+        if ($response === Password::PASSWORD_RESET) {
+            return $this->sendResetResponse($request, $response);
+        }
+
+        return $this->sendResetFailedResponse($request, $response);
+    }
+
+    public function showResetForm(Request $request, ?string $token = null): Response
+    {
+        return Inertia::render('Auth/PasswordReset', [
+            'token' => $token,
+            'email' => $request->input('email'),
+        ]);
     }
 }

@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import { AlertTriangle, CheckCircle2, X } from '@lucide/vue';
+import { useFlashToasts } from '@/composables/useFlashToasts';
+
+const {
+  dismissToast,
+  pauseToast,
+  resumeToast,
+  toastAccentClass,
+  toastAriaLive,
+  toastIconClass,
+  toastRole,
+  toasts,
+  toastTitle,
+} = useFlashToasts();
+</script>
+
+<template>
+  <TransitionGroup
+    tag="div"
+    name="toast-slide"
+    class="pointer-events-none fixed inset-x-3 bottom-3 z-50 flex flex-col gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[calc(100vw-2rem)] sm:max-w-sm"
+    aria-label="Notifications"
+  >
+    <div
+      v-for="toast in toasts"
+      :key="toast.id"
+      class="pointer-events-auto relative grid grid-cols-[auto_1fr_auto] items-start gap-3 overflow-hidden rounded-lg bg-card/95 px-3.5 py-3 text-sm text-foreground shadow-[0_18px_45px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-4"
+      :role="toastRole(toast.tone)"
+      :aria-live="toastAriaLive(toast.tone)"
+      @mouseenter="pauseToast(toast)"
+      @mouseleave="resumeToast(toast)"
+      @focusin="pauseToast(toast)"
+      @focusout="resumeToast(toast)"
+    >
+      <span
+        class="absolute inset-y-2.5 left-0 w-1 rounded-r-full"
+        :class="toastAccentClass(toast.tone)"
+        aria-hidden="true"
+      />
+      <div
+        class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-1"
+        :class="toastIconClass(toast.tone)"
+      >
+        <AlertTriangle
+          v-if="toast.tone === 'error'"
+          class="size-3.5"
+          aria-hidden="true" />
+        <CheckCircle2
+          v-else
+          class="size-3.5"
+          aria-hidden="true" />
+      </div>
+      <div class="min-w-0">
+        <p class="truncate font-semibold leading-5 text-foreground">
+          {{ toastTitle(toast.tone) }}
+        </p>
+        <p class="line-clamp-2 leading-5 text-muted-foreground">
+          {{ toast.message }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="-mr-1 -mt-1 flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        aria-label="Dismiss notification"
+        @click="dismissToast(toast.id)"
+      >
+        <X
+          class="size-4"
+          aria-hidden="true" />
+      </button>
+    </div>
+  </TransitionGroup>
+</template>

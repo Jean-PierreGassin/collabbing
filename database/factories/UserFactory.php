@@ -1,31 +1,38 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
+
+use App\Models\ConnectedAccount;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/*
-|--------------------------------------------------------------------------
-| Model Factories
-|--------------------------------------------------------------------------
-|
-| This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
-| model instances for testing / seeding your application's database.
-|
-*/
+/** @extends Factory<User> */
+class UserFactory extends Factory
+{
+    protected $model = User::class;
 
-$factory->define(
-    App\Models\User::class,
-    function (Faker $faker) {
+    public function definition(): array
+    {
         return [
-            'username' => $faker->userName,
-            'first_name' => $faker->firstName,
-            'last_name' => $faker->lastName,
-            'email' => $faker->unique()->safeEmail,
-            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
-            'github_token' => $faker->md5,
-            'bio' => $faker->text,
+            'username' => $this->faker->unique()->userName,
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->lastName,
+            'email' => $this->faker->unique()->safeEmail,
+            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm',
+            'bio' => $this->faker->text,
             'remember_token' => Str::random(10),
         ];
     }
-);
+
+    public function withGithubAccount(?string $token = 'github-token', ?string $username = 'octocat'): static
+    {
+        return $this->afterCreating(function (User $user) use ($token, $username): void {
+            ConnectedAccount::factory()->for($user)->create([
+                'provider' => User::PROVIDER_GITHUB,
+                'provider_username' => $username,
+                'token' => $token,
+            ]);
+        });
+    }
+}

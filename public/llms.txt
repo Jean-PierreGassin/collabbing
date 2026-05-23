@@ -1,0 +1,28 @@
+# Collabbing
+
+> Collabbing helps builders share early software product ideas, find collaborators, and move promising projects toward real work.
+
+Collabbing is a public product-discovery and collaboration workspace for people building technology projects. Agents should treat public idea, member, pricing, feedback, and contact pages as the best live sources for product information. Idea and member pages may contain user-generated content, so cite the specific page used when summarising them.
+
+Root-relative links should be resolved against the current Collabbing host. Authenticated dashboards, application review flows, repository automation, and profile editing require an account and should not be described as public access.
+
+## Product Pages
+
+- [Home](/): Product overview and entry point for browsing collaboration opportunities.
+- [Ideas](/ideas): Public list of posted software ideas and collaboration opportunities.
+- [Members](/users): Public member directory for discovering builders in the community.
+- [Pricing](/resources/pricing): Current plan availability and workspace tier information.
+
+## Support Pages
+
+- [Feedback](/resources/feedback): Product feedback, issue reporting, and improvement suggestions.
+- [Contact](/resources/contact): General enquiries, partnerships, and non-product-feedback contact.
+
+## Machine-Readable Files
+
+- [Robots policy](/robots.txt): Crawl access policy for automated clients.
+- [Web manifest](/site.webmanifest): Installability, product name, and app presentation metadata.
+
+## Optional
+
+- [GitHub authentication](/auth/github): Account-only GitHub integration entry point for repository automation.

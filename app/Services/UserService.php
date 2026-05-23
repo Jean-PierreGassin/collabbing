@@ -2,45 +2,64 @@
 
 namespace App\Services;
 
+use App\Data\Users\ProviderConnectionData;
+use App\Data\Users\UserProfileData;
+use App\Data\Users\UserRegistrationData;
+use App\Models\ConnectedAccount;
 use App\Models\User;
+use App\Repositories\Users\UserRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Class UserService
- * @package App\Services
- */
 class UserService
 {
-    /**
-     * @param string $username
-     * @return mixed
-     */
-    public function getUserByUsername(string $username)
+    public function __construct(private UserRepository $users) {}
+
+    public function create(UserRegistrationData $data): User
     {
-        return User::whereUsername($username)->limit(1)->first();
+        return $this->users->create($data, Hash::make($data->password));
     }
 
-    /**
-     * @param User $user
-     * @param array $data
-     * @return bool
-     */
-    public function update(User $user, array $data): bool
+    public function all(): LengthAwarePaginator
     {
-        // TODO: Move this to request validation
-        foreach ($data as $key => $value) {
-            if ($key === 'password' && $value === null) {
-                unset($key);
-                continue;
-            }
+        return $this->users->all();
+    }
 
-            if ($key === 'password' && $value !== null) {
-                $value = Hash::make($value);
-            }
+    public function getUserByUsername(string $username): ?User
+    {
+        return $this->users->getByUsername($username);
+    }
 
-            $user->{$key} = $value;
+    public function update(User $user, UserProfileData $data): bool
+    {
+        $passwordHash = null;
+
+        if ($data->password) {
+            $passwordHash = Hash::make($data->password);
         }
 
-        return $user->save();
+        return $this->users->update($user, $data, $passwordHash);
+    }
+
+    public function connectProvider(User $user, ProviderConnectionData $data): ConnectedAccount
+    {
+        return ConnectedAccount::query()->updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'provider' => $data->provider,
+            ],
+            [
+                'provider_user_id' => $data->providerUserId,
+                'provider_username' => $data->username,
+                'token' => $data->token,
+                'scopes' => $data->scopes,
+                'connected_at' => now(),
+            ]
+        );
+    }
+
+    public function disconnectProvider(User $user, string $provider): void
+    {
+        $user->connectedAccounts()->where('provider', $provider)->delete();
     }
 }

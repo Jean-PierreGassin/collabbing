@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateIdeasTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'ideas',
@@ -28,20 +23,8 @@ class CreateIdeasTable extends Migration
                 $table->string('communication');
                 $table->mediumText('content');
                 $table->enum('status', ['open', 'closed', 'suspended', 'expired'])->default('open');
-                $table->integer('repository')->default(0);
-                $table->string('repository_name');
                 $table->timestamps();
             }
         );
-    }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('ideas');
     }
 }

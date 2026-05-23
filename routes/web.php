@@ -1,170 +1,143 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use App\Http\Controllers\Auth\SocialController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\IdeaApplicationController;
+use App\Http\Controllers\IdeaCommentController;
+use App\Http\Controllers\IdeaController;
+use App\Http\Controllers\IdeaSupporterController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::get(
-    '/',
-    function () {
-        return view('welcome');
-    }
-);
+Route::get('/', fn () => Inertia::render('Home'))->name('home');
 
-/**
- * Resources for Users
- */
-Route::get('/dashboard', 'DashboardController@index')
+Route::get('/up', fn () => response()->noContent())->name('health');
+
+Route::get('/app/{path?}', fn () => redirect()->route('home'))
+    ->where('path', '.*')
+    ->name('app');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
-Route::prefix('users')->group(
-    function () {
-        Auth::routes();
+Route::prefix('users')->group(function (): void {
+    Auth::routes();
 
-        Route::get('{username}', 'UserController@show')
-            ->name('users.show')
-            ->middleware(['web']);
+    Route::name('users.')->group(function (): void {
+        Route::get('/', [UserController::class, 'index'])
+            ->name('index');
 
-        Route::put('{username}', 'UserController@update')
-            ->name('users.update')
-            ->middleware(['web', 'auth']);
+        Route::get('{user:username}', [UserController::class, 'show'])
+            ->name('show');
 
-        Route::get('{username}/edit', 'UserController@edit')
-            ->name('users.edit')
-            ->middleware(['web', 'auth']);
-    }
-);
+        Route::middleware('auth')->group(function (): void {
+            Route::get('{user:username}/edit', [UserController::class, 'edit'])
+                ->name('edit');
 
-/**
- * Resources for Ideas
- */
-Route::resource('ideas', 'IdeaController')->only(
-    [
-        'create',
-        'store',
-        'edit',
-        'destroy',
-        'update',
-    ]
-)->middleware(['web', 'auth']);
+            Route::put('{user:username}', [UserController::class, 'update'])
+                ->middleware('throttle:product-write')
+                ->name('update');
+        });
+    });
+});
 
-Route::resource('ideas', 'IdeaController')->only(
-    [
-        'show',
-        'index',
-    ]
-)->middleware(['web']);
+Route::prefix('ideas')->name('ideas.')->group(function (): void {
+    Route::middleware('auth')->group(function (): void {
+        Route::get('create', [IdeaController::class, 'create'])
+            ->name('create');
 
-Route::get('ideas', 'IdeaController@index')
-    ->name('ideas.index')
-    ->middleware(['web']);
+        Route::post('/', [IdeaController::class, 'store'])
+            ->middleware('throttle:product-write')
+            ->name('store');
 
-Route::get('ideas/{idea}/dashboard', 'IdeaController@dashboard')
-    ->name('ideas.dashboard')
-    ->middleware(['web', 'auth']);
+        Route::get('{idea}/edit', [IdeaController::class, 'edit'])
+            ->name('edit');
 
-Route::get('ideas/{idea}/repository-create', 'IdeaController@createRepository')
-    ->name('ideas.repository-create')
-    ->middleware(['web', 'auth']);
+        Route::match(['put', 'patch'], '{idea}', [IdeaController::class, 'update'])
+            ->middleware('throttle:product-write')
+            ->name('update');
+    });
 
-Route::get('ideas/{idea}/repository-invite/{user?}', 'IdeaController@inviteUsersToRepository')
-    ->name('ideas.repository-invite')
-    ->middleware(['web', 'auth']);
+    Route::get('/', [IdeaController::class, 'index'])
+        ->name('index');
 
-/**
- * Resources for Idea Comments
- */
-Route::resource('ideas.comments', 'IdeaCommentController')->only(
-    [
-        'create',
-        'store',
-        'edit',
-        'destroy',
-        'update',
-    ]
-)->middleware(['web', 'auth']);
+    Route::get('{idea}', [IdeaController::class, 'show'])
+        ->name('show');
+});
 
-Route::resource('ideas.comments', 'IdeaCommentController')->only(
-    [
-        'index',
-        'show',
-    ]
-)->middleware(['web']);
+Route::scopeBindings()
+    ->prefix('ideas/{idea}')
+    ->name('ideas.')
+    ->middleware('auth')
+    ->group(function (): void {
+        Route::get('dashboard', [IdeaController::class, 'dashboard'])
+            ->name('dashboard');
 
-/**
- * Resources for Idea Supporters
- */
-Route::resource('ideas.supporters', 'IdeaSupporterController')->only(
-    [
-        'store',
-        'destroy',
-    ]
-)->middleware(['web', 'auth']);
+        Route::middleware('throttle:integration-write')->group(function (): void {
+            Route::post('repository-create', [IdeaController::class, 'createRepository'])
+                ->name('repository-create');
 
-Route::resource('ideas.supporters', 'IdeaSupporterController')->only(
-    [
-        'index',
-        'show',
-    ]
-)->middleware(['web']);
+            Route::post('repository-invite', [IdeaController::class, 'inviteUsersToRepository'])
+                ->name('repository-invite');
+        });
 
-/**
- * Resources for Idea Applications
- */
-Route::resource('ideas.applications', 'IdeaApplicationController')->only(
-    [
-        'create',
-        'store',
-        'edit',
-        'update',
-        'destroy',
-    ]
-)->middleware(['web', 'auth']);
+        Route::get('comments/create', [IdeaCommentController::class, 'create'])
+            ->name('comments.create');
 
-Route::resource('ideas.applications', 'IdeaApplicationController')->only(
-    [
-        'index',
-        'show',
-    ]
-)->middleware(['web']);
+        Route::get('comments/{comment}/edit', [IdeaCommentController::class, 'edit'])
+            ->name('comments.edit');
 
-Route::put('ideas/{idea}/applications/{application}', 'IdeaApplicationController@approveApplication')
-    ->name('ideas.applications.approve')
-    ->middleware(['web', 'auth']);
+        Route::get('applications/create', [IdeaApplicationController::class, 'create'])
+            ->name('applications.create');
 
-/**
- * Social integrations
- */
-Route::get('auth/github', 'Auth\SocialController@redirectToProvider')
-    ->name('auth.github.login')
-    ->middleware(['web', 'auth']);
+        Route::middleware('throttle:product-write')->group(function (): void {
+            Route::post('comments', [IdeaCommentController::class, 'store'])
+                ->name('comments.store');
 
-Route::get('auth/github/callback', 'Auth\SocialController@handleProviderCallback')
-    ->name('auth.github.callback')
-    ->middleware(['web', 'auth']);
+            Route::match(['put', 'patch'], 'comments/{comment}', [IdeaCommentController::class, 'update'])
+                ->name('comments.update');
 
-Route::get('auth/github/revoke', 'Auth\SocialController@revokeProvider')
-    ->name('auth.github.revoke')
-    ->middleware(['web', 'auth']);
+            Route::post('supporters', [IdeaSupporterController::class, 'store'])
+                ->name('supporters.store');
 
-/**
- * Resource Links
- */
-Route::prefix('resources')->group(
-    function () {
-        Route::get('feedback', 'Resources\FeedbackController@index')
-            ->name('resources.feedback')
-            ->middleware('web');
+            Route::delete('supporters/{supporter}', [IdeaSupporterController::class, 'destroy'])
+                ->name('supporters.destroy');
 
-        Route::get('pricing', 'Resources\PricingController@index')
-            ->name('resources.pricing')
-            ->middleware('web');
-    }
-);
+            Route::post('applications', [IdeaApplicationController::class, 'store'])
+                ->name('applications.store');
+
+            Route::delete('applications/{application}', [IdeaApplicationController::class, 'destroy'])
+                ->name('applications.destroy');
+
+            Route::put('applications/{application}', [IdeaApplicationController::class, 'approveApplication'])
+                ->name('applications.approve');
+        });
+    });
+
+Route::prefix('auth/github')
+    ->name('auth.github.')
+    ->middleware('auth')
+    ->group(function (): void {
+        Route::get('/', [SocialController::class, 'redirectToProvider'])
+            ->name('login');
+
+        Route::get('callback', [SocialController::class, 'handleProviderCallback'])
+            ->name('callback');
+
+        Route::delete('revoke', [SocialController::class, 'revokeProvider'])
+            ->middleware('throttle:integration-write')
+            ->name('revoke');
+    });
+
+Route::prefix('resources')->name('resources.')->group(function (): void {
+    Route::get('feedback', fn () => Inertia::render('Feedback'))
+        ->name('feedback');
+
+    Route::get('contact', fn () => Inertia::render('Contact'))
+        ->name('contact');
+
+    Route::get('pricing', fn () => Inertia::render('Pricing'))
+        ->name('pricing');
+});

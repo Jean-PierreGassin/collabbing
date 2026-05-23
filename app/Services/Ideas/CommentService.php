@@ -2,37 +2,36 @@
 
 namespace App\Services\Ideas;
 
+use App\Data\Ideas\IdeaCommentData;
 use App\Models\Idea;
 use App\Models\IdeaComment;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Repositories\Ideas\CommentRepository;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
-/**
- * Class CommentService
- * @package App\Services\Ideas
- */
 class CommentService
 {
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return IdeaComment
-     */
-    public function store(Idea $idea, array $data): Model
-    {
-        $data['user_id'] = Auth::user()->id;
+    public function __construct(private CommentRepository $comments) {}
 
-        return $idea->comments()->create($data);
+    public function store(Idea $idea, IdeaCommentData $data): IdeaComment
+    {
+        return $this->comments->create($idea, $this->authenticatedUser(), $data);
     }
 
-    /**
-     * @param IdeaComment $comment
-     * @param array $data
-     * @return bool
-     */
-    public function update(IdeaComment $comment, array $data): bool
+    public function update(IdeaComment $comment, IdeaCommentData $data): bool
     {
-        $comment->update($data);
-        return $comment->save();
+        return $this->comments->update($comment, $data);
+    }
+
+    private function authenticatedUser(): User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            throw new RuntimeException('An authenticated user is required.');
+        }
+
+        return $user;
     }
 }

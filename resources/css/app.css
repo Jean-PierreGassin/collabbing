@@ -1,0 +1,1018 @@
+@import "tailwindcss";
+
+@source "../js/**/*.{ts,vue}";
+@source "../views/**/*.blade.php";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-white: var(--app-white);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+  --app-white: oklch(0.23 0.012 245);
+  --background: oklch(0.98 0.004 245);
+  --foreground: oklch(0.28 0.012 245);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.012 245);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.012 245);
+  --primary: oklch(0.7 0.17 58);
+  --primary-foreground: oklch(0.25 0.055 52);
+  --secondary: oklch(0.93 0.006 245);
+  --secondary-foreground: oklch(0.24 0.012 245);
+  --muted: oklch(0.94 0.006 245);
+  --muted-foreground: oklch(0.52 0.018 245);
+  --accent: oklch(0.91 0.052 72);
+  --accent-foreground: oklch(0.28 0.055 58);
+  --destructive: oklch(0.58 0.19 24);
+  --border: oklch(0.18 0.014 245 / 13%);
+  --input: oklch(0.18 0.014 245 / 18%);
+  --ring: oklch(0.7 0.17 58);
+  --chart-1: oklch(0.7 0.17 58);
+  --chart-2: oklch(0.58 0.13 230);
+  --chart-3: oklch(0.62 0.14 145);
+  --chart-4: oklch(0.62 0.17 35);
+  --chart-5: oklch(0.58 0.12 300);
+}
+
+.dark {
+  --app-white: oklch(0.91 0.006 245);
+  --background: oklch(0.16 0.014 245);
+  --foreground: oklch(0.86 0.007 245);
+  --card: oklch(0.2 0.017 245);
+  --card-foreground: oklch(0.86 0.007 245);
+  --popover: oklch(0.2 0.017 245);
+  --popover-foreground: oklch(0.86 0.007 245);
+  --primary: oklch(0.76 0.17 58);
+  --primary-foreground: oklch(0.13 0.012 245);
+  --secondary: oklch(0.27 0.019 245);
+  --secondary-foreground: oklch(0.97 0.006 245);
+  --muted: oklch(0.27 0.019 245);
+  --muted-foreground: oklch(0.72 0.018 245);
+  --accent: oklch(0.32 0.075 58);
+  --accent-foreground: oklch(0.96 0.025 75);
+  --destructive: oklch(0.7 0.19 24);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.76 0.17 58);
+  --chart-1: oklch(0.76 0.17 58);
+  --chart-2: oklch(0.7 0.13 230);
+  --chart-3: oklch(0.78 0.14 95);
+  --chart-4: oklch(0.7 0.17 35);
+  --chart-5: oklch(0.73 0.12 300);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+
+  html {
+    overflow-x: clip;
+    scrollbar-gutter: stable;
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    min-width: 320px;
+    overflow-x: clip;
+    background: var(--background);
+    color: var(--foreground);
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.markdown-content {
+  display: flex;
+  max-width: none;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.85rem;
+  color: var(--foreground);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.markdown-content :where(h1, h2, h3, h4) {
+  color: var(--app-white);
+  font-weight: 650;
+  line-height: 1.2;
+  scroll-margin-top: 6rem;
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.125rem;
+}
+
+.markdown-content :where(p, ul, ol, blockquote, pre) {
+  margin: 0;
+  max-width: 100%;
+}
+
+.markdown-content :where(ul, ol) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-left: 1.35rem;
+}
+
+.markdown-content ul {
+  list-style: disc;
+}
+
+.markdown-content ol {
+  list-style: decimal;
+}
+
+.markdown-content a {
+  color: var(--primary);
+  text-decoration-line: underline;
+  text-underline-offset: 0.18em;
+}
+
+.markdown-content blockquote {
+  border-left: 2px solid var(--primary);
+  color: var(--muted-foreground);
+  padding-left: 1rem;
+}
+
+.markdown-content code {
+  border: 1px solid color-mix(in oklab, var(--chart-2) 28%, var(--border) 72%);
+  border-radius: 0.3rem;
+  background: color-mix(in oklab, var(--background) 72%, black 28%);
+  color: color-mix(in oklab, var(--chart-2) 72%, white 28%);
+  padding: 0.08rem 0.34rem;
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--chart-2) 25%, var(--border) 75%);
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--card) 35%, transparent), transparent),
+    color-mix(in oklab, var(--background) 62%, black 38%);
+  box-shadow:
+    inset 3px 0 0 color-mix(in oklab, var(--chart-2) 62%, transparent),
+    inset 0 1px 0 color-mix(in oklab, white 8%, transparent);
+  color: color-mix(in oklab, var(--foreground) 92%, var(--chart-2) 8%);
+  padding: 1rem;
+}
+
+.markdown-content pre code {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  border-color: color-mix(in oklab, var(--input) 76%, var(--foreground) 24%);
+  background: color-mix(in oklab, var(--card) 74%, var(--background) 26%);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  border: 1px solid color-mix(in oklab, var(--input) 68%, var(--foreground) 32%);
+  background: color-mix(in oklab, var(--card) 74%, var(--background) 26%);
+  accent-color: var(--primary);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+input[type="checkbox"]::before {
+  width: 0.72rem;
+  height: 0.72rem;
+  clip-path: polygon(14% 44%, 0 60%, 39% 100%, 100% 20%, 84% 5%, 37% 67%);
+  content: "";
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease;
+  background: var(--primary-foreground);
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--primary) !important;
+  background-color: var(--primary) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 24%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--primary) 18%, transparent);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:hover {
+  border-color: color-mix(in oklab, var(--primary) 58%, var(--foreground) 42%);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--ring) 32%, transparent);
+}
+
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+textarea {
+  line-height: 1.65;
+  resize: vertical;
+  scrollbar-color: color-mix(in oklab, var(--primary) 72%, var(--foreground) 28%) color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+  scrollbar-width: thin;
+}
+
+textarea::-webkit-scrollbar {
+  width: 0.72rem;
+}
+
+textarea::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border: 2px solid color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--primary) 72%, var(--foreground) 28%);
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 78%, transparent);
+}
+
+input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):hover,
+textarea:hover,
+select:hover {
+  border-color: color-mix(in oklab, var(--input) 45%, var(--foreground) 55%);
+}
+
+input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--card) 88%, var(--background) 12%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--ring) 28%, transparent);
+}
+
+select option {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+select option:checked {
+  background: color-mix(in oklab, var(--primary) 82%, var(--popover) 18%);
+  color: var(--primary-foreground);
+}
+
+select option:hover,
+select option:focus {
+  background: color-mix(in oklab, var(--primary) 28%, var(--popover) 72%);
+  color: var(--foreground);
+}
+
+[aria-invalid="true"] {
+  border-color: var(--destructive) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 22%, transparent) !important;
+}
+
+.form-control-feedback-invalid {
+  border-color: var(--destructive) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--destructive) 22%, transparent) !important;
+}
+
+.form-control-feedback-valid {
+  border-color: oklch(0.74 0.16 155) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    0 0 0 3px color-mix(in oklab, oklch(0.74 0.16 155) 22%, transparent) !important;
+}
+
+input.form-control-clearable:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+textarea.form-control-clearable {
+  padding-right: 2.75rem;
+}
+
+.form-field-clear-button {
+  background: transparent;
+}
+
+.form-field-clear-button:hover,
+.form-field-clear-button:focus-visible {
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.form-field-sparks span {
+  position: absolute;
+  width: 0.2rem;
+  height: 0.54rem;
+  border-radius: 999px;
+  background: oklch(0.84 0.17 155);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: form-field-spark 640ms ease-out both;
+}
+
+.form-field-sparks span:nth-child(1) {
+  left: 10%;
+  top: -0.28rem;
+  rotate: -28deg;
+}
+
+.form-field-sparks span:nth-child(2) {
+  left: 33%;
+  top: -0.34rem;
+  rotate: 4deg;
+}
+
+.form-field-sparks span:nth-child(3) {
+  left: 66%;
+  top: -0.34rem;
+  rotate: -8deg;
+  animation-delay: 35ms;
+}
+
+.form-field-sparks span:nth-child(4) {
+  right: 10%;
+  top: -0.28rem;
+  rotate: 24deg;
+  animation-delay: 15ms;
+}
+
+.form-field-sparks span:nth-child(5) {
+  right: -0.22rem;
+  top: 50%;
+  rotate: 86deg;
+  animation-delay: 50ms;
+}
+
+.form-field-sparks span:nth-child(6) {
+  bottom: -0.32rem;
+  right: 28%;
+  rotate: 164deg;
+  animation-delay: 20ms;
+}
+
+.form-field-sparks span:nth-child(7) {
+  bottom: -0.32rem;
+  left: 28%;
+  rotate: 190deg;
+  animation-delay: 55ms;
+}
+
+.form-field-sparks span:nth-child(8) {
+  left: -0.22rem;
+  top: 50%;
+  rotate: -86deg;
+  animation-delay: 30ms;
+}
+
+@keyframes form-field-spark {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.6;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -0.9rem;
+    scale: 0.1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-field-sparks span {
+    animation: none;
+  }
+}
+
+.auth-morph-card {
+  transform-origin: center;
+  transition:
+    width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms ease,
+    border-radius 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 420ms ease,
+    box-shadow 420ms ease,
+    opacity 220ms ease,
+    scale 220ms ease;
+  will-change: width, height, translate, border-radius, background-color, opacity, scale;
+}
+
+.auth-morph-card-active {
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--card) 92%, var(--background) 8%);
+  border-color: transparent;
+  border-radius: 999px;
+  overflow: visible;
+  box-shadow:
+    0 22px 70px color-mix(in oklab, black 42%, transparent),
+    0 0 0 1px color-mix(in oklab, white 8%, transparent);
+}
+
+.auth-morph-card-fill {
+  background: oklch(0.74 0.16 155);
+  box-shadow:
+    0 24px 80px color-mix(in oklab, oklch(0.74 0.16 155) 24%, transparent),
+    0 0 0 1px color-mix(in oklab, white 14%, transparent);
+}
+
+.auth-morph-card-leaving {
+  opacity: 0;
+  scale: 0.92;
+}
+
+.auth-morph-content {
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease,
+    translate 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-morph-content-hidden {
+  opacity: 0;
+  filter: blur(10px);
+  pointer-events: none;
+  translate: 0 0.35rem;
+}
+
+.auth-success-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  scale: 0.86;
+  transition:
+    opacity 180ms ease,
+    scale 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-success-stage-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.auth-success-svg {
+  width: 3.25rem;
+  height: 3.25rem;
+  overflow: visible;
+}
+
+.auth-success-ring {
+  fill: transparent;
+  stroke: oklch(0.74 0.16 155);
+  stroke-width: 3;
+  stroke-dasharray: 139;
+  stroke-dashoffset: 139;
+  animation: auth-circle-draw 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition:
+    fill 320ms ease,
+    stroke 320ms ease;
+}
+
+.auth-success-check {
+  fill: none;
+  stroke: oklch(0.84 0.17 155);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: auth-check-draw 500ms cubic-bezier(0.22, 1, 0.36, 1) 360ms forwards;
+  transition: stroke 260ms ease;
+}
+
+.auth-success-stage-fill .auth-success-ring {
+  fill: oklch(0.74 0.16 155);
+  stroke: oklch(0.74 0.16 155);
+}
+
+.auth-success-stage-fill .auth-success-check {
+  stroke: oklch(0.17 0.02 155);
+}
+
+.auth-success-sparks {
+  position: absolute;
+  inset: -1rem;
+  pointer-events: none;
+}
+
+.auth-success-sparks span {
+  position: absolute;
+  width: 0.24rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  background: oklch(0.88 0.16 155);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: auth-success-spark 680ms ease-out both;
+}
+
+.auth-success-sparks span:nth-child(1) {
+  left: 10%;
+  top: 0.2rem;
+  rotate: -30deg;
+}
+
+.auth-success-sparks span:nth-child(2) {
+  left: 32%;
+  top: -0.22rem;
+  rotate: -6deg;
+  animation-delay: 35ms;
+}
+
+.auth-success-sparks span:nth-child(3) {
+  right: 32%;
+  top: -0.22rem;
+  rotate: 8deg;
+  animation-delay: 10ms;
+}
+
+.auth-success-sparks span:nth-child(4) {
+  right: 10%;
+  top: 0.2rem;
+  rotate: 30deg;
+  animation-delay: 55ms;
+}
+
+.auth-success-sparks span:nth-child(5) {
+  right: -0.18rem;
+  top: 38%;
+  rotate: 84deg;
+  animation-delay: 25ms;
+}
+
+.auth-success-sparks span:nth-child(6) {
+  bottom: 10%;
+  right: 6%;
+  rotate: 128deg;
+  animation-delay: 60ms;
+}
+
+.auth-success-sparks span:nth-child(7) {
+  bottom: -0.24rem;
+  right: 32%;
+  rotate: 172deg;
+  animation-delay: 20ms;
+}
+
+.auth-success-sparks span:nth-child(8) {
+  bottom: -0.24rem;
+  left: 32%;
+  rotate: 188deg;
+  animation-delay: 45ms;
+}
+
+.auth-success-sparks span:nth-child(9) {
+  bottom: 10%;
+  left: 6%;
+  rotate: 232deg;
+  animation-delay: 15ms;
+}
+
+.auth-success-sparks span:nth-child(10) {
+  left: -0.18rem;
+  top: 38%;
+  rotate: -84deg;
+  animation-delay: 55ms;
+}
+
+.auth-success-sparks span:nth-child(11) {
+  left: 0.4rem;
+  top: 14%;
+  rotate: -52deg;
+  animation-delay: 75ms;
+}
+
+.auth-success-sparks span:nth-child(12) {
+  right: 0.4rem;
+  top: 14%;
+  rotate: 52deg;
+  animation-delay: 70ms;
+}
+
+@keyframes auth-circle-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes auth-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes auth-success-spark {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.6;
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -1.35rem;
+    scale: 0.1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-morph-card,
+  .auth-morph-content,
+  .auth-success-stage {
+    transition-duration: 1ms;
+  }
+
+  .auth-success-check,
+  .auth-success-ring,
+  .auth-success-sparks span {
+    animation-duration: 1ms;
+  }
+}
+
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition:
+    opacity 220ms ease,
+    translate 220ms ease,
+    scale 220ms ease;
+}
+
+.page-transition-panel {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  will-change: opacity, translate, scale;
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  translate: 0 0.45rem;
+  scale: 0.99;
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  translate: 0 -0.5rem;
+  scale: 0.995;
+}
+
+.route-transition-frame {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.route-transition-panel {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  will-change: opacity, translate, scale;
+}
+
+.route-fade-enter-active {
+  z-index: 1;
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.route-fade-leave-active {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  pointer-events: none;
+  transition:
+    opacity 260ms ease,
+    translate 260ms ease,
+    scale 260ms ease;
+}
+
+.route-fade-enter-from {
+  opacity: 0;
+  translate: 0 0.7rem;
+  scale: 0.992;
+}
+
+.route-fade-leave-to {
+  opacity: 0;
+  translate: 0 -0.35rem;
+  scale: 0.996;
+}
+
+.breadcrumb-transition-frame,
+.footer-transition-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.breadcrumb-transition-panel,
+.footer-transition-panel {
+  will-change: opacity, translate, scale;
+}
+
+.breadcrumb-fade-enter-active,
+.footer-fade-enter-active {
+  z-index: 1;
+  transition:
+    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.breadcrumb-fade-leave-active,
+.footer-fade-leave-active {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  pointer-events: none;
+  transition:
+    opacity 220ms ease,
+    translate 220ms ease,
+    scale 220ms ease;
+}
+
+.breadcrumb-fade-enter-from,
+.footer-fade-enter-from {
+  opacity: 0;
+  translate: 0 0.35rem;
+  scale: 0.997;
+}
+
+.breadcrumb-fade-leave-to,
+.footer-fade-leave-to {
+  opacity: 0;
+  translate: 0 -0.2rem;
+  scale: 0.998;
+}
+
+.chrome-swap-enter-active,
+.chrome-swap-leave-active {
+  transition:
+    opacity 220ms ease,
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chrome-swap-enter-from {
+  opacity: 0;
+  translate: 0 0.25rem;
+  scale: 0.99;
+}
+
+.chrome-swap-leave-to {
+  opacity: 0;
+  translate: 0 -0.2rem;
+  scale: 0.995;
+}
+
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition:
+    opacity 240ms ease,
+    translate 240ms ease,
+    scale 240ms ease;
+}
+
+.toast-slide-enter-from,
+.toast-slide-leave-to {
+  opacity: 0;
+  translate: 1.5rem 0;
+  scale: 0.96;
+}
+
+.toast-slide-move {
+  transition: transform 180ms ease;
+}
+
+.mobile-panel-enter-active,
+.mobile-panel-leave-active {
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.mobile-panel-enter-from,
+.mobile-panel-leave-to {
+  opacity: 0;
+  translate: 0 -0.35rem;
+}
+
+.content-fade-enter-active,
+.content-fade-leave-active {
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.content-fade-enter-from {
+  opacity: 0;
+  translate: 0 0.3rem;
+}
+
+.content-fade-leave-to {
+  opacity: 0;
+  translate: 0 -0.3rem;
+}
+
+.description-reveal-panel {
+  min-width: 0;
+}
+
+.toc-float-enter-active,
+.toc-float-leave-active {
+  transition:
+    opacity 180ms ease,
+    translate 180ms ease,
+    scale 180ms ease;
+}
+
+.toc-float-enter-from,
+.toc-float-leave-to {
+  opacity: 0;
+  translate: 0 -0.35rem;
+  scale: 0.98;
+}
+
+.toc-mobile-enter-active,
+.toc-mobile-leave-active {
+  overflow: hidden;
+  transform-origin: top;
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    translate 180ms ease;
+}
+
+.toc-mobile-enter-from,
+.toc-mobile-leave-to {
+  max-height: 0;
+  opacity: 0;
+  translate: 0 -0.25rem;
+}
+
+.toc-mobile-enter-to,
+.toc-mobile-leave-from {
+  max-height: min(18rem, 55dvh);
+  opacity: 1;
+  translate: 0 0;
+}
+
+.toc-item-shell {
+  max-height: 2.75rem;
+  overflow: hidden;
+  transform: translateX(0);
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    transform 220ms ease,
+    margin-top 220ms ease;
+}
+
+.toc-item-shell-visible {
+  max-height: 2.75rem;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toc-item-shell-hidden {
+  margin-top: -0.25rem;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-0.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-enter-active,
+  .page-fade-leave-active,
+  .route-fade-enter-active,
+  .route-fade-leave-active,
+  .chrome-swap-enter-active,
+  .chrome-swap-leave-active,
+  .breadcrumb-fade-enter-active,
+  .breadcrumb-fade-leave-active,
+  .footer-fade-enter-active,
+  .footer-fade-leave-active,
+  .toast-slide-enter-active,
+  .toast-slide-leave-active,
+  .toast-slide-move,
+  .mobile-panel-enter-active,
+  .mobile-panel-leave-active,
+  .content-fade-enter-active,
+  .content-fade-leave-active,
+  .toc-float-enter-active,
+  .toc-float-leave-active,
+  .toc-mobile-enter-active,
+  .toc-mobile-leave-active,
+  .toc-item-shell {
+    transition-duration: 1ms;
+  }
+}

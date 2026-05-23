@@ -2,89 +2,91 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Data\Users\ProviderConnectionData;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GithubProvider;
+use Laravel\Socialite\Two\User as SocialiteUser;
 
-/**
- * Class SocialController
- * @package App\Http\Controllers\Auth
- */
 class SocialController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function __construct(private UserService $users)
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Redirect the user to the GitHub authentication page.
-     *
-     * @return RedirectResponse
-     */
     public function redirectToProvider(): RedirectResponse
     {
-        return Socialite::driver('github')
-            ->scopes(['repo'])
+        return $this->githubProvider()
+            ->scopes(['public_repo'])
             ->redirect();
     }
 
-    /**
-     * Obtain the user information from GitHub.
-     *
-     * @return RedirectResponse
-     */
     public function handleProviderCallback(): RedirectResponse
     {
-        /* @var $user User */
         $user = Auth::user();
 
+        if (! $user instanceof User) {
+            return redirect()->route('login');
+        }
+
         try {
-            $providerUser = Socialite::driver('github')->user();
+            $providerUser = $this->githubProvider()->user();
         } catch (Exception) {
             return redirect()
                 ->route('users.edit', $user->username)
-                ->with('errors', collect('Unable to link GitHub account'));
+                ->withErrors(['github' => 'Unable to link GitHub account']);
         }
 
-        $user->update(
-            [
-                'github_token' => $providerUser->token,
-                'github_username' => $providerUser->getNickname(),
-            ]
-        );
+        if (! $providerUser instanceof SocialiteUser) {
+            return redirect()
+                ->route('users.edit', $user->username)
+                ->withErrors(['github' => 'Unable to link GitHub account']);
+        }
+
+        $providerUserId = $providerUser->getId();
+
+        $this->users->connectProvider($user, new ProviderConnectionData(
+            provider: User::PROVIDER_GITHUB,
+            token: $providerUser->token,
+            username: $providerUser->getNickname(),
+            providerUserId: (string) $providerUserId,
+            scopes: ['public_repo']
+        ));
 
         return redirect()
             ->route('users.edit', $user->username)
             ->with('status', 'Successfully linked GitHub account');
     }
 
-    /**
-     * Remove the provider token for this user.
-     *
-     * @return RedirectResponse
-     */
     public function revokeProvider(): RedirectResponse
     {
-        /* @var $user User */
         $user = Auth::user();
-        $user->update(
-            [
-                'github_token' => null,
-                'github_username' => null,
-            ]
-        );
+
+        if (! $user instanceof User) {
+            return redirect()->route('login');
+        }
+
+        $this->users->disconnectProvider($user, User::PROVIDER_GITHUB);
 
         return redirect()
             ->back()
-            ->with('status', 'Successfully un-linked GitHub account');
+            ->with('status', 'GitHub account unlinked.');
+    }
+
+    private function githubProvider(): GithubProvider
+    {
+        $provider = Socialite::driver('github');
+
+        if (! $provider instanceof GithubProvider) {
+            throw new Exception('GitHub OAuth provider is not configured.');
+        }
+
+        return $provider;
     }
 }

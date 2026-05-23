@@ -4,47 +4,38 @@ namespace App\Services\Ideas;
 
 use App\Models\Idea;
 use App\Models\IdeaSupporter;
-use Exception;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\User;
+use App\Repositories\Ideas\SupporterRepository;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
-/**
- * Class SupporterService
- * @package App\Services\Ideas
- */
 class SupporterService
 {
-    /**
-     * @param Idea $idea
-     * @return Model
-     */
-    public function create(Idea $idea): Model
+    public function __construct(private SupporterRepository $supporters) {}
+
+    public function create(Idea $idea): IdeaSupporter
     {
-        return $idea->supporters()->firstOrCreate(
-            [
-                'user_id' => Auth::user()->id,
-                'idea_id' => $idea->id,
-            ]
-        );
+        return $this->supporters->create($idea, $this->authenticatedUser());
     }
 
-    /**
-     * @param IdeaSupporter $supporter
-     * @return bool
-     * @throws Exception
-     */
     public function destroy(IdeaSupporter $supporter): bool
     {
-        return $supporter->delete();
+        return $this->supporters->destroy($supporter);
     }
 
-    /**
-     * @param Idea $idea
-     * @return Model|HasMany|object|null
-     */
-    public function getSupportFromUser(Idea $idea)
+    public function getSupportFromUser(Idea $idea): ?IdeaSupporter
     {
-        return $idea->hasSupportFromUser(Auth::user()->id);
+        return $this->supporters->getSupportFromUser($idea, $this->authenticatedUser());
+    }
+
+    private function authenticatedUser(): User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            throw new RuntimeException('An authenticated user is required.');
+        }
+
+        return $user;
     }
 }

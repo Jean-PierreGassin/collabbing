@@ -1,0 +1,16 @@
+{
+  "name": "Collabbing",
+  "short_name": "Collabbing",
+  "description": "Share early product ideas, find collaborators, and move promising projects toward real work.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#151923",
+  "theme_color": "#f4a51c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

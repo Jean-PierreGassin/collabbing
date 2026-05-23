@@ -1,84 +1,68 @@
 <?php
 
-
 namespace App\Services\Ideas;
 
-
+use App\Data\Ideas\IdeaData;
 use App\Models\Idea;
-use Carbon\Carbon;
+use App\Models\User;
+use App\Repositories\Ideas\IdeaRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
-/**
- * Class IdeaService
- * @package App\Services\Ideas
- */
 class IdeaService
 {
-    /**
-     * @param array $data
-     * @return Idea
-     */
-    public function create(array $data): Idea
+    public function __construct(private IdeaRepository $ideas) {}
+
+    public function create(IdeaData $data): Idea
     {
-        return Auth::user()->ideas()->create($data);
+        return $this->ideas->createForUser($this->authenticatedUser(), $data);
     }
 
-    /**
-     * @param Idea $idea
-     * @param array $data
-     * @return bool
-     */
-    public function update(Idea $idea, array $data): bool
+    public function update(Idea $idea, IdeaData $data): bool
     {
-        $idea->update($data);
-        return $idea->save();
+        return $this->ideas->update($idea, $data);
     }
 
-    /**
-     * @return Collection
-     */
     public function getTrending(): Collection
     {
-        return Idea::where('status', 'open')
-            ->withCount('supporters')
-            ->orderBy('supporters_count', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->where('created_at', '>=', Carbon::now()->subDay())
-            ->limit(3)
-            ->get();
+        return $this->ideas->getTrending();
     }
 
-    /**
-     * @param string $search
-     * @return LengthAwarePaginator
-     */
     public function search(string $search): LengthAwarePaginator
     {
-        return Idea::where('status', 'open')
-            ->orderBy('created_at', 'desc')
-            ->where('title', 'like', "{$search}%")
-            ->paginate(10);
+        return $this->ideas->search($search);
     }
 
-    /**
-     * @return LengthAwarePaginator
-     */
-    public function getUserIdeas(): LengthAwarePaginator
+    public function getOpenRecent(): LengthAwarePaginator
     {
-        return Auth::user()->ideas()
-            ->orderBy('created_at', 'desc')
-            ->paginate(5, ['*'], 'ideas');
+        return $this->ideas->getOpenRecent();
     }
 
-    /**
-     * @return LengthAwarePaginator
-     */
-    public function getCollaboratedIdeas(): LengthAwarePaginator
+    public function getUserIdeas(?string $search = null): LengthAwarePaginator
     {
-        $collaborationIds = Auth::user()->collaborations()->pluck('idea_id');
-        return Idea::whereIn('id', $collaborationIds)
-            ->paginate(5, ['*'], 'collaborations');
+        return $this->ideas->getUserIdeas($this->authenticatedUser(), $search);
+    }
+
+    public function getCollaboratedIdeas(?string $search = null): LengthAwarePaginator
+    {
+        return $this->ideas->getCollaboratedIdeas($this->authenticatedUser(), $search);
+    }
+
+    public function getComments(Idea $idea): LengthAwarePaginator
+    {
+        return $this->ideas->getComments($idea);
+    }
+
+    private function authenticatedUser(): User
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            throw new RuntimeException('An authenticated user is required.');
+        }
+
+        return $user;
     }
 }

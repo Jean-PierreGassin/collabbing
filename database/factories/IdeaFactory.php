@@ -1,14 +1,45 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(
-    App\Models\Idea::class,
-    function (Faker $faker) {
+use App\Models\CodeRepository;
+use App\Models\Idea;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/** @extends Factory<Idea> */
+class IdeaFactory extends Factory
+{
+    protected $model = Idea::class;
+
+    public function definition(): array
+    {
         return [
-            'title' => $faker->title,
+            'title' => $this->faker->sentence(3),
+            'tagline' => $this->faker->sentence(8),
+            'summary' => $this->faker->sentence(14),
+            'tags' => ['product', 'collaboration'],
             'communication' => 'Slack',
-            'content' => $faker->paragraph,
+            'content' => $this->faker->paragraph,
         ];
     }
-);
+
+    public function withCodeRepository(?string $name = null, array $attributes = []): static
+    {
+        return $this->afterCreating(function (Idea $idea) use ($name, $attributes): void {
+            $owner = $idea->user;
+            $repositoryOwner = null;
+
+            if ($owner instanceof User) {
+                $repositoryOwner = $owner->githubUsername();
+            }
+
+            $idea->codeRepository()->create(array_merge([
+                'provider' => CodeRepository::PROVIDER_GITHUB,
+                'status' => CodeRepository::STATUS_PLANNED,
+                'owner' => $repositoryOwner,
+                'name' => $name ?? $this->faker->slug(2),
+            ], $attributes));
+        });
+    }
+}

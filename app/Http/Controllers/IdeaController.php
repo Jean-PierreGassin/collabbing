@@ -2,199 +2,156 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchIdeas;
 use App\Http\Requests\StoreIdea;
 use App\Models\Idea;
+use App\Models\IdeaApplication;
+use App\Models\IdeaComment;
 use App\Services\Ideas\ApplicationService;
 use App\Services\Ideas\IdeaService;
 use App\Services\Ideas\SupporterService;
+use App\Services\Inertia\PagePropsService;
 use App\Services\RepositoryService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
-/**
- * Class IdeaController
- * @package App\Http\Controllers
- */
 class IdeaController extends Controller
 {
-    /**
-     * @var IdeaService
-     */
-    private IdeaService $ideaService;
-
-    /**
-     * @var ApplicationService
-     */
-    private ApplicationService $applicationService;
-
-    /**
-     * @var SupporterService
-     */
-    private SupporterService $supporterService;
-
-    /**
-     * @var RepositoryService
-     */
-    private RepositoryService $repositoryService;
-
     public function __construct(
-        IdeaService $ideaService,
-        ApplicationService $applicationService,
-        SupporterService $supporterService,
-        RepositoryService $repositoryService
-    ) {
-        $this->ideaService = $ideaService;
-        $this->applicationService = $applicationService;
-        $this->supporterService = $supporterService;
-        $this->repositoryService = $repositoryService;
-    }
+        private IdeaService $ideaService,
+        private ApplicationService $applicationService,
+        private SupporterService $supporterService,
+        private RepositoryService $repositoryService,
+        private PagePropsService $pageProps
+    ) {}
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return Factory|View
-     */
-    public function index(Request $request)
+    public function index(SearchIdeas $request): Response
     {
         $searchResults = null;
-        $keyword = $request->get('search');
+        $keyword = $request->searchTerm();
+
         if ($keyword) {
             $searchResults = $this->ideaService->search($keyword);
-            $searchResults->setPath("ideas?search=$keyword");
+            $searchResults->appends(['search' => $keyword]);
         }
 
         $trendingIdeas = $this->ideaService->getTrending();
 
-        $ideas = Idea::where('status', 'open')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $ideas = $this->ideaService->getOpenRecent();
+        $searchResultsProps = null;
 
-        return view('idea.list', compact('searchResults', 'keyword', 'trendingIdeas', 'ideas'));
+        if ($searchResults) {
+            $searchResultsProps = $this->pageProps->paginator($searchResults, fn (Idea $idea) => $this->pageProps->idea($idea));
+        }
+
+        return Inertia::render('Ideas/Index', [
+            'keyword' => $keyword,
+            'searchResults' => $searchResultsProps,
+            'trendingIdeas' => $trendingIdeas->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
+            'ideas' => $this->pageProps->paginator($ideas, fn (Idea $idea) => $this->pageProps->idea($idea)),
+        ]);
     }
 
-    /**
-     * Display the dashboard for an idea
-     *
-     * @param Idea $idea
-     * @return Factory|View
-     */
-    public function dashboard(Idea $idea)
+    public function dashboard(Idea $idea): Response
     {
+        $this->authorize('manage', $idea);
+
         $applications = $this->applicationService->getPendingApplications($idea);
         $collaborators = $this->applicationService->getApprovedApplications($idea);
 
-        return view(
-            'idea.manage',
-            compact(
-                'idea',
-                'applications',
-                'collaborators'
-            )
-        );
+        return Inertia::render('Ideas/Manage', [
+            'idea' => $this->pageProps->idea($idea),
+            'applications' => $this->pageProps->paginator($applications, fn (IdeaApplication $application) => $this->pageProps->application($application)),
+            'collaborators' => $this->pageProps->paginator($collaborators, fn (IdeaApplication $application) => $this->pageProps->application($application)),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Factory|View
-     */
-    public function create()
+    public function create(): Response
     {
-        return view('idea.edit-add');
+        return Inertia::render('Ideas/Form');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param StoreIdea $request
-     * @return RedirectResponse
-     */
     public function store(StoreIdea $request): RedirectResponse
     {
-        $idea = $this->ideaService->create($request->validated());
+        $idea = $this->ideaService->create($request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully created');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param Idea $idea
-     * @return Factory|View
-     */
-    public function show(Idea $idea)
+    public function show(Idea $idea): Response
     {
-        if (!Auth::user()) {
-            return view('idea.single', compact('idea'));
+        if (! Auth::user()) {
+            return Inertia::render('Ideas/Show', [
+                'idea' => $this->pageProps->idea($idea),
+                'comments' => $this->pageProps->paginator(
+                    $this->ideaService->getComments($idea),
+                    fn (IdeaComment $comment) => $this->pageProps->comment($comment)
+                ),
+                'collaborator' => null,
+                'applicant' => null,
+                'supporter' => null,
+            ]);
         }
 
         $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
         $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
         $supporter = $this->supporterService->getSupportFromUser($idea);
+        $collaboratorProps = null;
+        $applicantProps = null;
 
-        return view(
-            'idea.single',
-            compact(
-                'idea',
-                'collaborator',
-                'applicant',
-                'supporter'
-            )
-        );
+        if ($collaborator) {
+            $collaboratorProps = $this->pageProps->application($collaborator);
+        }
+
+        if ($applicant) {
+            $applicantProps = $this->pageProps->application($applicant);
+        }
+
+        return Inertia::render('Ideas/Show', [
+            'idea' => $this->pageProps->idea($idea),
+            'comments' => $this->pageProps->paginator(
+                $this->ideaService->getComments($idea),
+                fn (IdeaComment $comment) => $this->pageProps->comment($comment)
+            ),
+            'collaborator' => $collaboratorProps,
+            'applicant' => $applicantProps,
+            'supporter' => $this->pageProps->supporter($supporter),
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Idea $idea
-     * @return Factory|View
-     * @throws AuthorizationException
-     */
-    public function edit(Idea $idea)
+    public function edit(Idea $idea): Response
     {
         $this->authorize('manage', $idea);
 
-        return view('idea.edit-add', compact('idea'));
+        return Inertia::render('Ideas/Form', [
+            'idea' => $this->pageProps->idea($idea),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param StoreIdea $request
-     * @param Idea $idea
-     * @return RedirectResponse
-     * @throws AuthorizationException
-     */
     public function update(StoreIdea $request, Idea $idea): RedirectResponse
     {
         $this->authorize('update', $idea);
 
-        $this->ideaService->update($idea, $request->validated());
+        $this->ideaService->update($idea, $request->toData());
 
         return redirect()
             ->route('ideas.show', compact('idea'))
             ->with('status', 'Idea successfully edited');
     }
 
-    /**
-     * @param Idea $idea
-     * @return RedirectResponse|string
-     * @throws AuthorizationException
-     */
-    public function createRepository(Idea $idea): string|RedirectResponse
+    public function createRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('createRepository', $idea);
 
-        if ($idea->repository) {
-            return route('ideas.dashboard', $idea);
+        $idea->loadMissing('codeRepository');
+
+        if ($idea->latestCodeRepository()?->isAvailable()) {
+            return redirect()->route('ideas.dashboard', $idea);
         }
 
         try {
@@ -202,31 +159,26 @@ class IdeaController extends Controller
         } catch (Exception $exception) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
-                ->with('errors', collect($exception->getMessage()));
+                ->withErrors(['repository' => $exception->getMessage()]);
         }
 
         return redirect()
             ->route('ideas.dashboard', $idea)
-            ->with('status', 'Repository created 🔥');
+            ->with('status', 'Repository created.');
     }
 
-    /**
-     * @param Idea $idea
-     * @return RedirectResponse
-     * @throws AuthorizationException
-     */
     public function inviteUsersToRepository(Idea $idea): RedirectResponse
     {
         $this->authorize('inviteUsersToRepository', $idea);
 
-        if (!$this->repositoryService->inviteUsers($idea)) {
+        if (! $this->repositoryService->inviteUsers($idea)) {
             return redirect()
                 ->route('ideas.dashboard', $idea)
-                ->with('status', 'Something went wrong, try again 🙉');
+                ->with('status', 'Repository invitations could not be sent. Please try again.');
         }
 
         return redirect()
             ->route('ideas.dashboard', $idea)
-            ->with('status', 'All Collaborators has been invited 🤟');
+            ->with('status', 'Collaborators have been invited.');
     }
 }

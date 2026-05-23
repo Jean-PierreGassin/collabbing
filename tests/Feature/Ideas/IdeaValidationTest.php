@@ -1,0 +1,160 @@
+<?php
+
+namespace Tests\Feature\Ideas;
+
+use App\Models\CodeRepository;
+use App\Models\ConnectedAccount;
+use App\Models\Idea;
+use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
+
+class IdeaValidationTest extends TestCase
+{
+    use LazilyRefreshDatabase;
+
+    public function testIdeaCanBeCreated(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload());
+
+        $idea = Idea::query()->where('title', 'A useful collaboration tool')->first();
+
+        $this->assertNotNull($idea);
+
+        $response->assertRedirect(route('ideas.show', $idea));
+        $this->assertSame($user->id, $idea->user_id);
+        $this->assertDatabaseHas('code_repositories', [
+            'idea_id' => $idea->id,
+            'provider' => CodeRepository::PROVIDER_GITHUB,
+            'status' => CodeRepository::STATUS_PLANNED,
+            'name' => 'useful-collaboration-tool',
+        ]);
+    }
+
+    public function testIdeaCanBeEdited(): void
+    {
+        $user = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($user, 'user')
+            ->withCodeRepository('original-repository')
+            ->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'title' => 'An updated collaboration tool',
+                'tagline' => 'A sharper card tagline for the update.',
+                'summary' => 'A better summary for the updated collaboration tool.',
+                'tags' => 'design, launch',
+                'repository_name' => 'updated-collaboration-tool',
+                'status' => 'closed',
+            ]));
+
+        $response->assertRedirect(route('ideas.show', $idea));
+        $this->assertDatabaseHas('ideas', [
+            'id' => $idea->id,
+            'user_id' => $user->id,
+            'title' => 'An updated collaboration tool',
+            'tagline' => 'A sharper card tagline for the update.',
+            'summary' => 'A better summary for the updated collaboration tool.',
+            'status' => 'closed',
+        ]);
+        $this->assertSame(['design', 'launch'], $idea->fresh()->tags);
+        $this->assertDatabaseHas('code_repositories', [
+            'idea_id' => $idea->id,
+            'provider' => CodeRepository::PROVIDER_GITHUB,
+            'name' => 'updated-collaboration-tool',
+        ]);
+    }
+
+    #[DataProvider('invalidIdeaPayloads')]
+    public function testIdeaPayloadRejectsInvalidInput(array $overrides, string $errorKey): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload($overrides));
+
+        $response->assertSessionHasErrors($errorKey);
+    }
+
+    public function testRepositoryNameMustBeUniqueForConnectedGithubOwner(): void
+    {
+        $user = User::factory()->create();
+
+        ConnectedAccount::factory()
+            ->for($user, 'user')
+            ->create([
+                'provider_username' => 'octocat',
+            ]);
+
+        $existingIdea = Idea::factory()
+            ->for($user, 'user')
+            ->create();
+
+        CodeRepository::factory()
+            ->for($existingIdea, 'idea')
+            ->create([
+                'provider' => CodeRepository::PROVIDER_GITHUB,
+                'owner' => 'octocat',
+                'name' => 'existing-repo',
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload([
+                'repository_name' => 'existing-repo',
+            ]))
+            ->assertSessionHasErrors('repository_name');
+    }
+
+    private function ideaPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'title' => 'A useful collaboration tool',
+            'tagline' => 'Match collaborators around useful product work.',
+            'summary' => 'A short summary for a useful collaboration tool.',
+            'tags' => 'product, collaboration',
+            'repository_name' => 'useful-collaboration-tool',
+            'communication' => 'Slack',
+            'content' => 'A focused pitch for a useful collaboration tool.',
+            'status' => 'open',
+        ], $overrides);
+    }
+
+    public static function invalidIdeaPayloads(): array
+    {
+        return [
+            'repository name with spaces' => [
+                ['repository_name' => 'repo with spaces'],
+                'repository_name',
+            ],
+            'missing summary' => [
+                ['summary' => null],
+                'summary',
+            ],
+            'missing tagline' => [
+                ['tagline' => null],
+                'tagline',
+            ],
+            'long tagline' => [
+                ['tagline' => str_repeat('a', 61)],
+                'tagline',
+            ],
+            'long summary' => [
+                ['summary' => str_repeat('a', 241)],
+                'summary',
+            ],
+            'too many tags' => [
+                ['tags' => 'one,two,three,four,five,six,seven,eight,nine'],
+                'tags',
+            ],
+        ];
+    }
+}

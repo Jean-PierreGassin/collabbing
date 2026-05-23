@@ -1,0 +1,107 @@
+<?php
+
+namespace Tests\Feature\Ideas;
+
+use App\Models\Idea;
+use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+use Tests\TestCase;
+
+class IdeaSearchTest extends TestCase
+{
+    use LazilyRefreshDatabase;
+
+    public function testSearchQueryIsNormalizedAndPreservedOnPaginationLinks(): void
+    {
+        $owner = User::factory()->create();
+
+        foreach (range(1, 11) as $index) {
+            Idea::factory()
+                ->for($owner, 'user')
+                ->create([
+                    'title' => "Collab search result {$index}",
+                ]);
+        }
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Unrelated idea',
+            ]);
+
+        $this
+            ->get(route('ideas.index', ['search' => '  Collab   search  ']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('keyword', 'Collab search')
+                ->has('searchResults.items', 10)
+                ->where('searchResults.nextPageUrl', function (?string $url): bool {
+                    if (! is_string($url) || str_contains($url, '++Collab')) {
+                        return false;
+                    }
+
+                    parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+                    return ($query['search'] ?? null) === 'Collab search';
+                }));
+    }
+
+    public function testSearchTreatsSqlWildcardsAsLiteralCharacters(): void
+    {
+        $owner = User::factory()->create();
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Ordinary idea',
+            ]);
+
+        $this
+            ->get(route('ideas.index', ['search' => '%']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('keyword', '%')
+                ->has('searchResults.items', 0));
+    }
+
+    public function testIdeasCanBeSearchedByTags(): void
+    {
+        $owner = User::factory()->create();
+        $matchingIdea = Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Unrelated title',
+                'summary' => 'Unrelated summary.',
+                'tags' => ['design-system', 'workflow'],
+            ]);
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Another unrelated idea',
+                'summary' => 'Nothing relevant here.',
+                'tags' => ['operations'],
+            ]);
+
+        $this
+            ->get(route('ideas.index', ['search' => 'design-system']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('keyword', 'design-system')
+                ->has('searchResults.items', 1)
+                ->where('searchResults.items.0.id', $matchingIdea->id));
+    }
+
+    public function testSearchQueryIsLimitedToAReasonableLength(): void
+    {
+        $this
+            ->from(route('ideas.index'))
+            ->get(route('ideas.index', ['search' => str_repeat('a', 81)]))
+            ->assertRedirect(route('ideas.index'))
+            ->assertSessionHasErrors('search');
+    }
+}
