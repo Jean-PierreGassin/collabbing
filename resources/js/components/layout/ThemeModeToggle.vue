@@ -60,7 +60,10 @@ function buttonClass(mode: ThemeMode): string {
       :aria-pressed="themeMode === option.mode"
       @click="setThemeMode(option.mode)"
     >
-      <component :is="option.icon" class="size-4" aria-hidden="true" />
+      <component
+        :is="option.icon"
+        class="size-4"
+        aria-hidden="true" />
       <span v-if="showLabels">{{ option.label }}</span>
     </button>
   </div>

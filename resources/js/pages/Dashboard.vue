@@ -60,7 +60,9 @@ const {
 
 <template>
   <section class="flex flex-col gap-5">
-    <h1 class="sr-only">Dashboard</h1>
+    <h1 class="sr-only">
+      Dashboard
+    </h1>
 
     <div class="flex flex-col gap-1">
       <p class="max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -69,7 +71,10 @@ const {
     </div>
 
     <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)_minmax(0,1fr)] md:items-center">
-      <div class="grid w-full grid-cols-1 gap-1 rounded-md border border-border bg-card p-1 sm:w-fit sm:grid-cols-2 md:justify-self-start" role="tablist" aria-label="Dashboard sections">
+      <div
+        class="grid w-full grid-cols-1 gap-1 rounded-md border border-border bg-card p-1 sm:w-fit sm:grid-cols-2 md:justify-self-start"
+        role="tablist"
+        aria-label="Dashboard sections">
         <Button
           v-for="tab in dashboardTabs"
           :id="tab.tabId"
@@ -86,9 +91,17 @@ const {
           {{ tab.label }}
         </Button>
       </div>
-      <form :action="session.routes.dashboard" method="GET" class="relative w-full md:justify-self-center" role="search">
-        <label for="dashboard-search" class="sr-only">Search dashboard ideas</label>
-        <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+      <form
+        :action="session.routes.dashboard"
+        method="GET"
+        class="relative w-full md:justify-self-center"
+        role="search">
+        <label
+          for="dashboard-search"
+          class="sr-only">Search dashboard ideas</label>
+        <Search
+          class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true" />
         <input
           id="dashboard-search"
           name="search"
@@ -99,15 +112,37 @@ const {
           maxlength="80"
         >
         <div class="absolute inset-y-1 right-1 flex items-center gap-1">
-          <Button type="submit" variant="ghost" size="icon" class="size-8" aria-label="Search dashboard ideas">
-            <Search class="size-4" aria-hidden="true" />
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            class="size-8"
+            aria-label="Search dashboard ideas">
+            <Search
+              class="size-4"
+              aria-hidden="true" />
           </Button>
-          <Button v-if="keyword" :as="Link" :href="session.routes.dashboard" variant="ghost" size="icon" class="size-8" aria-label="Clear dashboard search">
-            <X class="size-4" aria-hidden="true" />
+          <Button
+            v-if="keyword"
+            :as="Link"
+            :href="session.routes.dashboard"
+            variant="ghost"
+            size="icon"
+            class="size-8"
+            aria-label="Clear dashboard search">
+            <X
+              class="size-4"
+              aria-hidden="true" />
           </Button>
         </div>
       </form>
-      <Button :as="Link" :href="session.routes.ideasCreate" size="sm" class="justify-self-center md:justify-self-end">Create an Idea</Button>
+      <Button
+        :as="Link"
+        :href="session.routes.ideasCreate"
+        size="sm"
+        class="justify-self-center md:justify-self-end">
+        Create an Idea
+      </Button>
     </div>
 
     <div
@@ -117,9 +152,20 @@ const {
       tabindex="0"
       aria-labelledby="dashboard-ideas-tab"
     >
-      <IdeaList v-if="ideas.items.length > 0" :ideas="ideas.items" />
-      <p v-else>You have not shared any ideas yet. <Link class="text-primary hover:underline" :href="session.routes.ideasCreate">Create one</Link></p>
-      <PaginationLinks :paginator="ideas" :only="['ideas']" label="My idea pages" />
+      <IdeaList
+        v-if="ideas.items.length > 0"
+        :ideas="ideas.items" />
+      <p v-else>
+        You have not shared any ideas yet. <Link
+          class="text-primary hover:underline"
+          :href="session.routes.ideasCreate">
+          Create one
+        </Link>
+      </p>
+      <PaginationLinks
+        :paginator="ideas"
+        :only="['ideas']"
+        label="My idea pages" />
     </div>
 
     <div
@@ -129,9 +175,20 @@ const {
       tabindex="0"
       aria-labelledby="dashboard-collaborations-tab"
     >
-      <IdeaList v-if="collaborations.items.length > 0" :ideas="collaborations.items" />
-      <p v-else>You are not collaborating on any ideas yet. <Link class="text-primary hover:underline" :href="session.routes.ideas">Browse ideas</Link></p>
-      <PaginationLinks :paginator="collaborations" :only="['collaborations']" label="Collaboration idea pages" />
+      <IdeaList
+        v-if="collaborations.items.length > 0"
+        :ideas="collaborations.items" />
+      <p v-else>
+        You are not collaborating on any ideas yet. <Link
+          class="text-primary hover:underline"
+          :href="session.routes.ideas">
+          Browse ideas
+        </Link>
+      </p>
+      <PaginationLinks
+        :paginator="collaborations"
+        :only="['collaborations']"
+        label="Collaboration idea pages" />
     </div>
   </section>
 </template>

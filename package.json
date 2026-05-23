@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "lint": "eslint resources/js --max-warnings=0",
-    "lint:fix": "eslint resources/js --fix",
+    "lint": "eslint eslint.config.js resources/js --max-warnings=0",
+    "lint:fix": "eslint eslint.config.js resources/js --fix",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "vue-tsc --noEmit",
     "quality": "npm run lint && npm run typecheck && npm run test && npm run build",

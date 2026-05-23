@@ -62,7 +62,10 @@ function mountHome() {
       plugins: [createPinia()],
       stubs: {
         Button: {
-          props: ['as', 'href'],
+          props: [
+            'as',
+            'href',
+          ],
           template: '<component :is="as || \'button\'" :href="href"><slot /></component>',
         },
       },

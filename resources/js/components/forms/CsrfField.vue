@@ -5,5 +5,9 @@ const session = useSessionStore();
 </script>
 
 <template>
-  <input v-if="session.csrfToken" type="hidden" name="_token" :value="session.csrfToken">
+  <input
+    v-if="session.csrfToken"
+    type="hidden"
+    name="_token"
+    :value="session.csrfToken">
 </template>

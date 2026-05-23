@@ -60,3 +60,144 @@ export function markdownHeadings(markdown: string): MarkdownHeading[] {
     }))
     .filter((heading) => heading.title.toLowerCase() !== 'table of contents');
 }
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function inlineMarkdownToHtml(value: string): string {
+  let html = escapeHtml(value);
+
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\(#([^)]+)\)/g, '<a href="#$2">$1</a>');
+
+  return html;
+}
+
+export function renderMarkdownPreview(markdown: string): string {
+  const lines = markdown.split('\n');
+  const html: string[] = [];
+  let paragraph: string[] = [];
+  let listItems: string[] = [];
+  let blockquote: string[] = [];
+  let codeLines: string[] = [];
+  let isCodeBlock = false;
+  const headingCounts = new Map<string, number>();
+
+  const flushParagraph = (): void => {
+    if (paragraph.length === 0) {
+      return;
+    }
+
+    html.push(`<p>${inlineMarkdownToHtml(paragraph.join(' '))}</p>`);
+    paragraph = [];
+  };
+
+  const flushList = (): void => {
+    if (listItems.length === 0) {
+      return;
+    }
+
+    html.push(`<ul>${listItems.map((item) => `<li>${inlineMarkdownToHtml(item)}</li>`).join('')}</ul>`);
+    listItems = [];
+  };
+
+  const flushBlockquote = (): void => {
+    if (blockquote.length === 0) {
+      return;
+    }
+
+    html.push(`<blockquote>${blockquote.map((line) => `<p>${inlineMarkdownToHtml(line)}</p>`).join('')}</blockquote>`);
+    blockquote = [];
+  };
+
+  lines.forEach((line) => {
+    if ([
+      tableOfContentsStart,
+      tableOfContentsEnd,
+    ].includes(line.trim())) {
+      return;
+    }
+
+    if (line.trim().startsWith('```')) {
+      flushParagraph();
+      flushList();
+      flushBlockquote();
+
+      if (isCodeBlock) {
+        html.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+        codeLines = [];
+      }
+
+      isCodeBlock = !isCodeBlock;
+
+      return;
+    }
+
+    if (isCodeBlock) {
+      codeLines.push(line);
+
+      return;
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+    const listItem = line.match(/^\s*[-*]\s+(.+)$/);
+    const quote = line.match(/^>\s?(.+)$/);
+
+    if (heading) {
+      flushParagraph();
+      flushList();
+      flushBlockquote();
+
+      html.push(`<h${heading[1].length} id="${uniqueMarkdownAnchor(heading[2], headingCounts)}">${inlineMarkdownToHtml(stripMarkdownFormatting(heading[2]))}</h${heading[1].length}>`);
+
+      return;
+    }
+
+    if (listItem) {
+      flushParagraph();
+      flushBlockquote();
+      listItems.push(listItem[1]);
+
+      return;
+    }
+
+    if (quote) {
+      flushParagraph();
+      flushList();
+      blockquote.push(quote[1]);
+
+      return;
+    }
+
+    if (line.trim() === '') {
+      flushParagraph();
+      flushList();
+      flushBlockquote();
+
+      return;
+    }
+
+    flushList();
+    flushBlockquote();
+    paragraph.push(line.trim());
+  });
+
+  flushParagraph();
+  flushList();
+  flushBlockquote();
+
+  if (codeLines.length > 0) {
+    html.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+  }
+
+  return html.join('\n');
+}

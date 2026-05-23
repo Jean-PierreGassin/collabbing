@@ -28,5 +28,8 @@ onUpdated(() => {
 </script>
 
 <template>
-  <div ref="content" class="markdown-content" v-html="html" />
+  <div
+    ref="content"
+    class="markdown-content"
+    v-html="html" />
 </template>

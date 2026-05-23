@@ -39,14 +39,14 @@ watch(
   () => props.supporter,
   (supporter) => {
     localSupporter.value = supporter ?? null;
-  }
+  },
 );
 
 watch(
   () => props.idea.supportersCount,
   (count) => {
     localSupportersCount.value = count;
-  }
+  },
 );
 
 function playSupportSparks(): void {
@@ -90,11 +90,32 @@ function removeSupport(): void {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Collaborators</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Collaborators
+          </h2>
           <div v-if="collaborator || applicant || idea.can.storeApplication">
-            <Button v-if="collaborator" type="button" size="sm" disabled>Collaborator</Button>
-            <Button v-else-if="applicant" type="button" size="sm" disabled>Application pending</Button>
-            <Button v-else as="a" :href="idea.routes.applicationsCreate" variant="outline" size="sm">Apply to Collaborate</Button>
+            <Button
+              v-if="collaborator"
+              type="button"
+              size="sm"
+              disabled>
+              Collaborator
+            </Button>
+            <Button
+              v-else-if="applicant"
+              type="button"
+              size="sm"
+              disabled>
+              Application pending
+            </Button>
+            <Button
+              v-else
+              as="a"
+              :href="idea.routes.applicationsCreate"
+              variant="outline"
+              size="sm">
+              Apply to Collaborate
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -102,8 +123,13 @@ function removeSupport(): void {
         <template v-if="idea.collaborators.length === 0">
           No collaborators have joined yet.
         </template>
-        <div v-else class="flex flex-wrap gap-2">
-          <a v-for="collab in idea.collaborators" :key="collab.id" :href="collab.user.routes.show">
+        <div
+          v-else
+          class="flex flex-wrap gap-2">
+          <a
+            v-for="collab in idea.collaborators"
+            :key="collab.id"
+            :href="collab.user.routes.show">
             <UserAvatar
               :src="collab.user.profilePicture"
               :alt="`${collab.user.firstName} ${collab.user.lastName}`"
@@ -111,7 +137,9 @@ function removeSupport(): void {
               class="border-secondary"
             />
           </a>
-          <span v-if="idea.hiddenCollaboratorsCount > 0" class="inline-flex h-8 items-center rounded-md border border-border bg-background/35 px-2 text-xs font-medium text-muted-foreground">
+          <span
+            v-if="idea.hiddenCollaboratorsCount > 0"
+            class="inline-flex h-8 items-center rounded-md border border-border bg-background/35 px-2 text-xs font-medium text-muted-foreground">
             +{{ idea.hiddenCollaboratorsCount.toLocaleString() }} more
           </span>
         </div>
@@ -121,7 +149,9 @@ function removeSupport(): void {
     <Card v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0">
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Repository</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Repository
+          </h2>
           <Button
             v-if="idea.repositoryActivity.htmlUrl"
             as="a"
@@ -136,12 +166,16 @@ function removeSupport(): void {
         </div>
       </CardHeader>
       <CardContent class="flex flex-col gap-4 text-sm">
-        <div v-if="idea.repositoryActivity.isMissing" class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive">
+        <div
+          v-if="idea.repositoryActivity.isMissing"
+          class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive">
           Repository is no longer available on GitHub.
         </div>
 
         <template v-else>
-          <div v-if="idea.repositoryActivity.latestCommitMessage" class="flex flex-col gap-1">
+          <div
+            v-if="idea.repositoryActivity.latestCommitMessage"
+            class="flex flex-col gap-1">
             <span class="text-xs uppercase text-muted-foreground">Latest commit</span>
             <span>{{ idea.repositoryActivity.latestCommitMessage }}</span>
             <span class="text-muted-foreground">
@@ -156,16 +190,28 @@ function removeSupport(): void {
 
           <div class="grid grid-cols-3 gap-2 text-center">
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Issues</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.openIssuesCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Issues
+              </div>
             </div>
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.stargazersCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Stars</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.stargazersCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Stars
+              </div>
             </div>
             <div class="rounded-md border border-border px-2 py-2">
-              <div class="font-semibold">{{ idea.repositoryActivity.forksCount.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Forks</div>
+              <div class="font-semibold">
+                {{ idea.repositoryActivity.forksCount.toLocaleString() }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Forks
+              </div>
             </div>
           </div>
 
@@ -179,8 +225,13 @@ function removeSupport(): void {
           </div>
         </template>
 
-        <div v-if="idea.repositoryActivity.events.length > 0" class="flex flex-col gap-2 border-t border-border pt-3">
-          <div v-for="event in idea.repositoryActivity.events" :key="event.id" class="flex flex-col gap-1">
+        <div
+          v-if="idea.repositoryActivity.events.length > 0"
+          class="flex flex-col gap-2 border-t border-border pt-3">
+          <div
+            v-for="event in idea.repositoryActivity.events"
+            :key="event.id"
+            class="flex flex-col gap-1">
             <span>{{ event.summary }}</span>
             <span class="text-xs text-muted-foreground">{{ event.occurredAtForHumans }}</span>
           </div>
@@ -191,12 +242,38 @@ function removeSupport(): void {
     <Card>
       <CardHeader>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-semibold text-white">Supporters</h2>
-          <div v-if="idea.can.storeSupporter" class="relative">
-            <Button v-if="localSupporter" type="button" size="sm" variant="outline" :disabled="supportForm.processing" @click="removeSupport">Remove Support</Button>
-            <Button v-else type="button" size="sm" variant="outline" :disabled="supportForm.processing" @click="supportIdea">Support Idea</Button>
-            <span v-if="showSupportSparks" :key="supportSparkKey" class="auth-success-sparks" aria-hidden="true">
-              <span v-for="index in 12" :key="index" />
+          <h2 class="text-lg font-semibold text-white">
+            Supporters
+          </h2>
+          <div
+            v-if="idea.can.storeSupporter"
+            class="relative">
+            <Button
+              v-if="localSupporter"
+              type="button"
+              size="sm"
+              variant="outline"
+              :disabled="supportForm.processing"
+              @click="removeSupport">
+              Remove Support
+            </Button>
+            <Button
+              v-else
+              type="button"
+              size="sm"
+              variant="outline"
+              :disabled="supportForm.processing"
+              @click="supportIdea">
+              Support Idea
+            </Button>
+            <span
+              v-if="showSupportSparks"
+              :key="supportSparkKey"
+              class="auth-success-sparks"
+              aria-hidden="true">
+              <span
+                v-for="index in 12"
+                :key="index" />
             </span>
           </div>
         </div>

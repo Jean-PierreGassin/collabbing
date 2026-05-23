@@ -20,7 +20,10 @@ const props = defineProps<{
 const isPitchExpanded = ref(false);
 
 const mentionableUsers = computed<DomainUser[]>(() => {
-  const users = [props.idea.user, ...props.idea.collaborators.map((collaborator) => collaborator.user)];
+  const users = [
+    props.idea.user,
+    ...props.idea.collaborators.map((collaborator) => collaborator.user),
+  ];
   const seen = new Set<number>();
 
   return users.filter((user) => {
@@ -51,15 +54,30 @@ function hasPitchHeadingsClass(): string | undefined {
   <section class="flex flex-col gap-5">
     <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex min-w-0 flex-col gap-1">
-        <h1 class="text-2xl font-semibold leading-tight text-white">Idea - {{ idea.titleDisplay }}</h1>
+        <h1 class="text-2xl font-semibold leading-tight text-white">
+          Idea - {{ idea.titleDisplay }}
+        </h1>
       </div>
-      <div v-if="idea.can.update" class="flex shrink-0 flex-wrap justify-end gap-2 sm:pt-0.5">
-        <Button as="a" :href="idea.routes.dashboard" size="sm">
-          <GitBranch class="size-4" aria-hidden="true" />
+      <div
+        v-if="idea.can.update"
+        class="flex shrink-0 flex-wrap justify-end gap-2 sm:pt-0.5">
+        <Button
+          as="a"
+          :href="idea.routes.dashboard"
+          size="sm">
+          <GitBranch
+            class="size-4"
+            aria-hidden="true" />
           Manage
         </Button>
-        <Button as="a" :href="idea.routes.edit" variant="outline" size="sm">
-          <Pencil class="size-4" aria-hidden="true" />
+        <Button
+          as="a"
+          :href="idea.routes.edit"
+          variant="outline"
+          size="sm">
+          <Pencil
+            class="size-4"
+            aria-hidden="true" />
           Edit
         </Button>
       </div>
@@ -68,7 +86,11 @@ function hasPitchHeadingsClass(): string | undefined {
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <div class="flex flex-col gap-4">
         <div :class="hasPitchHeadingsClass()">
-          <IdeaCard v-model:pitch-expanded="isPitchExpanded" :idea="idea" single hide-title />
+          <IdeaCard
+            v-model:pitch-expanded="isPitchExpanded"
+            :idea="idea"
+            single
+            hide-title />
 
           <MarkdownTableOfContents
             :content-id="pitchDescriptionId"
@@ -79,7 +101,10 @@ function hasPitchHeadingsClass(): string | undefined {
         </div>
 
         <template v-if="idea.can.storeComment">
-          <CommentList :comments="comments" :comments-store="idea.routes.commentsStore" :mentionable-users="mentionableUsers" />
+          <CommentList
+            :comments="comments"
+            :comments-store="idea.routes.commentsStore"
+            :mentionable-users="mentionableUsers" />
         </template>
       </div>
 

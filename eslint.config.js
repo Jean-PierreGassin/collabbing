@@ -17,7 +17,10 @@ export default [
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   {
-    files: ['resources/js/**/*.{js,ts,vue}'],
+    files: [
+      'eslint.config.js',
+      'resources/js/**/*.{js,ts,vue}',
+    ],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: {
@@ -30,8 +33,121 @@ export default [
       sourceType: 'module',
     },
     rules: {
+      'array-bracket-newline': [
+        'error',
+        {
+          minItems: 2,
+        },
+      ],
+      'array-element-newline': [
+        'error',
+        {
+          minItems: 2,
+        },
+      ],
+      'comma-dangle': [
+        'error',
+        'always-multiline',
+      ],
+      indent: [
+        'error',
+        2,
+      ],
+      'padding-line-between-statements': [
+        'error',
+        {
+          blankLine: 'always',
+          prev: [
+            'const',
+            'let',
+            'var',
+          ],
+          next: 'function',
+        },
+        {
+          blankLine: 'always',
+          prev: 'function',
+          next: [
+            'const',
+            'let',
+            'var',
+            'function',
+          ],
+        },
+      ],
+      'vue/array-bracket-newline': [
+        'error',
+        {
+          minItems: 2,
+        },
+      ],
+      'vue/array-element-newline': [
+        'error',
+        {
+          minItems: 2,
+        },
+      ],
+      'vue/comma-dangle': [
+        'error',
+        'always-multiline',
+      ],
+      'vue/block-order': [
+        'error',
+        {
+          order: [
+            'script',
+            'template',
+            'style',
+          ],
+        },
+      ],
+      'vue/define-macros-order': [
+        'error',
+        {
+          order: [
+            'defineOptions',
+            'defineProps',
+            'defineEmits',
+            'defineSlots',
+          ],
+        },
+      ],
+      'vue/first-attribute-linebreak': [
+        'error',
+        {
+          multiline: 'below',
+          singleline: 'ignore',
+        },
+      ],
+      'vue/html-indent': [
+        'error',
+        2,
+        {
+          attribute: 1,
+          baseIndent: 1,
+          closeBracket: 0,
+        },
+      ],
+      'vue/multiline-html-element-content-newline': 'error',
+      'vue/max-attributes-per-line': [
+        'error',
+        {
+          multiline: {
+            max: 1,
+          },
+          singleline: {
+            max: 1,
+          },
+        },
+      ],
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
+      'vue/singleline-html-element-content-newline': [
+        'error',
+        {
+          ignoreWhenNoAttributes: false,
+        },
+      ],
     },
   },
 ];

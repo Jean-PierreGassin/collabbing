@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import { Button } from '@/components/ui/button';
-import { oldInputString } from '@/lib/forms';
-import { maxLengthValidator } from '@/lib/formValidation';
+import { useCommentComposer } from '@/composables/useCommentComposer';
 import type { DomainUser } from '@/types/domain';
 
 const props = withDefaults(defineProps<{
@@ -40,166 +37,44 @@ const emit = defineEmits<{
   submitted: [];
 }>();
 
-const oldParentId = oldInputString('parent_id');
-const shouldUseOldContent = props.method === 'POST' && oldParentId === String(props.parentId ?? '');
-const textarea = ref<HTMLTextAreaElement | null>(null);
-let initialContent = props.initialContent;
-
-if (shouldUseOldContent) {
-  initialContent = oldInputString('content', props.initialContent);
-}
-
-const content = ref(initialContent);
-const cursorPosition = ref(content.value.length);
-const contentValidator = maxLengthValidator(1500, 'a comment');
-const form = useForm({
-  content: content.value,
-  parent_id: props.parentId,
-});
-
-const activeMention = computed(() => {
-  const beforeCursor = content.value.slice(0, cursorPosition.value);
-  const match = beforeCursor.match(/(^|\s)@([A-Za-z0-9_-]{0,20})$/);
-
-  if (! match) {
-    return null;
-  }
-
-  return {
-    query: match[2].toLowerCase(),
-    start: beforeCursor.length - match[2].length - 1,
-    end: cursorPosition.value,
-  };
-});
-
-const mentionSuggestions = computed(() => {
-  if (! activeMention.value) {
-    return [];
-  }
-
-  return props.mentionableUsers
-    .filter((user) => user.username.toLowerCase().startsWith(activeMention.value?.query ?? ''))
-    .slice(0, 5);
-});
-
-const hasMentionSuggestions = computed(() => mentionSuggestions.value.length > 0);
-const overrideMethod = computed(() => {
-  if (props.method === 'POST') {
-    return null;
-  }
-
-  return props.method;
-});
-
-function updateCursorPosition(): void {
-  cursorPosition.value = textarea.value?.selectionStart ?? content.value.length;
-}
-
-function insertMention(username: string): void {
-  const input = textarea.value;
-  const mention = `@${username} `;
-
-  if (! input) {
-    return;
-  }
-
-  const start = activeMention.value?.start ?? input.selectionStart ?? content.value.length;
-  const end = activeMention.value?.end ?? input.selectionEnd ?? content.value.length;
-  const prefix = content.value.slice(0, start);
-  let spacer = ' ';
-
-  if (prefix.length === 0 || /\s$/.test(prefix)) {
-    spacer = '';
-  }
-
-  content.value = `${prefix}${spacer}${mention}${content.value.slice(end)}`;
-
-  void nextTick(() => {
-    const nextPosition = start + spacer.length + mention.length;
-
-    input.setSelectionRange(nextPosition, nextPosition);
-    input.focus();
-    updateCursorPosition();
-  });
-}
-
-function insertFirstMentionSuggestion(): void {
-  const suggestion = mentionSuggestions.value[0];
-
-  if (! suggestion) {
-    return;
-  }
-
-  insertMention(suggestion.username);
-}
-
-function syncInput(event: Event): void {
-  content.value = (event.target as HTMLTextAreaElement).value;
-  form.content = content.value;
-  updateCursorPosition();
-}
-
-function handleMentionTab(event: KeyboardEvent): void {
-  if (! hasMentionSuggestions.value) {
-    return;
-  }
-
-  event.preventDefault();
-  insertFirstMentionSuggestion();
-}
-
-function focusTextarea(): void {
-  if (! props.autofocus) {
-    return;
-  }
-
-  void nextTick(() => {
-    textarea.value?.focus();
-  });
-}
-
-function submitComment(): void {
-  form.content = content.value;
-  form.parent_id = props.parentId;
-
-  const options = {
-    preserveScroll: true,
-    onSuccess: () => {
-      emit('submitted');
-
-      if (props.method !== 'POST') {
-        return;
-      }
-
-      content.value = '';
-      form.content = '';
-    },
-  };
-
-  if (props.method === 'POST') {
-    form.post(props.action, options);
-
-    return;
-  }
-
-  if (props.method === 'PUT') {
-    form.put(props.action, options);
-
-    return;
-  }
-
-  form.patch(props.action, options);
-}
-
-onMounted(focusTextarea);
+const {
+  content,
+  contentValidator,
+  form,
+  handleMentionTab,
+  hasMentionSuggestions,
+  insertMention,
+  mentionSuggestions,
+  overrideMethod,
+  submitComment,
+  syncInput,
+  textarea,
+  updateCursorPosition,
+} = useCommentComposer(props, emit);
 </script>
 
 <template>
-  <form :action="action" method="POST" class="flex flex-col gap-4" @submit.prevent="submitComment">
+  <form
+    :action="action"
+    method="POST"
+    class="flex flex-col gap-4"
+    @submit.prevent="submitComment">
     <CsrfField />
-    <MethodField v-if="overrideMethod" :method="overrideMethod" />
-    <input v-if="parentId" type="hidden" name="parent_id" :value="parentId">
-    <FormField :id="textareaId" error-key="content" :label="label" :hide-label="hideLabel" help="Markdown and @mentions are supported." :validator="contentValidator">
+    <MethodField
+      v-if="overrideMethod"
+      :method="overrideMethod" />
+    <input
+      v-if="parentId"
+      type="hidden"
+      name="parent_id"
+      :value="parentId">
+    <FormField
+      :id="textareaId"
+      error-key="content"
+      :label="label"
+      :hide-label="hideLabel"
+      help="Markdown and @mentions are supported."
+      :validator="contentValidator">
       <template #default="{ invalid, describedBy, feedbackClass }">
         <div class="relative">
           <textarea
@@ -207,7 +82,10 @@ onMounted(focusTextarea);
             ref="textarea"
             v-model="content"
             name="content"
-            :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+            :class="[
+              'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+              feedbackClass,
+            ]"
             :placeholder="placeholder"
             maxlength="1500"
             :aria-invalid="invalid || undefined"
@@ -243,8 +121,20 @@ onMounted(focusTextarea);
     </FormField>
 
     <div class="flex flex-wrap justify-end gap-2">
-      <Button v-if="cancelLabel" type="button" variant="ghost" size="sm" @click="emit('cancel')">{{ cancelLabel }}</Button>
-      <Button type="submit" size="sm" :disabled="form.processing">{{ buttonLabel }}</Button>
+      <Button
+        v-if="cancelLabel"
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="emit('cancel')">
+        {{ cancelLabel }}
+      </Button>
+      <Button
+        type="submit"
+        size="sm"
+        :disabled="form.processing">
+        {{ buttonLabel }}
+      </Button>
     </div>
   </form>
 </template>

@@ -35,7 +35,10 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     titleDisplay: 'Useful idea',
     tagline: 'A useful card tagline.',
     summary: 'A useful idea for collaborators.',
-    tags: ['design', 'workflow'],
+    tags: [
+      'design',
+      'workflow',
+    ],
     communication: 'Slack',
     content: 'A focused pitch.',
     contentHtml: '<p>A focused pitch.</p>',
@@ -115,7 +118,11 @@ function mountIndex(props: {
     global: {
       stubs: {
         IdeaList: {
-          props: ['ideas', 'featured', 'variant'],
+          props: [
+            'ideas',
+            'featured',
+            'variant',
+          ],
           template: '<div data-list :data-featured="featured ? \'true\' : \'false\'" :data-variant="variant">{{ ideas.map((idea) => idea.id).join(\',\') }}</div>',
         },
         PaginationLinks: {
@@ -137,7 +144,10 @@ describe('Ideas/Index', () => {
     const recent = idea({ id: 2, title: 'Recent idea' });
     const wrapper = mountIndex({
       trendingIdeas: [trending],
-      ideas: paginator([trending, recent]),
+      ideas: paginator([
+        trending,
+        recent,
+      ]),
     });
 
     const lists = wrapper.findAll('[data-list]');

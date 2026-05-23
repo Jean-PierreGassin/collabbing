@@ -35,7 +35,10 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     titleDisplay: 'Useful idea',
     tagline: 'A concise product tagline.',
     summary: 'A summary that belongs on the full idea page.',
-    tags: ['design-systems', 'workflow'],
+    tags: [
+      'design-systems',
+      'workflow',
+    ],
     communication: 'Slack',
     content: 'A focused pitch.',
     contentHtml: '<p>A focused pitch.</p>',

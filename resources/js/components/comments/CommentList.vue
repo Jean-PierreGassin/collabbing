@@ -25,7 +25,9 @@ function commentsPanelClass(): string | undefined {
     <CardHeader class="gap-4">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div class="flex flex-col gap-1">
-          <h2 class="text-lg font-semibold text-white">Comments</h2>
+          <h2 class="text-lg font-semibold text-white">
+            Comments
+          </h2>
         </div>
         <PaginationLinks
           v-if="comments.lastPage > 1"
@@ -44,8 +46,12 @@ function commentsPanelClass(): string | undefined {
       />
     </CardHeader>
     <CardContent :class="commentsPanelClass()">
-      <Transition name="page-fade" mode="out-in">
-        <div :key="comments.currentPage" class="flex flex-col gap-3">
+      <Transition
+        name="page-fade"
+        mode="out-in">
+        <div
+          :key="comments.currentPage"
+          class="flex flex-col gap-3">
           <template v-if="comments.items.length > 0">
             <CommentThread
               v-for="comment in comments.items"
@@ -55,7 +61,11 @@ function commentsPanelClass(): string | undefined {
               :mentionable-users="mentionableUsers"
             />
           </template>
-          <p v-else class="text-sm text-muted-foreground">No comments yet.</p>
+          <p
+            v-else
+            class="text-sm text-muted-foreground">
+            No comments yet.
+          </p>
         </div>
       </Transition>
     </CardContent>

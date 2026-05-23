@@ -27,10 +27,14 @@ const startPaging = (event: MouseEvent): void => {
 };
 
 watch(
-  () => [props.paginator.currentPage, props.paginator.previousPageUrl, props.paginator.nextPageUrl],
+  () => [
+    props.paginator.currentPage,
+    props.paginator.previousPageUrl,
+    props.paginator.nextPageUrl,
+  ],
   () => {
     isPaging.value = false;
-  }
+  },
 );
 
 function isToolbar(): boolean {
@@ -85,7 +89,7 @@ onUnmounted(stopFinishListener);
     v-if="paginator.lastPage > 1"
     :class="cn(
       'flex gap-3',
-      navLayoutClass()
+      navLayoutClass(),
     )"
     :aria-label="label ?? 'Pagination'"
   >
@@ -101,7 +105,9 @@ onUnmounted(stopFinishListener);
       :class="buttonClass()"
       @click="startPaging"
     >
-      <ChevronLeft class="size-4" aria-hidden="true" />
+      <ChevronLeft
+        class="size-4"
+        aria-hidden="true" />
       Previous
     </Button>
     <Button
@@ -112,13 +118,15 @@ onUnmounted(stopFinishListener);
       disabled
       :class="buttonClass()"
     >
-      <ChevronLeft class="size-4" aria-hidden="true" />
+      <ChevronLeft
+        class="size-4"
+        aria-hidden="true" />
       Previous
     </Button>
     <span
       :class="cn(
         'rounded-md border border-border bg-card px-3 text-center text-sm text-muted-foreground transition-colors',
-        pageStatusClass()
+        pageStatusClass(),
       )"
       aria-live="polite"
     >
@@ -137,7 +145,9 @@ onUnmounted(stopFinishListener);
       @click="startPaging"
     >
       Next
-      <ChevronRight class="size-4" aria-hidden="true" />
+      <ChevronRight
+        class="size-4"
+        aria-hidden="true" />
     </Button>
     <Button
       v-else
@@ -148,7 +158,9 @@ onUnmounted(stopFinishListener);
       :class="buttonClass()"
     >
       Next
-      <ChevronRight class="size-4" aria-hidden="true" />
+      <ChevronRight
+        class="size-4"
+        aria-hidden="true" />
     </Button>
   </nav>
 </template>

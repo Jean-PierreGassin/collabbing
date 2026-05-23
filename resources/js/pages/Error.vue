@@ -58,9 +58,15 @@ const details = computed(() => {
 
 <template>
   <section class="mx-auto flex min-h-[45vh] max-w-2xl flex-col items-center justify-center gap-5 px-4 text-center">
-    <p class="text-sm font-semibold uppercase tracking-wide text-primary">Error {{ status }}</p>
-    <h1 class="text-4xl font-semibold text-white md:text-5xl">{{ details.title }}</h1>
-    <p class="text-base leading-7 text-muted-foreground md:text-lg">{{ details.message }}</p>
+    <p class="text-sm font-semibold uppercase tracking-wide text-primary">
+      Error {{ status }}
+    </p>
+    <h1 class="text-4xl font-semibold text-white md:text-5xl">
+      {{ details.title }}
+    </h1>
+    <p class="text-base leading-7 text-muted-foreground md:text-lg">
+      {{ details.message }}
+    </p>
     <div class="flex flex-wrap justify-center gap-3">
       <Button
         as="a"

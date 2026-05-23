@@ -27,7 +27,7 @@ watch(
   () => props.src,
   () => {
     isLoaded.value = false;
-  }
+  },
 );
 
 onMounted(() => {
@@ -58,14 +58,14 @@ const imageOpacityClass = computed(() => {
     :class="cn(
       'relative inline-flex shrink-0 overflow-hidden rounded-full border border-border bg-secondary/40',
       sizeClass,
-      props.class
+      props.class,
     )"
   >
     <span
       aria-hidden="true"
       :class="cn(
         'absolute inset-0 bg-gradient-to-br from-secondary via-card to-background transition-opacity duration-200 ease-out',
-        placeholderOpacityClass
+        placeholderOpacityClass,
       )"
     />
     <img
