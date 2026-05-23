@@ -49,6 +49,9 @@
 - Do not write rollback code for migrations, only roll forward
 
 ## Code Quality
+- Run project tooling through Docker Compose rather than the host runtime.
+  - Use the PHP container for Laravel, Composer, Pint, PHPStan, PHPUnit, and Artisan commands.
+  - Use the Node container for Bun, Vite, ESLint, typecheck, and frontend test commands.
 - Use PSR-12 standards
 - Ensure changes pass Pint/PHPStan/ESLint configuration
 - Files/Methods/Classes should have realistic human friendly names
