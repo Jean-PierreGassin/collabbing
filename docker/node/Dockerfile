@@ -2,10 +2,12 @@ ARG NODE_VERSION=24
 ARG NODE_VARIANT=bookworm
 ARG HOST_UID=1000
 ARG HOST_GID=1000
+ARG BUN_VERSION=1.3.14
 FROM node:${NODE_VERSION}-${NODE_VARIANT}
 
 ARG HOST_UID=1000
 ARG HOST_GID=1000
+ARG BUN_VERSION=1.3.14
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -14,7 +16,7 @@ RUN apt-get update \
         zsh \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /usr/local/bin/yarn /usr/local/bin/yarnpkg \
-    && npm install -g yarn
+    && npm install -g bun@"${BUN_VERSION}"
 
 RUN groupmod -o -g "${HOST_GID}" node \
     && usermod -o -u "${HOST_UID}" -g "${HOST_GID}" node \

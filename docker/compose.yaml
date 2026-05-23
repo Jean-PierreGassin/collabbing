@@ -70,7 +70,7 @@ services:
       - ${APP_HOST_PATH}:${APP_CONTAINER_PATH}
       - node_modules:${APP_CONTAINER_PATH}/node_modules
     working_dir: ${APP_CONTAINER_PATH}
-    command: sh -lc "npm install && npm run dev"
+    command: sh -lc "bun install && bun run dev"
     ports:
       - "${NODE_PORT}:5173"
     networks:

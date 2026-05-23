@@ -148,10 +148,10 @@ class ProductionRuntimeContractTest extends TestCase
             'pint' => ['vendor/bin/pint --test'],
             'phpstan' => ['vendor/bin/phpstan analyse --memory-limit=1G --debug'],
             'phpunit' => ['php artisan test --compact --do-not-cache-result'],
-            'eslint' => ['npm run lint'],
-            'typescript' => ['npm run typecheck'],
-            'vitest' => ['npm run test'],
-            'vite build' => ['npm run build'],
+            'eslint' => ['bun run lint'],
+            'typescript' => ['bun run typecheck'],
+            'vitest' => ['bun run test'],
+            'vite build' => ['bun run build'],
         ];
     }
 

@@ -3,18 +3,23 @@
 ARG NODE_VERSION=24
 ARG PHP_VERSION=8.5
 ARG COMPOSER_VERSION=2
+ARG BUN_VERSION=1.3.14
 
 FROM node:${NODE_VERSION}-bookworm AS assets
 
 WORKDIR /var/www/html
 
-COPY package.json package-lock.json ./
-RUN npm ci
+ARG BUN_VERSION=1.3.14
+
+RUN npm install -g bun@"${BUN_VERSION}"
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 COPY components.json tsconfig.json vite.config.js ./
 COPY resources ./resources
 COPY public ./public
-RUN npm run build
+RUN bun run build
 
 FROM composer:${COMPOSER_VERSION} AS composer_image
 

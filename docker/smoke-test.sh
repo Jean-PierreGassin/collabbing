@@ -117,7 +117,7 @@ wait_for_mysql "$ENV_B_FILE"
 
 compose "$ENV_A_FILE" ps -a
 compose "$ENV_B_FILE" ps -a
-compose "$ENV_A_FILE" exec -T node sh -lc 'node -v && yarn -v'
+compose "$ENV_A_FILE" exec -T node sh -lc 'node -v && bun -v'
 compose "$ENV_A_FILE" exec -T php sh -lc 'php -v && composer --version'
 compose "$ENV_A_FILE" exec -T mysql mysqladmin ping -h127.0.0.1 -uroot -proot
 compose "$ENV_A_FILE" exec -T redis redis-cli ping
