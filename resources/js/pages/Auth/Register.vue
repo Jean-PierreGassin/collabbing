@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import AuthMorphCard from '@/components/auth/AuthMorphCard.vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
@@ -14,10 +15,20 @@ import {
 import { useSessionStore } from '@/stores/session';
 
 const session = useSessionStore();
+
+const successHref = computed(() => {
+  const next = new URLSearchParams(window.location.search).get('next');
+
+  if (next === session.routes.ideasCreate) {
+    return next;
+  }
+
+  return session.routes.ideas;
+});
 </script>
 
 <template>
-  <AuthMorphCard title="Register" :action="session.routes.register" :success-href="session.routes.ideas" max-width="lg">
+  <AuthMorphCard title="Register" :action="session.routes.register" :success-href="successHref" max-width="lg">
     <template #default="{ errorsFor, isSubmitting }">
       <CsrfField />
       <FormField id="username" label="Username" help="Use 3-20 letters, numbers, dashes, or underscores." :validator="usernameValidator" :external-errors="errorsFor('username')">
