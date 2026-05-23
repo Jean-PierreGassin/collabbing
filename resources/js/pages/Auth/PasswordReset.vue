@@ -40,7 +40,10 @@ const session = useSessionStore();
             <input
               id="email"
               type="email"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               name="email"
               :defaultValue="oldInputString('email', email)"
               autocomplete="email"
@@ -61,7 +64,10 @@ const session = useSessionStore();
               <input
                 id="password"
                 type="password"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 name="password"
                 autocomplete="new-password"
                 minlength="12"
@@ -79,7 +85,10 @@ const session = useSessionStore();
               <input
                 id="password_confirmation"
                 type="password"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 name="password_confirmation"
                 autocomplete="new-password"
                 minlength="12"

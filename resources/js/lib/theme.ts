@@ -1,6 +1,10 @@
 import { readonly, ref } from 'vue';
 
-export const themeModes = ['light', 'dark', 'system'] as const;
+export const themeModes = [
+  'light',
+  'dark',
+  'system',
+] as const;
 
 export type ThemeMode = typeof themeModes[number];
 export type ResolvedTheme = Exclude<ThemeMode, 'system'>;

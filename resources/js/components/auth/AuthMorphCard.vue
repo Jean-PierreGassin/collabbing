@@ -142,7 +142,10 @@ async function parseErrorResponse(response: Response): Promise<void> {
 
   const nextErrors: FieldErrors = {};
 
-  for (const [field, messages] of Object.entries(payload.errors ?? {})) {
+  for (const [
+    field,
+    messages,
+  ] of Object.entries(payload.errors ?? {})) {
     if (Array.isArray(messages)) {
       nextErrors[field] = messages;
     } else {

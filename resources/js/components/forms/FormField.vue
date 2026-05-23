@@ -72,7 +72,11 @@ const feedbackId = computed(() => {
 const serverInvalid = computed(() => errors.value.length > 0);
 const invalid = computed(() => serverInvalid.value || feedbackState.value === 'invalid');
 const valid = computed(() => !serverInvalid.value && feedbackState.value === 'valid');
-const describedBy = computed(() => [helpId.value, feedbackId.value, errorId.value].filter(Boolean).join(' ') || undefined);
+const describedBy = computed(() => [
+  helpId.value,
+  feedbackId.value,
+  errorId.value,
+].filter(Boolean).join(' ') || undefined);
 const feedbackClass = computed(() => {
   let className = 'form-control-feedback';
 

@@ -27,10 +27,14 @@ const startPaging = (event: MouseEvent): void => {
 };
 
 watch(
-  () => [props.paginator.currentPage, props.paginator.previousPageUrl, props.paginator.nextPageUrl],
+  () => [
+    props.paginator.currentPage,
+    props.paginator.previousPageUrl,
+    props.paginator.nextPageUrl,
+  ],
   () => {
     isPaging.value = false;
-  }
+  },
 );
 
 function isToolbar(): boolean {
@@ -85,7 +89,7 @@ onUnmounted(stopFinishListener);
     v-if="paginator.lastPage > 1"
     :class="cn(
       'flex gap-3',
-      navLayoutClass()
+      navLayoutClass(),
     )"
     :aria-label="label ?? 'Pagination'"
   >
@@ -122,7 +126,7 @@ onUnmounted(stopFinishListener);
     <span
       :class="cn(
         'rounded-md border border-border bg-card px-3 text-center text-sm text-muted-foreground transition-colors',
-        pageStatusClass()
+        pageStatusClass(),
       )"
       aria-live="polite"
     >

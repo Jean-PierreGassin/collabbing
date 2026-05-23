@@ -146,8 +146,14 @@ const canonicalUrl = computed(() => {
 });
 
 const transitionKey = computed(() => {
-  const [pathAndQuery, hash = ''] = page.url.split('#');
-  const [path, query = ''] = pathAndQuery.split('?');
+  const [
+    pathAndQuery,
+    hash = '',
+  ] = page.url.split('#');
+  const [
+    path,
+    query = '',
+  ] = pathAndQuery.split('?');
   const params = new URLSearchParams(query);
 
   params.delete('comments');
@@ -168,7 +174,9 @@ const transitionKey = computed(() => {
 });
 const chromeTransitionKey = computed(() => session.isAuthenticated ? 'authenticated' : 'guest');
 const currentSearchTerm = computed(() => {
-  const [, query = ''] = page.url.split('?');
+  const [
+    , query = '',
+  ] = page.url.split('?');
   const params = new URLSearchParams(query.split('#')[0]);
   const search = params.get('search');
 
@@ -245,7 +253,11 @@ function handleDocumentClick(event: MouseEvent): void {
 function handleShellShortcut(event: KeyboardEvent): void {
   const target = event.target;
 
-  if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+  if (target instanceof HTMLElement && (target.isContentEditable || [
+    'INPUT',
+    'TEXTAREA',
+    'SELECT',
+  ].includes(target.tagName))) {
     return;
   }
 
@@ -280,7 +292,7 @@ watch(
       isDesktopSearchOpen.value = true;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

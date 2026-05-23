@@ -54,7 +54,10 @@ if (props.comment) {
             <textarea
               id="content"
               name="content"
-              :class="['min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               :placeholder="textareaPlaceholder"
               maxlength="1500"
               :defaultValue="oldInputString('content', comment?.content)"

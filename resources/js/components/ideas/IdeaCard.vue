@@ -470,7 +470,10 @@ function leaveDescription(element: Element, done: () => void): void {
           <span class="inline-flex items-center gap-1 text-sm font-semibold">
             {{ pitchToggleLabel }}
             <ChevronDown
-              :class="['size-4 transition-transform duration-200', pitchChevronClass]"
+              :class="[
+                'size-4 transition-transform duration-200',
+                pitchChevronClass,
+              ]"
               aria-hidden="true" />
           </span>
           <span

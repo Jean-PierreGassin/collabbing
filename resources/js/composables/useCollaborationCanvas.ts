@@ -353,7 +353,10 @@ export function useCollaborationCanvas() {
   }
 
   function pruneMeetCooldowns(time: number): void {
-    for (const [key, until] of meetCooldown) {
+    for (const [
+      key,
+      until,
+    ] of meetCooldown) {
       if (until < time) {
         meetCooldown.delete(key);
       }

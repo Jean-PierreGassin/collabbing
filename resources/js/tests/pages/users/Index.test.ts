@@ -92,11 +92,9 @@ describe('UsersIndex', () => {
   });
 
   it('expands and collapses long bios without hiding the profile action', async () => {
-    const wrapper = mountPage([
-      member({
-        bio: 'This member works across product discovery, implementation planning, release coordination, and community support for collaboration-heavy projects that benefit from thoughtful contributor context.',
-      }),
-    ]);
+    const wrapper = mountPage([member({
+      bio: 'This member works across product discovery, implementation planning, release coordination, and community support for collaboration-heavy projects that benefit from thoughtful contributor context.',
+    })]);
 
     const bio = wrapper.get('p.break-words');
     const toggle = wrapper.get('button[aria-expanded="false"]');

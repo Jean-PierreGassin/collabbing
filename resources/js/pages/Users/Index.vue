@@ -196,7 +196,10 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
           >
             {{ isBioExpanded(user) ? 'Hide bio' : 'Show bio' }}
             <ChevronDown
-              :class="['size-4 transition-transform duration-200', isBioExpanded(user) ? 'rotate-180' : undefined]"
+              :class="[
+                'size-4 transition-transform duration-200',
+                isBioExpanded(user) ? 'rotate-180' : undefined,
+              ]"
               aria-hidden="true"
             />
           </button>

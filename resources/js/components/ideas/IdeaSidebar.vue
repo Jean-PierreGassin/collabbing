@@ -39,14 +39,14 @@ watch(
   () => props.supporter,
   (supporter) => {
     localSupporter.value = supporter ?? null;
-  }
+  },
 );
 
 watch(
   () => props.idea.supportersCount,
   (count) => {
     localSupportersCount.value = count;
-  }
+  },
 );
 
 function playSupportSparks(): void {

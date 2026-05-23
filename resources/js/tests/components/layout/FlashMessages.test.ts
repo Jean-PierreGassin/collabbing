@@ -30,7 +30,10 @@ describe('FlashMessages', () => {
   it('summarizes multiple validation errors assertively', () => {
     session.flash = {
       status: null,
-      errors: ['Title is required.', 'Content is required.'],
+      errors: [
+        'Title is required.',
+        'Content is required.',
+      ],
     };
 
     const wrapper = mount(FlashMessages);

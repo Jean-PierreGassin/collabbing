@@ -211,7 +211,10 @@ onBeforeUnmount(() => {
     >
       <span class="truncate">{{ selectedLabel }}</span>
       <ChevronDown
-        :class="['size-4 shrink-0 text-primary transition-transform', { 'rotate-180': isOpen }]"
+        :class="[
+          'size-4 shrink-0 text-primary transition-transform',
+          { 'rotate-180': isOpen },
+        ]"
         aria-hidden="true" />
     </button>
 

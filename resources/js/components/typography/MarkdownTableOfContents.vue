@@ -187,7 +187,10 @@ function observeHeadings(): void {
     }
   }, {
     rootMargin: '-18% 0px -65% 0px',
-    threshold: [0, 1],
+    threshold: [
+      0,
+      1,
+    ],
   });
 
   headingElements.forEach((element) => headingObserver?.observe(element));
@@ -237,7 +240,10 @@ function observeContent(): void {
     updateContentVisibility();
   }, {
     rootMargin: '-64px 0px -22% 0px',
-    threshold: [0, 0.01],
+    threshold: [
+      0,
+      0.01,
+    ],
   });
 
   contentObserver.observe(contentElement);
@@ -304,7 +310,13 @@ async function openHeading(anchor: string): Promise<void> {
   }), 0);
 }
 
-watch(() => [props.enabled, props.headings] as const, async ([enabled, headings]) => {
+watch(() => [
+  props.enabled,
+  props.headings,
+] as const, async ([
+  enabled,
+  headings,
+]) => {
   if (!enabled || headings.length === 0) {
     activeAnchor.value = '';
     isMobileOpen.value = false;
@@ -352,7 +364,10 @@ onBeforeUnmount(() => {
           >
             Contents
             <ChevronDown
-              :class="['size-4 text-primary transition-transform duration-200', mobileChevronClass()]"
+              :class="[
+                'size-4 text-primary transition-transform duration-200',
+                mobileChevronClass(),
+              ]"
               aria-hidden="true" />
           </button>
 

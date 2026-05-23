@@ -85,7 +85,10 @@ function submitProfile(event: SubmitEvent): void {
                 id="first_name"
                 name="first_name"
                 type="text"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 :defaultValue="oldInputString('first_name', user?.firstName)"
                 placeholder="John"
                 autocomplete="given-name"
@@ -104,7 +107,10 @@ function submitProfile(event: SubmitEvent): void {
                 id="last_name"
                 name="last_name"
                 type="text"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 :defaultValue="oldInputString('last_name', user?.lastName)"
                 placeholder="Smith"
                 autocomplete="family-name"
@@ -125,7 +131,10 @@ function submitProfile(event: SubmitEvent): void {
               id="email"
               name="email"
               type="email"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               :defaultValue="oldInputString('email', user?.email)"
               placeholder="john.smith@apples.com"
               autocomplete="email"
@@ -178,7 +187,10 @@ function submitProfile(event: SubmitEvent): void {
             <textarea
               id="bio"
               name="bio"
-              :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               placeholder="Tell us what you're good at and what you enjoy..."
               maxlength="500"
               :defaultValue="oldInputString('bio', user?.bio)"
@@ -198,7 +210,10 @@ function submitProfile(event: SubmitEvent): void {
                 id="password"
                 name="password"
                 type="password"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 autocomplete="new-password"
                 minlength="12"
                 maxlength="128"
@@ -215,7 +230,10 @@ function submitProfile(event: SubmitEvent): void {
                 id="password_confirmation"
                 name="password_confirmation"
                 type="password"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 autocomplete="new-password"
                 minlength="12"
                 maxlength="128"

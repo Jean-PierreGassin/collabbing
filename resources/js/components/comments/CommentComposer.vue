@@ -223,7 +223,10 @@ onMounted(focusTextarea);
             ref="textarea"
             v-model="content"
             name="content"
-            :class="['min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+            :class="[
+              'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+              feedbackClass,
+            ]"
             :placeholder="placeholder"
             maxlength="1500"
             :aria-invalid="invalid || undefined"

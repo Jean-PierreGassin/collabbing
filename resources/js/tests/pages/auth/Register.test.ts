@@ -45,7 +45,10 @@ function mountRegister() {
       plugins: [createPinia()],
       stubs: {
         AuthMorphCard: {
-          props: ['action', 'successHref'],
+          props: [
+            'action',
+            'successHref',
+          ],
           template: '<div data-testid="auth-card" :data-action="action" :data-success-href="successHref"></div>',
         },
       },

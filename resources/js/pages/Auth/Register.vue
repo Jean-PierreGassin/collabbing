@@ -45,7 +45,10 @@ const successHref = computed(() => {
           <input
             id="username"
             type="text"
-            :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+            :class="[
+              'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+              feedbackClass,
+            ]"
             name="username"
             autocomplete="username"
             minlength="3"
@@ -68,7 +71,10 @@ const successHref = computed(() => {
             <input
               id="first_name"
               type="text"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               name="first_name"
               autocomplete="given-name"
               maxlength="255"
@@ -87,7 +93,10 @@ const successHref = computed(() => {
             <input
               id="last_name"
               type="text"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               name="last_name"
               autocomplete="family-name"
               maxlength="255"
@@ -107,7 +116,10 @@ const successHref = computed(() => {
           <input
             id="email"
             type="email"
-            :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+            :class="[
+              'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+              feedbackClass,
+            ]"
             name="email"
             autocomplete="email"
             maxlength="255"
@@ -128,7 +140,10 @@ const successHref = computed(() => {
             <input
               id="password"
               type="password"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               name="password"
               autocomplete="new-password"
               minlength="12"
@@ -147,7 +162,10 @@ const successHref = computed(() => {
             <input
               id="password_confirmation"
               type="password"
-              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              :class="[
+                'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                feedbackClass,
+              ]"
               name="password_confirmation"
               autocomplete="new-password"
               minlength="12"

@@ -20,7 +20,10 @@ const props = defineProps<{
 const isPitchExpanded = ref(false);
 
 const mentionableUsers = computed<DomainUser[]>(() => {
-  const users = [props.idea.user, ...props.idea.collaborators.map((collaborator) => collaborator.user)];
+  const users = [
+    props.idea.user,
+    ...props.idea.collaborators.map((collaborator) => collaborator.user),
+  ];
   const seen = new Set<number>();
 
   return users.filter((user) => {

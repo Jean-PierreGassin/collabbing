@@ -44,7 +44,12 @@ export function oldInputBoolean(name: string, fallback = false): boolean {
   }
 
   if (typeof value === 'string') {
-    return ['1', 'on', 'true', 'yes'].includes(value.toLowerCase());
+    return [
+      '1',
+      'on',
+      'true',
+      'yes',
+    ].includes(value.toLowerCase());
   }
 
   return fallback;

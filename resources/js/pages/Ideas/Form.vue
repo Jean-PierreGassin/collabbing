@@ -185,7 +185,10 @@ function renderMarkdownPreview(markdown: string): string {
   };
 
   lines.forEach((line) => {
-    if ([tableOfContentsStart, tableOfContentsEnd].includes(line.trim())) {
+    if ([
+      tableOfContentsStart,
+      tableOfContentsEnd,
+    ].includes(line.trim())) {
       return;
     }
 
@@ -265,7 +268,10 @@ function renderMarkdownPreview(markdown: string): string {
 }
 
 function isMarkdownFile(file: File): boolean {
-  return markdownFilePattern.test(file.name) || ['text/markdown', 'text/plain'].includes(file.type);
+  return markdownFilePattern.test(file.name) || [
+    'text/markdown',
+    'text/plain',
+  ].includes(file.type);
 }
 
 function insertionBoundaryBefore(value: string): string {
@@ -437,7 +443,10 @@ const markdownImportFeedbackClass = computed(() => {
                   id="title"
                   name="title"
                   type="text"
-                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :class="[
+                    'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                    feedbackClass,
+                  ]"
                   :defaultValue="oldInputString('title', idea?.title)"
                   placeholder="A faster way to match design reviewers"
                   maxlength="100"
@@ -457,7 +466,10 @@ const markdownImportFeedbackClass = computed(() => {
                   id="tagline"
                   name="tagline"
                   type="text"
-                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :class="[
+                    'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                    feedbackClass,
+                  ]"
                   :defaultValue="oldInputString('tagline', idea?.tagline)"
                   placeholder="Match reviewers with focused feedback"
                   maxlength="60"
@@ -476,7 +488,10 @@ const markdownImportFeedbackClass = computed(() => {
                   id="communication"
                   name="communication"
                   type="text"
-                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :class="[
+                    'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                    feedbackClass,
+                  ]"
                   :defaultValue="oldInputString('communication', idea?.communication)"
                   placeholder="Slack, Discord, email..."
                   maxlength="50"
@@ -496,7 +511,10 @@ const markdownImportFeedbackClass = computed(() => {
                   id="tags"
                   name="tags"
                   type="text"
-                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :class="[
+                    'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                    feedbackClass,
+                  ]"
                   :defaultValue="oldInputString('tags', tagsText)"
                   placeholder="design, review, workflow"
                   maxlength="240"
@@ -517,7 +535,10 @@ const markdownImportFeedbackClass = computed(() => {
                 id="repository_name"
                 name="repository_name"
                 type="text"
-                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 :defaultValue="oldInputString('repository_name', idea?.repositoryName)"
                 placeholder="design-review-matchmaker"
                 maxlength="100"
@@ -543,7 +564,10 @@ const markdownImportFeedbackClass = computed(() => {
               <textarea
                 id="summary"
                 name="summary"
-                :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :class="[
+                  'min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                  feedbackClass,
+                ]"
                 placeholder="A short plain-text overview of who this helps and why it should exist."
                 maxlength="240"
                 :defaultValue="oldInputString('summary', idea?.summary)"
@@ -594,7 +618,10 @@ const markdownImportFeedbackClass = computed(() => {
                     ref="contentInput"
                     v-model="content"
                     name="content"
-                    :class="['min-h-[28rem] w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                    :class="[
+                      'min-h-[28rem] w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                      feedbackClass,
+                    ]"
                     placeholder="Explain the problem, who it helps, and what a first version should do."
                     maxlength="20000"
                     :aria-invalid="invalid || undefined"

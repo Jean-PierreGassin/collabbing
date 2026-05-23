@@ -59,7 +59,10 @@ function mountThread() {
     global: {
       stubs: {
         CommentComposer: {
-          emits: ['cancel', 'submitted'],
+          emits: [
+            'cancel',
+            'submitted',
+          ],
           props: ['buttonLabel'],
           template: '<form data-testid="comment-composer" @submit.prevent="$emit(\'submitted\')"><button type="submit">{{ buttonLabel }}</button></form>',
         },
