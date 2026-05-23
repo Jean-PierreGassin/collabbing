@@ -1,0 +1,174 @@
+name: Production Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Run the full deployment after preflight
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+  LATEST_IMAGE: ghcr.io/${{ github.repository }}:latest
+
+jobs:
+  verify:
+    name: Verify Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run Pint
+        run: vendor/bin/pint --test
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=1G --debug
+
+      - name: Run PHPUnit
+        run: php artisan test --compact --do-not-cache-result
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install Bun dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run ESLint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Run frontend tests
+        run: bun run test
+
+      - name: Build frontend
+        run: bun run build
+
+  build:
+    name: Build Production Image
+    runs-on: ubuntu-latest
+    needs: verify
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/production/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}
+            ${{ env.LATEST_IMAGE }}
+
+  deploy:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate deployment secrets
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+          PRODUCTION_ENV_FILE: ${{ secrets.PRODUCTION_ENV_FILE }}
+        run: |
+          missing=0
+
+          for name in PRODUCTION_HOST PRODUCTION_USER PRODUCTION_SSH_KEY PRODUCTION_SSH_KNOWN_HOSTS PRODUCTION_ENV_FILE; do
+            if [ -z "${!name}" ]; then
+              echo "Missing ${name}" >&2
+              missing=1
+            fi
+          done
+
+          exit "$missing"
+
+      - name: Prepare SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          if [ -z "${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}" ]; then
+            echo "Missing PRODUCTION_SSH_KNOWN_HOSTS secret" >&2
+            exit 1
+          fi
+          printf '%s\n' "${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload deployment bundle
+        run: |
+          ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "mkdir -p ~/collabbing/docker/production"
+          scp -P "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" docker/production/stack.yaml docker/production/deploy.sh "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:~/collabbing/docker/production/"
+          install -m 600 /dev/null .env.production
+          printf '%s\n' "${{ secrets.PRODUCTION_ENV_FILE }}" > .env.production
+          scp -P "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" .env.production "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:~/collabbing/docker/production/.env.production"
+          ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "chmod 600 ~/collabbing/docker/production/.env.production && chmod 700 ~/collabbing/docker/production/deploy.sh"
+
+      - name: Run deployment preflight
+        run: |
+          ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "\
+            cd ~/collabbing && \
+            IMAGE='${{ env.IMAGE }}' \
+            STACK_NAME='${{ vars.PRODUCTION_STACK_NAME || 'collabbing' }}' \
+            APP_ENV_FILE='.env.production' \
+            docker/production/deploy.sh --preflight"
+
+      - name: Deploy over SSH
+        if: github.event_name == 'push' || inputs.deploy
+        run: |
+          printf '%s\n' "${{ secrets.GITHUB_TOKEN }}" | ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
+          ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "\
+            cd ~/collabbing && \
+            IMAGE='${{ env.IMAGE }}' \
+            STACK_NAME='${{ vars.PRODUCTION_STACK_NAME || 'collabbing' }}' \
+            APP_ENV_FILE='.env.production' \
+            docker/production/deploy.sh"
