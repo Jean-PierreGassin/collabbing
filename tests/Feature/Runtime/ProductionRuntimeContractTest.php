@@ -62,12 +62,12 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertSame($order, $stack['services'][$service]['deploy']['update_config']['order']);
     }
 
-    public function testProductionWorkflowVerifiesBuildsAndDeploysReleaseImage(): void
+    public function testProductionWorkflowVerifiesBuildsAndKeepsDeployManual(): void
     {
         $workflow = Yaml::parseFile(base_path('.github/workflows/production-deploy.yml'));
 
         $this->assertIsArray($workflow);
-        $this->assertContains('master', $workflow['on']['push']['branches']);
+        $this->assertArrayNotHasKey('push', $workflow['on']);
         $this->assertArrayHasKey('workflow_dispatch', $workflow['on']);
         $this->assertSame(['contents' => 'read'], $workflow['permissions']);
         $this->assertSame(['contents' => 'read', 'packages' => 'write'], $workflow['jobs']['build']['permissions']);
@@ -75,8 +75,10 @@ class ProductionRuntimeContractTest extends TestCase
         $this->assertSame('verify', $workflow['jobs']['build']['needs']);
         $this->assertSame('build', $workflow['jobs']['deploy']['needs']);
 
+        $deploySteps = collect($workflow['jobs']['deploy']['steps'])->keyBy('name');
         $deployRuns = implode("\n", $this->workflowStepRuns($workflow, 'deploy'));
 
+        $this->assertSame('inputs.deploy', $deploySteps['Deploy over SSH']['if']);
         $this->assertStringContainsString('PRODUCTION_SSH_KNOWN_HOSTS', $deployRuns);
         $this->assertStringContainsString('docker/production/deploy.sh --preflight', $deployRuns);
         $this->assertStringNotContainsString('ssh-keyscan', $deployRuns);

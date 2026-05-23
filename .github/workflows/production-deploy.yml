@@ -163,7 +163,7 @@ jobs:
             docker/production/deploy.sh --preflight"
 
       - name: Deploy over SSH
-        if: github.event_name == 'push' || inputs.deploy
+        if: inputs.deploy
         run: |
           printf '%s\n' "${{ secrets.GITHUB_TOKEN }}" | ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
           ssh -p "${{ secrets.PRODUCTION_SSH_PORT || 22 }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" "\
