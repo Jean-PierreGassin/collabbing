@@ -38,16 +38,16 @@ const groupLabel = computed(() => `Theme: ${themeMode.value}`);
 
 function buttonClass(mode: ThemeMode): string {
   return cn(
-    'inline-flex h-9 items-center justify-center gap-2 rounded-sm px-2.5 text-sm font-medium text-muted-foreground transition-[background-color,color,box-shadow,transform] duration-150 ease-out hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+    'inline-flex h-9 items-center justify-center gap-2 rounded-sm px-2.5 text-sm font-medium text-muted-foreground transition-[background-color,color,box-shadow,transform] duration-150 ease-out hover:bg-background/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
     props.showLabels ? 'flex-1' : 'w-9',
-    themeMode.value === mode && 'bg-primary/18 text-accent-foreground shadow-sm shadow-primary/10 hover:bg-primary/24 hover:text-accent-foreground dark:bg-primary dark:text-primary-foreground dark:shadow-primary/15 dark:hover:bg-primary dark:hover:text-primary-foreground',
+    themeMode.value === mode && 'bg-primary text-primary-foreground shadow-sm shadow-primary/15 hover:bg-primary/92 hover:text-primary-foreground',
   );
 }
 </script>
 
 <template>
   <div
-    class="inline-flex items-center gap-1 rounded-md border border-border bg-secondary/55 p-1"
+    class="inline-flex items-center gap-1 rounded-md border border-border bg-background/92 p-1 shadow-sm shadow-black/5"
     role="group"
     :aria-label="groupLabel"
   >

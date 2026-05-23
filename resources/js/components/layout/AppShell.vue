@@ -316,7 +316,7 @@ watch(
             <Link
               :href="brandHref"
               :aria-label="brandLabel"
-              class="w-fit text-lg font-semibold text-white transition-colors hover:text-primary focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              class="w-fit text-lg font-semibold text-foreground transition-colors hover:text-primary focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               @click="closeMobileNavigation"
             >
               Collabbing
@@ -418,6 +418,8 @@ watch(
               <Button :as="Link" :href="session.routes.register">Register</Button>
             </nav>
           </Transition>
+
+          <ThemeModeToggle class="hidden lg:inline-flex" />
 
           <Transition name="chrome-swap">
             <div v-if="session.isAuthenticated" class="flex min-w-0 items-center justify-end gap-2">
@@ -542,7 +544,7 @@ watch(
           <div :key="chromeTransitionKey" class="footer-transition-panel">
             <div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 text-sm sm:grid-cols-2 sm:px-6 lg:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] lg:px-8">
               <div class="flex max-w-sm flex-col gap-3">
-                <Link :href="brandHref" class="text-lg font-semibold text-white transition-colors hover:text-primary">
+                <Link :href="brandHref" class="text-lg font-semibold text-foreground transition-colors hover:text-primary">
                   Collabbing
                 </Link>
                 <p class="leading-6 text-muted-foreground">
@@ -551,7 +553,7 @@ watch(
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-white">Explore</h2>
+                <h2 class="text-sm font-semibold text-foreground">Explore</h2>
                 <nav aria-label="Explore links" class="flex flex-col gap-2 text-muted-foreground">
                   <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.ideas">Ideas</Link>
                   <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.users">Members</Link>
@@ -560,7 +562,7 @@ watch(
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-white">Workspace</h2>
+                <h2 class="text-sm font-semibold text-foreground">Workspace</h2>
                 <nav aria-label="Workspace footer links" class="flex flex-col gap-2 text-muted-foreground">
                   <template v-if="session.isAuthenticated">
                     <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.dashboard">Dashboard</Link>
@@ -574,7 +576,7 @@ watch(
               </div>
 
               <div class="flex flex-col gap-3">
-                <h2 class="text-sm font-semibold text-white">Support</h2>
+                <h2 class="text-sm font-semibold text-foreground">Support</h2>
                 <nav aria-label="Support links" class="flex flex-col gap-2 text-muted-foreground">
                   <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.feedback">Feedback</Link>
                   <Link class="w-fit transition-colors hover:text-primary" :href="session.routes.contact">Contact</Link>

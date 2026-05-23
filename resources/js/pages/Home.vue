@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Lightbulb, Users, Zap } from '@lucide/vue';
 import { Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { useSessionStore } from '@/stores/session';
 
 const session = useSessionStore();
+
+const shareIdeaHref = computed(() => {
+  if (session.isAuthenticated) {
+    return session.routes.ideasCreate;
+  }
+
+  const separator = session.routes.register.includes('?') ? '&' : '?';
+
+  return `${session.routes.register}${separator}next=${encodeURIComponent(session.routes.ideasCreate)}`;
+});
 
 const steps = [
   {
@@ -62,13 +72,18 @@ let canvasH = 0;
 let dpr = 1;
 let frameCount = 0;
 let sparkId = 0;
+let desktopQuery: MediaQueryList | null = null;
+let reducedMotionQuery: MediaQueryList | null = null;
+const sparkTimers = new Set<number>();
 
 function spawnSpark(x: number, y: number): void {
   const id = sparkId++;
   sparks.value.push({ id, x, y });
-  window.setTimeout(() => {
+  const timerId = window.setTimeout(() => {
+    sparkTimers.delete(timerId);
     sparks.value = sparks.value.filter((s) => s.id !== id);
   }, 720);
+  sparkTimers.add(timerId);
 }
 
 const CONNECTION_DIST = 138;
@@ -115,6 +130,121 @@ function resizeCanvas(canvas: HTMLCanvasElement): void {
   canvas.style.width = `${canvasW}px`;
   canvas.style.height = `${canvasH}px`;
   initNodes();
+}
+
+function prefersReducedMotion(): boolean {
+  if (!reducedMotionQuery) {
+    return true;
+  }
+
+  return reducedMotionQuery.matches;
+}
+
+function canAnimateCanvas(): boolean {
+  if (!desktopQuery) {
+    return false;
+  }
+
+  if (!desktopQuery.matches) {
+    return false;
+  }
+
+  if (prefersReducedMotion()) {
+    return false;
+  }
+
+  return true;
+}
+
+function clearSparks(): void {
+  for (const timerId of sparkTimers) {
+    window.clearTimeout(timerId);
+  }
+
+  sparkTimers.clear();
+  sparks.value = [];
+}
+
+function stopCanvasAnimation(): void {
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  ro?.disconnect();
+  ro = null;
+  pulses = [];
+  meetCooldown.clear();
+  clearSparks();
+
+  const canvas = canvasRef.value;
+
+  if (!canvas || canvasW === 0 || canvasH === 0) {
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    ctx.clearRect(0, 0, canvasW, canvasH);
+  }
+}
+
+function startCanvasAnimation(): void {
+  if (rafId) {
+    return;
+  }
+
+  if (!canAnimateCanvas()) {
+    return;
+  }
+
+  const canvas = canvasRef.value;
+
+  if (!canvas || !canvas.parentElement) {
+    return;
+  }
+
+  resizeCanvas(canvas);
+
+  ro = new ResizeObserver(() => resizeCanvas(canvas));
+  ro.observe(canvas.parentElement);
+
+  rafId = requestAnimationFrame((t) => tick(canvas, t));
+}
+
+function syncCanvasAnimation(): void {
+  if (canAnimateCanvas()) {
+    startCanvasAnimation();
+
+    return;
+  }
+
+  stopCanvasAnimation();
+}
+
+function addQueryListener(query: MediaQueryList, listener: () => void): void {
+  if (query.addEventListener) {
+    query.addEventListener('change', listener);
+
+    return;
+  }
+
+  query.addListener(listener);
+}
+
+function removeQueryListener(query: MediaQueryList | null, listener: () => void): void {
+  if (!query) {
+    return;
+  }
+
+  if (query.removeEventListener) {
+    query.removeEventListener('change', listener);
+
+    return;
+  }
+
+  query.removeListener(listener);
 }
 
 function maybeMeet(i: number, j: number, dist: number, t: number): void {
@@ -266,41 +396,43 @@ function tick(canvas: HTMLCanvasElement, t: number): void {
 }
 
 onMounted(() => {
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.parentElement) return;
+  if (!window.matchMedia) {
+    return;
+  }
 
-  resizeCanvas(canvas);
+  desktopQuery = window.matchMedia('(min-width: 1024px)');
+  reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  addQueryListener(desktopQuery, syncCanvasAnimation);
+  addQueryListener(reducedMotionQuery, syncCanvasAnimation);
 
-  ro = new ResizeObserver(() => resizeCanvas(canvas));
-  ro.observe(canvas.parentElement);
-
-  rafId = requestAnimationFrame((t) => tick(canvas, t));
+  syncCanvasAnimation();
 });
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(rafId);
-  ro?.disconnect();
+  removeQueryListener(desktopQuery, syncCanvasAnimation);
+  removeQueryListener(reducedMotionQuery, syncCanvasAnimation);
+  stopCanvasAnimation();
 });
 </script>
 
 <template>
-  <section class="relative left-1/2 isolate -my-8 flex min-h-[calc(100svh-7rem)] w-[100dvw] max-w-[100dvw] -translate-x-1/2 items-center overflow-hidden border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8">
+  <section class="relative left-1/2 isolate -my-8 flex min-h-[calc(100svh-7rem)] w-[100dvw] max-w-[100dvw] -translate-x-1/2 items-center overflow-hidden border-y border-border bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8">
     <!-- Warm ambient gradient -->
     <div
-      class="absolute inset-0 -z-30 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--background)_92%,var(--primary))_0%,color-mix(in_oklab,var(--background)_82%,var(--primary))_45%,color-mix(in_oklab,var(--background)_88%,var(--chart-4))_100%)]"
+      class="absolute inset-0 -z-30 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--background)_94%,var(--primary))_0%,color-mix(in_oklab,var(--background)_84%,var(--primary))_45%,color-mix(in_oklab,var(--background)_88%,var(--chart-4))_100%)]"
       aria-hidden="true"
     />
 
     <!-- Full-bleed canvas (desktop only) -->
     <canvas
       ref="canvasRef"
-      class="absolute inset-0 -z-20 hidden h-full w-full opacity-75 lg:block"
+      class="absolute inset-0 -z-20 hidden h-full w-full opacity-45 dark:opacity-75 lg:block"
       aria-hidden="true"
     />
 
     <!-- Asymmetric left-to-right fade: opaque under the text, transparent where the network plays -->
     <div
-      class="absolute inset-0 -z-10 hidden bg-[linear-gradient(100deg,var(--background)_0%,color-mix(in_oklab,var(--background)_78%,transparent)_32%,transparent_64%)] lg:block"
+      class="absolute inset-0 -z-10 hidden bg-[linear-gradient(100deg,var(--background)_0%,color-mix(in_oklab,var(--background)_80%,transparent)_32%,transparent_64%)] lg:block"
       aria-hidden="true"
     />
 
@@ -321,7 +453,7 @@ onBeforeUnmount(() => {
     <div class="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-16 sm:gap-24">
       <!-- Left-aligned hero -->
       <div class="flex max-w-2xl flex-col items-start gap-7">
-        <h1 class="text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
+        <h1 class="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
           Where ideas find
           <span class="relative inline-block text-primary">
             their people.
@@ -350,7 +482,7 @@ onBeforeUnmount(() => {
           </Button>
           <Button
             :as="Link"
-            :href="session.isAuthenticated ? session.routes.ideasCreate : session.routes.register"
+            :href="shareIdeaHref"
             variant="outline"
             size="lg"
           >
@@ -364,33 +496,38 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Step flow -->
-      <div class="grid gap-10 md:grid-cols-3 md:gap-8">
-        <div
+      <ol class="grid gap-6 md:grid-cols-3 md:gap-8">
+        <li
           v-for="(step, idx) in steps"
           :key="step.title"
-          class="relative flex flex-col items-start gap-5"
+          class="relative grid grid-cols-[3.5rem_1fr] gap-4 md:flex md:flex-col md:items-start md:gap-5"
         >
-          <!-- Hand-drawn dashed connector linking each step to the next -->
+          <!-- Connector linking each step to the next -->
+          <div
+            v-if="idx < steps.length - 1"
+            class="pointer-events-none absolute bottom-[-1.5rem] left-7 top-14 w-px bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--primary)_54%,transparent),color-mix(in_oklab,var(--primary)_10%,transparent))] md:hidden"
+            aria-hidden="true"
+          />
           <div
             v-if="idx < steps.length - 1"
             class="pointer-events-none absolute left-16 -right-8 top-7 hidden h-px bg-[repeating-linear-gradient(to_right,color-mix(in_oklab,var(--primary)_50%,transparent)_0_6px,transparent_6px_14px)] md:block"
             aria-hidden="true"
           />
 
-          <div class="relative flex size-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_28%,transparent),color-mix(in_oklab,var(--chart-4)_20%,transparent))] text-primary">
+          <div class="relative z-10 flex size-14 items-center justify-center rounded-full border border-primary/20 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_28%,var(--background)),color-mix(in_oklab,var(--chart-4)_18%,var(--background)))] text-primary shadow-sm shadow-primary/10">
             <component :is="step.icon" class="size-6" aria-hidden="true" />
             <div
-              class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary/25 blur-xl"
+              class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary/18 blur-xl"
               aria-hidden="true"
             />
           </div>
 
-          <div class="flex flex-col gap-2">
+          <div class="flex min-w-0 flex-col gap-2 pt-1 md:pt-0">
             <h3 class="text-lg font-semibold text-foreground">{{ step.title }}</h3>
             <p class="text-sm leading-relaxed text-muted-foreground">{{ step.description }}</p>
           </div>
-        </div>
-      </div>
+        </li>
+      </ol>
     </div>
   </section>
 </template>
