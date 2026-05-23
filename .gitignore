@@ -14,5 +14,6 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+bun-error.log
 .env
 .DS_STORE

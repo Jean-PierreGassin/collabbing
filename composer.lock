@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7cefe2564a8262e2a0b01b543ba5e919",
+    "content-hash": "64e77aef3840293c636b4a91659a8742",
     "packages": [
         {
             "name": "brick/math",
@@ -8123,6 +8123,40 @@
                 "source": "https://github.com/iamcal/SQLParser/tree/v0.7"
             },
             "time": "2026-01-28T22:20:33+00:00"
+        },
+        {
+            "name": "jean-pierre-gassin/ai-context",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Jean-PierreGassin/ai-context.git",
+                "reference": "a5b5fb285f72c3216ccf87225e3e97238f70841b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Jean-PierreGassin/ai-context/zipball/a5b5fb285f72c3216ccf87225e3e97238f70841b",
+                "reference": "a5b5fb285f72c3216ccf87225e3e97238f70841b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "JeanPierreGassin\\AiContext\\": "bin/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Portable AI agent context, skills, and role guidance for software projects.",
+            "support": {
+                "issues": "https://github.com/Jean-PierreGassin/ai-context/issues",
+                "source": "https://github.com/Jean-PierreGassin/ai-context/tree/v0.1.0"
+            },
+            "time": "2026-05-23T03:04:50+00:00"
         },
         {
             "name": "larastan/larastan",
