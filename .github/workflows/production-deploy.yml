@@ -1,9 +1,6 @@
 name: Production Deploy
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       deploy:
