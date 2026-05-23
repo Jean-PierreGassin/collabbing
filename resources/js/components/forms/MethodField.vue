@@ -5,5 +5,8 @@ defineProps<{
 </script>
 
 <template>
-  <input type="hidden" name="_method" :value="method">
+  <input
+    type="hidden"
+    name="_method"
+    :value="method">
 </template>

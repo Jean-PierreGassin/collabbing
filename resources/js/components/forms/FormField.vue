@@ -412,9 +412,17 @@ watch(errors, () => {
 </script>
 
 <template>
-  <div ref="field" class="relative flex flex-col gap-2">
-    <label :for="id" :class="labelClass">{{ label }}</label>
-    <slot :invalid="invalid" :valid="valid" :described-by="describedBy" :feedback-class="feedbackClass" />
+  <div
+    ref="field"
+    class="relative flex flex-col gap-2">
+    <label
+      :for="id"
+      :class="labelClass">{{ label }}</label>
+    <slot
+      :invalid="invalid"
+      :valid="valid"
+      :described-by="describedBy"
+      :feedback-class="feedbackClass" />
     <span
       v-if="showSpark"
       :key="sparkKey"
@@ -440,24 +448,52 @@ watch(errors, () => {
       tabindex="-1"
       @click="clearControl"
     >
-      <X class="size-4" aria-hidden="true" />
+      <X
+        class="size-4"
+        aria-hidden="true" />
     </button>
-    <div v-if="help || validationMessage || errors.length > 0" class="flex flex-col gap-1">
-      <p v-if="help" :id="helpId" class="flex gap-2 text-sm leading-5 text-muted-foreground">
-        <Info class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+    <div
+      v-if="help || validationMessage || errors.length > 0"
+      class="flex flex-col gap-1">
+      <p
+        v-if="help"
+        :id="helpId"
+        class="flex gap-2 text-sm leading-5 text-muted-foreground">
+        <Info
+          class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+          aria-hidden="true" />
         <span>{{ help }}</span>
       </p>
-      <p v-if="validationMessage" :id="feedbackId" class="flex gap-2 text-sm leading-5 text-destructive" role="alert">
-        <TriangleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <p
+        v-if="validationMessage"
+        :id="feedbackId"
+        class="flex gap-2 text-sm leading-5 text-destructive"
+        role="alert">
+        <TriangleAlert
+          class="mt-0.5 size-4 shrink-0"
+          aria-hidden="true" />
         <span>{{ validationMessage }}</span>
       </p>
-      <p v-if="errors.length > 0" :id="errorId" class="flex gap-2 text-sm leading-5 text-destructive" role="alert">
-        <CircleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <p
+        v-if="errors.length > 0"
+        :id="errorId"
+        class="flex gap-2 text-sm leading-5 text-destructive"
+        role="alert">
+        <CircleAlert
+          class="mt-0.5 size-4 shrink-0"
+          aria-hidden="true" />
         <span>
-          <span v-for="error in errors" :key="error" class="block">{{ error }}</span>
+          <span
+            v-for="error in errors"
+            :key="error"
+            class="block">{{ error }}</span>
         </span>
       </p>
     </div>
-    <p v-else-if="valid" :id="feedbackId" class="sr-only" role="status">Looks good.</p>
+    <p
+      v-else-if="valid"
+      :id="feedbackId"
+      class="sr-only"
+      role="status">Looks good.</p>
   </div>
 </template>

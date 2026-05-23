@@ -418,54 +418,157 @@ const markdownImportFeedbackClass = computed(() => {
 
     <Card class="overflow-visible">
       <CardContent>
-        <form :action="formAction" method="POST" class="flex flex-col gap-5">
+        <form
+          :action="formAction"
+          method="POST"
+          class="flex flex-col gap-5">
           <CsrfField />
-          <MethodField v-if="idea" method="PUT" />
+          <MethodField
+            v-if="idea"
+            method="PUT" />
 
           <div class="grid gap-4 md:grid-cols-2">
-            <FormField id="title" label="Title" :validator="titleValidator">
+            <FormField
+              id="title"
+              label="Title"
+              :validator="titleValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="title" name="title" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('title', idea?.title)" placeholder="A faster way to match design reviewers" maxlength="100" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :defaultValue="oldInputString('title', idea?.title)"
+                  placeholder="A faster way to match design reviewers"
+                  maxlength="100"
+                  :aria-invalid="invalid || undefined"
+                  :aria-describedby="describedBy"
+                  required>
               </template>
             </FormField>
 
-            <FormField id="tagline" label="Tagline" help="Short card copy for scanning the ideas list." :validator="taglineValidator">
+            <FormField
+              id="tagline"
+              label="Tagline"
+              help="Short card copy for scanning the ideas list."
+              :validator="taglineValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="tagline" name="tagline" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tagline', idea?.tagline)" placeholder="Match reviewers with focused feedback" maxlength="60" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input
+                  id="tagline"
+                  name="tagline"
+                  type="text"
+                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :defaultValue="oldInputString('tagline', idea?.tagline)"
+                  placeholder="Match reviewers with focused feedback"
+                  maxlength="60"
+                  :aria-invalid="invalid || undefined"
+                  :aria-describedby="describedBy"
+                  required>
               </template>
             </FormField>
 
-            <FormField id="communication" label="Communication" :validator="communicationValidator">
+            <FormField
+              id="communication"
+              label="Communication"
+              :validator="communicationValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="communication" name="communication" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('communication', idea?.communication)" placeholder="Slack, Discord, email..." maxlength="50" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+                <input
+                  id="communication"
+                  name="communication"
+                  type="text"
+                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :defaultValue="oldInputString('communication', idea?.communication)"
+                  placeholder="Slack, Discord, email..."
+                  maxlength="50"
+                  :aria-invalid="invalid || undefined"
+                  :aria-describedby="describedBy"
+                  required>
               </template>
             </FormField>
 
-            <FormField id="tags" label="Tags" help="Separate tags with commas." :validator="tagsValidator">
+            <FormField
+              id="tags"
+              label="Tags"
+              help="Separate tags with commas."
+              :validator="tagsValidator">
               <template #default="{ invalid, describedBy, feedbackClass }">
-                <input id="tags" name="tags" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('tags', tagsText)" placeholder="design, review, workflow" maxlength="240" autocomplete="off" :aria-invalid="invalid || undefined" :aria-describedby="describedBy">
+                <input
+                  id="tags"
+                  name="tags"
+                  type="text"
+                  :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                  :defaultValue="oldInputString('tags', tagsText)"
+                  placeholder="design, review, workflow"
+                  maxlength="240"
+                  autocomplete="off"
+                  :aria-invalid="invalid || undefined"
+                  :aria-describedby="describedBy">
               </template>
             </FormField>
           </div>
 
-          <FormField id="repository_name" label="Repository name" help="Use up to 100 letters, numbers, dashes, or underscores." :validator="repositoryNameValidator">
+          <FormField
+            id="repository_name"
+            label="Repository name"
+            help="Use up to 100 letters, numbers, dashes, or underscores."
+            :validator="repositoryNameValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="repository_name" name="repository_name" type="text" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" :defaultValue="oldInputString('repository_name', idea?.repositoryName)" placeholder="design-review-matchmaker" maxlength="100" :pattern="repositoryNamePattern" autocomplete="off" autocapitalize="none" spellcheck="false" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required @beforeinput="blockInvalidRepositoryNameInput" @input="sanitizeRepositoryName" @paste="pasteRepositoryName">
+              <input
+                id="repository_name"
+                name="repository_name"
+                type="text"
+                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                :defaultValue="oldInputString('repository_name', idea?.repositoryName)"
+                placeholder="design-review-matchmaker"
+                maxlength="100"
+                :pattern="repositoryNamePattern"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                :aria-invalid="invalid || undefined"
+                :aria-describedby="describedBy"
+                required
+                @beforeinput="blockInvalidRepositoryNameInput"
+                @input="sanitizeRepositoryName"
+                @paste="pasteRepositoryName">
             </template>
           </FormField>
 
-          <FormField id="summary" label="Summary" help="Plain text only. This appears on the idea page." :validator="summaryValidator">
+          <FormField
+            id="summary"
+            label="Summary"
+            help="Plain text only. This appears on the idea page."
+            :validator="summaryValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <textarea id="summary" name="summary" :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" placeholder="A short plain-text overview of who this helps and why it should exist." maxlength="240" :defaultValue="oldInputString('summary', idea?.summary)" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required />
+              <textarea
+                id="summary"
+                name="summary"
+                :class="['min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                placeholder="A short plain-text overview of who this helps and why it should exist."
+                maxlength="240"
+                :defaultValue="oldInputString('summary', idea?.summary)"
+                :aria-invalid="invalid || undefined"
+                :aria-describedby="describedBy"
+                required />
             </template>
           </FormField>
 
-          <FormField id="content" label="Pitch (supports markdown)" help="Drop in markdown files to append a generated table of contents and sectioned notes." :validator="contentValidator">
+          <FormField
+            id="content"
+            label="Pitch (supports markdown)"
+            help="Drop in markdown files to append a generated table of contents and sectioned notes."
+            :validator="contentValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
               <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-3">
-                  <div class="flex flex-wrap gap-2" role="toolbar" aria-label="Pitch section inserts">
-                    <div v-for="section in writingSections" :key="section.label" class="group relative">
+                  <div
+                    class="flex flex-wrap gap-2"
+                    role="toolbar"
+                    aria-label="Pitch section inserts">
+                    <div
+                      v-for="section in writingSections"
+                      :key="section.label"
+                      class="group relative">
                       <Button
                         type="button"
                         variant="outline"
@@ -475,7 +578,10 @@ const markdownImportFeedbackClass = computed(() => {
                         @mousedown.prevent
                         @click="insertWritingSection(section)"
                       >
-                        <component :is="section.icon" class="size-4 text-primary" aria-hidden="true" />
+                        <component
+                          :is="section.icon"
+                          class="size-4 text-primary"
+                          aria-hidden="true" />
                       </Button>
                       <span class="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-52 -translate-x-1/2 rounded-md border border-border bg-popover px-3 py-2 text-xs leading-5 text-popover-foreground opacity-0 shadow-xl shadow-black/20 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
                         <span class="block font-semibold text-primary">{{ section.label }}</span>
@@ -519,7 +625,9 @@ const markdownImportFeedbackClass = computed(() => {
                         aria-controls="content_markdown_files"
                         @click="openMarkdownFilePicker"
                       >
-                        <Upload class="size-4 text-primary" aria-hidden="true" />
+                        <Upload
+                          class="size-4 text-primary"
+                          aria-hidden="true" />
                         Choose markdown files
                       </Button>
                     </div>
@@ -541,14 +649,21 @@ const markdownImportFeedbackClass = computed(() => {
                     nav-label="Preview table of contents"
                   />
 
-                  <section :id="previewDescriptionId" class="flex min-h-[28rem] min-w-0 flex-col gap-3 rounded-md border border-border bg-background/35 p-4" aria-label="Markdown preview">
+                  <section
+                    :id="previewDescriptionId"
+                    class="flex min-h-[28rem] min-w-0 flex-col gap-3 rounded-md border border-border bg-background/35 p-4"
+                    aria-label="Markdown preview">
                     <div class="flex items-center justify-between gap-3 border-b border-border pb-3">
                       <h2 class="text-sm font-semibold text-white">Preview</h2>
                       <span class="text-xs text-muted-foreground">{{ contentBody.length.toLocaleString() }} / 20,000</span>
                     </div>
                     <div class="min-w-0">
-                      <MarkdownContent v-if="contentBody.trim()" :html="previewHtml" />
-                      <p v-else class="text-sm text-muted-foreground">Start writing to preview the markdown here.</p>
+                      <MarkdownContent
+                        v-if="contentBody.trim()"
+                        :html="previewHtml" />
+                      <p
+                        v-else
+                        class="text-sm text-muted-foreground">Start writing to preview the markdown here.</p>
                     </div>
                   </section>
                 </div>
@@ -557,16 +672,27 @@ const markdownImportFeedbackClass = computed(() => {
           </FormField>
 
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div v-if="idea" class="flex items-center gap-2 text-sm">
+            <div
+              v-if="idea"
+              class="flex items-center gap-2 text-sm">
               <label for="status">Status:</label>
-              <FormSelect id="status" name="status">
-                <option value="open" :selected="oldInputString('status', idea.status) === 'open'">Open</option>
-                <option value="closed" :selected="oldInputString('status', idea.status) === 'closed'">Closed</option>
+              <FormSelect
+                id="status"
+                name="status">
+                <option
+                  value="open"
+                  :selected="oldInputString('status', idea.status) === 'open'">Open</option>
+                <option
+                  value="closed"
+                  :selected="oldInputString('status', idea.status) === 'closed'">Closed</option>
               </FormSelect>
             </div>
             <span v-else />
 
-            <Button type="submit" size="sm" class="self-end">
+            <Button
+              type="submit"
+              size="sm"
+              class="self-end">
               {{ submitLabel }}
             </Button>
           </div>

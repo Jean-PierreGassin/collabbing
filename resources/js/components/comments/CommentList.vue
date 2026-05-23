@@ -44,8 +44,12 @@ function commentsPanelClass(): string | undefined {
       />
     </CardHeader>
     <CardContent :class="commentsPanelClass()">
-      <Transition name="page-fade" mode="out-in">
-        <div :key="comments.currentPage" class="flex flex-col gap-3">
+      <Transition
+        name="page-fade"
+        mode="out-in">
+        <div
+          :key="comments.currentPage"
+          class="flex flex-col gap-3">
           <template v-if="comments.items.length > 0">
             <CommentThread
               v-for="comment in comments.items"
@@ -55,7 +59,9 @@ function commentsPanelClass(): string | undefined {
               :mentionable-users="mentionableUsers"
             />
           </template>
-          <p v-else class="text-sm text-muted-foreground">No comments yet.</p>
+          <p
+            v-else
+            class="text-sm text-muted-foreground">No comments yet.</p>
         </div>
       </Transition>
     </CardContent>

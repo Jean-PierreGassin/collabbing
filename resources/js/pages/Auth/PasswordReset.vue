@@ -19,23 +19,70 @@ const session = useSessionStore();
   <Card class="mx-auto w-full max-w-2xl">
     <CardHeader><h1 class="text-2xl font-semibold text-white">Reset password</h1></CardHeader>
     <CardContent>
-      <form method="POST" :action="session.routes.passwordRequest" class="flex flex-col gap-4">
+      <form
+        method="POST"
+        :action="session.routes.passwordRequest"
+        class="flex flex-col gap-4">
         <CsrfField />
-        <input type="hidden" name="token" :value="token ?? ''">
-        <FormField id="email" label="Email address" :validator="emailValidator">
+        <input
+          type="hidden"
+          name="token"
+          :value="token ?? ''">
+        <FormField
+          id="email"
+          label="Email address"
+          :validator="emailValidator">
           <template #default="{ invalid, describedBy, feedbackClass }">
-            <input id="email" type="email" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="email" :defaultValue="oldInputString('email', email)" autocomplete="email" maxlength="255" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required autofocus>
+            <input
+              id="email"
+              type="email"
+              :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+              name="email"
+              :defaultValue="oldInputString('email', email)"
+              autocomplete="email"
+              maxlength="255"
+              :aria-invalid="invalid || undefined"
+              :aria-describedby="describedBy"
+              required
+              autofocus>
           </template>
         </FormField>
         <div class="grid gap-4 sm:grid-cols-2">
-          <FormField id="password" label="Password" help="Use at least 12 characters with letters and numbers." :validator="passwordValidator">
+          <FormField
+            id="password"
+            label="Password"
+            help="Use at least 12 characters with letters and numbers."
+            :validator="passwordValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="password" type="password" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="password" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input
+                id="password"
+                type="password"
+                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                name="password"
+                autocomplete="new-password"
+                minlength="12"
+                maxlength="128"
+                :aria-invalid="invalid || undefined"
+                :aria-describedby="describedBy"
+                required>
             </template>
           </FormField>
-          <FormField id="password_confirmation" label="Confirm password" :validator="passwordConfirmationValidator">
+          <FormField
+            id="password_confirmation"
+            label="Confirm password"
+            :validator="passwordConfirmationValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
-              <input id="password_confirmation" type="password" :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]" name="password_confirmation" autocomplete="new-password" minlength="12" maxlength="128" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" required>
+              <input
+                id="password_confirmation"
+                type="password"
+                :class="['h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40', feedbackClass]"
+                name="password_confirmation"
+                autocomplete="new-password"
+                minlength="12"
+                maxlength="128"
+                :aria-invalid="invalid || undefined"
+                :aria-describedby="describedBy"
+                required>
             </template>
           </FormField>
         </div>

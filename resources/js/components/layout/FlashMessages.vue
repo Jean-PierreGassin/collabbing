@@ -159,8 +159,14 @@ onBeforeUnmount(() => {
         class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-1"
         :class="toastIconClass(toast.tone)"
       >
-        <AlertTriangle v-if="toast.tone === 'error'" class="size-3.5" aria-hidden="true" />
-        <CheckCircle2 v-else class="size-3.5" aria-hidden="true" />
+        <AlertTriangle
+          v-if="toast.tone === 'error'"
+          class="size-3.5"
+          aria-hidden="true" />
+        <CheckCircle2
+          v-else
+          class="size-3.5"
+          aria-hidden="true" />
       </div>
       <div class="min-w-0">
         <p class="truncate font-semibold leading-5 text-foreground">{{ toastTitle(toast.tone) }}</p>
@@ -172,7 +178,9 @@ onBeforeUnmount(() => {
         aria-label="Dismiss notification"
         @click="dismissToast(toast.id)"
       >
-        <X class="size-4" aria-hidden="true" />
+        <X
+          class="size-4"
+          aria-hidden="true" />
       </button>
     </div>
   </TransitionGroup>

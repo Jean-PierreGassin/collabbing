@@ -223,15 +223,30 @@ function leaveDescription(element: Element, done: () => void): void {
       :aria-label="`Open ${idea.titleDisplay}`"
     />
 
-    <div v-if="isCompact" class="pointer-events-none relative z-10 flex h-full flex-col gap-2.5 p-3.5">
+    <div
+      v-if="isCompact"
+      class="pointer-events-none relative z-10 flex h-full flex-col gap-2.5 p-3.5">
       <div class="pointer-events-none flex min-w-0 flex-col gap-1.5">
-        <div v-if="featured || idea.can.update" class="flex min-w-0 items-start justify-between gap-3">
-          <span v-if="featured" class="inline-flex min-h-9 items-center gap-1.5 text-xs font-semibold uppercase text-primary">
-            <Sparkles class="size-3.5" aria-hidden="true" />
+        <div
+          v-if="featured || idea.can.update"
+          class="flex min-w-0 items-start justify-between gap-3">
+          <span
+            v-if="featured"
+            class="inline-flex min-h-9 items-center gap-1.5 text-xs font-semibold uppercase text-primary">
+            <Sparkles
+              class="size-3.5"
+              aria-hidden="true" />
             Trending
           </span>
-          <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="pointer-events-auto relative z-20 ml-auto">
-            <GitBranch class="size-4" aria-hidden="true" />
+          <Button
+            v-if="idea.can.update"
+            :as="Link"
+            :href="idea.routes.dashboard"
+            size="sm"
+            class="pointer-events-auto relative z-20 ml-auto">
+            <GitBranch
+              class="size-4"
+              aria-hidden="true" />
             Manage
           </Button>
         </div>
@@ -242,7 +257,9 @@ function leaveDescription(element: Element, done: () => void): void {
 
         <p class="text-xs text-muted-foreground">
           by
-          <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+          <Link
+            class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
+            :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
           <span aria-hidden="true"> · </span>
           {{ idea.createdAtForHumans }}
         </p>
@@ -252,31 +269,47 @@ function leaveDescription(element: Element, done: () => void): void {
         {{ idea.tagline }}
       </p>
 
-      <div v-if="idea.tags.length > 0" class="pointer-events-none flex flex-wrap gap-1.5 pt-0.5">
-        <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+      <div
+        v-if="idea.tags.length > 0"
+        class="pointer-events-none flex flex-wrap gap-1.5 pt-0.5">
+        <Badge
+          v-for="tag in idea.tags"
+          :key="tag"
+          variant="secondary"
+          class="text-xs">
           {{ tag }}
         </Badge>
       </div>
 
       <div class="pointer-events-none mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border pt-2.5 text-xs text-muted-foreground">
         <span class="inline-flex items-center gap-1.5">
-          <Users class="size-3.5 text-primary" aria-hidden="true" />
+          <Users
+            class="size-3.5 text-primary"
+            aria-hidden="true" />
           {{ supportersLabel }}
         </span>
         <span class="inline-flex items-center gap-1.5">
-          <MessageSquare class="size-3.5 text-primary" aria-hidden="true" />
+          <MessageSquare
+            class="size-3.5 text-primary"
+            aria-hidden="true" />
           {{ collaboratorsLabel }}
         </span>
       </div>
     </div>
 
-    <div v-else-if="isDetailed" class="pointer-events-none relative z-10 flex flex-col gap-2.5 p-4 sm:px-5">
+    <div
+      v-else-if="isDetailed"
+      class="pointer-events-none relative z-10 flex flex-col gap-2.5 p-4 sm:px-5">
       <div class="flex min-w-0 flex-col gap-2.5">
         <div class="flex min-w-0 items-start justify-between gap-4">
           <div class="flex min-w-0 flex-col gap-2">
-            <div v-if="featured" class="flex flex-wrap items-center gap-1.5">
+            <div
+              v-if="featured"
+              class="flex flex-wrap items-center gap-1.5">
               <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase text-primary">
-                <Sparkles class="size-3.5" aria-hidden="true" />
+                <Sparkles
+                  class="size-3.5"
+                  aria-hidden="true" />
                 Trending
               </span>
             </div>
@@ -287,15 +320,24 @@ function leaveDescription(element: Element, done: () => void): void {
               </CardTitle>
               <p class="text-sm text-muted-foreground">
                 by
-                <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+                <Link
+                  class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
+                  :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
                 <span aria-hidden="true"> · </span>
                 {{ idea.createdAtForHumans }}
               </p>
             </div>
           </div>
 
-          <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="pointer-events-auto relative z-20 shrink-0">
-            <GitBranch class="size-4" aria-hidden="true" />
+          <Button
+            v-if="idea.can.update"
+            :as="Link"
+            :href="idea.routes.dashboard"
+            size="sm"
+            class="pointer-events-auto relative z-20 shrink-0">
+            <GitBranch
+              class="size-4"
+              aria-hidden="true" />
             Manage
           </Button>
         </div>
@@ -307,20 +349,30 @@ function leaveDescription(element: Element, done: () => void): void {
 
       <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div class="flex min-w-0 flex-wrap gap-1.5">
-          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+          <Badge
+            v-for="tag in idea.tags"
+            :key="tag"
+            variant="secondary"
+            class="text-xs">
             {{ tag }}
           </Badge>
-          <span v-if="idea.tags.length === 0" class="text-sm text-muted-foreground">No tags yet.</span>
+          <span
+            v-if="idea.tags.length === 0"
+            class="text-sm text-muted-foreground">No tags yet.</span>
         </div>
 
         <div class="flex shrink-0 flex-wrap items-center gap-3 text-xs text-muted-foreground sm:justify-end">
           <span class="inline-flex items-center gap-1.5">
-            <Users class="size-3.5 text-primary" aria-hidden="true" />
+            <Users
+              class="size-3.5 text-primary"
+              aria-hidden="true" />
             <strong class="font-semibold text-white">{{ idea.supportersCount.toLocaleString() }}</strong>
             supporters
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <MessageSquare class="size-3.5 text-primary" aria-hidden="true" />
+            <MessageSquare
+              class="size-3.5 text-primary"
+              aria-hidden="true" />
             <strong class="font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
             collaborators
           </span>
@@ -328,11 +380,17 @@ function leaveDescription(element: Element, done: () => void): void {
       </div>
     </div>
 
-    <CardHeader v-else :class="headerClass">
+    <CardHeader
+      v-else
+      :class="headerClass">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-col gap-2">
-          <div v-if="featured" class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
-            <Sparkles class="size-3.5" aria-hidden="true" />
+          <div
+            v-if="featured"
+            class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
+            <Sparkles
+              class="size-3.5"
+              aria-hidden="true" />
             Trending
           </div>
           <template v-if="single && !hideTitle">
@@ -340,33 +398,51 @@ function leaveDescription(element: Element, done: () => void): void {
               {{ idea.titleDisplay }}
             </h1>
           </template>
-          <CardTitle v-else-if="!single" class="leading-tight">
+          <CardTitle
+            v-else-if="!single"
+            class="leading-tight">
             <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
           </CardTitle>
           <p class="text-xs text-muted-foreground">
             by
-            <Link class="pointer-events-auto relative z-20 font-medium text-primary hover:underline" :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
+            <Link
+              class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
+              :href="idea.user.routes.show">@{{ idea.user.username }}</Link>
             <span aria-hidden="true"> · </span>
             {{ idea.createdAtForHumans }}
           </p>
         </div>
 
-        <div v-if="idea.can.update || single" class="pointer-events-auto relative z-20 flex shrink-0 flex-wrap items-center gap-2">
-          <Badge :variant="statusBadgeVariant" class="w-fit">
+        <div
+          v-if="idea.can.update || single"
+          class="pointer-events-auto relative z-20 flex shrink-0 flex-wrap items-center gap-2">
+          <Badge
+            :variant="statusBadgeVariant"
+            class="w-fit">
             {{ idea.statusDisplay }}
           </Badge>
         </div>
       </div>
     </CardHeader>
 
-    <CardContent v-if="single" class="flex flex-col gap-5">
-      <section class="flex flex-col gap-2" aria-label="Idea summary">
+    <CardContent
+      v-if="single"
+      class="flex flex-col gap-5">
+      <section
+        class="flex flex-col gap-2"
+        aria-label="Idea summary">
         <h2 class="text-sm font-semibold text-white">Summary</h2>
         <p class="break-words text-base leading-7 text-white [overflow-wrap:anywhere]">
           {{ idea.summary }}
         </p>
-        <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-2 pt-1">
-          <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+        <div
+          v-if="idea.tags.length > 0"
+          class="flex flex-wrap gap-2 pt-1">
+          <Badge
+            v-for="tag in idea.tags"
+            :key="tag"
+            variant="secondary"
+            class="text-xs">
             {{ tag }}
           </Badge>
         </div>
@@ -380,12 +456,18 @@ function leaveDescription(element: Element, done: () => void): void {
           :aria-expanded="isDescriptionExpanded"
           @click="isDescriptionExpanded = !isDescriptionExpanded"
         >
-          <span class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65" aria-hidden="true" />
+          <span
+            class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65"
+            aria-hidden="true" />
           <span class="inline-flex items-center gap-1 text-sm font-semibold">
             {{ pitchToggleLabel }}
-            <ChevronDown :class="['size-4 transition-transform duration-200', pitchChevronClass]" aria-hidden="true" />
+            <ChevronDown
+              :class="['size-4 transition-transform duration-200', pitchChevronClass]"
+              aria-hidden="true" />
           </span>
-          <span class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65" aria-hidden="true" />
+          <span
+            class="h-px flex-1 bg-primary/35 transition-colors group-hover:bg-primary/65"
+            aria-hidden="true" />
         </button>
 
         <Transition
@@ -393,7 +475,10 @@ function leaveDescription(element: Element, done: () => void): void {
           @enter="enterDescription"
           @leave="leaveDescription"
         >
-          <div v-if="isDescriptionExpanded" :id="descriptionId" class="description-reveal-panel">
+          <div
+            v-if="isDescriptionExpanded"
+            :id="descriptionId"
+            class="description-reveal-panel">
             <slot name="pitch-toc" />
             <div class="min-h-0 min-w-0 overflow-hidden border-t border-border pt-4">
               <MarkdownContent :html="idea.contentHtml" />
@@ -403,38 +488,67 @@ function leaveDescription(element: Element, done: () => void): void {
       </section>
     </CardContent>
 
-    <CardContent v-else-if="!isCompact && !isDetailed" :class="summaryContentClass">
+    <CardContent
+      v-else-if="!isCompact && !isDetailed"
+      :class="summaryContentClass">
       <p class="break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">
         {{ idea.tagline }}
       </p>
-      <div v-if="idea.tags.length > 0" class="flex flex-wrap gap-1.5">
-        <Badge v-for="tag in idea.tags" :key="tag" variant="secondary" class="text-xs">
+      <div
+        v-if="idea.tags.length > 0"
+        class="flex flex-wrap gap-1.5">
+        <Badge
+          v-for="tag in idea.tags"
+          :key="tag"
+          variant="secondary"
+          class="text-xs">
           {{ tag }}
         </Badge>
       </div>
     </CardContent>
 
-    <div v-if="!single && !isCompact && !isDetailed" :class="cardStatsClass">
+    <div
+      v-if="!single && !isCompact && !isDetailed"
+      :class="cardStatsClass">
       <span class="inline-flex items-center gap-2">
-        <Users class="size-4 text-primary" aria-hidden="true" />
+        <Users
+          class="size-4 text-primary"
+          aria-hidden="true" />
         {{ supportersLabel }}
       </span>
-      <span class="text-border" aria-hidden="true">/</span>
+      <span
+        class="text-border"
+        aria-hidden="true">/</span>
       <span class="inline-flex items-center gap-2">
-        <MessageSquare class="size-4 text-primary" aria-hidden="true" />
+        <MessageSquare
+          class="size-4 text-primary"
+          aria-hidden="true" />
         {{ collaboratorsLabel }}
       </span>
     </div>
 
-    <div v-if="!single && !isCompact && !isDetailed && (idea.can.update || idea.repository)" :class="cardActionsClass">
+    <div
+      v-if="!single && !isCompact && !isDetailed && (idea.can.update || idea.repository)"
+      :class="cardActionsClass">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <div v-if="idea.repository" class="inline-flex items-center gap-2 text-sm text-muted-foreground">
-          <GitBranch class="size-4 text-primary" aria-hidden="true" />
+        <div
+          v-if="idea.repository"
+          class="inline-flex items-center gap-2 text-sm text-muted-foreground">
+          <GitBranch
+            class="size-4 text-primary"
+            aria-hidden="true" />
           Repository linked
         </div>
 
-        <Button v-if="idea.can.update" :as="Link" :href="idea.routes.dashboard" size="sm" class="ml-auto">
-          <GitBranch class="size-4" aria-hidden="true" />
+        <Button
+          v-if="idea.can.update"
+          :as="Link"
+          :href="idea.routes.dashboard"
+          size="sm"
+          class="ml-auto">
+          <GitBranch
+            class="size-4"
+            aria-hidden="true" />
           Manage
         </Button>
       </div>

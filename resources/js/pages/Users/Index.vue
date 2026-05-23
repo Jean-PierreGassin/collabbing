@@ -127,16 +127,22 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
       </p>
     </div>
 
-    <div v-if="hasMembers" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div
+      v-if="hasMembers"
+      class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <article
         v-for="user in props.users.items"
         :key="user.id"
         class="group flex min-w-0 flex-col gap-4 rounded-md border border-border bg-card/90 p-4 transition-[border-color,background-color,box-shadow,transform] duration-150 ease-out hover:-translate-y-px hover:border-primary/35 hover:bg-card focus-within:border-primary/55 focus-within:ring-2 focus-within:ring-ring/35"
       >
         <div class="flex min-w-0 gap-3">
-          <UserAvatar :src="user.profilePicture" :alt="`${user.name} profile picture`" />
+          <UserAvatar
+            :src="user.profilePicture"
+            :alt="`${user.name} profile picture`" />
           <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <a class="truncate font-semibold text-white transition-colors hover:text-primary" :href="user.routes.show">
+            <a
+              class="truncate font-semibold text-white transition-colors hover:text-primary"
+              :href="user.routes.show">
               {{ user.name }}
             </a>
             <span class="truncate text-sm text-muted-foreground">@{{ user.username }}</span>
@@ -144,8 +150,12 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <Badge :variant="githubAvailabilityVariant(user)" class="gap-1.5">
-            <GitBranch class="size-3.5" aria-hidden="true" />
+          <Badge
+            :variant="githubAvailabilityVariant(user)"
+            class="gap-1.5">
+            <GitBranch
+              class="size-3.5"
+              aria-hidden="true" />
             {{ githubAvailabilityLabel(user) }}
           </Badge>
           <a
@@ -169,7 +179,9 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
           >
             {{ user.bio }}
           </p>
-          <p v-else class="text-sm leading-6 text-muted-foreground">
+          <p
+            v-else
+            class="text-sm leading-6 text-muted-foreground">
             This member has not added a bio yet.
           </p>
 
@@ -189,8 +201,14 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
         </div>
 
         <div class="mt-auto flex flex-wrap items-center gap-2 border-t border-border pt-4">
-          <Button :as="'a'" :href="user.routes.show" size="sm" class="flex-1 sm:flex-none">
-            <UserRound class="size-4" aria-hidden="true" />
+          <Button
+            :as="'a'"
+            :href="user.routes.show"
+            size="sm"
+            class="flex-1 sm:flex-none">
+            <UserRound
+              class="size-4"
+              aria-hidden="true" />
             View profile
           </Button>
           <Button
@@ -201,19 +219,29 @@ async function copyProfileLink(user: DomainUser): Promise<void> {
             class="flex-1 sm:flex-none"
             @click="copyProfileLink(user)"
           >
-            <Check v-if="copiedUserId === user.id" class="size-4" aria-hidden="true" />
-            <LinkIcon v-else class="size-4" aria-hidden="true" />
+            <Check
+              v-if="copiedUserId === user.id"
+              class="size-4"
+              aria-hidden="true" />
+            <LinkIcon
+              v-else
+              class="size-4"
+              aria-hidden="true" />
             {{ copiedUserId === user.id ? 'Copied' : 'Copy link' }}
           </Button>
         </div>
       </article>
     </div>
 
-    <div v-else class="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
+    <div
+      v-else
+      class="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
       No members are available yet.
     </div>
 
-    <p class="sr-only" aria-live="polite">
+    <p
+      class="sr-only"
+      aria-live="polite">
       <template v-if="copiedUserId !== null">Profile link copied.</template>
     </p>
 

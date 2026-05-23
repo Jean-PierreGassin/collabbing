@@ -220,7 +220,9 @@ async function submitForm(event: SubmitEvent): Promise<void> {
 </script>
 
 <template>
-  <div class="mx-auto w-full" :class="widthClass">
+  <div
+    class="mx-auto w-full"
+    :class="widthClass">
     <div
       ref="shell"
       class="auth-morph-card relative mx-auto overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm shadow-black/10"
@@ -248,11 +250,19 @@ async function submitForm(event: SubmitEvent): Promise<void> {
           @input="clearFieldError"
           @submit="submitForm"
         >
-          <p v-if="formError" class="flex gap-2 rounded-md bg-destructive/12 px-3 py-2 text-sm leading-5 text-destructive" role="alert">
-            <CircleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <p
+            v-if="formError"
+            class="flex gap-2 rounded-md bg-destructive/12 px-3 py-2 text-sm leading-5 text-destructive"
+            role="alert">
+            <CircleAlert
+              class="mt-0.5 size-4 shrink-0"
+              aria-hidden="true" />
             <span>{{ formError }}</span>
           </p>
-          <slot :errors-for="errorsFor" :is-submitting="isSubmitting" :phase="phase" />
+          <slot
+            :errors-for="errorsFor"
+            :is-submitting="isSubmitting"
+            :phase="phase" />
         </form>
       </div>
 
@@ -266,12 +276,24 @@ async function submitForm(event: SubmitEvent): Promise<void> {
         role="status"
         aria-live="polite"
       >
-        <svg class="auth-success-svg" viewBox="0 0 64 64" aria-hidden="true">
-          <circle class="auth-success-ring" cx="32" cy="32" r="22" />
-          <path class="auth-success-check" d="M20 33.5 28.5 42 45 23" />
+        <svg
+          class="auth-success-svg"
+          viewBox="0 0 64 64"
+          aria-hidden="true">
+          <circle
+            class="auth-success-ring"
+            cx="32"
+            cy="32"
+            r="22" />
+          <path
+            class="auth-success-check"
+            d="M20 33.5 28.5 42 45 23" />
         </svg>
         <span class="sr-only">Success. Taking you to your ideas.</span>
-        <span v-if="isFilled" class="auth-success-sparks" aria-hidden="true">
+        <span
+          v-if="isFilled"
+          class="auth-success-sparks"
+          aria-hidden="true">
           <span />
           <span />
           <span />

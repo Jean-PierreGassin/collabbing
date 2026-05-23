@@ -75,7 +75,9 @@ function startReply(): void {
 <template>
   <article :class="threadClass(depth)">
     <header class="flex flex-wrap items-center justify-between gap-2 text-sm">
-      <a class="font-medium text-primary hover:underline" :href="comment.user.routes.show">
+      <a
+        class="font-medium text-primary hover:underline"
+        :href="comment.user.routes.show">
         @{{ comment.user.username }}
       </a>
       <span class="text-muted-foreground">
@@ -97,19 +99,37 @@ function startReply(): void {
       @cancel="isEditing = false"
       @submitted="isEditing = false"
     />
-    <MarkdownContent v-else :html="comment.contentHtml" />
+    <MarkdownContent
+      v-else
+      :html="comment.contentHtml" />
 
     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-      <span v-if="comment.wasEdited" class="text-sm text-muted-foreground">Last edited {{ comment.updatedAtForHumans }}</span>
+      <span
+        v-if="comment.wasEdited"
+        class="text-sm text-muted-foreground">Last edited {{ comment.updatedAtForHumans }}</span>
       <span v-else />
       <div class="flex flex-wrap gap-2">
-        <Button v-if="comment.replies.length > 0" type="button" variant="ghost" size="sm" @click="areRepliesVisible = !areRepliesVisible">
+        <Button
+          v-if="comment.replies.length > 0"
+          type="button"
+          variant="ghost"
+          size="sm"
+          @click="areRepliesVisible = !areRepliesVisible">
           {{ repliesToggleLabel(areRepliesVisible) }} {{ comment.replies.length.toLocaleString() }} {{ replyCountLabel(comment.replies.length) }}
         </Button>
-        <Button type="button" variant="ghost" size="sm" @click="toggleReplying">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          @click="toggleReplying">
           {{ replyButtonLabel() }}
         </Button>
-        <Button v-if="comment.can.update && !isEditing" type="button" variant="outline" size="sm" @click="isEditing = true">Edit</Button>
+        <Button
+          v-if="comment.can.update && !isEditing"
+          type="button"
+          variant="outline"
+          size="sm"
+          @click="isEditing = true">Edit</Button>
       </div>
     </div>
 
@@ -125,7 +145,9 @@ function startReply(): void {
       @submitted="isReplying = false"
     />
 
-    <div v-if="comment.replies.length > 0 && areRepliesVisible" class="flex flex-col gap-3">
+    <div
+      v-if="comment.replies.length > 0 && areRepliesVisible"
+      class="flex flex-col gap-3">
       <CommentThread
         v-for="reply in comment.replies"
         :key="reply.id"

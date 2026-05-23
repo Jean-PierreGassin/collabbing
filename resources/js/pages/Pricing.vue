@@ -29,10 +29,17 @@ const session = useSessionStore();
             <li>Limited idea applications per day</li>
             <li><s>Automatic idea repository management</s></li>
           </ul>
-          <Button v-if="!session.isAuthenticated" as="a" :href="session.routes.register" class="w-fit">
+          <Button
+            v-if="!session.isAuthenticated"
+            as="a"
+            :href="session.routes.register"
+            class="w-fit">
             Sign up for free
           </Button>
-          <Badge v-else variant="secondary" class="w-fit">Current free access</Badge>
+          <Badge
+            v-else
+            variant="secondary"
+            class="w-fit">Current free access</Badge>
         </CardContent>
       </Card>
 
@@ -53,7 +60,10 @@ const session = useSessionStore();
             <li>Unlimited idea applications</li>
             <li>Automatic idea repository management</li>
           </ul>
-          <Button type="button" disabled class="w-fit">
+          <Button
+            type="button"
+            disabled
+            class="w-fit">
             Get started
           </Button>
           <p class="text-sm font-medium text-muted-foreground">Collabbing is currently free for everyone.</p>

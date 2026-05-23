@@ -191,8 +191,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <span ref="selectRoot" class="relative inline-flex min-w-36">
-    <input type="hidden" :name="name" :value="selectedValue">
+  <span
+    ref="selectRoot"
+    class="relative inline-flex min-w-36">
+    <input
+      type="hidden"
+      :name="name"
+      :value="selectedValue">
     <button
       :id="id"
       type="button"
@@ -205,7 +210,9 @@ onBeforeUnmount(() => {
       @keydown="handleButtonKeydown"
     >
       <span class="truncate">{{ selectedLabel }}</span>
-      <ChevronDown :class="['size-4 shrink-0 text-primary transition-transform', { 'rotate-180': isOpen }]" aria-hidden="true" />
+      <ChevronDown
+        :class="['size-4 shrink-0 text-primary transition-transform', { 'rotate-180': isOpen }]"
+        aria-hidden="true" />
     </button>
 
     <Teleport to="body">
@@ -234,7 +241,10 @@ onBeforeUnmount(() => {
             @mouseenter="activeIndex = index"
           >
             <span>{{ option.label }}</span>
-            <Check v-if="option.value === selectedValue" class="size-4" aria-hidden="true" />
+            <Check
+              v-if="option.value === selectedValue"
+              class="size-4"
+              aria-hidden="true" />
           </button>
         </div>
       </Transition>

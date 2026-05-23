@@ -101,7 +101,9 @@ onUnmounted(stopFinishListener);
       :class="buttonClass()"
       @click="startPaging"
     >
-      <ChevronLeft class="size-4" aria-hidden="true" />
+      <ChevronLeft
+        class="size-4"
+        aria-hidden="true" />
       Previous
     </Button>
     <Button
@@ -112,7 +114,9 @@ onUnmounted(stopFinishListener);
       disabled
       :class="buttonClass()"
     >
-      <ChevronLeft class="size-4" aria-hidden="true" />
+      <ChevronLeft
+        class="size-4"
+        aria-hidden="true" />
       Previous
     </Button>
     <span
@@ -137,7 +141,9 @@ onUnmounted(stopFinishListener);
       @click="startPaging"
     >
       Next
-      <ChevronRight class="size-4" aria-hidden="true" />
+      <ChevronRight
+        class="size-4"
+        aria-hidden="true" />
     </Button>
     <Button
       v-else
@@ -148,7 +154,9 @@ onUnmounted(stopFinishListener);
       :class="buttonClass()"
     >
       Next
-      <ChevronRight class="size-4" aria-hidden="true" />
+      <ChevronRight
+        class="size-4"
+        aria-hidden="true" />
     </Button>
   </nav>
 </template>

@@ -30,6 +30,23 @@ export default [
       sourceType: 'module',
     },
     rules: {
+      'vue/first-attribute-linebreak': ['error', {
+        multiline: 'below',
+        singleline: 'ignore',
+      }],
+      'vue/html-indent': ['error', 2, {
+        attribute: 1,
+        baseIndent: 1,
+        closeBracket: 0,
+      }],
+      'vue/max-attributes-per-line': ['error', {
+        multiline: {
+          max: 1,
+        },
+        singleline: {
+          max: 1,
+        },
+      }],
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
     },

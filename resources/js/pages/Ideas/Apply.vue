@@ -21,9 +21,16 @@ const applicationValidator = maxLengthValidator(1500, 'an application');
 
     <Card class="w-full max-w-3xl">
       <CardContent>
-        <form :action="idea.routes.applicationsStore" method="POST" class="flex flex-col gap-4">
+        <form
+          :action="idea.routes.applicationsStore"
+          method="POST"
+          class="flex flex-col gap-4">
           <CsrfField />
-          <FormField id="content" label="Application" help="Share the skills, context, or time you can contribute. Markdown is supported." :validator="applicationValidator">
+          <FormField
+            id="content"
+            label="Application"
+            help="Share the skills, context, or time you can contribute. Markdown is supported."
+            :validator="applicationValidator">
             <template #default="{ invalid, describedBy, feedbackClass }">
               <textarea
                 id="content"

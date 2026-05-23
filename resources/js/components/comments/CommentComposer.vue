@@ -195,11 +195,27 @@ onMounted(focusTextarea);
 </script>
 
 <template>
-  <form :action="action" method="POST" class="flex flex-col gap-4" @submit.prevent="submitComment">
+  <form
+    :action="action"
+    method="POST"
+    class="flex flex-col gap-4"
+    @submit.prevent="submitComment">
     <CsrfField />
-    <MethodField v-if="overrideMethod" :method="overrideMethod" />
-    <input v-if="parentId" type="hidden" name="parent_id" :value="parentId">
-    <FormField :id="textareaId" error-key="content" :label="label" :hide-label="hideLabel" help="Markdown and @mentions are supported." :validator="contentValidator">
+    <MethodField
+      v-if="overrideMethod"
+      :method="overrideMethod" />
+    <input
+      v-if="parentId"
+      type="hidden"
+      name="parent_id"
+      :value="parentId">
+    <FormField
+      :id="textareaId"
+      error-key="content"
+      :label="label"
+      :hide-label="hideLabel"
+      help="Markdown and @mentions are supported."
+      :validator="contentValidator">
       <template #default="{ invalid, describedBy, feedbackClass }">
         <div class="relative">
           <textarea
@@ -243,8 +259,16 @@ onMounted(focusTextarea);
     </FormField>
 
     <div class="flex flex-wrap justify-end gap-2">
-      <Button v-if="cancelLabel" type="button" variant="ghost" size="sm" @click="emit('cancel')">{{ cancelLabel }}</Button>
-      <Button type="submit" size="sm" :disabled="form.processing">{{ buttonLabel }}</Button>
+      <Button
+        v-if="cancelLabel"
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="emit('cancel')">{{ cancelLabel }}</Button>
+      <Button
+        type="submit"
+        size="sm"
+        :disabled="form.processing">{{ buttonLabel }}</Button>
     </div>
   </form>
 </template>

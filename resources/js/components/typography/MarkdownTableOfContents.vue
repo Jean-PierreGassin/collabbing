@@ -351,11 +351,16 @@ onBeforeUnmount(() => {
             @click="isMobileOpen = !isMobileOpen"
           >
             Contents
-            <ChevronDown :class="['size-4 text-primary transition-transform duration-200', mobileChevronClass()]" aria-hidden="true" />
+            <ChevronDown
+              :class="['size-4 text-primary transition-transform duration-200', mobileChevronClass()]"
+              aria-hidden="true" />
           </button>
 
           <Transition name="toc-mobile">
-            <nav v-if="isMobileOpen" :aria-label="navLabel" class="scrollbar-hidden mt-2 max-h-[min(18rem,55dvh)] overflow-y-auto overscroll-contain border-l border-border py-2 text-sm">
+            <nav
+              v-if="isMobileOpen"
+              :aria-label="navLabel"
+              class="scrollbar-hidden mt-2 max-h-[min(18rem,55dvh)] overflow-y-auto overscroll-contain border-l border-border py-2 text-sm">
               <div class="flex flex-col gap-1">
                 <div
                   v-for="(heading, index) in headings"
@@ -376,7 +381,9 @@ onBeforeUnmount(() => {
                     ]"
                     @click.prevent="openHeading(heading.anchor)"
                   >
-                    <span class="truncate" :class="headingTextClass(heading)">{{ heading.title }}</span>
+                    <span
+                      class="truncate"
+                      :class="headingTextClass(heading)">{{ heading.title }}</span>
                   </a>
                 </div>
               </div>
@@ -394,7 +401,9 @@ onBeforeUnmount(() => {
     >
       <div class="sticky top-24 p-2">
         <h2 class="pb-2 pl-3 text-sm font-semibold text-white">Contents</h2>
-        <nav :aria-label="navLabel" class="scrollbar-hidden flex max-h-[calc(100svh-10rem)] flex-col gap-1 overflow-y-auto overscroll-contain border-l border-border pb-3 text-sm">
+        <nav
+          :aria-label="navLabel"
+          class="scrollbar-hidden flex max-h-[calc(100svh-10rem)] flex-col gap-1 overflow-y-auto overscroll-contain border-l border-border pb-3 text-sm">
           <div class="flex flex-col gap-1">
             <div
               v-for="(heading, index) in headings"
@@ -415,7 +424,9 @@ onBeforeUnmount(() => {
                 ]"
                 @click.prevent="openHeading(heading.anchor)"
               >
-                <span class="truncate" :class="headingTextClass(heading)">{{ heading.title }}</span>
+                <span
+                  class="truncate"
+                  :class="headingTextClass(heading)">{{ heading.title }}</span>
               </a>
             </div>
           </div>

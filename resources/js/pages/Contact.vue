@@ -17,7 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
       <CardHeader>
         <div class="flex items-center gap-3">
           <span class="flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Mail class="size-5" aria-hidden="true" />
+            <Mail
+              class="size-5"
+              aria-hidden="true" />
           </span>
           <CardTitle>Email enquiry</CardTitle>
         </div>
@@ -26,7 +28,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
         <p class="text-sm leading-6 text-muted-foreground">
           Include a short summary and the best way to get back to you.
         </p>
-        <Button as="a" href="mailto:jeanpierre.gassin@gmail.com?subject=Collabbing Enquiry" class="w-fit">
+        <Button
+          as="a"
+          href="mailto:jeanpierre.gassin@gmail.com?subject=Collabbing Enquiry"
+          class="w-fit">
           Email enquiry
         </Button>
       </CardContent>
