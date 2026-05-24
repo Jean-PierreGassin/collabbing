@@ -300,4 +300,47 @@ describe('FormField', () => {
     expect(wrapper.get('textarea').attributes('aria-invalid')).toBe('true');
     expect(wrapper.get('#content-feedback').text()).toBe('Comment is required.');
   });
+
+  it('does not run custom validators for empty optional fields on submit', async () => {
+    session.errors = {};
+    const validator = vi.fn((value: string) => {
+      if (value.trim() === '') {
+        return 'Enter optional context.';
+      }
+
+      return undefined;
+    });
+
+    const wrapper = mount(FormField, {
+      attachTo: document.body,
+      props: {
+        id: 'content',
+        label: 'Optional context',
+        validator,
+      },
+      slots: {
+        default: `
+          <template #default="{ invalid, describedBy, feedbackClass }">
+            <textarea id="content" form="optional-context-form" :class="feedbackClass" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" />
+          </template>
+        `,
+      },
+    });
+
+    const form = document.createElement('form');
+    form.id = 'optional-context-form';
+    document.body.append(form);
+
+    await nextTick();
+    await nextTick();
+
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    await nextTick();
+
+    expect(submitEvent.defaultPrevented).toBe(false);
+    expect(wrapper.get('textarea').attributes('aria-invalid')).toBeUndefined();
+    expect(wrapper.find('#content-feedback').exists()).toBe(false);
+    expect(validator).not.toHaveBeenCalled();
+  });
 });

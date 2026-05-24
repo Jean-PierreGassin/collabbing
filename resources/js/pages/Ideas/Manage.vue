@@ -2,7 +2,6 @@
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
-import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,14 @@ const showRepositoryInvitePrompt = computed(() => page.props.flash.repositoryInv
 const showRepositoryAccessPrompt = computed(() => (
   page.props.flash.repositoryAccessPrompt || props.idea.repositoryAccessReviewNeeded === true
 ) && props.idea.repository);
+const canInviteCollaborators = computed(() => props.idea.repository && props.idea.user.hasGithubToken);
+const repositoryInvitePromptText = computed(() => {
+  if (canInviteCollaborators.value) {
+    return 'Repository is connected. Invite approved collaborators when you are ready.';
+  }
+
+  return 'Repository is connected. Connect your code host to invite approved collaborators.';
+});
 const readinessItems = computed(() => [
   {
     actionHref: props.idea.routes.edit,
@@ -145,8 +152,18 @@ const {
             Create repository
           </Button>
         </form>
+        <Button
+          v-else-if="!idea.user.hasGithubToken && !showRepositoryInvitePrompt"
+          as="a"
+          :href="idea.routes.repositoryInvite"
+          size="sm">
+          <GitBranch
+            class="size-4"
+            aria-hidden="true" />
+          Connect code host to invite collaborators
+        </Button>
         <form
-          v-else
+          v-else-if="!showRepositoryInvitePrompt"
           :action="idea.routes.repositoryInvite"
           method="POST">
           <CsrfField />
@@ -178,9 +195,10 @@ const {
       role="status"
       aria-live="polite">
       <p>
-        Repository is connected. Invite approved collaborators when you are ready.
+        {{ repositoryInvitePromptText }}
       </p>
       <form
+        v-if="canInviteCollaborators"
         :action="idea.routes.repositoryInvite"
         method="POST">
         <CsrfField />
@@ -193,6 +211,16 @@ const {
           Invite collaborators
         </Button>
       </form>
+      <Button
+        v-else
+        as="a"
+        :href="idea.routes.repositoryInvite"
+        size="sm">
+        <GitBranch
+          class="size-4"
+          aria-hidden="true" />
+        Connect code host
+      </Button>
     </div>
 
     <div
@@ -286,7 +314,7 @@ const {
                       v-if="idea.can.deleteApplication"
                       class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 md:max-w-sm">
                       <summary class="cursor-pointer text-sm font-medium text-destructive">
-                        Decline Application
+                        Decline application
                       </summary>
                       <form
                         :action="application.routes.destroy"
@@ -342,7 +370,7 @@ const {
                         type="submit"
                         variant="success"
                         size="sm">
-                        Approve Application
+                        Approve application
                       </Button>
                     </form>
                   </div>
@@ -381,7 +409,7 @@ const {
                   v-if="idea.can.deleteApplication"
                   class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 sm:max-w-sm">
                   <summary class="cursor-pointer text-sm font-medium text-destructive">
-                    Remove Collaborator
+                    Remove collaborator
                   </summary>
                   <form
                     :action="collaborator.routes.destroy"
@@ -463,7 +491,6 @@ const {
             </ul>
           </CardContent>
         </Card>
-        <IdeaSidebar :idea="idea" />
       </aside>
     </div>
   </section>

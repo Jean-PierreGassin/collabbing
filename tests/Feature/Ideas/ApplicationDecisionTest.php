@@ -256,6 +256,23 @@ class ApplicationDecisionTest extends TestCase
             ->assertSessionHas('repositoryInvitePrompt', true);
     }
 
+    public function testRepositoryPromptAppearsWhenConnectedRepositoryNeedsCodeHostReconnect(): void
+    {
+        [
+            'owner' => $owner,
+            'idea' => $idea,
+            'application' => $application,
+        ] = $this->pendingApplication();
+
+        $this->activeRepositoryFor($idea);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.applications.approve', [$idea, $application]))
+            ->assertRedirect()
+            ->assertSessionHas('repositoryInvitePrompt', true);
+    }
+
     public function testRepositoryPromptSkipsUnavailableRepository(): void
     {
         [

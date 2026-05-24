@@ -228,6 +228,8 @@ describe('Ideas/Apply', () => {
   it('submits intent fields and optional context', async () => {
     const wrapper = mountApply();
 
+    expect(wrapper.get<HTMLSelectElement>('select[name="contribution_type"]').element.required).toBe(true);
+
     await selectCombobox('contribution_type', 'Testing - recommended');
     await wrapper.get<HTMLInputElement>('input#first_action').setValue('Write a regression test.');
     await wrapper.get<HTMLTextAreaElement>('textarea#content').setValue('I can start with Vitest coverage.');

@@ -221,12 +221,12 @@ const {
 
 let pageTitle = 'Share your idea';
 let formAction = session.routes.ideasStore;
-let submitLabel = 'Share Idea';
+let submitLabel = 'Share idea';
 
 if (props.idea) {
   pageTitle = 'Edit your idea';
   formAction = props.idea.routes.update;
-  submitLabel = 'Edit Idea';
+  submitLabel = 'Edit idea';
 }
 
 const readinessItems = computed(() => [

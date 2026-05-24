@@ -211,16 +211,14 @@ function confirmWithdraw(event: SubmitEvent): void {
       </div>
 
       <div class="flex flex-col gap-2 border-t border-border pt-4">
-        <Button
+        <span
           v-if="idea.can.update"
-          as="a"
-          :href="idea.routes.dashboard"
-          size="sm">
+          class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 text-sm font-medium text-foreground">
           <GitBranch
             class="size-4"
             aria-hidden="true" />
-          Manage collaboration
-        </Button>
+          You own this idea
+        </span>
         <div
           v-else-if="collaborator"
           class="flex flex-col gap-3">
@@ -336,7 +334,7 @@ function confirmWithdraw(event: SubmitEvent): void {
           <UserPlus
             class="size-4"
             aria-hidden="true" />
-          Apply to Collaborate
+          Apply to collaborate
         </Button>
         <Button
           v-else

@@ -241,7 +241,7 @@ function removeSupport(): void {
               variant="outline"
               :disabled="supportForm.processing"
               @click="removeSupport">
-              Remove Support
+              Remove support
             </Button>
             <Button
               v-else
@@ -250,7 +250,7 @@ function removeSupport(): void {
               variant="outline"
               :disabled="supportForm.processing"
               @click="supportIdea">
-              Support Idea
+              Support idea
             </Button>
             <span
               v-if="showSupportSparks"

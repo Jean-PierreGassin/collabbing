@@ -226,9 +226,6 @@ function mountManage(
     global: {
       stubs: {
         CsrfField: true,
-        IdeaSidebar: {
-          template: '<aside data-testid="idea-sidebar"></aside>',
-        },
         MarkdownContent: {
           props: ['html'],
           template: '<div v-html="html"></div>',
@@ -353,7 +350,7 @@ describe('Idea management tabs', () => {
     expect(wrapper.get('form[action="/ideas/1/applications/3/approve"]').attributes('method')).toBe('POST');
     expect(wrapper.get('form[action="/ideas/1/applications/3/approve"] input[name="_method"]').attributes('value')).toBe('PUT');
     expect(wrapper.get('textarea[name="approval_note"]').attributes('maxlength')).toBe('1200');
-    expect(wrapper.get('details summary').text()).toContain('Decline Application');
+    expect(wrapper.get('details summary').text()).toContain('Decline application');
     expect(wrapper.get('form[action="/ideas/1/applications/3"]').attributes('method')).toBe('POST');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
     expect(wrapper.get('textarea[name="decline_reason"]').attributes('maxlength')).toBe('1200');
@@ -378,10 +375,33 @@ describe('Idea management tabs', () => {
 
     const wrapper = mountManage([], [], {
       repository: true,
+      user: user({
+        hasGithubToken: true,
+      }),
     });
 
     expect(wrapper.text()).toContain('Repository is connected.');
-    expect(wrapper.findAll('form[action="/ideas/1/repository/invite"]')).toHaveLength(2);
+    expect(wrapper.findAll('form[action="/ideas/1/repository/invite"]')).toHaveLength(1);
+  });
+
+  it('links owners back to the code host before inviting collaborators', () => {
+    inertiaPage.props.flash.repositoryInvitePrompt = true;
+
+    const wrapper = mountManage([], [], {
+      repository: true,
+      user: user({
+        hasGithubToken: false,
+      }),
+      routes: {
+        ...idea().routes,
+        repositoryInvite: '/auth/github',
+      },
+    });
+
+    expect(wrapper.text()).toContain('Connect your code host to invite approved collaborators.');
+    expect(wrapper.findAll('form[action="/ideas/1/repository/invite"]')).toHaveLength(0);
+    expect(wrapper.findAll('a[href="/auth/github"]')).toHaveLength(1);
+    expect(wrapper.find('a[href="/auth/github"]').text()).toContain('Connect code host');
   });
 
   it('shows repository access cleanup prompt after collaborator exits', () => {
@@ -408,7 +428,7 @@ describe('Idea management tabs', () => {
 
     await wrapper.get('#manage-collaborators-tab').trigger('click');
 
-    expect(wrapper.get('details summary').text()).toContain('Remove Collaborator');
+    expect(wrapper.get('details summary').text()).toContain('Remove collaborator');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
     expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] button[type="submit"]').text()).toContain('Confirm remove');

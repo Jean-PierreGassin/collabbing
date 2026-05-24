@@ -45,7 +45,7 @@ export function useBreadcrumbs() {
       parentCrumb('Ideas', session.routes.ideas),
       {
         href,
-        label: `Idea - ${idea.titleDisplay}`,
+        label: idea.titleDisplay,
       },
     ];
 

@@ -314,7 +314,7 @@ describe('Ideas/Form', () => {
     expect(isHidden(wrapper, '#idea-form-basics-step')).toBe(false);
     expect(isHidden(wrapper, '#idea-form-collaboration-step')).toBe(true);
     expect(wrapper.get('[aria-label="Idea creation steps"]').text()).toContain('Idea basics');
-    expect(wrapper.findAll('button').some((button) => button.text() === 'Share Idea')).toBe(false);
+    expect(wrapper.findAll('button').some((button) => button.text() === 'Share idea')).toBe(false);
   });
 
   it('continues to collaboration setup after basics are valid', async () => {
@@ -324,7 +324,7 @@ describe('Ideas/Form', () => {
 
     expect(isHidden(wrapper, '#idea-form-basics-step')).toBe(true);
     expect(isHidden(wrapper, '#idea-form-collaboration-step')).toBe(false);
-    expect(wrapper.findAll('button').some((button) => button.text() === 'Share Idea')).toBe(true);
+    expect(wrapper.findAll('button').some((button) => button.text() === 'Share idea')).toBe(true);
   });
 
   it('keeps basic values submitted from collaboration setup', async () => {
@@ -570,7 +570,7 @@ describe('Ideas/Form', () => {
     expect(wrapper.text()).toContain('Idea basics');
     expect(wrapper.text()).toContain('Collaboration setup');
     expect(wrapper.findAll('button').some((button) => button.text() === 'Continue')).toBe(false);
-    expect(wrapper.findAll('button').some((button) => button.text() === 'Edit Idea')).toBe(true);
+    expect(wrapper.findAll('button').some((button) => button.text() === 'Edit idea')).toBe(true);
   });
 
   it('prefills edit collaboration values from idea props', () => {

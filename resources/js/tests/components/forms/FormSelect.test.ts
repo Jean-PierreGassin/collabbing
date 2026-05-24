@@ -18,10 +18,10 @@ describe('FormSelect', () => {
       },
     });
 
-    const hiddenInput = wrapper.get('input[type="hidden"]').element as HTMLInputElement;
+    const select = wrapper.get('select[name="status"]').element as HTMLSelectElement;
 
-    expect(hiddenInput.name).toBe('status');
-    expect(hiddenInput.value).toBe('open');
+    expect(select.name).toBe('status');
+    expect(select.value).toBe('open');
     expect(wrapper.get('[role="combobox"]').text()).toContain('Open');
 
     await wrapper.get('[role="combobox"]').trigger('click');
@@ -36,9 +36,31 @@ describe('FormSelect', () => {
     options[1].click();
     await nextTick();
 
-    expect(hiddenInput.value).toBe('closed');
+    expect(select.value).toBe('closed');
     expect(wrapper.get('[role="combobox"]').text()).toContain('Closed');
     expect(document.body.querySelector('[role="listbox"]')).toBeNull();
+  });
+
+  it('can expose required browser validation while keeping the custom trigger', () => {
+    const wrapper = mount(FormSelect, {
+      props: {
+        id: 'contribution_type',
+        name: 'contribution_type',
+        required: true,
+      },
+      slots: {
+        default: `
+          <option value="">Choose a contribution type</option>
+          <option value="testing">Testing</option>
+        `,
+      },
+    });
+
+    const select = wrapper.get('select[name="contribution_type"]').element as HTMLSelectElement;
+
+    expect(select.required).toBe(true);
+    expect(select.value).toBe('');
+    expect(wrapper.get('[role="combobox"]').attributes('id')).toBe('contribution_type');
   });
 
   it('supports reactive values with generated option lists', async () => {
@@ -80,9 +102,9 @@ describe('FormSelect', () => {
       `,
     }));
 
-    const hiddenInput = wrapper.get('input[type="hidden"]').element as HTMLInputElement;
+    const select = wrapper.get('select[name="communication_style"]').element as HTMLSelectElement;
 
-    expect(hiddenInput.value).toBe('github');
+    expect(select.value).toBe('github');
     expect(wrapper.get('[role="combobox"]').text()).toContain('GitHub');
 
     await wrapper.get('[role="combobox"]').trigger('click');
@@ -96,7 +118,7 @@ describe('FormSelect', () => {
     discordOption?.click();
     await nextTick();
 
-    expect(hiddenInput.value).toBe('discord');
+    expect(select.value).toBe('discord');
     expect(wrapper.get('[data-testid="selected"]').text()).toBe('discord');
     expect(wrapper.get('[role="combobox"]').text()).toContain('Discord');
   });

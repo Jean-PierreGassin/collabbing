@@ -81,7 +81,7 @@ const pageTitle = computed(() => {
   return `Apply to ${props.idea.title}`;
 });
 const formAction = computed(() => props.application?.routes.update ?? props.idea.routes.applicationsStore);
-const submitLabel = computed(() => props.application ? 'Update Application' : 'Submit Application');
+const submitLabel = computed(() => props.application ? 'Update application' : 'Submit application');
 </script>
 
 <template>
@@ -123,6 +123,7 @@ const submitLabel = computed(() => props.application ? 'Update Application' : 'S
                 id="contribution_type"
                 v-model="contributionType"
                 name="contribution_type"
+                required
                 :class="feedbackClass"
                 :aria-describedby="describedBy">
                 <option

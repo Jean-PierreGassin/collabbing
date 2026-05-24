@@ -20,6 +20,6 @@ class IdeaApplicationMessageController extends Controller
 
         return redirect()
             ->back()
-            ->with('status', 'Thread message sent');
+            ->with('status', 'Message sent.');
     }
 }

@@ -232,7 +232,7 @@ describe('IdeaSidebar', () => {
     expect(wrapper.text()).toContain('GitHub');
     expect(wrapper.text()).toContain('Repo available');
     expect(wrapper.text()).toContain('Start notes ready');
-    expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to Collaborate');
+    expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to collaborate');
   });
 
   it('renders first contribution links through sanitized markdown', () => {
@@ -270,7 +270,7 @@ describe('IdeaSidebar', () => {
     expect(wrapper.get('a[href="/register?next=%2Fideas%2F1"]').text()).toContain('Register');
     expect(wrapper.get('a[href="/login?next=%2Fideas%2F1"]').text()).toContain('Sign in');
     expect(wrapper.text()).toContain('Sign in to apply, support, or comment.');
-    expect(wrapper.text()).not.toContain('Apply to Collaborate');
+    expect(wrapper.text()).not.toContain('Apply to collaborate');
   });
 
   it('shows closed application guidance without removing support context', () => {
@@ -316,6 +316,21 @@ describe('IdeaSidebar', () => {
 
     expect(wrapper.text()).toContain('Sign in to support or comment while applications are closed.');
     expect(wrapper.text()).not.toContain('Sign in to apply, support, or comment.');
+  });
+
+  it('shows owner state without duplicating the manage action inside the panel', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      idea: idea({
+        can: {
+          ...idea().can,
+          update: true,
+        },
+      }),
+    });
+
+    expect(wrapper.text()).toContain('You own this idea');
+    expect(wrapper.find('a[href="/ideas/1/dashboard"]').exists()).toBe(false);
   });
 
   it('surfaces current applicant and collaborator states as the primary action', () => {

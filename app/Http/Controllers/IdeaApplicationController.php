@@ -48,7 +48,7 @@ class IdeaApplicationController extends Controller
 
         return redirect()
             ->route('ideas.show', $idea->id)
-            ->with('status', 'Application successfully submitted');
+            ->with('status', 'Application submitted.');
     }
 
     public function update(StoreIdeaApplication $request, Idea $idea, IdeaApplication $application): RedirectResponse
@@ -59,7 +59,7 @@ class IdeaApplicationController extends Controller
 
         return redirect()
             ->route('ideas.show', $idea->id)
-            ->with('status', 'Application updated');
+            ->with('status', 'Application updated.');
     }
 
     public function approveApplication(ReviewIdeaApplication $request, Idea $idea, IdeaApplication $application): RedirectResponse
@@ -103,7 +103,7 @@ class IdeaApplicationController extends Controller
 
             return redirect()
                 ->route('ideas.show', $idea->id)
-                ->with('status', 'Application withdrawn');
+                ->with('status', 'Application withdrawn.');
         }
 
         $wasApproved = $application->isApproved();
@@ -140,8 +140,7 @@ class IdeaApplicationController extends Controller
         $owner = $idea->owner();
 
         return $idea->latestCodeRepository()?->isAvailable() === true
-            && $owner instanceof User
-            && $owner->hasGithubToken();
+            && $owner instanceof User;
     }
 
     private function hasAvailableRepository(Idea $idea): bool
