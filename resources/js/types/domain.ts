@@ -25,7 +25,11 @@ export interface IdeaApplication {
   id: number;
   content: string;
   contentHtml: string;
+  contributionType: string | null;
+  contributionTypeDisplay: string;
+  firstAction: string | null;
   status: string;
+  statusDisplay: string;
   createdAtForHumans: string;
   user: DomainUser;
   routes: {
@@ -88,6 +92,32 @@ export interface IdeaRepositoryActivity {
   events: RepositoryEvent[];
 }
 
+export interface IdeaCollaborationReadinessBadges {
+  applicationsOpen: boolean;
+  firstStepListed: boolean;
+  repoAvailable: boolean;
+  startNotesReady: boolean;
+}
+
+export interface IdeaCollaboration {
+  stage: string | null;
+  stageDisplay: string;
+  helpWanted: string[];
+  helpWantedDisplay: string[];
+  helpWantedNote: string | null;
+  firstContribution: string | null;
+  applicationsOpen: boolean;
+  applicationsClosedNote: string | null;
+  communicationStyle: string | null;
+  communicationStyleDisplay: string;
+  communicationNote: string | null;
+  gettingStartedNotesReady: boolean;
+  gettingStartedNotes: string | null;
+  gettingStartedNotesHtml: string | null;
+  gettingStartedNotesUpdatedAtForHumans: string | null;
+  readinessBadges: IdeaCollaborationReadinessBadges;
+}
+
 export interface Idea {
   id: number;
   title: string;
@@ -96,6 +126,7 @@ export interface Idea {
   summary: string;
   tags: string[];
   communication: string | null;
+  collaboration: IdeaCollaboration;
   content: string;
   contentHtml: string;
   status: string;

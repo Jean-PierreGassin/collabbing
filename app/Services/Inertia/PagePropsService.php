@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -99,6 +100,8 @@ class PagePropsService
             $repositoryInviteRoute = route('ideas.repository-invite', $idea);
         }
 
+        $privateGettingStartedNotes = $this->privateGettingStartedNotes($idea);
+
         return [
             'id' => $idea->id,
             'title' => $idea->title,
@@ -107,6 +110,29 @@ class PagePropsService
             'summary' => $this->ideaSummary($idea),
             'tags' => $this->ideaTags($idea),
             'communication' => $idea->communication,
+            'collaboration' => [
+                'stage' => $idea->collaboration_stage,
+                'stageDisplay' => $this->collaborationStageDisplay($idea->collaboration_stage),
+                'helpWanted' => $this->helpWanted($idea),
+                'helpWantedDisplay' => $this->helpWantedDisplay($idea),
+                'helpWantedNote' => $idea->help_wanted_note,
+                'firstContribution' => $idea->first_contribution,
+                'applicationsOpen' => $idea->applications_open,
+                'applicationsClosedNote' => $idea->applications_closed_note,
+                'communicationStyle' => $idea->communication_style,
+                'communicationStyleDisplay' => $this->communicationStyleDisplay($idea->communication_style),
+                'communicationNote' => $idea->communication_note,
+                'gettingStartedNotesReady' => $this->hasGettingStartedNotes($idea),
+                'gettingStartedNotes' => $privateGettingStartedNotes,
+                'gettingStartedNotesHtml' => $this->privateGettingStartedNotesHtml($privateGettingStartedNotes),
+                'gettingStartedNotesUpdatedAtForHumans' => $this->dateForHumans($idea->getting_started_notes_updated_at),
+                'readinessBadges' => [
+                    'applicationsOpen' => $idea->applications_open,
+                    'firstStepListed' => $this->hasFirstContribution($idea),
+                    'repoAvailable' => $repositoryAvailable,
+                    'startNotesReady' => $this->hasGettingStartedNotes($idea),
+                ],
+            ],
             'content' => $idea->content,
             'contentHtml' => (string) Markdown::convertToHtml($idea->content),
             'status' => $idea->status,
@@ -185,6 +211,123 @@ class PagePropsService
             ->unique()
             ->values()
             ->all();
+    }
+
+    private function helpWanted(Idea $idea): array
+    {
+        $helpWanted = $idea->getAttributeValue('help_wanted');
+
+        if (! is_array($helpWanted)) {
+            return [];
+        }
+
+        return collect($helpWanted)
+            ->filter(fn (mixed $area): bool => is_string($area) && trim($area) !== '')
+            ->map(fn (string $area): string => Str::of($area)->squish()->lower()->toString())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function helpWantedDisplay(Idea $idea): array
+    {
+        return collect($this->helpWanted($idea))
+            ->map(fn (string $area): string => $this->helpAreaDisplay($area))
+            ->values()
+            ->all();
+    }
+
+    private function collaborationStageDisplay(?string $stage): string
+    {
+        return match ($stage) {
+            Idea::COLLABORATION_STAGE_ROUGH_IDEA => 'Rough idea',
+            Idea::COLLABORATION_STAGE_NEEDS_SHAPING => 'Needs shaping',
+            Idea::COLLABORATION_STAGE_READY_TO_BUILD => 'Ready to build',
+            Idea::COLLABORATION_STAGE_ACTIVELY_BUILDING => 'Actively building',
+            Idea::COLLABORATION_STAGE_LIVE => 'Live',
+            default => 'Not decided yet',
+        };
+    }
+
+    private function helpAreaDisplay(string $area): string
+    {
+        return match ($area) {
+            Idea::HELP_FRONTEND => 'Frontend',
+            Idea::HELP_BACKEND => 'Backend',
+            Idea::HELP_DESIGN => 'Design',
+            Idea::HELP_PRODUCT => 'Product',
+            Idea::HELP_TESTING => 'Testing',
+            Idea::HELP_DEVOPS => 'DevOps',
+            Idea::HELP_WRITING => 'Writing',
+            Idea::HELP_RESEARCH => 'Research',
+            Idea::HELP_FEEDBACK => 'Feedback',
+            Idea::HELP_MARKETING => 'Marketing',
+            Idea::HELP_ANYTHING => 'Open to anything',
+            default => Str::of($area)->replace('_', ' ')->title()->toString(),
+        };
+    }
+
+    private function communicationStyleDisplay(?string $style): string
+    {
+        return match ($style) {
+            Idea::COMMUNICATION_STYLE_GITHUB => 'GitHub',
+            Idea::COMMUNICATION_STYLE_DISCORD => 'Discord',
+            Idea::COMMUNICATION_STYLE_SLACK => 'Slack',
+            Idea::COMMUNICATION_STYLE_EMAIL => 'Email',
+            Idea::COMMUNICATION_STYLE_CALLS => 'Calls',
+            Idea::COMMUNICATION_STYLE_NOT_DECIDED => 'Not decided yet',
+            default => 'Not decided yet',
+        };
+    }
+
+    private function hasFirstContribution(Idea $idea): bool
+    {
+        return is_string($idea->first_contribution) && trim($idea->first_contribution) !== '';
+    }
+
+    private function hasGettingStartedNotes(Idea $idea): bool
+    {
+        return is_string($idea->getting_started_notes) && trim($idea->getting_started_notes) !== '';
+    }
+
+    private function privateGettingStartedNotes(Idea $idea): ?string
+    {
+        if (! $this->hasGettingStartedNotes($idea)) {
+            return null;
+        }
+
+        if (! $this->canViewPrivateGettingStartedNotes($idea)) {
+            return null;
+        }
+
+        return $idea->getting_started_notes;
+    }
+
+    private function privateGettingStartedNotesHtml(?string $notes): ?string
+    {
+        if ($notes === null) {
+            return null;
+        }
+
+        return (string) Markdown::convertToHtml($notes);
+    }
+
+    private function canViewPrivateGettingStartedNotes(Idea $idea): bool
+    {
+        if (Gate::allows('update', $idea)) {
+            return true;
+        }
+
+        $user = Auth::user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        return $idea->applications()
+            ->where('user_id', $user->id)
+            ->where('status', IdeaApplication::STATUS_APPROVED)
+            ->exists();
     }
 
     private function relationCount(Idea $idea, string $relation, string $countAttribute): int
@@ -319,7 +462,11 @@ class PagePropsService
             'id' => $application->id,
             'content' => $application->content,
             'contentHtml' => (string) Markdown::convertToHtml($application->content),
+            'contributionType' => $application->contribution_type,
+            'contributionTypeDisplay' => $this->applicationContributionDisplay($application->contribution_type),
+            'firstAction' => $application->first_action,
             'status' => $application->status,
+            'statusDisplay' => $this->applicationStatusDisplay($application->status),
             'createdAtForHumans' => $application->created_at->diffForHumans(),
             'user' => $this->user($this->applicationUser($application)),
             'routes' => [
@@ -327,6 +474,28 @@ class PagePropsService
                 'approve' => route('ideas.applications.approve', [$application->idea_id, $application]),
             ],
         ];
+    }
+
+    private function applicationContributionDisplay(?string $contributionType): string
+    {
+        if (! $contributionType) {
+            return 'Not specified';
+        }
+
+        return $this->helpAreaDisplay($contributionType);
+    }
+
+    private function applicationStatusDisplay(string $status): string
+    {
+        return match ($status) {
+            IdeaApplication::STATUS_PENDING => 'Pending',
+            IdeaApplication::STATUS_WITHDRAWN => 'Withdrawn',
+            IdeaApplication::STATUS_APPROVED => 'Collaborating',
+            IdeaApplication::STATUS_DECLINED => 'Declined',
+            IdeaApplication::STATUS_LEFT => 'Left collaboration',
+            IdeaApplication::STATUS_REMOVED => 'Removed from collaboration',
+            default => ucfirst($status),
+        };
     }
 
     public function supporter(?IdeaSupporter $supporter): ?array

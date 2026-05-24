@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Manage from '@/pages/Ideas/Manage.vue';
-import type { DomainUser, Idea, IdeaApplication, Paginator } from '@/types/domain';
+import type { DomainUser, Idea, IdeaApplication, IdeaCollaboration, Paginator } from '@/types/domain';
 
 vi.mock('@inertiajs/vue3', () => ({
   Link: {
@@ -56,6 +56,7 @@ function idea(): Idea {
     summary: 'A focused idea',
     tags: ['dashboard'],
     communication: null,
+    collaboration: collaboration(),
     content: '',
     contentHtml: '',
     status: 'open',
@@ -103,6 +104,33 @@ function idea(): Idea {
       repositoryCreate: '/ideas/1/repository',
       repositoryInvite: '/ideas/1/repository/invite',
     },
+  };
+}
+
+function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollaboration {
+  return {
+    stage: null,
+    stageDisplay: 'Not decided yet',
+    helpWanted: [],
+    helpWantedDisplay: [],
+    helpWantedNote: null,
+    firstContribution: null,
+    applicationsOpen: true,
+    applicationsClosedNote: null,
+    communicationStyle: null,
+    communicationStyleDisplay: 'Not decided yet',
+    communicationNote: null,
+    gettingStartedNotesReady: false,
+    gettingStartedNotes: null,
+    gettingStartedNotesHtml: null,
+    gettingStartedNotesUpdatedAtForHumans: null,
+    readinessBadges: {
+      applicationsOpen: true,
+      firstStepListed: false,
+      repoAvailable: false,
+      startNotesReady: false,
+    },
+    ...overrides,
   };
 }
 

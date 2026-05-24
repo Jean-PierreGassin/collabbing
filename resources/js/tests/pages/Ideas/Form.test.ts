@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import IdeaForm from '@/pages/Ideas/Form.vue';
-import type { Idea } from '@/types/domain';
+import type { Idea, IdeaCollaboration } from '@/types/domain';
 
 const session = vi.hoisted(() => ({
   csrfToken: 'test-token',
@@ -26,6 +26,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     summary: 'Existing summary',
     tags: ['design'],
     communication: 'Slack',
+    collaboration: collaboration(),
     content: 'Existing pitch.',
     contentHtml: '<p>Existing pitch.</p>',
     status: 'open',
@@ -93,6 +94,33 @@ function idea(overrides: Partial<Idea> = {}): Idea {
       supportersStore: '/ideas/7/supporters',
       repositoryCreate: '/ideas/7/repository-create',
       repositoryInvite: '/ideas/7/repository-invite',
+    },
+    ...overrides,
+  };
+}
+
+function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollaboration {
+  return {
+    stage: null,
+    stageDisplay: 'Not decided yet',
+    helpWanted: [],
+    helpWantedDisplay: [],
+    helpWantedNote: null,
+    firstContribution: null,
+    applicationsOpen: true,
+    applicationsClosedNote: null,
+    communicationStyle: null,
+    communicationStyleDisplay: 'Not decided yet',
+    communicationNote: null,
+    gettingStartedNotesReady: false,
+    gettingStartedNotes: null,
+    gettingStartedNotesHtml: null,
+    gettingStartedNotesUpdatedAtForHumans: null,
+    readinessBadges: {
+      applicationsOpen: true,
+      firstStepListed: false,
+      repoAvailable: false,
+      startNotesReady: false,
     },
     ...overrides,
   };

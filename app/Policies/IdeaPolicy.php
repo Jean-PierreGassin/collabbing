@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Idea;
+use App\Models\IdeaApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -33,6 +34,7 @@ class IdeaPolicy
     public function createApplication(User $user, Idea $idea): bool
     {
         return $user->id !== $idea->user_id
+            && $idea->applications_open
             && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
@@ -49,6 +51,7 @@ class IdeaPolicy
     public function storeApplication(User $user, Idea $idea): bool
     {
         return $user->id !== $idea->user_id
+            && $idea->applications_open
             && ! $this->hasActiveApplicationFrom($user, $idea);
     }
 
@@ -66,7 +69,7 @@ class IdeaPolicy
     {
         return $idea->applications()
             ->where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', IdeaApplication::activeStatuses())
             ->exists();
     }
 }

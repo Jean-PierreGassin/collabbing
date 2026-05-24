@@ -13,20 +13,121 @@ class Idea extends Model
 {
     use HasFactory;
 
+    public const COLLABORATION_STAGE_ROUGH_IDEA = 'rough_idea';
+
+    public const COLLABORATION_STAGE_NEEDS_SHAPING = 'needs_shaping';
+
+    public const COLLABORATION_STAGE_READY_TO_BUILD = 'ready_to_build';
+
+    public const COLLABORATION_STAGE_ACTIVELY_BUILDING = 'actively_building';
+
+    public const COLLABORATION_STAGE_LIVE = 'live';
+
+    public const HELP_FRONTEND = 'frontend';
+
+    public const HELP_BACKEND = 'backend';
+
+    public const HELP_DESIGN = 'design';
+
+    public const HELP_PRODUCT = 'product';
+
+    public const HELP_TESTING = 'testing';
+
+    public const HELP_DEVOPS = 'devops';
+
+    public const HELP_WRITING = 'writing';
+
+    public const HELP_RESEARCH = 'research';
+
+    public const HELP_FEEDBACK = 'feedback';
+
+    public const HELP_MARKETING = 'marketing';
+
+    public const HELP_ANYTHING = 'anything';
+
+    public const COMMUNICATION_STYLE_GITHUB = 'github';
+
+    public const COMMUNICATION_STYLE_DISCORD = 'discord';
+
+    public const COMMUNICATION_STYLE_SLACK = 'slack';
+
+    public const COMMUNICATION_STYLE_EMAIL = 'email';
+
+    public const COMMUNICATION_STYLE_CALLS = 'calls';
+
+    public const COMMUNICATION_STYLE_NOT_DECIDED = 'not_decided_yet';
+
     protected $fillable = [
         'title',
         'tagline',
         'summary',
         'tags',
         'communication',
+        'collaboration_stage',
+        'help_wanted',
+        'help_wanted_note',
+        'first_contribution',
+        'applications_open',
+        'applications_closed_note',
+        'communication_style',
+        'communication_note',
+        'getting_started_notes',
+        'getting_started_notes_updated_at',
         'content',
         'status',
+    ];
+
+    protected $attributes = [
+        'applications_open' => true,
     ];
 
     protected function casts(): array
     {
         return [
             'tags' => 'array',
+            'help_wanted' => 'array',
+            'applications_open' => 'boolean',
+            'getting_started_notes_updated_at' => 'datetime',
+        ];
+    }
+
+    public static function collaborationStages(): array
+    {
+        return [
+            self::COLLABORATION_STAGE_ROUGH_IDEA,
+            self::COLLABORATION_STAGE_NEEDS_SHAPING,
+            self::COLLABORATION_STAGE_READY_TO_BUILD,
+            self::COLLABORATION_STAGE_ACTIVELY_BUILDING,
+            self::COLLABORATION_STAGE_LIVE,
+        ];
+    }
+
+    public static function helpAreas(): array
+    {
+        return [
+            self::HELP_FRONTEND,
+            self::HELP_BACKEND,
+            self::HELP_DESIGN,
+            self::HELP_PRODUCT,
+            self::HELP_TESTING,
+            self::HELP_DEVOPS,
+            self::HELP_WRITING,
+            self::HELP_RESEARCH,
+            self::HELP_FEEDBACK,
+            self::HELP_MARKETING,
+            self::HELP_ANYTHING,
+        ];
+    }
+
+    public static function communicationStyles(): array
+    {
+        return [
+            self::COMMUNICATION_STYLE_GITHUB,
+            self::COMMUNICATION_STYLE_DISCORD,
+            self::COMMUNICATION_STYLE_SLACK,
+            self::COMMUNICATION_STYLE_EMAIL,
+            self::COMMUNICATION_STYLE_CALLS,
+            self::COMMUNICATION_STYLE_NOT_DECIDED,
         ];
     }
 
@@ -47,7 +148,7 @@ class Idea extends Model
 
     public function pendingApplications(): HasMany
     {
-        return $this->applications()->where('status', 'pending');
+        return $this->applications()->where('status', IdeaApplication::STATUS_PENDING);
     }
 
     public function applications(): HasMany
@@ -57,7 +158,7 @@ class Idea extends Model
 
     public function approvedApplications(): HasMany
     {
-        return $this->applications()->where('status', 'approved');
+        return $this->applications()->where('status', IdeaApplication::STATUS_APPROVED);
     }
 
     public function hasApplicationFromUser(int|string $userId, string $type): ?IdeaApplication
