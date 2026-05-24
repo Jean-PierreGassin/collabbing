@@ -1,0 +1,315 @@
+import { mount } from '@vue/test-utils';
+import { describe, expect, it, vi } from 'vitest';
+import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
+import type { DomainUser, Idea, IdeaApplication, IdeaCollaboration, IdeaSupporter } from '@/types/domain';
+
+const session = vi.hoisted(() => ({
+  isAuthenticated: true,
+  routes: {
+    login: '/login',
+    register: '/register',
+  },
+}));
+
+vi.mock('@inertiajs/vue3', () => ({
+  useForm: () => ({
+    delete: vi.fn(),
+    post: vi.fn(),
+    processing: false,
+  }),
+}));
+
+vi.mock('@/stores/session', () => ({
+  useSessionStore: () => session,
+}));
+
+function user(overrides: Partial<DomainUser> = {}): DomainUser {
+  return {
+    id: 1,
+    username: 'builder',
+    firstName: 'Build',
+    lastName: 'Er',
+    name: 'Build Er',
+    email: null,
+    bio: null,
+    bioHtml: null,
+    githubUsername: 'builder',
+    hasGithubToken: true,
+    profilePicture: '/avatar.png',
+    createdAtFormatted: '20 May - 2026',
+    canUpdate: false,
+    routes: {
+      show: '/users/builder',
+      edit: '/users/builder/edit',
+      update: '/users/builder',
+      githubLogin: '/auth/github',
+      githubRevoke: '/auth/github/revoke',
+    },
+    ...overrides,
+  };
+}
+
+function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication {
+  return {
+    id: 1,
+    content: 'I can help.',
+    contentHtml: '<p>I can help.</p>',
+    contributionType: 'frontend',
+    contributionTypeDisplay: 'Frontend',
+    firstAction: 'Review the first issue.',
+    status: 'pending',
+    statusDisplay: 'Pending',
+    createdAtForHumans: 'Today',
+    user: user({
+      id: 2,
+      username: 'applicant',
+    }),
+    routes: {
+      destroy: '/applications/1',
+      approve: '/applications/1/approve',
+    },
+    ...overrides,
+  };
+}
+
+function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollaboration {
+  return {
+    stage: null,
+    stageDisplay: 'Not decided yet',
+    helpWanted: [],
+    helpWantedDisplay: [],
+    helpWantedNote: null,
+    firstContribution: null,
+    applicationsOpen: true,
+    applicationsClosedNote: null,
+    communicationStyle: null,
+    communicationStyleDisplay: 'Not decided yet',
+    communicationNote: null,
+    gettingStartedNotesReady: false,
+    gettingStartedNotes: null,
+    gettingStartedNotesHtml: null,
+    gettingStartedNotesUpdatedAtForHumans: null,
+    readinessBadges: {
+      applicationsOpen: true,
+      firstStepListed: false,
+      repoAvailable: false,
+      startNotesReady: false,
+    },
+    ...overrides,
+  };
+}
+
+function idea(overrides: Partial<Idea> = {}): Idea {
+  return {
+    id: 1,
+    title: 'Useful idea',
+    titleDisplay: 'Useful idea',
+    tagline: 'A concise product tagline.',
+    summary: 'A summary that belongs on the full idea page.',
+    tags: ['design-systems'],
+    communication: null,
+    collaboration: collaboration(),
+    content: 'A focused pitch.',
+    contentHtml: '<p>A focused pitch.</p>',
+    status: 'open',
+    statusDisplay: 'Open',
+    repository: false,
+    repositoryName: null,
+    repositoryActivity: {
+      htmlUrl: null,
+      defaultBranch: null,
+      isMissing: false,
+      openIssuesCount: 0,
+      stargazersCount: 0,
+      forksCount: 0,
+      lastPushedAtForHumans: null,
+      lastSyncedAtForHumans: null,
+      latestCommitSha: null,
+      latestCommitShortSha: null,
+      latestCommitMessage: null,
+      latestCommitAuthor: null,
+      events: [],
+    },
+    createdAtForHumans: '1 hour ago',
+    user: user(),
+    supportersCount: 3,
+    approvedApplicationsCount: 0,
+    collaborators: [],
+    hiddenCollaboratorsCount: 0,
+    can: {
+      update: false,
+      storeApplication: true,
+      storeSupporter: true,
+      deleteApplication: false,
+      updateApplication: false,
+      storeComment: true,
+    },
+    routes: {
+      show: '/ideas/1',
+      edit: '/ideas/1/edit',
+      dashboard: '/ideas/1/dashboard',
+      update: '/ideas/1',
+      applicationsCreate: '/ideas/1/applications/create',
+      applicationsStore: '/ideas/1/applications',
+      commentsStore: '/ideas/1/comments',
+      supportersStore: '/ideas/1/supporters',
+      repositoryCreate: '/ideas/1/repository-create',
+      repositoryInvite: '/ideas/1/repository-invite',
+    },
+    ...overrides,
+  };
+}
+
+function mountSidebar(props: {
+  idea?: Idea;
+  collaborator?: IdeaApplication | null;
+  applicant?: IdeaApplication | null;
+  supporter?: IdeaSupporter | null;
+} = {}) {
+  return mount(IdeaSidebar, {
+    props: {
+      idea: props.idea ?? idea(),
+      collaborator: props.collaborator,
+      applicant: props.applicant,
+      supporter: props.supporter,
+    },
+    global: {
+      stubs: {
+        UserAvatar: true,
+      },
+    },
+  });
+}
+
+describe('IdeaSidebar', () => {
+  it('shows Start Collaborating first with public guidance and readiness badges', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      idea: idea({
+        repository: true,
+        collaboration: collaboration({
+          stage: 'ready_to_build',
+          stageDisplay: 'Ready to build',
+          helpWanted: [
+            'frontend',
+            'testing',
+          ],
+          helpWantedDisplay: [
+            'Frontend',
+            'Testing',
+          ],
+          helpWantedNote: 'Regression coverage and UI review would help.',
+          firstContribution: 'Review the first issue.',
+          communicationStyle: 'github',
+          communicationStyleDisplay: 'GitHub',
+          communicationNote: 'Issues and pull requests first.',
+          gettingStartedNotesReady: true,
+          readinessBadges: {
+            applicationsOpen: true,
+            firstStepListed: true,
+            repoAvailable: true,
+            startNotesReady: true,
+          },
+        }),
+      }),
+    });
+
+    const headings = wrapper.findAll('h2').map((heading) => heading.text());
+
+    expect(headings[0]).toBe('Start Collaborating');
+    expect(wrapper.text()).toContain('Ready to build');
+    expect(wrapper.text()).toContain('Frontend');
+    expect(wrapper.text()).toContain('Testing');
+    expect(wrapper.text()).toContain('Review the first issue.');
+    expect(wrapper.text()).toContain('Applications open');
+    expect(wrapper.text()).toContain('GitHub');
+    expect(wrapper.text()).toContain('Repo available');
+    expect(wrapper.text()).toContain('Start notes ready');
+    expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to Collaborate');
+  });
+
+  it('offers guests sign-in and register actions without hiding public guidance', () => {
+    session.isAuthenticated = false;
+    const wrapper = mountSidebar({
+      idea: idea({
+        can: {
+          ...idea().can,
+          storeApplication: false,
+          storeSupporter: false,
+          storeComment: false,
+        },
+        collaboration: collaboration({
+          stageDisplay: 'Needs shaping',
+          applicationsOpen: true,
+        }),
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Needs shaping');
+    expect(wrapper.get('a[href="/register?next=%2Fideas%2F1"]').text()).toContain('Register');
+    expect(wrapper.get('a[href="/login?next=%2Fideas%2F1"]').text()).toContain('Sign in');
+    expect(wrapper.text()).toContain('Sign in to apply, support, or comment.');
+    expect(wrapper.text()).not.toContain('Apply to Collaborate');
+  });
+
+  it('shows closed application guidance without removing support context', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      idea: idea({
+        can: {
+          ...idea().can,
+          storeApplication: false,
+        },
+        collaboration: collaboration({
+          applicationsOpen: false,
+          applicationsClosedNote: 'Paused while current applications are reviewed.',
+          readinessBadges: {
+            applicationsOpen: false,
+            firstStepListed: false,
+            repoAvailable: false,
+            startNotesReady: false,
+          },
+        }),
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Applications closed');
+    expect(wrapper.text()).toContain('Paused while current applications are reviewed.');
+    expect(wrapper.text()).toContain('Support and comments remain open while applications are closed.');
+    expect(wrapper.text()).toContain('There are 3 people supporting this idea.');
+  });
+
+  it('does not tell guests to apply when applications are closed', () => {
+    session.isAuthenticated = false;
+    const wrapper = mountSidebar({
+      idea: idea({
+        can: {
+          ...idea().can,
+          storeApplication: false,
+        },
+        collaboration: collaboration({
+          applicationsOpen: false,
+        }),
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Sign in to support or comment while applications are closed.');
+    expect(wrapper.text()).not.toContain('Sign in to apply, support, or comment.');
+  });
+
+  it('surfaces current applicant and collaborator states as the primary action', () => {
+    session.isAuthenticated = true;
+    const applicantSidebar = mountSidebar({
+      applicant: application(),
+    });
+    const collaboratorSidebar = mountSidebar({
+      collaborator: application({
+        status: 'approved',
+        statusDisplay: 'Collaborating',
+      }),
+    });
+
+    expect(applicantSidebar.text()).toContain('Application pending');
+    expect(collaboratorSidebar.text()).toContain('Collaborating');
+  });
+});

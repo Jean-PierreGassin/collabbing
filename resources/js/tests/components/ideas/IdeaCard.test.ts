@@ -152,6 +152,39 @@ describe('IdeaCard', () => {
     expect(text).not.toContain('Repository');
   });
 
+  it('adds collaboration signals to compact cards', () => {
+    const wrapper = mountCard('compact', {
+      collaboration: collaboration({
+        stage: 'ready_to_build',
+        stageDisplay: 'Ready to build',
+        helpWanted: [
+          'frontend',
+          'backend',
+          'testing',
+          'design',
+        ],
+        helpWantedDisplay: [
+          'Frontend',
+          'Backend',
+          'Testing',
+          'Design',
+        ],
+        firstContribution: 'Review the first issue.',
+        applicationsOpen: false,
+      }),
+    });
+    const text = wrapper.text();
+
+    expect(text).toContain('Ready to build');
+    expect(text).toContain('Frontend');
+    expect(text).toContain('Backend');
+    expect(text).toContain('Testing');
+    expect(text).not.toContain('Design');
+    expect(text).toContain('Applications closed');
+    expect(text).toContain('First step listed');
+    expect(text).not.toContain('Review the first issue.');
+  });
+
   it('renders detailed cards as slim rows without summary or labels', () => {
     const wrapper = mountCard('detailed');
     const text = wrapper.text();
@@ -167,6 +200,33 @@ describe('IdeaCard', () => {
     expect(text).toContain('7');
     expect(text).toContain('collaborators');
     expect(wrapper.findAll('a[href="/ideas/1"]')).toHaveLength(1);
+  });
+
+  it('adds collaboration signals to detailed cards', () => {
+    const wrapper = mountCard('detailed', {
+      collaboration: collaboration({
+        stage: 'actively_building',
+        stageDisplay: 'Actively building',
+        helpWanted: [
+          'product',
+          'research',
+        ],
+        helpWantedDisplay: [
+          'Product',
+          'Research',
+        ],
+        firstContribution: 'Map the onboarding state.',
+        applicationsOpen: true,
+      }),
+    });
+    const text = wrapper.text();
+
+    expect(text).toContain('Actively building');
+    expect(text).toContain('Product');
+    expect(text).toContain('Research');
+    expect(text).toContain('First step listed');
+    expect(text).not.toContain('Applications closed');
+    expect(text).not.toContain('Map the onboarding state.');
   });
 
   it('keeps card body layers pass-through so cards remain clickable', () => {

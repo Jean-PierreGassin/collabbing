@@ -9,6 +9,11 @@ import { ChevronDown, GitBranch, MessageSquare, Sparkles, Users } from '@lucide/
 import { useCollapsiblePanelTransition } from '@/composables/useCollapsiblePanelTransition';
 import type { Idea } from '@/types/domain';
 
+type CardBadge = {
+  label: string;
+  variant: 'default' | 'outline' | 'secondary';
+};
+
 const props = withDefaults(defineProps<{
   idea: Idea;
   featured?: boolean;
@@ -39,9 +44,40 @@ const {
 const isCompact = computed(() => props.variant === 'compact' && ! props.single);
 const isDetailed = computed(() => props.variant === 'detailed' && ! props.single);
 const descriptionId = computed(() => `idea-${props.idea.id}-description`);
+const visibleHelpAreas = computed(() => props.idea.collaboration.helpWantedDisplay.slice(0, 3));
 const isDescriptionExpanded = computed({
   get: () => props.pitchExpanded,
   set: (value: boolean) => emit('update:pitchExpanded', value),
+});
+
+const collaborationBadges = computed<CardBadge[]>(() => {
+  const badges: CardBadge[] = [{
+    label: props.idea.collaboration.stageDisplay,
+    variant: 'default',
+  }];
+
+  visibleHelpAreas.value.forEach((label) => {
+    badges.push({
+      label,
+      variant: 'secondary',
+    });
+  });
+
+  if (! props.idea.collaboration.applicationsOpen) {
+    badges.push({
+      label: 'Applications closed',
+      variant: 'outline',
+    });
+  }
+
+  if (props.idea.collaboration.firstContribution) {
+    badges.push({
+      label: 'First step listed',
+      variant: 'outline',
+    });
+  }
+
+  return badges;
 });
 
 const collaboratorsLabel = computed(() => {
@@ -214,6 +250,16 @@ const pitchChevronClass = computed(() => {
         </Badge>
       </div>
 
+      <div class="pointer-events-none flex flex-wrap gap-1.5">
+        <Badge
+          v-for="badge in collaborationBadges"
+          :key="`${badge.label}-${badge.variant}`"
+          :variant="badge.variant"
+          class="text-xs">
+          {{ badge.label }}
+        </Badge>
+      </div>
+
       <div class="pointer-events-none mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border pt-2.5 text-xs text-muted-foreground">
         <span class="inline-flex items-center gap-1.5">
           <Users
@@ -283,17 +329,28 @@ const pitchChevronClass = computed(() => {
       </div>
 
       <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div class="flex min-w-0 flex-wrap gap-1.5">
-          <Badge
-            v-for="tag in idea.tags"
-            :key="tag"
-            variant="secondary"
-            class="text-xs">
-            {{ tag }}
-          </Badge>
-          <span
-            v-if="idea.tags.length === 0"
-            class="text-sm text-muted-foreground">No tags yet.</span>
+        <div class="flex min-w-0 flex-col gap-2">
+          <div class="flex min-w-0 flex-wrap gap-1.5">
+            <Badge
+              v-for="tag in idea.tags"
+              :key="tag"
+              variant="secondary"
+              class="text-xs">
+              {{ tag }}
+            </Badge>
+            <span
+              v-if="idea.tags.length === 0"
+              class="text-sm text-muted-foreground">No tags yet.</span>
+          </div>
+          <div class="flex min-w-0 flex-wrap gap-1.5">
+            <Badge
+              v-for="badge in collaborationBadges"
+              :key="`${badge.label}-${badge.variant}`"
+              :variant="badge.variant"
+              class="text-xs">
+              {{ badge.label }}
+            </Badge>
+          </div>
         </div>
 
         <div class="flex shrink-0 flex-wrap items-center gap-3 text-xs text-muted-foreground sm:justify-end">
@@ -385,6 +442,15 @@ const pitchChevronClass = computed(() => {
             {{ tag }}
           </Badge>
         </div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <Badge
+            v-for="badge in collaborationBadges"
+            :key="`${badge.label}-${badge.variant}`"
+            :variant="badge.variant"
+            class="text-xs">
+            {{ badge.label }}
+          </Badge>
+        </div>
       </section>
 
       <section class="flex flex-col gap-3">
@@ -445,6 +511,15 @@ const pitchChevronClass = computed(() => {
           variant="secondary"
           class="text-xs">
           {{ tag }}
+        </Badge>
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <Badge
+          v-for="badge in collaborationBadges"
+          :key="`${badge.label}-${badge.variant}`"
+          :variant="badge.variant"
+          class="text-xs">
+          {{ badge.label }}
         </Badge>
       </div>
     </CardContent>
