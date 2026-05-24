@@ -35,9 +35,19 @@ class IdeaService
         return $this->ideas->search($search);
     }
 
+    public function browseOpen(?string $search = null, ?string $tag = null): LengthAwarePaginator
+    {
+        return $this->ideas->browseOpen($search, $tag);
+    }
+
     public function getOpenRecent(): LengthAwarePaginator
     {
         return $this->ideas->getOpenRecent();
+    }
+
+    public function getPopularTags(): Collection
+    {
+        return $this->ideas->getPopularTags();
     }
 
     public function getUserIdeas(?string $search = null): LengthAwarePaginator

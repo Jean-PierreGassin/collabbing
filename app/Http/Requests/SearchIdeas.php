@@ -16,6 +16,7 @@ class SearchIdeas extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:80'],
+            'tag' => ['nullable', 'string', 'max:32', 'regex:/^[\pL\pN _-]+$/u'],
         ];
     }
 
@@ -31,20 +32,46 @@ class SearchIdeas extends FormRequest
         return $search;
     }
 
+    public function tag(): ?string
+    {
+        $validated = $this->validated();
+        $tag = $validated['tag'] ?? null;
+
+        if (! is_string($tag)) {
+            return null;
+        }
+
+        return $tag;
+    }
+
     protected function prepareForValidation(): void
     {
         $search = $this->input('search');
+        $tag = $this->input('tag');
+        $normalized = [];
 
-        if (! is_string($search)) {
-            return;
+        if (is_string($search)) {
+            $search = Str::squish($search);
+
+            if ($search === '') {
+                $search = null;
+            }
+
+            $normalized['search'] = $search;
         }
 
-        $search = Str::squish($search);
+        if (is_string($tag)) {
+            $tag = Str::of($tag)->squish()->lower()->toString();
 
-        if ($search === '') {
-            $search = null;
+            if ($tag === '') {
+                $tag = null;
+            }
+
+            $normalized['tag'] = $tag;
         }
 
-        $this->merge(['search' => $search]);
+        if ($normalized !== []) {
+            $this->merge($normalized);
+        }
     }
 }

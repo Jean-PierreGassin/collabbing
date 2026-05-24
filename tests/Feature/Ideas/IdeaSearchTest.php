@@ -96,6 +96,99 @@ class IdeaSearchTest extends TestCase
                 ->where('searchResults.items.0.id', $matchingIdea->id));
     }
 
+    public function testIdeasCanBeFilteredBySelectedTag(): void
+    {
+        $owner = User::factory()->create();
+        $matchingIdea = Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Design review board',
+                'tags' => ['design', 'workflow'],
+            ]);
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'title' => 'Operations board',
+                'tags' => ['operations'],
+            ]);
+
+        $this
+            ->get(route('ideas.index', ['tag' => '  Design  ']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('selectedTag', 'design')
+                ->where('keyword', null)
+                ->has('searchResults.items', 1)
+                ->where('searchResults.items.0.id', $matchingIdea->id));
+    }
+
+    public function testTagFilterIsPreservedOnPaginationLinks(): void
+    {
+        $owner = User::factory()->create();
+
+        foreach (range(1, 11) as $index) {
+            Idea::factory()
+                ->for($owner, 'user')
+                ->create([
+                    'title' => "Design idea {$index}",
+                    'tags' => ['design'],
+                ]);
+        }
+
+        $this
+            ->get(route('ideas.index', ['search' => 'Design', 'tag' => 'design']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('keyword', 'Design')
+                ->where('selectedTag', 'design')
+                ->where('searchResults.nextPageUrl', function (?string $url): bool {
+                    if (! is_string($url)) {
+                        return false;
+                    }
+
+                    parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+                    return ($query['search'] ?? null) === 'Design'
+                        && ($query['tag'] ?? null) === 'design';
+                }));
+    }
+
+    public function testPopularTagsAreExposedFromOpenIdeas(): void
+    {
+        $owner = User::factory()->create();
+
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'tags' => ['design', 'workflow'],
+            ]);
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'tags' => ['design'],
+            ]);
+        Idea::factory()
+            ->for($owner, 'user')
+            ->create([
+                'status' => 'closed',
+                'tags' => ['private'],
+            ]);
+
+        $this
+            ->get(route('ideas.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Ideas/Index')
+                ->where('popularTags.0.name', 'design')
+                ->where('popularTags.0.count', 2)
+                ->where('popularTags.1.name', 'workflow')
+                ->where('popularTags.1.count', 1)
+                ->missing('popularTags.2'));
+    }
+
     public function testSearchQueryIsLimitedToAReasonableLength(): void
     {
         $this

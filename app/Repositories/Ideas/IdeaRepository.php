@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class IdeaRepository
 {
@@ -81,21 +82,54 @@ class IdeaRepository
 
     public function search(string $search): LengthAwarePaginator
     {
-        return Idea::where('status', 'open')
-            ->with(self::INDEX_RELATIONS)
-            ->withCount(self::INDEX_COUNTS)
+        return $this->browseOpen($search);
+    }
+
+    public function browseOpen(?string $search = null, ?string $tag = null): LengthAwarePaginator
+    {
+        return $this->openIndexQuery()
+            ->when($search, fn (Builder $query, string $search): Builder => $this->applyIdeaSearch($query, $search))
+            ->when($tag, fn (Builder $query, string $tag): Builder => $this->applyIdeaTag($query, $tag))
             ->orderBy('created_at', 'desc')
-            ->where(fn (Builder $query): Builder => $this->applyIdeaSearch($query, $search))
             ->paginate(10);
     }
 
     public function getOpenRecent(): LengthAwarePaginator
     {
-        return Idea::where('status', 'open')
-            ->with(self::INDEX_RELATIONS)
-            ->withCount(self::INDEX_COUNTS)
+        return $this->openIndexQuery()
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+    }
+
+    public function getPopularTags(int $limit = 12): Collection
+    {
+        $counts = [];
+
+        Idea::where('status', 'open')
+            ->whereNotNull('tags')
+            ->select('tags')
+            ->orderBy('id')
+            ->cursor()
+            ->each(function (Idea $idea) use (&$counts): void {
+                foreach ($this->normalizedTags($idea->tags) as $tag) {
+                    $counts[$tag] = ($counts[$tag] ?? 0) + 1;
+                }
+            });
+
+        return collect($counts)
+            ->map(fn (int $count, string $tag): array => [
+                'name' => $tag,
+                'count' => $count,
+            ])
+            ->sort(function (array $first, array $second): int {
+                if ($first['count'] === $second['count']) {
+                    return $first['name'] <=> $second['name'];
+                }
+
+                return $second['count'] <=> $first['count'];
+            })
+            ->take($limit)
+            ->values();
     }
 
     public function getUserIdeas(User $user, ?string $search = null): LengthAwarePaginator
@@ -157,5 +191,31 @@ class IdeaRepository
                 ->orWhere('summary', 'like', "%{$search}%")
                 ->orWhere('tags', 'like', "%{$search}%");
         });
+    }
+
+    private function applyIdeaTag(Builder $query, string $tag): Builder
+    {
+        return $query->whereJsonContains('tags', $tag);
+    }
+
+    private function openIndexQuery(): Builder
+    {
+        return Idea::where('status', 'open')
+            ->with(self::INDEX_RELATIONS)
+            ->withCount(self::INDEX_COUNTS);
+    }
+
+    private function normalizedTags(mixed $tags): array
+    {
+        if (! is_array($tags)) {
+            return [];
+        }
+
+        return collect($tags)
+            ->filter(fn (mixed $tag): bool => is_string($tag) && trim($tag) !== '')
+            ->map(fn (string $tag): string => Str::of($tag)->squish()->lower()->toString())
+            ->unique()
+            ->values()
+            ->all();
     }
 }
