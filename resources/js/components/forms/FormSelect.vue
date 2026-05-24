@@ -8,6 +8,7 @@ const props = defineProps<{
   name: string;
 }>();
 
+const modelValue = defineModel<string>();
 const slots = useSlots();
 
 const {
@@ -23,7 +24,7 @@ const {
   selectedLabel,
   selectedValue,
   toggleSelect,
-} = useFormSelect(props.id, slots);
+} = useFormSelect(props.id, slots, modelValue);
 </script>
 
 <template>
