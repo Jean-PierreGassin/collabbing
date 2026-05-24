@@ -30,7 +30,8 @@ describe('FormSelect', () => {
     const options = Array.from(document.body.querySelectorAll<HTMLElement>('[role="option"]'));
 
     expect(options).toHaveLength(2);
-    expect(options[0].classList.contains('bg-primary/18')).toBe(true);
+    expect(options[0].getAttribute('aria-selected')).toBe('true');
+    expect(options[1].getAttribute('aria-selected')).toBe('false');
 
     options[1].click();
     await nextTick();

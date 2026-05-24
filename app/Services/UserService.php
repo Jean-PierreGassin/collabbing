@@ -7,13 +7,17 @@ use App\Data\Users\UserProfileData;
 use App\Data\Users\UserRegistrationData;
 use App\Models\ConnectedAccount;
 use App\Models\User;
+use App\Repositories\Users\ConnectedAccountRepository;
 use App\Repositories\Users\UserRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
-    public function __construct(private UserRepository $users) {}
+    public function __construct(
+        private UserRepository $users,
+        private ConnectedAccountRepository $connectedAccounts
+    ) {}
 
     public function create(UserRegistrationData $data): User
     {
@@ -43,23 +47,11 @@ class UserService
 
     public function connectProvider(User $user, ProviderConnectionData $data): ConnectedAccount
     {
-        return ConnectedAccount::query()->updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'provider' => $data->provider,
-            ],
-            [
-                'provider_user_id' => $data->providerUserId,
-                'provider_username' => $data->username,
-                'token' => $data->token,
-                'scopes' => $data->scopes,
-                'connected_at' => now(),
-            ]
-        );
+        return $this->connectedAccounts->connect($user, $data);
     }
 
     public function disconnectProvider(User $user, string $provider): void
     {
-        $user->connectedAccounts()->where('provider', $provider)->delete();
+        $this->connectedAccounts->disconnect($user, $provider);
     }
 }

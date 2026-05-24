@@ -6,6 +6,8 @@ use App\Jobs\SyncGitHubRepositories;
 use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
+use App\Repositories\CodeRepositories\CodeRepositoryRepository;
+use App\Repositories\CodeRepositories\RepositoryEventRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Carbon\Carbon;
@@ -36,7 +38,7 @@ class IdeaRepositorySyncTest extends TestCase
             ->with($this->callback(fn (User $owner) => $owner->is($user)), 'missing-repo')
             ->willThrowException(new GitHubRuntimeException('Not Found', 404));
 
-        (new IdeaRepositorySyncService($github))->sync($codeRepository);
+        $this->syncWithGitHub($github)->sync($codeRepository);
 
         $codeRepository->refresh();
 
@@ -68,7 +70,7 @@ class IdeaRepositorySyncTest extends TestCase
             ->with($this->callback(fn (User $owner) => $owner->is($user)), 'synced-repo', 'main')
             ->willReturn($this->commitPayload());
 
-        $sync = new IdeaRepositorySyncService($github);
+        $sync = $this->syncWithGitHub($github);
 
         $sync->sync($codeRepository);
         $codeRepository->refresh();
@@ -125,7 +127,7 @@ class IdeaRepositorySyncTest extends TestCase
             ->method('sync')
             ->with($this->callback(fn (CodeRepository $codeRepository) => $dueRepositories->contains(fn (CodeRepository $dueRepository) => $dueRepository->is($codeRepository))));
 
-        (new SyncGitHubRepositories)->handle($sync);
+        (new SyncGitHubRepositories)->handle($sync, app(CodeRepositoryRepository::class));
     }
 
     private function repositoryFor(Idea $idea): CodeRepository
@@ -157,6 +159,15 @@ class IdeaRepositorySyncTest extends TestCase
     private function syncService(): IdeaRepositorySyncService&MockObject
     {
         return $this->createMock(IdeaRepositorySyncService::class);
+    }
+
+    private function syncWithGitHub(GitHubRepositoryClient $github): IdeaRepositorySyncService
+    {
+        return new IdeaRepositorySyncService(
+            github: $github,
+            codeRepositories: app(CodeRepositoryRepository::class),
+            repositoryEvents: app(RepositoryEventRepository::class)
+        );
     }
 
     private function repositoryPayload(): array

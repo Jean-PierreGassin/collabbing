@@ -1,4 +1,4 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Slots, VNode } from 'vue';
 
 export type SelectOption = {
@@ -38,31 +38,20 @@ export function useFormSelect(id: string, slots: Slots) {
       .map((node) => optionFromNode(node));
   });
 
+  const defaultSelectedOption = computed(() => {
+    return options.value.find((option) => option.selected) ?? options.value[0];
+  });
+
   const selectedOption = computed(() => {
-    return options.value.find((option) => option.value === selectedValue.value) ?? options.value[0];
+    return options.value.find((option) => option.value === selectedValue.value) ?? defaultSelectedOption.value;
   });
 
   const selectedLabel = computed(() => selectedOption.value?.label ?? 'Select an option');
-
-  watch(options, (nextOptions) => {
-    if (nextOptions.length === 0) {
-      selectedValue.value = '';
-      activeIndex.value = 0;
-
-      return;
-    }
-
-    if (nextOptions.some((option) => option.value === selectedValue.value)) {
-      return;
-    }
-
-    selectedValue.value = nextOptions.find((option) => option.selected)?.value ?? nextOptions[0].value;
-    activeIndex.value = Math.max(0, nextOptions.findIndex((option) => option.value === selectedValue.value));
-  }, { immediate: true });
+  const formValue = computed(() => selectedOption.value?.value ?? '');
 
   async function openSelect(): Promise<void> {
     isOpen.value = true;
-    activeIndex.value = Math.max(0, options.value.findIndex((option) => option.value === selectedValue.value));
+    activeIndex.value = Math.max(0, options.value.findIndex((option) => option.value === formValue.value));
     await nextTick();
     positionPopover();
   }
@@ -194,7 +183,7 @@ export function useFormSelect(id: string, slots: Slots) {
     selectOption,
     selectRoot,
     selectedLabel,
-    selectedValue,
+    selectedValue: formValue,
     toggleSelect,
   };
 }

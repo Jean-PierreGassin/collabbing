@@ -16,8 +16,19 @@ const inertia = vi.hoisted(() => ({
 
 vi.mock('@inertiajs/vue3', () => ({
   Link: {
+    emits: ['click'],
     props: ['href'],
-    template: '<a :href="href"><slot /></a>',
+    setup(_props: unknown, { emit }: { emit: (event: 'click', payload: MouseEvent) => void }) {
+      function click(event: MouseEvent): void {
+        emit('click', event);
+        event.preventDefault();
+      }
+
+      return {
+        click,
+      };
+    },
+    template: '<a :href="href" @click="click"><slot /></a>',
   },
   router: {
     on: inertia.on,
@@ -67,7 +78,7 @@ describe('PaginationLinks', () => {
     expect(wrapper.text()).toContain('Page 1 of 2');
   });
 
-  it('leaves new-tab or modified pagination clicks to the browser', async () => {
+  it('does not show loading state for new-tab or modified pagination clicks', async () => {
     const wrapper = mount(PaginationLinks, {
       props: {
         paginator: paginator(),

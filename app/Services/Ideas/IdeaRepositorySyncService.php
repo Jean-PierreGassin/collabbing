@@ -5,6 +5,8 @@ namespace App\Services\Ideas;
 use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
+use App\Repositories\CodeRepositories\CodeRepositoryRepository;
+use App\Repositories\CodeRepositories\RepositoryEventRepository;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use Carbon\Carbon;
 use Github\Exception\RuntimeException as GitHubRuntimeException;
@@ -13,7 +15,11 @@ use Illuminate\Support\Str;
 
 class IdeaRepositorySyncService
 {
-    public function __construct(private GitHubRepositoryClient $github) {}
+    public function __construct(
+        private GitHubRepositoryClient $github,
+        private CodeRepositoryRepository $codeRepositories,
+        private RepositoryEventRepository $repositoryEvents
+    ) {}
 
     public function sync(CodeRepository $codeRepository): void
     {
@@ -94,7 +100,7 @@ class IdeaRepositorySyncService
             $repositoryFullName = $fullName;
         }
 
-        $codeRepository->forceFill([
+        $this->codeRepositories->forceUpdate($codeRepository, [
             'status' => CodeRepository::STATUS_ACTIVE,
             'provider_repository_id' => $this->repositoryProviderId($repository),
             'owner' => $this->repositoryOwner($repository, $codeRepository->owner),
@@ -112,7 +118,7 @@ class IdeaRepositorySyncService
             'synced_at' => $syncedAt,
             'missing_at' => null,
             'sync_due_at' => $this->nextSyncDueAt($syncedAt),
-        ])->save();
+        ]);
 
         if (! $wasSynced) {
             $this->recordEvent(
@@ -194,12 +200,12 @@ class IdeaRepositorySyncService
     {
         $missingAt = now();
 
-        $codeRepository->forceFill([
+        $this->codeRepositories->forceUpdate($codeRepository, [
             'status' => CodeRepository::STATUS_MISSING,
             'synced_at' => $missingAt,
             'missing_at' => $missingAt,
             'sync_due_at' => null,
-        ])->save();
+        ]);
 
         $this->recordEvent(
             $codeRepository,
@@ -213,22 +219,14 @@ class IdeaRepositorySyncService
 
     private function recordEvent(CodeRepository $codeRepository, string $type, string $summary, string $dedupeKey, Carbon $occurredAt, array $payload = []): void
     {
-        $codeRepository->events()->firstOrCreate(
-            ['dedupe_key' => $dedupeKey],
-            [
-                'type' => $type,
-                'summary' => Str::limit($summary, 255, ''),
-                'occurred_at' => $occurredAt,
-                'payload' => $payload,
-            ]
-        );
+        $this->repositoryEvents->record($codeRepository, $type, $summary, $dedupeKey, $occurredAt, $payload);
     }
 
     public function scheduleRetry(CodeRepository $codeRepository): void
     {
-        $codeRepository->forceFill([
+        $this->codeRepositories->forceUpdate($codeRepository, [
             'sync_due_at' => $this->retrySyncDueAt(now()),
-        ])->save();
+        ]);
     }
 
     private function nextSyncDueAt(Carbon $from): Carbon

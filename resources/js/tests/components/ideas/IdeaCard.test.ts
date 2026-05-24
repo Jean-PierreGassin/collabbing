@@ -145,10 +145,10 @@ describe('IdeaCard', () => {
     const compact = mountCard('compact');
     const detailed = mountCard('detailed');
 
-    expect(compact.find('.pointer-events-none.relative.z-10').exists()).toBe(true);
-    expect(detailed.find('.pointer-events-none.relative.z-10').exists()).toBe(true);
     expect(compact.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
     expect(detailed.get('a[aria-label="Open Useful idea"]').attributes('href')).toBe('/ideas/1');
+    expect(compact.findAll('a[href="/ideas/1"]')).toHaveLength(1);
+    expect(detailed.findAll('a[href="/ideas/1"]')).toHaveLength(1);
   });
 
   it('shows the manage action once at the top of compact and detailed cards', () => {
