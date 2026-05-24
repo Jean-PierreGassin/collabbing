@@ -222,9 +222,7 @@ describe('Ideas/Index', () => {
     const wrapper = mountIndex({
       keyword: 'review',
       selectedTag: 'design',
-      popularTags: [
-        { name: 'design', count: 3 },
-      ],
+      popularTags: [{ name: 'design', count: 3 }],
       searchResults: paginator([idea({ id: 3 })]),
     });
 
