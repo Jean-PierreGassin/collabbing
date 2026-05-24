@@ -590,17 +590,6 @@ onMounted(() => {
                     :aria-describedby="describedBy">
                 </template>
               </FormField>
-              <label
-                v-if="isEditing && (idea?.approvedApplicationsCount ?? 0) > 0"
-                class="flex items-start gap-2 rounded-md border border-border bg-background/35 px-3 py-2 text-sm text-muted-foreground">
-                <input
-                  v-model="notifyCollaborators"
-                  type="checkbox"
-                  name="notify_collaborators"
-                  value="1"
-                  class="mt-1 size-4 rounded border-input bg-background">
-                <span>Notify accepted collaborators that private start notes changed.</span>
-              </label>
             </div>
 
             <FormField
@@ -1028,18 +1017,34 @@ onMounted(() => {
                   help="Visible only to accepted collaborators and the owner. Markdown is supported."
                   :validator="gettingStartedNotesValidator">
                   <template #default="{ invalid, describedBy, feedbackClass }">
-                    <textarea
-                      id="getting_started_notes"
-                      v-model="formValues.gettingStartedNotes"
-                      name="getting_started_notes"
-                      :class="[
-                        'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                        feedbackClass,
-                      ]"
-                      placeholder="Share private setup links, contact details, or first-week context after approval."
-                      maxlength="10000"
-                      :aria-invalid="invalid || undefined"
-                      :aria-describedby="describedBy" />
+                    <div class="flex flex-col gap-3">
+                      <textarea
+                        id="getting_started_notes"
+                        v-model="formValues.gettingStartedNotes"
+                        name="getting_started_notes"
+                        :class="[
+                          'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                          feedbackClass,
+                        ]"
+                        placeholder="Share private setup links, contact details, or first-week context after approval."
+                        maxlength="10000"
+                        :aria-invalid="invalid || undefined"
+                        :aria-describedby="describedBy" />
+                      <label
+                        v-if="isEditing && (idea?.approvedApplicationsCount ?? 0) > 0"
+                        class="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/10 p-3 text-sm">
+                        <input
+                          v-model="notifyCollaborators"
+                          type="checkbox"
+                          name="notify_collaborators"
+                          value="1"
+                          class="mt-0.5 size-4 shrink-0 rounded border-input bg-background text-primary focus:ring-ring">
+                        <span class="flex flex-col gap-1">
+                          <span class="font-medium text-foreground">Notify accepted collaborators</span>
+                          <span class="text-muted-foreground">Send a heads-up that the private start notes changed.</span>
+                        </span>
+                      </label>
+                    </div>
                   </template>
                 </FormField>
               </section>

@@ -189,7 +189,7 @@ function mountSidebar(props: {
 }
 
 describe('IdeaSidebar', () => {
-  it('shows start collaborating first with public guidance and readiness context', () => {
+  it('shows start collaborating first with public first step and project context', () => {
     session.isAuthenticated = true;
     const wrapper = mountSidebar({
       idea: idea({
@@ -225,14 +225,15 @@ describe('IdeaSidebar', () => {
 
     expect(headings[0]).toBe('Start collaborating');
     expect(wrapper.text()).not.toContain('Ready to build');
-    expect(wrapper.text()).toContain('Frontend');
-    expect(wrapper.text()).toContain('Testing');
+    expect(wrapper.text()).not.toContain('What help is needed');
+    expect(wrapper.text()).not.toContain('Frontend');
+    expect(wrapper.text()).not.toContain('Testing');
+    expect(wrapper.text()).not.toContain('Regression coverage and UI review would help.');
     expect(wrapper.text()).toContain('Review the first issue.');
-    expect(wrapper.text()).toContain('Applications open');
     expect(wrapper.text()).toContain('GitHub');
-    expect(wrapper.text()).toContain('Readiness signals');
-    expect(wrapper.text()).toContain('Repo connected');
-    expect(wrapper.text()).toContain('Start notes ready');
+    expect(wrapper.text()).not.toContain('Readiness signals');
+    expect(wrapper.text()).not.toContain('Repo connected');
+    expect(wrapper.text()).not.toContain('Start notes ready');
     expect(wrapper.find('button[aria-label="A small public starting point so someone can understand the first useful action before they apply."]').exists()).toBe(true);
     expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to collaborate');
   });

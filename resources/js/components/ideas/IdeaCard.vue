@@ -54,10 +54,18 @@ const applicationStatusLabel = computed(() => {
 
 const applicationStatusVariant = computed(() => {
   if (props.idea.collaboration.applicationsOpen) {
-    return 'secondary';
+    return 'default';
   }
 
   return 'outline';
+});
+
+const applicationStatusClass = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'border-primary/70 bg-primary text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/25 motion-safe:animate-pulse';
+  }
+
+  return 'text-muted-foreground';
 });
 
 const helpWantedSummary = computed(() => {
@@ -406,7 +414,10 @@ const pitchChevronClass = computed(() => {
         </div>
         <Badge
           :variant="applicationStatusVariant"
-          class="shrink-0"
+          :class="[
+            'shrink-0',
+            applicationStatusClass,
+          ]"
           :aria-label="`Application status: ${applicationStatusLabel}`">
           {{ applicationStatusLabel }}
         </Badge>

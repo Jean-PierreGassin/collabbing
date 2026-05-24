@@ -266,7 +266,11 @@ describe('IdeaCard', () => {
       statusDisplay: 'Open',
     });
 
-    expect(wrapper.get('[aria-label="Application status: Applications open"]').text()).toBe('Applications open');
+    const applicationStatus = wrapper.get('[aria-label="Application status: Applications open"]');
+
+    expect(applicationStatus.text()).toBe('Applications open');
+    expect(applicationStatus.classes()).toContain('bg-primary');
+    expect(applicationStatus.classes()).toContain('motion-safe:animate-pulse');
     expect(wrapper.text()).not.toContain('Status');
   });
 

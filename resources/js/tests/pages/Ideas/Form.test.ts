@@ -650,8 +650,12 @@ describe('Ideas/Form', () => {
       }),
     });
 
+    const privateNotesField = wrapper.get<HTMLTextAreaElement>('textarea#getting_started_notes').element.closest('.relative');
+
     await wrapper.get<HTMLInputElement>('input[name="notify_collaborators"]').setValue(true);
 
+    expect(privateNotesField?.textContent).toContain('Notify accepted collaborators');
+    expect(privateNotesField?.textContent).toContain('Send a heads-up that the private start notes changed.');
     expect(wrapper.text()).toContain('Notify accepted collaborators');
     expect(formData(wrapper).get('notify_collaborators')).toBe('1');
   });

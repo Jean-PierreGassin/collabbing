@@ -29,8 +29,7 @@ withDefaults(defineProps<{
         <button
           type="button"
           class="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-          :aria-label="label"
-          :title="label">
+          :aria-label="label">
           <Info
             class="size-3.5"
             aria-hidden="true" />

@@ -3,12 +3,11 @@ import { computed } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { InfoTooltip } from '@/components/ui/tooltip';
 import { useSessionStore } from '@/stores/session';
-import { CheckCircle2, Circle, GitBranch, Lock, MessageSquare, UserPlus } from '@lucide/vue';
+import { CheckCircle2, GitBranch, Lock, MessageSquare, UserPlus } from '@lucide/vue';
 import type { Idea, IdeaApplication } from '@/types/domain';
 
 const props = defineProps<{
@@ -18,14 +17,6 @@ const props = defineProps<{
 }>();
 
 const session = useSessionStore();
-
-const helpWantedLabels = computed(() => {
-  if (props.idea.collaboration.helpWantedDisplay.length === 0) {
-    return ['Open to figuring it out'];
-  }
-
-  return props.idea.collaboration.helpWantedDisplay;
-});
 
 const firstContributionLabel = computed(() => {
   if (props.idea.collaboration.firstContribution) {
@@ -52,25 +43,6 @@ const registerActionLabel = computed(() => {
 
   return 'Register';
 });
-
-const readinessBadges = computed(() => [
-  {
-    complete: props.idea.collaboration.readinessBadges.applicationsOpen,
-    label: 'Applications open',
-  },
-  {
-    complete: props.idea.collaboration.readinessBadges.firstStepListed,
-    label: 'First step listed',
-  },
-  {
-    complete: props.idea.collaboration.readinessBadges.repoAvailable,
-    label: 'Repo connected',
-  },
-  {
-    complete: props.idea.collaboration.readinessBadges.startNotesReady,
-    label: 'Start notes ready',
-  },
-]);
 
 function routeWithNext(route: string): string {
   const separator = route.includes('?') ? '&' : '?';
@@ -234,48 +206,23 @@ function confirmWithdraw(event: SubmitEvent): void {
 
       <section
         :class="[
-          'flex flex-col gap-3',
+          'flex flex-col gap-1',
           idea.can.update ? '' : 'border-t border-border pt-4',
         ]">
-        <div class="flex flex-col gap-1">
-          <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-            What help is needed
-            <InfoTooltip
-              id="sidebar-help-wanted-tooltip"
-              label="The contribution areas the owner is most interested in right now. Applicants can still propose other useful work."
-              align="end" />
-          </h3>
-          <div class="flex flex-wrap gap-1.5">
-            <Badge
-              v-for="label in helpWantedLabels"
-              :key="label"
-              variant="secondary">
-              {{ label }}
-            </Badge>
-          </div>
-          <p
-            v-if="idea.collaboration.helpWantedNote"
-            class="text-muted-foreground">
-            {{ idea.collaboration.helpWantedNote }}
-          </p>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-            First useful step
-            <InfoTooltip
-              id="sidebar-first-useful-step-tooltip"
-              label="A small public starting point so someone can understand the first useful action before they apply."
-              align="end" />
-          </h3>
-          <div
-            class="whitespace-pre-line text-foreground"
-            :class="{ 'text-muted-foreground': !idea.collaboration.firstContribution }">
-            <MarkdownContent
-              v-if="idea.collaboration.firstContributionHtml"
-              :html="idea.collaboration.firstContributionHtml" />
-            <span v-else>{{ firstContributionLabel }}</span>
-          </div>
+        <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
+          First useful step
+          <InfoTooltip
+            id="sidebar-first-useful-step-tooltip"
+            label="A small public starting point so someone can understand the first useful action before they apply."
+            align="end" />
+        </h3>
+        <div
+          class="whitespace-pre-line text-foreground"
+          :class="{ 'text-muted-foreground': !idea.collaboration.firstContribution }">
+          <MarkdownContent
+            v-if="idea.collaboration.firstContributionHtml"
+            :html="idea.collaboration.firstContributionHtml" />
+          <span v-else>{{ firstContributionLabel }}</span>
         </div>
       </section>
 
@@ -314,38 +261,6 @@ function confirmWithdraw(event: SubmitEvent): void {
             </dd>
           </div>
         </dl>
-      </section>
-
-      <section class="flex flex-col gap-2 border-t border-border pt-4">
-        <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
-          Readiness signals
-          <InfoTooltip
-            id="sidebar-readiness-signals-tooltip"
-            label="A quick checklist of the public and private setup pieces that make collaboration easier to start."
-            align="end" />
-        </h3>
-        <div
-          class="flex flex-wrap gap-1.5"
-          aria-label="Collaboration readiness signals">
-          <Badge
-            v-for="badge in readinessBadges"
-            :key="badge.label"
-            :variant="badge.complete ? 'secondary' : 'outline'"
-            :class="[
-              'gap-1.5',
-              badge.complete ? '' : 'text-muted-foreground',
-            ]">
-            <CheckCircle2
-              v-if="badge.complete"
-              class="size-3.5"
-              aria-hidden="true" />
-            <Circle
-              v-else
-              class="size-3.5"
-              aria-hidden="true" />
-            {{ badge.label }}
-          </Badge>
-        </div>
       </section>
 
       <div
