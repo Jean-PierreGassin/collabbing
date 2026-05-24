@@ -4,11 +4,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Manage from '@/pages/Ideas/Manage.vue';
 import type { DomainUser, Idea, IdeaApplication, IdeaCollaboration, Paginator } from '@/types/domain';
 
+const inertiaPage = vi.hoisted(() => ({
+  props: {
+    flash: {
+      status: null,
+      errors: [],
+      repositoryInvitePrompt: false,
+    },
+  },
+}));
+
 vi.mock('@inertiajs/vue3', () => ({
   Link: {
     props: ['href'],
     template: '<a :href="href"><slot /></a>',
   },
+  usePage: () => inertiaPage,
 }));
 
 function paginator<T>(items: T[] = []): Paginator<T> {
@@ -47,7 +58,19 @@ function user(overrides: Partial<DomainUser> = {}): DomainUser {
   };
 }
 
-function idea(): Idea {
+function permissions(overrides: Partial<Idea['can']> = {}): Idea['can'] {
+  return {
+    update: true,
+    storeApplication: false,
+    storeSupporter: false,
+    deleteApplication: false,
+    updateApplication: false,
+    storeComment: true,
+    ...overrides,
+  };
+}
+
+function idea(overrides: Partial<Idea> = {}): Idea {
   return {
     id: 1,
     title: 'Build a better dashboard',
@@ -85,14 +108,7 @@ function idea(): Idea {
     pendingApplicationsCount: 0,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
-    can: {
-      update: true,
-      storeApplication: false,
-      storeSupporter: false,
-      deleteApplication: false,
-      updateApplication: false,
-      storeComment: true,
-    },
+    can: permissions(),
     routes: {
       show: '/ideas/1',
       edit: '/ideas/1/edit',
@@ -105,6 +121,7 @@ function idea(): Idea {
       repositoryCreate: '/ideas/1/repository',
       repositoryInvite: '/ideas/1/repository/invite',
     },
+    ...overrides,
   };
 }
 
@@ -116,6 +133,9 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
     contributionType: 'testing',
     contributionTypeDisplay: 'Testing',
     firstAction: 'Write the first regression test.',
+    approvalNote: null,
+    approvalNoteHtml: null,
+    declineReason: null,
     status: 'pending',
     statusDisplay: 'Pending',
     createdAtForHumans: '5 minutes ago',
@@ -190,11 +210,15 @@ function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollabor
   };
 }
 
-function mountManage(applications: IdeaApplication[] = [], collaborators: IdeaApplication[] = []) {
+function mountManage(
+  applications: IdeaApplication[] = [],
+  collaborators: IdeaApplication[] = [],
+  ideaOverrides: Partial<Idea> = {},
+) {
   return mount(Manage, {
     attachTo: document.body,
     props: {
-      idea: idea(),
+      idea: idea(ideaOverrides),
       applications: paginator(applications),
       collaborators: paginator(collaborators),
     },
@@ -208,7 +232,10 @@ function mountManage(applications: IdeaApplication[] = [], collaborators: IdeaAp
           props: ['html'],
           template: '<div v-html="html"></div>',
         },
-        MethodField: true,
+        MethodField: {
+          props: ['method'],
+          template: '<input type="hidden" name="_method" :value="method" />',
+        },
         PaginationLinks: {
           props: ['label'],
           template: '<nav :aria-label="label"></nav>',
@@ -220,6 +247,7 @@ function mountManage(applications: IdeaApplication[] = [], collaborators: IdeaAp
 
 describe('Idea management tabs', () => {
   beforeEach(() => {
+    inertiaPage.props.flash.repositoryInvitePrompt = false;
     window.history.pushState({}, '', '/ideas/1/dashboard');
   });
 
@@ -275,6 +303,49 @@ describe('Idea management tabs', () => {
     expect(wrapper.text()).toContain('Could you clarify the testing scope?');
     expect(wrapper.text()).toContain('1 new');
     expect(wrapper.find('form[action="/ideas/1/applications/3/messages"]').exists()).toBe(true);
+  });
+
+  it('shows owner decision controls with private notes', () => {
+    const wrapper = mountManage([application()], [], {
+      can: permissions({
+        deleteApplication: true,
+        updateApplication: true,
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Private start notes are missing.');
+    expect(wrapper.get('form[action="/ideas/1/applications/3/approve"]').attributes('method')).toBe('POST');
+    expect(wrapper.get('form[action="/ideas/1/applications/3/approve"] input[name="_method"]').attributes('value')).toBe('PUT');
+    expect(wrapper.get('textarea[name="approval_note"]').attributes('maxlength')).toBe('1200');
+    expect(wrapper.get('details summary').text()).toContain('Decline Application');
+    expect(wrapper.get('form[action="/ideas/1/applications/3"]').attributes('method')).toBe('POST');
+    expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
+    expect(wrapper.get('textarea[name="decline_reason"]').attributes('maxlength')).toBe('1200');
+    expect(wrapper.get('form[action="/ideas/1/applications/3"] button[type="submit"]').text()).toContain('Confirm decline');
+  });
+
+  it('hides the missing notes warning when start notes are ready', () => {
+    const wrapper = mountManage([application()], [], {
+      can: permissions({
+        updateApplication: true,
+      }),
+      collaboration: collaboration({
+        gettingStartedNotesReady: true,
+      }),
+    });
+
+    expect(wrapper.text()).not.toContain('Private start notes are missing.');
+  });
+
+  it('shows a repository invite prompt after approval', () => {
+    inertiaPage.props.flash.repositoryInvitePrompt = true;
+
+    const wrapper = mountManage([], [], {
+      repository: true,
+    });
+
+    expect(wrapper.text()).toContain('Repository is connected.');
+    expect(wrapper.findAll('form[action="/ideas/1/repository/invite"]')).toHaveLength(2);
   });
 
   it('preserves the collaborator tab intent from the query string', () => {

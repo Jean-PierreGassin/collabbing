@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReviewIdeaApplication;
 use App\Http\Requests\StoreIdeaApplication;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
@@ -61,11 +62,11 @@ class IdeaApplicationController extends Controller
             ->with('status', 'Application updated');
     }
 
-    public function approveApplication(Idea $idea, IdeaApplication $application): RedirectResponse
+    public function approveApplication(ReviewIdeaApplication $request, Idea $idea, IdeaApplication $application): RedirectResponse
     {
-        $this->authorizeForUser(Auth::user(), 'updateApplication', $idea);
+        $this->authorize('approve', $application);
 
-        $this->applicationService->approve($application);
+        $this->applicationService->approve($application, $request->toData());
         $user = $application->user;
         $applicantName = 'The applicant';
 
@@ -73,12 +74,18 @@ class IdeaApplicationController extends Controller
             $applicantName = "{$user->first_name} {$user->last_name}";
         }
 
-        return redirect()
+        $redirect = redirect()
             ->back()
             ->with('status', "You have approved $applicantName");
+
+        if ($this->shouldPromptRepositoryInvite($idea)) {
+            $redirect->with('repositoryInvitePrompt', true);
+        }
+
+        return $redirect;
     }
 
-    public function destroy(Idea $idea, IdeaApplication $application): RedirectResponse
+    public function destroy(ReviewIdeaApplication $request, Idea $idea, IdeaApplication $application): RedirectResponse
     {
         $this->authorize('delete', $application);
         $user = Auth::user();
@@ -91,7 +98,9 @@ class IdeaApplicationController extends Controller
                 ->with('status', 'Application withdrawn');
         }
 
-        $this->applicationService->destroy($application);
+        $wasApproved = $application->isApproved();
+
+        $this->applicationService->destroy($application, $request->toData());
         $user = $application->user;
         $applicantName = 'The applicant';
 
@@ -99,8 +108,25 @@ class IdeaApplicationController extends Controller
             $applicantName = "{$user->first_name} {$user->last_name}";
         }
 
+        if (! $wasApproved) {
+            return redirect()
+                ->back()
+                ->with('status', "$applicantName has been declined.");
+        }
+
         return redirect()
             ->back()
             ->with('status', "$applicantName has been removed from this idea.");
+    }
+
+    private function shouldPromptRepositoryInvite(Idea $idea): bool
+    {
+        $idea->loadMissing(['codeRepository', 'user.githubAccount']);
+
+        $owner = $idea->owner();
+
+        return $idea->latestCodeRepository()?->isAvailable() === true
+            && $owner instanceof User
+            && $owner->hasGithubToken();
     }
 }

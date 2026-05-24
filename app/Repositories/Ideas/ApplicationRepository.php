@@ -3,6 +3,7 @@
 namespace App\Repositories\Ideas;
 
 use App\Data\Ideas\IdeaApplicationData;
+use App\Data\Ideas\IdeaApplicationDecisionData;
 use App\Data\Ideas\IdeaApplicationMessageData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
@@ -25,9 +26,16 @@ class ApplicationRepository
         ]);
     }
 
-    public function approve(IdeaApplication $application): bool
+    public function approve(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
     {
-        $application->status = IdeaApplication::STATUS_APPROVED;
+        if (! $application->isPending()) {
+            return false;
+        }
+
+        $application->forceFill([
+            'approval_note' => $data?->approvalNote,
+            'status' => IdeaApplication::STATUS_APPROVED,
+        ]);
 
         if (! $application->save()) {
             return false;
@@ -43,7 +51,7 @@ class ApplicationRepository
         return $application->forceFill($data->attributes())->save();
     }
 
-    public function destroy(IdeaApplication $application): bool
+    public function destroy(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
     {
         if ($application->isApproved()) {
             $application->forceFill([
@@ -51,9 +59,14 @@ class ApplicationRepository
                 'removed_at' => Carbon::now('UTC'),
             ]);
             $messageType = IdeaApplicationMessage::TYPE_REMOVED;
-        } else {
-            $application->status = IdeaApplication::STATUS_DECLINED;
+        } elseif ($application->isPending()) {
+            $application->forceFill([
+                'decline_reason' => $data?->declineReason,
+                'status' => IdeaApplication::STATUS_DECLINED,
+            ]);
             $messageType = IdeaApplicationMessage::TYPE_DECLINED;
+        } else {
+            return false;
         }
 
         if (! $application->save()) {

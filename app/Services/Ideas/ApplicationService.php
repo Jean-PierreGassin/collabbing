@@ -3,11 +3,14 @@
 namespace App\Services\Ideas;
 
 use App\Data\Ideas\IdeaApplicationData;
+use App\Data\Ideas\IdeaApplicationDecisionData;
 use App\Data\Ideas\IdeaApplicationMessageData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\IdeaApplicationMessage;
 use App\Models\User;
+use App\Notifications\Ideas\IdeaApplicationApprovedNotification;
+use App\Notifications\Ideas\IdeaApplicationDeclinedNotification;
 use App\Notifications\Ideas\IdeaApplicationThreadMessageNotification;
 use App\Notifications\Ideas\NewIdeaApplicationNotification;
 use App\Repositories\Ideas\ApplicationRepository;
@@ -37,23 +40,30 @@ class ApplicationService
         return $this->applications->update($application, $data);
     }
 
-    public function approve(IdeaApplication $application): bool
+    public function approve(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
     {
-        $approved = $this->applications->approve($application);
+        $approved = $this->applications->approve($application, $data);
 
         if ($approved) {
             $this->markThreadRead($application);
+            $this->notifyApplicantApproved($application);
         }
 
         return $approved;
     }
 
-    public function destroy(IdeaApplication $application): bool
+    public function destroy(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
     {
-        $destroyed = $this->applications->destroy($application);
+        $wasApproved = $application->isApproved();
+        $wasPending = $application->isPending();
+        $destroyed = $this->applications->destroy($application, $data);
 
         if ($destroyed) {
             $this->markThreadRead($application);
+
+            if ($wasPending && ! $wasApproved) {
+                $this->notifyApplicantDeclined($application);
+            }
         }
 
         return $destroyed;
@@ -137,6 +147,28 @@ class ApplicationService
         $recipient->notify(new IdeaApplicationThreadMessageNotification($idea, $application, $message));
     }
 
+    private function notifyApplicantApproved(IdeaApplication $application): void
+    {
+        $application->loadMissing(['idea', 'user']);
+        $idea = $application->idea;
+        $applicant = $application->user;
+
+        if ($idea instanceof Idea && $applicant instanceof User) {
+            $applicant->notify(new IdeaApplicationApprovedNotification($idea, $application));
+        }
+    }
+
+    private function notifyApplicantDeclined(IdeaApplication $application): void
+    {
+        $application->loadMissing(['idea', 'user']);
+        $idea = $application->idea;
+        $applicant = $application->user;
+
+        if ($idea instanceof Idea && $applicant instanceof User) {
+            $applicant->notify(new IdeaApplicationDeclinedNotification($idea, $application));
+        }
+    }
+
     private function threadRecipient(IdeaApplication $application, User $sender): ?User
     {
         $idea = $application->idea;
@@ -157,6 +189,10 @@ class ApplicationService
 
         $owner = $idea->owner();
 
-        return $owner instanceof User ? $owner : null;
+        if ($owner instanceof User) {
+            return $owner;
+        }
+
+        return null;
     }
 }

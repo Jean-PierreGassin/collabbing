@@ -26,12 +26,21 @@ class IdeaApplicationPolicy
         return $application->isPending() && (int) $user->id === (int) $application->user_id;
     }
 
+    public function approve(User $user, IdeaApplication $application): bool
+    {
+        $idea = $application->idea;
+
+        return $application->isPending()
+            && $idea instanceof Idea
+            && (int) $user->id === (int) $idea->user_id;
+    }
+
     public function delete(User $user, IdeaApplication $application): bool
     {
         $idea = $application->idea;
 
         if ($idea instanceof Idea && (int) $user->id === (int) $idea->user_id) {
-            return true;
+            return $application->isPending() || $application->isApproved();
         }
 
         return $application->isPending() && (int) $user->id === (int) $application->user_id;
