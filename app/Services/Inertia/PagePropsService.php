@@ -84,8 +84,10 @@ class PagePropsService
 
         $codeRepository = $idea->latestCodeRepository();
         $owner = $idea->owner();
+        $canUpdate = Gate::allows('update', $idea);
         $supportersCount = $this->relationCount($idea, 'supporters', 'supporters_count');
         $approvedApplicationsCount = $this->relationCount($idea, 'approvedApplications', 'approved_applications_count');
+        $pendingApplicationsCount = null;
         $collaborators = $this->collaboratorPreview($idea);
         $repositoryAvailable = false;
         $repositoryCreateRoute = route('auth.github.login');
@@ -98,6 +100,10 @@ class PagePropsService
         if ($owner && $owner->hasGithubToken()) {
             $repositoryCreateRoute = route('ideas.repository-create', $idea);
             $repositoryInviteRoute = route('ideas.repository-invite', $idea);
+        }
+
+        if ($canUpdate) {
+            $pendingApplicationsCount = $this->relationCount($idea, 'pendingApplications', 'pending_applications_count');
         }
 
         $privateGettingStartedNotes = $this->privateGettingStartedNotes($idea);
@@ -144,10 +150,11 @@ class PagePropsService
             'user' => $this->user($owner),
             'supportersCount' => $supportersCount,
             'approvedApplicationsCount' => $approvedApplicationsCount,
+            'pendingApplicationsCount' => $pendingApplicationsCount,
             'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->application($application))->values(),
             'hiddenCollaboratorsCount' => max(0, $approvedApplicationsCount - $collaborators->count()),
             'can' => [
-                'update' => Gate::allows('update', $idea),
+                'update' => $canUpdate,
                 'storeApplication' => Gate::allows('storeApplication', $idea),
                 'storeSupporter' => Gate::allows('storeSupporter', $idea),
                 'deleteApplication' => Gate::allows('deleteApplication', $idea),
@@ -471,6 +478,8 @@ class PagePropsService
             'user' => $this->user($this->applicationUser($application)),
             'routes' => [
                 'destroy' => route('ideas.applications.destroy', [$application->idea_id, $application]),
+                'edit' => route('ideas.applications.edit', [$application->idea_id, $application]),
+                'update' => route('ideas.applications.update', [$application->idea_id, $application]),
                 'approve' => route('ideas.applications.approve', [$application->idea_id, $application]),
             ],
         ];

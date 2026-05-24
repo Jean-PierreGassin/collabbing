@@ -82,6 +82,7 @@ function idea(): Idea {
     user: user(),
     supportersCount: 0,
     approvedApplicationsCount: 0,
+    pendingApplicationsCount: 0,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {
@@ -104,6 +105,34 @@ function idea(): Idea {
       repositoryCreate: '/ideas/1/repository',
       repositoryInvite: '/ideas/1/repository/invite',
     },
+  };
+}
+
+function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication {
+  return {
+    id: 3,
+    content: 'I can help with useful tests.',
+    contentHtml: '<p>I can help with useful tests.</p>',
+    contributionType: 'testing',
+    contributionTypeDisplay: 'Testing',
+    firstAction: 'Write the first regression test.',
+    status: 'pending',
+    statusDisplay: 'Pending',
+    createdAtForHumans: '5 minutes ago',
+    user: user({
+      id: 2,
+      username: 'applicant',
+      firstName: 'Applied',
+      lastName: 'User',
+      name: 'Applied User',
+    }),
+    routes: {
+      destroy: '/ideas/1/applications/3',
+      edit: '/ideas/1/applications/3/edit',
+      update: '/ideas/1/applications/3',
+      approve: '/ideas/1/applications/3/approve',
+    },
+    ...overrides,
   };
 }
 
@@ -196,6 +225,18 @@ describe('Idea management tabs', () => {
     expect(wrapper.get('#manage-applications-tab').attributes('tabindex')).toBe('-1');
     expect(wrapper.get('[role="tabpanel"]').attributes('id')).toBe('manage-collaborators-panel');
     expect(wrapper.text()).toContain('No collaborators have joined yet.');
+  });
+
+  it('shows contribution intent on application review cards', () => {
+    const wrapper = mountManage([application()]);
+
+    expect(wrapper.text()).toContain("Applied User's Application");
+    expect(wrapper.text()).toContain('Contribution type');
+    expect(wrapper.text()).toContain('Testing');
+    expect(wrapper.text()).toContain('First action');
+    expect(wrapper.text()).toContain('Write the first regression test.');
+    expect(wrapper.text()).toContain('I can help with useful tests.');
+    expect(wrapper.text()).toContain('Submitted 5 minutes ago');
   });
 
   it('preserves the collaborator tab intent from the query string', () => {

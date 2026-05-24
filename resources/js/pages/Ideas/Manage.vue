@@ -166,9 +166,27 @@ const {
                   </h6>
                 </CardHeader>
                 <CardContent class="flex flex-col gap-4">
+                  <dl class="grid gap-3 rounded-md border border-border bg-background/35 p-3 text-sm md:grid-cols-2">
+                    <div class="flex flex-col gap-1">
+                      <dt class="text-xs font-medium uppercase text-muted-foreground">
+                        Contribution type
+                      </dt>
+                      <dd>
+                        {{ application.contributionTypeDisplay }}
+                      </dd>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <dt class="text-xs font-medium uppercase text-muted-foreground">
+                        First action
+                      </dt>
+                      <dd>
+                        {{ application.firstAction || 'Not specified' }}
+                      </dd>
+                    </div>
+                  </dl>
                   <MarkdownContent :html="application.contentHtml" />
                   <h6 class="text-right text-sm text-muted-foreground">
-                    Submitted {{ idea.createdAtForHumans }}
+                    Submitted {{ application.createdAtForHumans }}
                   </h6>
                   <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
                     <form

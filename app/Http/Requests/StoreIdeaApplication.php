@@ -18,12 +18,12 @@ class StoreIdeaApplication extends FormRequest
     {
         return [
             'contribution_type' => [
-                'nullable',
+                'required',
                 'string',
                 Rule::in(Idea::helpAreas()),
             ],
-            'first_action' => 'nullable|string|max:280',
-            'content' => 'required|max:1500',
+            'first_action' => 'required|string|max:280',
+            'content' => 'nullable|string|max:1500',
         ];
     }
 
@@ -32,7 +32,7 @@ class StoreIdeaApplication extends FormRequest
         $this->validated();
 
         return new IdeaApplicationData(
-            content: $this->string('content')->toString(),
+            content: $this->optionalString('content') ?? '',
             contributionType: $this->optionalString('contribution_type'),
             firstAction: $this->optionalString('first_action')
         );

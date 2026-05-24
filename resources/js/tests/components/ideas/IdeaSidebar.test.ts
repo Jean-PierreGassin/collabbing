@@ -66,6 +66,8 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
     }),
     routes: {
       destroy: '/applications/1',
+      edit: '/applications/1/edit',
+      update: '/applications/1',
       approve: '/applications/1/approve',
     },
     ...overrides,
@@ -134,6 +136,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     user: user(),
     supportersCount: 3,
     approvedApplicationsCount: 0,
+    pendingApplicationsCount: null,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {
@@ -310,6 +313,9 @@ describe('IdeaSidebar', () => {
     });
 
     expect(applicantSidebar.text()).toContain('Application pending');
+    expect(applicantSidebar.get('a[href="/applications/1/edit"]').text()).toContain('Edit application');
+    expect(applicantSidebar.find('form[action="/applications/1"]').exists()).toBe(true);
+    expect(applicantSidebar.text()).toContain('Public first steps, support, and comments stay available.');
     expect(collaboratorSidebar.text()).toContain('Collaborating');
   });
 });

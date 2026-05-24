@@ -35,6 +35,11 @@ class ApplicationRepository
         return true;
     }
 
+    public function update(IdeaApplication $application, IdeaApplicationData $data): bool
+    {
+        return $application->forceFill($data->attributes())->save();
+    }
+
     public function destroy(IdeaApplication $application): bool
     {
         if ($application->isApproved()) {
@@ -53,6 +58,22 @@ class ApplicationRepository
         }
 
         $this->recordSystemMessage($application, $messageType);
+
+        return true;
+    }
+
+    public function withdraw(IdeaApplication $application): bool
+    {
+        $application->forceFill([
+            'status' => IdeaApplication::STATUS_WITHDRAWN,
+            'withdrawn_at' => Carbon::now('UTC'),
+        ]);
+
+        if (! $application->save()) {
+            return false;
+        }
+
+        $this->recordSystemMessage($application, IdeaApplicationMessage::TYPE_WITHDRAWN);
 
         return true;
     }

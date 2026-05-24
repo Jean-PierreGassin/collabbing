@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import CsrfField from '@/components/forms/CsrfField.vue';
+import MethodField from '@/components/forms/MethodField.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -73,6 +75,14 @@ function routeWithNext(route: string): string {
   const separator = route.includes('?') ? '&' : '?';
 
   return `${route}${separator}next=${encodeURIComponent(props.idea.routes.show)}`;
+}
+
+function confirmWithdraw(event: SubmitEvent): void {
+  if (!window.confirm || window.confirm('Withdraw this application? You can apply again later.')) {
+    return;
+  }
+
+  event.preventDefault();
 }
 </script>
 
@@ -217,16 +227,39 @@ function routeWithNext(route: string): string {
             aria-hidden="true" />
           Collaborating
         </Button>
-        <Button
+        <div
           v-else-if="applicant"
-          type="button"
-          size="sm"
-          disabled>
-          <MessageSquare
-            class="size-4"
-            aria-hidden="true" />
-          Application pending
-        </Button>
+          class="flex flex-col gap-2">
+          <span class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-background/50 px-3 text-sm font-medium text-foreground">
+            <MessageSquare
+              class="size-4 text-primary"
+              aria-hidden="true" />
+            Application pending
+          </span>
+          <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            <Button
+              as="a"
+              :href="applicant.routes.edit"
+              variant="outline"
+              size="sm">
+              Edit application
+            </Button>
+            <form
+              :action="applicant.routes.destroy"
+              method="POST"
+              @submit="confirmWithdraw">
+              <CsrfField />
+              <MethodField method="DELETE" />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                class="w-full">
+                Withdraw
+              </Button>
+            </form>
+          </div>
+        </div>
         <div
           v-else-if="!session.isAuthenticated"
           class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
@@ -269,7 +302,10 @@ function routeWithNext(route: string): string {
         </Button>
 
         <p class="text-xs leading-5 text-muted-foreground">
-          <template v-if="!session.isAuthenticated && idea.collaboration.applicationsOpen">
+          <template v-if="applicant">
+            You can edit while the owner reviews. Public first steps, support, and comments stay available.
+          </template>
+          <template v-else-if="!session.isAuthenticated && idea.collaboration.applicationsOpen">
             Sign in to apply, support, or comment.
           </template>
           <template v-else-if="!session.isAuthenticated">

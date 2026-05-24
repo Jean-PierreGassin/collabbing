@@ -29,6 +29,16 @@ class IdeaApplicationController extends Controller
         ]);
     }
 
+    public function edit(Idea $idea, IdeaApplication $application): Response
+    {
+        $this->authorize('update', $application);
+
+        return Inertia::render('Ideas/Apply', [
+            'idea' => $this->pageProps->idea($idea),
+            'application' => $this->pageProps->application($application),
+        ]);
+    }
+
     public function store(StoreIdeaApplication $request, Idea $idea): RedirectResponse
     {
         $this->authorize('storeApplication', $idea);
@@ -38,6 +48,17 @@ class IdeaApplicationController extends Controller
         return redirect()
             ->route('ideas.show', $idea->id)
             ->with('status', 'Application successfully submitted');
+    }
+
+    public function update(StoreIdeaApplication $request, Idea $idea, IdeaApplication $application): RedirectResponse
+    {
+        $this->authorize('update', $application);
+
+        $this->applicationService->update($application, $request->toData());
+
+        return redirect()
+            ->route('ideas.show', $idea->id)
+            ->with('status', 'Application updated');
     }
 
     public function approveApplication(Idea $idea, IdeaApplication $application): RedirectResponse
@@ -59,7 +80,16 @@ class IdeaApplicationController extends Controller
 
     public function destroy(Idea $idea, IdeaApplication $application): RedirectResponse
     {
-        $this->authorizeForUser(Auth::user(), 'deleteApplication', $idea);
+        $this->authorize('delete', $application);
+        $user = Auth::user();
+
+        if ($user instanceof User && (int) $application->user_id === (int) $user->id) {
+            $this->applicationService->withdraw($application);
+
+            return redirect()
+                ->route('ideas.show', $idea->id)
+                ->with('status', 'Application withdrawn');
+        }
 
         $this->applicationService->destroy($application);
         $user = $application->user;

@@ -22,6 +22,7 @@ class IdeaRepository
     private const INDEX_COUNTS = [
         'supporters',
         'approvedApplications',
+        'pendingApplications',
     ];
 
     public function createForUser(User $user, IdeaData $data): Idea
