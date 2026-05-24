@@ -5,7 +5,9 @@ namespace App\Repositories\Ideas;
 use App\Data\Ideas\IdeaApplicationData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Models\IdeaApplicationMessage;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -22,14 +24,37 @@ class ApplicationRepository
 
     public function approve(IdeaApplication $application): bool
     {
-        $application->status = 'approved';
+        $application->status = IdeaApplication::STATUS_APPROVED;
 
-        return $application->save();
+        if (! $application->save()) {
+            return false;
+        }
+
+        $this->recordSystemMessage($application, IdeaApplicationMessage::TYPE_APPROVED);
+
+        return true;
     }
 
     public function destroy(IdeaApplication $application): bool
     {
-        return $application->delete();
+        if ($application->isApproved()) {
+            $application->forceFill([
+                'status' => IdeaApplication::STATUS_REMOVED,
+                'removed_at' => Carbon::now('UTC'),
+            ]);
+            $messageType = IdeaApplicationMessage::TYPE_REMOVED;
+        } else {
+            $application->status = IdeaApplication::STATUS_DECLINED;
+            $messageType = IdeaApplicationMessage::TYPE_DECLINED;
+        }
+
+        if (! $application->save()) {
+            return false;
+        }
+
+        $this->recordSystemMessage($application, $messageType);
+
+        return true;
     }
 
     public function getPendingApplications(Idea $idea): LengthAwarePaginator
@@ -76,5 +101,14 @@ class ApplicationRepository
         }
 
         return $application;
+    }
+
+    private function recordSystemMessage(IdeaApplication $application, string $type): void
+    {
+        $application->messages()->create([
+            'type' => $type,
+            'body' => null,
+            'occurred_at' => Carbon::now('UTC'),
+        ]);
     }
 }
