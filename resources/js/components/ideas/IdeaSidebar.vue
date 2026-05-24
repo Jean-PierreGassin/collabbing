@@ -161,7 +161,7 @@ function removeSupport(): void {
             variant="outline"
             size="sm"
           >
-            View on GitHub
+            Open repository
           </Button>
         </div>
       </CardHeader>
@@ -169,7 +169,7 @@ function removeSupport(): void {
         <div
           v-if="idea.repositoryActivity.isMissing"
           class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive">
-          Repository is no longer available on GitHub.
+          Repository is no longer available from the code host.
         </div>
 
         <template v-else>

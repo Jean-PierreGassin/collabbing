@@ -76,7 +76,7 @@ const {
           <GitBranch
             class="size-4"
             aria-hidden="true" />
-          Link GitHub to create a repository
+          Connect code host to create a repository
         </Button>
         <form
           v-else-if="!idea.repository"
@@ -89,7 +89,7 @@ const {
             <GitBranch
               class="size-4"
               aria-hidden="true" />
-            Create Repository
+            Create repository
           </Button>
         </form>
         <form
@@ -103,7 +103,7 @@ const {
             <GitBranch
               class="size-4"
               aria-hidden="true" />
-            Invite Collaborators
+            Invite collaborators
           </Button>
         </form>
         <Button
