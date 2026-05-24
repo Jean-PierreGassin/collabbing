@@ -1,8 +1,17 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 export interface IdeaFormDraftValues {
+  applicationsClosedNote: string;
+  applicationsOpen: string;
+  collaborationStage: string;
   communication: string;
+  communicationNote: string;
+  communicationStyle: string;
   content: string;
+  firstContribution: string;
+  gettingStartedNotes: string;
+  helpWanted: string[];
+  helpWantedNote: string;
   repositoryName: string;
   summary: string;
   tagline: string;
@@ -25,11 +34,39 @@ const draftFields: (keyof IdeaFormDraftValues)[] = [
   'title',
   'tagline',
   'communication',
+  'collaborationStage',
+  'helpWanted',
+  'helpWantedNote',
+  'firstContribution',
+  'applicationsOpen',
+  'applicationsClosedNote',
+  'communicationStyle',
+  'communicationNote',
+  'gettingStartedNotes',
   'tags',
   'repositoryName',
   'summary',
   'content',
 ];
+
+const defaultDraftValues: IdeaFormDraftValues = {
+  title: '',
+  tagline: '',
+  communication: '',
+  collaborationStage: '',
+  helpWanted: [],
+  helpWantedNote: '',
+  firstContribution: '',
+  applicationsOpen: '1',
+  applicationsClosedNote: '',
+  communicationStyle: '',
+  communicationNote: '',
+  gettingStartedNotes: '',
+  tags: '',
+  repositoryName: '',
+  summary: '',
+  content: '',
+};
 
 const createDraftKey = 'collabbing.ideaFormDraft.create';
 
@@ -46,6 +83,15 @@ function snapshot(values: IdeaFormDraftValues): IdeaFormDraftValues {
     title: values.title,
     tagline: values.tagline,
     communication: values.communication,
+    collaborationStage: values.collaborationStage,
+    helpWanted: [...values.helpWanted],
+    helpWantedNote: values.helpWantedNote,
+    firstContribution: values.firstContribution,
+    applicationsOpen: values.applicationsOpen,
+    applicationsClosedNote: values.applicationsClosedNote,
+    communicationStyle: values.communicationStyle,
+    communicationNote: values.communicationNote,
+    gettingStartedNotes: values.gettingStartedNotes,
     tags: values.tags,
     repositoryName: values.repositoryName,
     summary: values.summary,
@@ -54,7 +100,23 @@ function snapshot(values: IdeaFormDraftValues): IdeaFormDraftValues {
 }
 
 function sameValues(first: IdeaFormDraftValues, second: IdeaFormDraftValues): boolean {
-  return draftFields.every((field) => first[field] === second[field]);
+  return draftFields.every((field) => sameDraftValue(first[field], second[field]));
+}
+
+function sameDraftValue(first: string | string[], second: string | string[]): boolean {
+  if (Array.isArray(first) || Array.isArray(second)) {
+    if (!Array.isArray(first) || !Array.isArray(second)) {
+      return false;
+    }
+
+    if (first.length !== second.length) {
+      return false;
+    }
+
+    return first.every((value, index) => value === second[index]);
+  }
+
+  return first === second;
 }
 
 function readDraft(storageKey: string): StoredIdeaFormDraft | null {
@@ -71,31 +133,41 @@ function readDraft(storageKey: string): StoredIdeaFormDraft | null {
       return null;
     }
 
-    const values = draftFields.reduce<Partial<IdeaFormDraftValues>>((draftValues, field) => {
-      if (typeof parsed[field] === 'string') {
-        draftValues[field] = parsed[field];
-      }
-
-      return draftValues;
-    }, {});
-
-    if (draftFields.some((field) => typeof values[field] !== 'string')) {
-      return null;
-    }
-
     return {
-      title: values.title ?? '',
-      tagline: values.tagline ?? '',
-      communication: values.communication ?? '',
-      tags: values.tags ?? '',
-      repositoryName: values.repositoryName ?? '',
-      summary: values.summary ?? '',
-      content: values.content ?? '',
+      ...defaultDraftValues,
+      title: stringDraftValue(parsed.title),
+      tagline: stringDraftValue(parsed.tagline),
+      communication: stringDraftValue(parsed.communication),
+      collaborationStage: stringDraftValue(parsed.collaborationStage),
+      helpWanted: stringArrayDraftValue(parsed.helpWanted),
+      helpWantedNote: stringDraftValue(parsed.helpWantedNote),
+      firstContribution: stringDraftValue(parsed.firstContribution),
+      applicationsOpen: stringDraftValue(parsed.applicationsOpen, defaultDraftValues.applicationsOpen),
+      applicationsClosedNote: stringDraftValue(parsed.applicationsClosedNote),
+      communicationStyle: stringDraftValue(parsed.communicationStyle),
+      communicationNote: stringDraftValue(parsed.communicationNote),
+      gettingStartedNotes: stringDraftValue(parsed.gettingStartedNotes),
+      tags: stringDraftValue(parsed.tags),
+      repositoryName: stringDraftValue(parsed.repositoryName),
+      summary: stringDraftValue(parsed.summary),
+      content: stringDraftValue(parsed.content),
       savedAt: parsed.savedAt,
     };
   } catch {
     return null;
   }
+}
+
+function stringDraftValue(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function stringArrayDraftValue(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is string => typeof item === 'string');
 }
 
 function removeDraft(storageKey: string): void {
@@ -174,9 +246,7 @@ export function useIdeaFormDraft(options: UseIdeaFormDraftOptions) {
 
     const draft = recoverableDraft.value;
 
-    draftFields.forEach((field) => {
-      options.values[field] = draft[field];
-    });
+    restoreDraftValues(options.values, draft);
 
     recoverableDraft.value = null;
     savedAt.value = draft.savedAt;
@@ -230,4 +300,23 @@ export function useIdeaFormDraft(options: UseIdeaFormDraftOptions) {
     markSubmitting,
     restoreDraft,
   };
+}
+
+function restoreDraftValues(values: IdeaFormDraftValues, draft: StoredIdeaFormDraft): void {
+  values.title = draft.title;
+  values.tagline = draft.tagline;
+  values.communication = draft.communication;
+  values.collaborationStage = draft.collaborationStage;
+  values.helpWanted = [...draft.helpWanted];
+  values.helpWantedNote = draft.helpWantedNote;
+  values.firstContribution = draft.firstContribution;
+  values.applicationsOpen = draft.applicationsOpen;
+  values.applicationsClosedNote = draft.applicationsClosedNote;
+  values.communicationStyle = draft.communicationStyle;
+  values.communicationNote = draft.communicationNote;
+  values.gettingStartedNotes = draft.gettingStartedNotes;
+  values.tags = draft.tags;
+  values.repositoryName = draft.repositoryName;
+  values.summary = draft.summary;
+  values.content = draft.content;
 }

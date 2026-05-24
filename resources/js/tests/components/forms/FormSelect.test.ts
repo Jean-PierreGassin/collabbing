@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { defineComponent, nextTick, ref } from 'vue';
 import { describe, expect, it } from 'vitest';
 import FormSelect from '@/components/forms/FormSelect.vue';
 
@@ -39,5 +39,65 @@ describe('FormSelect', () => {
     expect(hiddenInput.value).toBe('closed');
     expect(wrapper.get('[role="combobox"]').text()).toContain('Closed');
     expect(document.body.querySelector('[role="listbox"]')).toBeNull();
+  });
+
+  it('supports reactive values with generated option lists', async () => {
+    const wrapper = mount(defineComponent({
+      components: {
+        FormSelect,
+      },
+      setup() {
+        const selected = ref('github');
+        const options = [
+          {
+            label: 'GitHub',
+            value: 'github',
+          },
+          {
+            label: 'Discord',
+            value: 'discord',
+          },
+        ];
+
+        return {
+          options,
+          selected,
+        };
+      },
+      template: `
+        <FormSelect
+          id="communication_style"
+          v-model="selected"
+          name="communication_style">
+          <option
+            v-for="option in options"
+            :key="option.value"
+            :value="option.value">
+            {{ option.label }}
+          </option>
+        </FormSelect>
+        <span data-testid="selected">{{ selected }}</span>
+      `,
+    }));
+
+    const hiddenInput = wrapper.get('input[type="hidden"]').element as HTMLInputElement;
+
+    expect(hiddenInput.value).toBe('github');
+    expect(wrapper.get('[role="combobox"]').text()).toContain('GitHub');
+
+    await wrapper.get('[role="combobox"]').trigger('click');
+    await nextTick();
+
+    const discordOption = Array.from(document.body.querySelectorAll<HTMLElement>('[role="option"]'))
+      .find((option) => option.textContent?.includes('Discord'));
+
+    expect(discordOption).toBeDefined();
+
+    discordOption?.click();
+    await nextTick();
+
+    expect(hiddenInput.value).toBe('discord');
+    expect(wrapper.get('[data-testid="selected"]').text()).toBe('discord');
+    expect(wrapper.get('[role="combobox"]').text()).toContain('Discord');
   });
 });
