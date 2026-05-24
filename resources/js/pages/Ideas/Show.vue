@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import CommentList from '@/components/comments/CommentList.vue';
+import IdeaActionRail from '@/components/ideas/IdeaActionRail.vue';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
-import { Button } from '@/components/ui/button';
 import MarkdownTableOfContents from '@/components/typography/MarkdownTableOfContents.vue';
 import { markdownHeadings, stripGeneratedTableOfContents } from '@/lib/markdown';
-import { GitBranch, Pencil } from '@lucide/vue';
 import type { DomainUser, Idea, IdeaApplication, IdeaComment, IdeaSupporter, Paginator } from '@/types/domain';
 
 const props = defineProps<{
@@ -58,30 +57,12 @@ function hasPitchHeadingsClass(): string | undefined {
           Idea - {{ idea.titleDisplay }}
         </h1>
       </div>
-      <div
-        v-if="idea.can.update"
-        class="flex shrink-0 flex-wrap justify-end gap-2 sm:pt-0.5">
-        <Button
-          as="a"
-          :href="idea.routes.dashboard"
-          size="sm">
-          <GitBranch
-            class="size-4"
-            aria-hidden="true" />
-          Manage
-        </Button>
-        <Button
-          as="a"
-          :href="idea.routes.edit"
-          variant="outline"
-          size="sm">
-          <Pencil
-            class="size-4"
-            aria-hidden="true" />
-          Edit
-        </Button>
-      </div>
     </header>
+
+    <IdeaActionRail
+      :idea="idea"
+      :collaborator="collaborator"
+      :applicant="applicant" />
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <div class="flex flex-col gap-4">
