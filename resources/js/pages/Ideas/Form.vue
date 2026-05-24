@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, reactive, ref, toRef } from 'vue';
 import { Upload } from '@lucide/vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
@@ -10,8 +10,9 @@ import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import MarkdownTableOfContents from '@/components/typography/MarkdownTableOfContents.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ideaFormDraftKey, useIdeaFormDraft, type IdeaFormDraftValues } from '@/composables/useIdeaFormDraft';
 import { useIdeaPitchTools } from '@/composables/useIdeaPitchTools';
-import { oldInputString } from '@/lib/forms';
+import { hasOldInput, oldInputString } from '@/lib/forms';
 import { maxLengthValidator, repositoryNameValidator } from '@/lib/formValidation';
 import { stripGeneratedTableOfContents } from '@/lib/markdown';
 import { useSessionStore } from '@/stores/session';
@@ -27,7 +28,6 @@ const markdownFileInput = ref<HTMLInputElement | null>(null);
 const repositoryNamePattern = '[A-Za-z0-9_-]+';
 const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
 const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
-const content = ref(stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)));
 const titleValidator = maxLengthValidator(100, 'a title');
 const taglineValidator = maxLengthValidator(60, 'a tagline');
 const communicationValidator = maxLengthValidator(50, 'a communication preference');
@@ -36,6 +36,39 @@ const tagsValidator = maxLengthValidator(240, 'tags');
 const contentValidator = maxLengthValidator(20000, 'a pitch');
 const tagsText = computed(() => props.idea?.tags.join(', ') ?? '');
 const previewDescriptionId = 'idea-form-preview-description';
+const ideaFormDraftFields = [
+  'title',
+  'tagline',
+  'communication',
+  'tags',
+  'repository_name',
+  'summary',
+  'content',
+  'status',
+];
+const formValues = reactive<IdeaFormDraftValues>({
+  title: oldInputString('title', props.idea?.title),
+  tagline: oldInputString('tagline', props.idea?.tagline),
+  communication: oldInputString('communication', props.idea?.communication),
+  tags: oldInputString('tags', tagsText.value),
+  repositoryName: oldInputString('repository_name', props.idea?.repositoryName),
+  summary: oldInputString('summary', props.idea?.summary),
+  content: stripGeneratedTableOfContents(oldInputString('content', props.idea?.content)),
+});
+const content = toRef(formValues, 'content');
+const {
+  discardDraft,
+  draftSavedAtLabel,
+  hasRecoverableDraft,
+  hasUnsavedChanges,
+  markSubmitting,
+  restoreDraft,
+} = useIdeaFormDraft({
+  allowRestore: !hasOldInput(ideaFormDraftFields),
+  initialValues: { ...formValues },
+  storageKey: ideaFormDraftKey(props.idea?.id),
+  values: formValues,
+});
 const {
   contentBody,
   dropMarkdownFiles,
@@ -65,6 +98,7 @@ function sanitizeRepositoryName(event: Event): void {
 
   if (input.value !== sanitized) {
     input.value = sanitized;
+    formValues.repositoryName = sanitized;
   }
 }
 
@@ -93,6 +127,10 @@ function pasteRepositoryName(event: ClipboardEvent): void {
   input.value = `${input.value.slice(0, start)}${sanitized}${input.value.slice(end)}`.slice(0, 100);
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
+
+function submitForm(): void {
+  markSubmitting();
+}
 </script>
 
 <template>
@@ -107,11 +145,51 @@ function pasteRepositoryName(event: ClipboardEvent): void {
         <form
           :action="formAction"
           method="POST"
-          class="flex flex-col gap-5">
+          class="flex flex-col gap-5"
+          @submit="submitForm">
           <CsrfField />
           <MethodField
             v-if="idea"
             method="PUT" />
+
+          <div
+            v-if="hasRecoverableDraft"
+            class="flex flex-col gap-3 rounded-md border border-amber-400/45 bg-amber-500/10 p-4 text-sm text-amber-950 dark:text-amber-100 sm:flex-row sm:items-center sm:justify-between"
+            role="status"
+            aria-live="polite">
+            <div class="flex flex-col gap-1">
+              <p class="font-medium text-foreground">
+                Unsaved draft found
+              </p>
+              <p class="text-muted-foreground">
+                Restore your local draft from {{ draftSavedAtLabel || 'earlier' }}, or discard it and keep this version.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                @click="restoreDraft">
+                Restore draft
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                @click="discardDraft">
+                Discard
+              </Button>
+            </div>
+          </div>
+
+          <p
+            v-else-if="hasUnsavedChanges"
+            class="rounded-md border border-border bg-background/45 px-3 py-2 text-sm text-muted-foreground"
+            role="status"
+            aria-live="polite">
+            Draft saved locally. You will be warned before leaving with unsaved changes.
+          </p>
 
           <div class="grid gap-4 md:grid-cols-2">
             <FormField
@@ -121,13 +199,13 @@ function pasteRepositoryName(event: ClipboardEvent): void {
               <template #default="{ invalid, describedBy, feedbackClass }">
                 <input
                   id="title"
+                  v-model="formValues.title"
                   name="title"
                   type="text"
                   :class="[
                     'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                     feedbackClass,
                   ]"
-                  :defaultValue="oldInputString('title', idea?.title)"
                   placeholder="A faster way to match design reviewers"
                   maxlength="100"
                   :aria-invalid="invalid || undefined"
@@ -144,13 +222,13 @@ function pasteRepositoryName(event: ClipboardEvent): void {
               <template #default="{ invalid, describedBy, feedbackClass }">
                 <input
                   id="tagline"
+                  v-model="formValues.tagline"
                   name="tagline"
                   type="text"
                   :class="[
                     'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                     feedbackClass,
                   ]"
-                  :defaultValue="oldInputString('tagline', idea?.tagline)"
                   placeholder="Match reviewers with focused feedback"
                   maxlength="60"
                   :aria-invalid="invalid || undefined"
@@ -166,13 +244,13 @@ function pasteRepositoryName(event: ClipboardEvent): void {
               <template #default="{ invalid, describedBy, feedbackClass }">
                 <input
                   id="communication"
+                  v-model="formValues.communication"
                   name="communication"
                   type="text"
                   :class="[
                     'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                     feedbackClass,
                   ]"
-                  :defaultValue="oldInputString('communication', idea?.communication)"
                   placeholder="Slack, Discord, email..."
                   maxlength="50"
                   :aria-invalid="invalid || undefined"
@@ -189,13 +267,13 @@ function pasteRepositoryName(event: ClipboardEvent): void {
               <template #default="{ invalid, describedBy, feedbackClass }">
                 <input
                   id="tags"
+                  v-model="formValues.tags"
                   name="tags"
                   type="text"
                   :class="[
                     'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                     feedbackClass,
                   ]"
-                  :defaultValue="oldInputString('tags', tagsText)"
                   placeholder="design, review, workflow"
                   maxlength="240"
                   autocomplete="off"
@@ -213,13 +291,13 @@ function pasteRepositoryName(event: ClipboardEvent): void {
             <template #default="{ invalid, describedBy, feedbackClass }">
               <input
                 id="repository_name"
+                v-model="formValues.repositoryName"
                 name="repository_name"
                 type="text"
                 :class="[
                   'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                   feedbackClass,
                 ]"
-                :defaultValue="oldInputString('repository_name', idea?.repositoryName)"
                 placeholder="design-review-matchmaker"
                 maxlength="100"
                 :pattern="repositoryNamePattern"
@@ -243,6 +321,7 @@ function pasteRepositoryName(event: ClipboardEvent): void {
             <template #default="{ invalid, describedBy, feedbackClass }">
               <textarea
                 id="summary"
+                v-model="formValues.summary"
                 name="summary"
                 :class="[
                   'min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
@@ -250,7 +329,6 @@ function pasteRepositoryName(event: ClipboardEvent): void {
                 ]"
                 placeholder="A short plain-text overview of who this helps and why it should exist."
                 maxlength="240"
-                :defaultValue="oldInputString('summary', idea?.summary)"
                 :aria-invalid="invalid || undefined"
                 :aria-describedby="describedBy"
                 required />
