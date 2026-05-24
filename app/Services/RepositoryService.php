@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Repositories\Ideas\ApplicationRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
 use RuntimeException;
@@ -14,7 +15,8 @@ class RepositoryService
 {
     public function __construct(
         private GitHubRepositoryClient $github,
-        private IdeaRepositorySyncService $sync
+        private IdeaRepositorySyncService $sync,
+        private ApplicationRepository $applications
     ) {}
 
     public function create(Idea $idea): bool
@@ -37,11 +39,8 @@ class RepositoryService
 
     public function inviteUsers(Idea $idea): bool
     {
-        return IdeaApplication::query()
-            ->where('idea_id', $idea->id)
-            ->where('status', 'approved')
-            ->with('user.githubAccount')
-            ->get()
+        return $this->applications
+            ->getApprovedApplicationsForInvite($idea)
             ->every(fn (IdeaApplication $collaborator) => $this->inviteUser($idea, $collaborator));
     }
 

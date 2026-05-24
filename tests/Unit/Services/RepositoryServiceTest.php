@@ -7,6 +7,9 @@ use App\Models\ConnectedAccount;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Repositories\CodeRepositories\CodeRepositoryRepository;
+use App\Repositories\CodeRepositories\RepositoryEventRepository;
+use App\Repositories\Ideas\ApplicationRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\RepositoryService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
@@ -67,7 +70,12 @@ class RepositoryServiceTest extends TestCase
     {
         return new RepositoryService(
             github: $github,
-            sync: new IdeaRepositorySyncService($this->createStub(GitHubRepositoryClient::class)),
+            sync: new IdeaRepositorySyncService(
+                github: $this->createStub(GitHubRepositoryClient::class),
+                codeRepositories: $this->createStub(CodeRepositoryRepository::class),
+                repositoryEvents: $this->createStub(RepositoryEventRepository::class)
+            ),
+            applications: new ApplicationRepository
         );
     }
 

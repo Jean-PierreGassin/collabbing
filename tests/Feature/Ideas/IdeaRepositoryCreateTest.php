@@ -6,6 +6,9 @@ use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Repositories\CodeRepositories\CodeRepositoryRepository;
+use App\Repositories\CodeRepositories\RepositoryEventRepository;
+use App\Repositories\Ideas\ApplicationRepository;
 use App\Services\Ideas\IdeaRepositorySyncService;
 use App\Services\RepositoryService;
 use App\Services\ThirdParty\GitHub\GitHubRepositoryClient;
@@ -134,7 +137,7 @@ class IdeaRepositoryCreateTest extends TestCase
             )
             ->willThrowException(new Exception('GitHub invite failed'));
 
-        $service = new RepositoryService($github, $this->syncService());
+        $service = new RepositoryService($github, $this->syncService(), app(ApplicationRepository::class));
 
         $this->assertFalse($service->inviteUsers($idea));
     }
@@ -157,13 +160,17 @@ class IdeaRepositoryCreateTest extends TestCase
         $github = $this->createMock(GitHubRepositoryClient::class);
         $github->expects($this->never())->method('addCollaborator');
 
-        $service = new RepositoryService($github, $this->syncService());
+        $service = new RepositoryService($github, $this->syncService(), app(ApplicationRepository::class));
 
         $this->assertFalse($service->inviteUsers($idea));
     }
 
     private function syncService(): IdeaRepositorySyncService
     {
-        return new IdeaRepositorySyncService($this->createStub(GitHubRepositoryClient::class));
+        return new IdeaRepositorySyncService(
+            github: $this->createStub(GitHubRepositoryClient::class),
+            codeRepositories: app(CodeRepositoryRepository::class),
+            repositoryEvents: app(RepositoryEventRepository::class)
+        );
     }
 }

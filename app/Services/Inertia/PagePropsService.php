@@ -8,6 +8,9 @@ use App\Models\IdeaComment;
 use App\Models\IdeaSupporter;
 use App\Models\RepositoryEvent;
 use App\Models\User;
+use App\Repositories\CodeRepositories\RepositoryEventRepository;
+use App\Repositories\Ideas\ApplicationRepository;
+use App\Repositories\Ideas\CommentRepository;
 use Carbon\Carbon;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -22,6 +25,12 @@ class PagePropsService
     private const IDEA_TAGLINE_LIMIT = 60;
 
     private const COLLABORATOR_PREVIEW_LIMIT = 12;
+
+    public function __construct(
+        private ApplicationRepository $applications,
+        private CommentRepository $comments,
+        private RepositoryEventRepository $repositoryEvents
+    ) {}
 
     public function user(?User $user): ?array
     {
@@ -195,13 +204,7 @@ class PagePropsService
 
     private function collaboratorPreview(Idea $idea): Collection
     {
-        return IdeaApplication::query()
-            ->where('idea_id', $idea->id)
-            ->where('status', 'approved')
-            ->with('user')
-            ->latest()
-            ->limit(self::COLLABORATOR_PREVIEW_LIMIT)
-            ->get();
+        return $this->applications->getApprovedApplicationPreview($idea, self::COLLABORATOR_PREVIEW_LIMIT);
     }
 
     private function repositoryActivity(Idea $idea): array
@@ -211,11 +214,8 @@ class PagePropsService
         $events = [];
 
         if ($codeRepository && ($codeRepository->isAvailable() || $codeRepository->missing_at)) {
-            $events = RepositoryEvent::query()
-                ->where('code_repository_id', $codeRepository->id)
-                ->latest('occurred_at')
-                ->limit(5)
-                ->get()
+            $events = $this->repositoryEvents
+                ->recentFor($codeRepository, 5)
                 ->map(fn (RepositoryEvent $event): array => [
                     'id' => $event->id,
                     'type' => $event->type,
@@ -272,11 +272,8 @@ class PagePropsService
             'updatedAtForHumans' => $comment->updated_at->diffForHumans(),
             'wasEdited' => $comment->created_at->timestamp < $comment->updated_at->timestamp,
             'user' => $this->user($this->commentUser($comment)),
-            'replies' => IdeaComment::query()
-                ->where('parent_id', $comment->id)
-                ->with('user')
-                ->oldest()
-                ->get()
+            'replies' => $this->comments
+                ->repliesFor($comment)
                 ->map(fn (IdeaComment $reply): array => $this->comment($reply))
                 ->values(),
             'can' => [
@@ -295,12 +292,7 @@ class PagePropsService
 
         preg_match_all('/(?<![A-Za-z0-9_-])@([A-Za-z0-9_-]{3,20})\b/', $comment->content, $matches);
 
-        if (! empty($matches[1])) {
-            $usernames = User::query()
-                ->whereIn('username', array_unique($matches[1]))
-                ->get()
-                ->keyBy('username');
-        }
+        $usernames = $this->comments->mentionedUsers($matches[1]);
 
         $content = preg_replace_callback(
             '/(?<![A-Za-z0-9_-])@([A-Za-z0-9_-]{3,20})\b/',

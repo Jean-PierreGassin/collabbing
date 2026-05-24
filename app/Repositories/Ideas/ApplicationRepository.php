@@ -7,6 +7,7 @@ use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ApplicationRepository
 {
@@ -45,6 +46,22 @@ class ApplicationRepository
             ->with('user')
             ->latest()
             ->paginate(10, ['*'], 'collaborators');
+    }
+
+    public function getApprovedApplicationsForInvite(Idea $idea): Collection
+    {
+        return $idea->approvedApplications()
+            ->with('user.githubAccount')
+            ->get();
+    }
+
+    public function getApprovedApplicationPreview(Idea $idea, int $limit): Collection
+    {
+        return $idea->approvedApplications()
+            ->with('user')
+            ->latest()
+            ->limit($limit)
+            ->get();
     }
 
     public function getApplicationFromUser(Idea $idea, User $user, string $type): ?IdeaApplication
