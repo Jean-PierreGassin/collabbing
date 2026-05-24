@@ -90,6 +90,7 @@ function idea(): Idea {
     statusDisplay: 'Open',
     repository: false,
     repositoryName: null,
+    repositoryAccessReviewNeeded: false,
     repositoryActivity: {
       htmlUrl: null,
       defaultBranch: null,
@@ -174,13 +175,14 @@ function application(): IdeaApplication {
   };
 }
 
-function mountShow(applicant: IdeaApplication | null = null) {
+function mountShow(applicant: IdeaApplication | null = null, historicalApplication: IdeaApplication | null = null) {
   return mount(Show, {
     props: {
       idea: idea(),
       comments: paginator<IdeaComment>(),
       collaborator: null,
       applicant,
+      historicalApplication,
       supporter: null as IdeaSupporter | null,
     },
     global: {
@@ -219,5 +221,22 @@ describe('Ideas/Show', () => {
     const wrapper = mountShow();
 
     expect(wrapper.find('#application-thread').exists()).toBe(false);
+  });
+
+  it('renders historical application threads read only', () => {
+    const historicalApplication = application();
+
+    historicalApplication.status = 'removed';
+    historicalApplication.statusDisplay = 'Removed from collaboration';
+    historicalApplication.thread = {
+      ...historicalApplication.thread!,
+      canMessage: false,
+      isReadOnly: true,
+      readOnlyReason: 'This application thread is read-only after a final decision.',
+    };
+
+    const wrapper = mountShow(null, historicalApplication);
+
+    expect(wrapper.get('#application-thread').text()).toContain('Your application thread');
   });
 });

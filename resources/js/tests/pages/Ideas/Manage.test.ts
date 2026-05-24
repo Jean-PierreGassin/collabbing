@@ -10,6 +10,7 @@ const inertiaPage = vi.hoisted(() => ({
       status: null,
       errors: [],
       repositoryInvitePrompt: false,
+      repositoryAccessPrompt: false,
     },
   },
 }));
@@ -248,6 +249,7 @@ function mountManage(
 describe('Idea management tabs', () => {
   beforeEach(() => {
     inertiaPage.props.flash.repositoryInvitePrompt = false;
+    inertiaPage.props.flash.repositoryAccessPrompt = false;
     window.history.pushState({}, '', '/ideas/1/dashboard');
   });
 
@@ -346,6 +348,36 @@ describe('Idea management tabs', () => {
 
     expect(wrapper.text()).toContain('Repository is connected.');
     expect(wrapper.findAll('form[action="/ideas/1/repository/invite"]')).toHaveLength(2);
+  });
+
+  it('shows repository access cleanup prompt after collaborator exits', () => {
+    inertiaPage.props.flash.repositoryAccessPrompt = true;
+
+    const wrapper = mountManage([], [], {
+      repository: true,
+    });
+
+    expect(wrapper.text()).toContain('Review repository access.');
+    expect(wrapper.text()).toContain('access when you are ready');
+  });
+
+  it('uses a confirm step with private reason when removing collaborators', async () => {
+    const collaborator = application({
+      status: 'approved',
+      statusDisplay: 'Collaborating',
+    });
+    const wrapper = mountManage([], [collaborator], {
+      can: permissions({
+        deleteApplication: true,
+      }),
+    });
+
+    await wrapper.get('#manage-collaborators-tab').trigger('click');
+
+    expect(wrapper.get('details summary').text()).toContain('Remove Collaborator');
+    expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
+    expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
+    expect(wrapper.get('form[action="/ideas/1/applications/3"] button[type="submit"]').text()).toContain('Confirm remove');
   });
 
   it('preserves the collaborator tab intent from the query string', () => {

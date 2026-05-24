@@ -104,19 +104,42 @@ describe('IdeaApplicationThread', () => {
     const wrapper = mountThread(application({
       thread: {
         ...application().thread!,
-        messages: [{
-          id: 2,
-          type: 'withdrawn',
-          body: null,
-          bodyHtml: null,
-          isSystem: true,
-          occurredAtForHumans: 'just now',
-          user: null,
-        }],
+        messages: [
+          {
+            id: 2,
+            type: 'withdrawn',
+            body: null,
+            bodyHtml: null,
+            isSystem: true,
+            occurredAtForHumans: 'just now',
+            user: null,
+          },
+          {
+            id: 3,
+            type: 'left',
+            body: 'Stepping away from this work.',
+            bodyHtml: '<p>Stepping away from this work.</p>',
+            isSystem: true,
+            occurredAtForHumans: 'just now',
+            user: null,
+          },
+          {
+            id: 4,
+            type: 'removed',
+            body: null,
+            bodyHtml: null,
+            isSystem: true,
+            occurredAtForHumans: 'just now',
+            user: null,
+          },
+        ],
       },
     }));
 
     expect(wrapper.text()).toContain('Application withdrawn');
+    expect(wrapper.text()).toContain('Collaborator left');
+    expect(wrapper.text()).toContain('Stepping away from this work.');
+    expect(wrapper.text()).toContain('Collaborator removed');
     expect(wrapper.text()).toContain('just now');
   });
 

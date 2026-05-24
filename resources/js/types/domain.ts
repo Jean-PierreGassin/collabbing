@@ -163,6 +163,7 @@ export interface Idea {
   repository: boolean;
   repositoryName: string | null;
   repositoryActivity: IdeaRepositoryActivity;
+  repositoryAccessReviewNeeded?: boolean;
   createdAtForHumans: string;
   user: DomainUser;
   supportersCount: number;

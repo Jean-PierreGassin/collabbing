@@ -77,6 +77,7 @@ class StoreIdea extends FormRequest
             ],
             'communication_note' => 'nullable|string|max:240',
             'getting_started_notes' => 'nullable|string|max:10000',
+            'notify_collaborators' => 'nullable|boolean',
             'content' => 'required|max:20000',
             'status' => 'in:open,closed',
         ];
@@ -145,7 +146,8 @@ class StoreIdea extends FormRequest
             communicationStyle: $this->optionalString('communication_style'),
             communicationNote: $this->optionalString('communication_note'),
             gettingStartedNotes: $this->gettingStartedNotesValue(),
-            gettingStartedNotesUpdatedAt: $this->gettingStartedNotesUpdatedAt()
+            gettingStartedNotesUpdatedAt: $this->gettingStartedNotesUpdatedAt(),
+            notifyCollaboratorsOfGettingStartedNotes: $this->boolean('notify_collaborators')
         );
     }
 

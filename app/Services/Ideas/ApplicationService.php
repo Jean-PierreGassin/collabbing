@@ -12,6 +12,9 @@ use App\Models\User;
 use App\Notifications\Ideas\IdeaApplicationApprovedNotification;
 use App\Notifications\Ideas\IdeaApplicationDeclinedNotification;
 use App\Notifications\Ideas\IdeaApplicationThreadMessageNotification;
+use App\Notifications\Ideas\IdeaApplicationWithdrawnNotification;
+use App\Notifications\Ideas\IdeaCollaboratorLeftNotification;
+use App\Notifications\Ideas\IdeaCollaboratorRemovedNotification;
 use App\Notifications\Ideas\NewIdeaApplicationNotification;
 use App\Repositories\Ideas\ApplicationRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -64,9 +67,25 @@ class ApplicationService
             if ($wasPending && ! $wasApproved) {
                 $this->notifyApplicantDeclined($application);
             }
+
+            if ($wasApproved) {
+                $this->notifyCollaboratorRemoved($application, $data?->exitReason);
+            }
         }
 
         return $destroyed;
+    }
+
+    public function leave(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
+    {
+        $left = $this->applications->leave($application, $data);
+
+        if ($left) {
+            $this->markThreadRead($application);
+            $this->notifyOwnerCollaboratorLeft($application, $data?->exitReason);
+        }
+
+        return $left;
     }
 
     public function withdraw(IdeaApplication $application): bool
@@ -75,6 +94,7 @@ class ApplicationService
 
         if ($withdrawn) {
             $this->markThreadRead($application);
+            $this->notifyOwnerApplicationWithdrawn($application);
         }
 
         return $withdrawn;
@@ -109,6 +129,11 @@ class ApplicationService
     public function getApplicationFromUser(Idea $idea, string $type): ?IdeaApplication
     {
         return $this->applications->getApplicationFromUser($idea, $this->authenticatedUser(), $type);
+    }
+
+    public function getLatestFinalApplicationFromUser(Idea $idea): ?IdeaApplication
+    {
+        return $this->applications->getLatestFinalApplicationFromUser($idea, $this->authenticatedUser());
     }
 
     private function authenticatedUser(): User
@@ -167,6 +192,57 @@ class ApplicationService
         if ($idea instanceof Idea && $applicant instanceof User) {
             $applicant->notify(new IdeaApplicationDeclinedNotification($idea, $application));
         }
+    }
+
+    private function notifyOwnerApplicationWithdrawn(IdeaApplication $application): void
+    {
+        $application->loadMissing(['idea.user', 'user']);
+        $idea = $application->idea;
+        $owner = $idea instanceof Idea ? $idea->owner() : null;
+
+        if ($idea instanceof Idea && $owner instanceof User) {
+            $owner->notify(new IdeaApplicationWithdrawnNotification($idea, $application));
+        }
+    }
+
+    private function notifyOwnerCollaboratorLeft(IdeaApplication $application, ?string $reason): void
+    {
+        $application->loadMissing(['idea.user', 'user', 'idea.codeRepository']);
+        $idea = $application->idea;
+        $owner = $idea instanceof Idea ? $idea->owner() : null;
+
+        if ($idea instanceof Idea && $owner instanceof User) {
+            $owner->notify(new IdeaCollaboratorLeftNotification(
+                idea: $idea,
+                application: $application,
+                reason: $reason,
+                shouldReviewRepositoryAccess: $this->shouldReviewRepositoryAccess($application)
+            ));
+        }
+    }
+
+    private function notifyCollaboratorRemoved(IdeaApplication $application, ?string $reason): void
+    {
+        $application->loadMissing(['idea.codeRepository', 'user']);
+        $idea = $application->idea;
+        $collaborator = $application->user;
+
+        if ($idea instanceof Idea && $collaborator instanceof User) {
+            $collaborator->notify(new IdeaCollaboratorRemovedNotification(
+                idea: $idea,
+                application: $application,
+                reason: $reason,
+                shouldReviewRepositoryAccess: $this->shouldReviewRepositoryAccess($application)
+            ));
+        }
+    }
+
+    private function shouldReviewRepositoryAccess(IdeaApplication $application): bool
+    {
+        $application->loadMissing('idea.codeRepository');
+        $idea = $application->idea;
+
+        return $idea instanceof Idea && $idea->latestCodeRepository()?->isAvailable() === true;
     }
 
     private function threadRecipient(IdeaApplication $application, User $sender): ?User

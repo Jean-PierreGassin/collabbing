@@ -596,4 +596,20 @@ describe('Ideas/Form', () => {
     expect(wrapper.get<HTMLInputElement>('input#repository_name').element.value).toBe('prefilled-repo');
     expect(formData(wrapper).get('communication')).toBe('github');
   });
+
+  it('can include collaborator notification when editing private notes', async () => {
+    const wrapper = mountForm({
+      idea: idea({
+        approvedApplicationsCount: 2,
+        collaboration: collaboration({
+          gettingStartedNotes: 'Private setup notes.',
+        }),
+      }),
+    });
+
+    await wrapper.get<HTMLInputElement>('input[name="notify_collaborators"]').setValue(true);
+
+    expect(wrapper.text()).toContain('Notify accepted collaborators');
+    expect(formData(wrapper).get('notify_collaborators')).toBe('1');
+  });
 });

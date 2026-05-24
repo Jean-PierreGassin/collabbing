@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ideaFormDraftKey, useIdeaFormDraft, type IdeaFormDraftValues } from '@/composables/useIdeaFormDraft';
 import { useIdeaPitchTools } from '@/composables/useIdeaPitchTools';
-import { hasOldInput, oldInputString, oldInputStringArray } from '@/lib/forms';
+import { hasOldInput, oldInputBoolean, oldInputString, oldInputStringArray } from '@/lib/forms';
 import { maxLengthValidator, repositoryNameValidator } from '@/lib/formValidation';
 import { stripGeneratedTableOfContents } from '@/lib/markdown';
 import { useSessionStore } from '@/stores/session';
@@ -26,6 +26,7 @@ const session = useSessionStore();
 const form = ref<HTMLFormElement | null>(null);
 const contentInput = ref<HTMLTextAreaElement | null>(null);
 const markdownFileInput = ref<HTMLInputElement | null>(null);
+const notifyCollaborators = ref(oldInputBoolean('notify_collaborators'));
 const repositoryNamePattern = '[A-Za-z0-9_-]+';
 const repositoryNameAllowedCharacters = /^[A-Za-z0-9_-]+$/;
 const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
@@ -519,6 +520,17 @@ function submitForm(): void {
                     :aria-describedby="describedBy">
                 </template>
               </FormField>
+              <label
+                v-if="isEditing && (idea?.approvedApplicationsCount ?? 0) > 0"
+                class="flex items-start gap-2 rounded-md border border-border bg-background/35 px-3 py-2 text-sm text-muted-foreground">
+                <input
+                  v-model="notifyCollaborators"
+                  type="checkbox"
+                  name="notify_collaborators"
+                  value="1"
+                  class="mt-1 size-4 rounded border-input bg-background">
+                <span>Notify accepted collaborators that private start notes changed.</span>
+              </label>
             </div>
 
             <FormField

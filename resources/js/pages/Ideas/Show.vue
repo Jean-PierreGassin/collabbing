@@ -15,6 +15,7 @@ const props = defineProps<{
   comments: Paginator<IdeaComment>;
   collaborator: IdeaApplication | null;
   applicant: IdeaApplication | null;
+  historicalApplication: IdeaApplication | null;
   supporter: IdeaSupporter | null;
 }>();
 
@@ -41,7 +42,7 @@ const mentionableUsers = computed<DomainUser[]>(() => {
 const pitchContent = computed(() => stripGeneratedTableOfContents(props.idea.content));
 const pitchHeadings = computed(() => markdownHeadings(pitchContent.value));
 const pitchDescriptionId = computed(() => `idea-${props.idea.id}-description`);
-const threadApplication = computed(() => props.applicant ?? props.collaborator);
+const threadApplication = computed(() => props.applicant ?? props.collaborator ?? props.historicalApplication);
 
 function hasPitchHeadingsClass(): string | undefined {
   if (pitchHeadings.value.length > 0) {

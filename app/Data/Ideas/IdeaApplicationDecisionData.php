@@ -6,6 +6,7 @@ final readonly class IdeaApplicationDecisionData
 {
     public function __construct(
         public ?string $approvalNote = null,
-        public ?string $declineReason = null
+        public ?string $declineReason = null,
+        public ?string $exitReason = null
     ) {}
 }

@@ -122,9 +122,14 @@ async function markThreadRead(): Promise<void> {
         class="rounded-md border border-border bg-card/80 px-3 py-2">
         <div
           v-if="message.isSystem"
-          class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-          <span>{{ systemLabel(message.type) }}</span>
-          <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+          class="flex flex-col gap-2">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+            <span>{{ systemLabel(message.type) }}</span>
+            <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+          </div>
+          <MarkdownContent
+            v-if="message.bodyHtml"
+            :html="message.bodyHtml" />
         </div>
         <div
           v-else

@@ -113,15 +113,18 @@ class IdeaController extends Controller
                 ),
                 'collaborator' => null,
                 'applicant' => null,
+                'historicalApplication' => null,
                 'supporter' => null,
             ]);
         }
 
         $collaborator = $this->applicationService->getApplicationFromUser($idea, 'approved');
         $applicant = $this->applicationService->getApplicationFromUser($idea, 'pending');
+        $historicalApplication = null;
         $supporter = $this->supporterService->getSupportFromUser($idea);
         $collaboratorProps = null;
         $applicantProps = null;
+        $historicalApplicationProps = null;
 
         if ($collaborator) {
             $collaboratorProps = $this->pageProps->application($collaborator);
@@ -129,6 +132,14 @@ class IdeaController extends Controller
 
         if ($applicant) {
             $applicantProps = $this->pageProps->application($applicant);
+        }
+
+        if (! $collaborator && ! $applicant) {
+            $historicalApplication = $this->applicationService->getLatestFinalApplicationFromUser($idea);
+        }
+
+        if ($historicalApplication) {
+            $historicalApplicationProps = $this->pageProps->application($historicalApplication);
         }
 
         return Inertia::render('Ideas/Show', [
@@ -139,6 +150,7 @@ class IdeaController extends Controller
             ),
             'collaborator' => $collaboratorProps,
             'applicant' => $applicantProps,
+            'historicalApplication' => $historicalApplicationProps,
             'supporter' => $this->pageProps->supporter($supporter),
         ]);
     }

@@ -5,9 +5,12 @@ namespace Tests\Feature\Ideas;
 use App\Models\CodeRepository;
 use App\Models\ConnectedAccount;
 use App\Models\Idea;
+use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Notifications\Ideas\GettingStartedNotesUpdatedNotification;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -179,6 +182,80 @@ class IdeaValidationTest extends TestCase
             'idea_id' => $idea->id,
             'name' => 'updated-collaboration-tool',
         ]);
+    }
+
+    public function testCollaboratorsCanBeNotifiedWhenPrivateNotesChange(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $collaborator = User::factory()->create();
+        $pendingApplicant = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($collaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($pendingApplicant, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_PENDING,
+            ]);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'original-repository',
+                'getting_started_notes' => 'Updated private notes.',
+                'notify_collaborators' => '1',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        Notification::assertSentTo($collaborator, GettingStartedNotesUpdatedNotification::class);
+        Notification::assertNotSentTo($pendingApplicant, GettingStartedNotesUpdatedNotification::class);
+    }
+
+    public function testPrivateNotesNotificationIsSkippedWhenNotesDoNotChange(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $collaborator = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($collaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'original-repository',
+                'getting_started_notes' => 'Original private notes.',
+                'notify_collaborators' => '1',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        Notification::assertNothingSent();
     }
 
     public function testEditingPreservesOmittedCollaborationFields(): void

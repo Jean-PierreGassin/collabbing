@@ -337,4 +337,51 @@ describe('IdeaSidebar', () => {
     expect(applicantSidebar.text()).toContain('Public first steps, support, and comments stay available.');
     expect(collaboratorSidebar.text()).toContain('Collaborating');
   });
+
+  it('shows accepted collaborator start notes, approval note, and leave confirmation', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      idea: idea({
+        repository: true,
+        repositoryActivity: {
+          ...idea().repositoryActivity,
+          htmlUrl: 'https://github.com/example/repo',
+        },
+        collaboration: collaboration({
+          gettingStartedNotesReady: true,
+          gettingStartedNotes: 'Private setup notes.',
+          gettingStartedNotesHtml: '<p>Private setup notes.</p>',
+          gettingStartedNotesUpdatedAtForHumans: '2 minutes ago',
+        }),
+      }),
+      collaborator: application({
+        status: 'approved',
+        statusDisplay: 'Collaborating',
+        approvalNote: 'Start with issue #1.',
+        approvalNoteHtml: '<p>Start with issue #1.</p>',
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Your starting point');
+    expect(wrapper.text()).toContain('Private setup notes.');
+    expect(wrapper.text()).toContain('Updated 2 minutes ago.');
+    expect(wrapper.text()).toContain('Start with issue #1.');
+    expect(wrapper.get('details summary').text()).toContain('Leave collaboration');
+    expect(wrapper.get('form[action="/applications/1"] input[name="_method"]').attributes('value')).toBe('DELETE');
+    expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
+    expect(wrapper.get('form[action="/applications/1"] button[type="submit"]').text()).toContain('Confirm leave');
+  });
+
+  it('shows an honest empty state when accepted collaborator notes are missing', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      collaborator: application({
+        status: 'approved',
+        statusDisplay: 'Collaborating',
+      }),
+    });
+
+    expect(wrapper.text()).toContain('The owner has not added private start notes yet.');
+    expect(wrapper.text()).not.toContain('Approval note');
+  });
 });

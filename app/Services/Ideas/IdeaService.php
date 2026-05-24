@@ -4,7 +4,9 @@ namespace App\Services\Ideas;
 
 use App\Data\Ideas\IdeaData;
 use App\Models\Idea;
+use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Notifications\Ideas\GettingStartedNotesUpdatedNotification;
 use App\Repositories\Ideas\IdeaRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -22,7 +24,14 @@ class IdeaService
 
     public function update(Idea $idea, IdeaData $data): bool
     {
-        return $this->ideas->update($idea, $data);
+        $shouldNotify = $this->shouldNotifyGettingStartedNotes($idea, $data);
+        $updated = $this->ideas->update($idea, $data);
+
+        if ($updated && $shouldNotify) {
+            $this->notifyCollaboratorsOfGettingStartedNotes($idea);
+        }
+
+        return $updated;
     }
 
     public function getTrending(): Collection
@@ -74,5 +83,27 @@ class IdeaService
         }
 
         return $user;
+    }
+
+    private function shouldNotifyGettingStartedNotes(Idea $idea, IdeaData $data): bool
+    {
+        return $data->notifyCollaboratorsOfGettingStartedNotes
+            && $data->gettingStartedNotes !== null
+            && $idea->getting_started_notes !== $data->gettingStartedNotes;
+    }
+
+    private function notifyCollaboratorsOfGettingStartedNotes(Idea $idea): void
+    {
+        $this->ideas
+            ->getApprovedApplications($idea)
+            ->each(function (IdeaApplication $application) use ($idea): void {
+                $application->loadMissing('user');
+
+                $collaborator = $application->user;
+
+                if ($collaborator instanceof User) {
+                    $collaborator->notify(new GettingStartedNotesUpdatedNotification($idea));
+                }
+            });
     }
 }

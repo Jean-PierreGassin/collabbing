@@ -24,7 +24,8 @@ final readonly class IdeaData
         public ?string $communicationStyle = null,
         public ?string $communicationNote = null,
         public ?string $gettingStartedNotes = null,
-        public ?CarbonInterface $gettingStartedNotesUpdatedAt = null
+        public ?CarbonInterface $gettingStartedNotesUpdatedAt = null,
+        public bool $notifyCollaboratorsOfGettingStartedNotes = false
     ) {}
 
     public function ideaAttributes(): array
