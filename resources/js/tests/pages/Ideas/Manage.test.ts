@@ -144,6 +144,8 @@ describe('Idea management tabs', () => {
     const wrapper = mountManage();
     const tabs = wrapper.findAll('[role="tab"]');
 
+    expect(wrapper.text()).toContain('Connect code host to create a repository');
+    expect(wrapper.text()).not.toContain('Link GitHub to create a repository');
     expect(wrapper.get('[role="tablist"]').attributes('aria-label')).toBe('Idea management sections');
     expect(tabs).toHaveLength(2);
     expect(tabs[0].attributes('id')).toBe('manage-applications-tab');

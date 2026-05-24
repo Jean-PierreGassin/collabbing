@@ -73,7 +73,7 @@ class IdeaRepositorySyncService
         $this->recordEvent(
             $codeRepository,
             'repository_created',
-            'Repository created on GitHub.',
+            'Repository created on the connected code host.',
             'repository_created:'.$codeRepository->name,
             now(),
             $this->repositoryPayload($repository)
@@ -124,7 +124,7 @@ class IdeaRepositorySyncService
             $this->recordEvent(
                 $codeRepository,
                 'repository_synced',
-                'Repository sync connected to GitHub.',
+                'Repository sync connected to the code host.',
                 'repository_synced:'.$codeRepository->name,
                 $syncedAt,
                 $this->repositoryPayload($repository)
@@ -135,7 +135,7 @@ class IdeaRepositorySyncService
             $this->recordEvent(
                 $codeRepository,
                 'repository_restored',
-                'Repository is available on GitHub again.',
+                'Repository is available from the code host again.',
                 'repository_restored:'.$codeRepository->name.':'.$syncedAt->timestamp,
                 $syncedAt,
                 $this->repositoryPayload($repository)
@@ -210,7 +210,7 @@ class IdeaRepositorySyncService
         $this->recordEvent(
             $codeRepository,
             'repository_missing',
-            'Repository is no longer available on GitHub.',
+            'Repository is no longer available from the code host.',
             'repository_missing:'.$codeRepository->name.':'.$missingAt->toDateString(),
             $missingAt,
             ['repository_name' => $codeRepository->name]
