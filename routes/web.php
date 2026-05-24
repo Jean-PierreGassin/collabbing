@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IdeaApplicationController;
 use App\Http\Controllers\IdeaCommentController;
 use App\Http\Controllers\IdeaController;
+use App\Http\Controllers\IdeaRepositoryEventController;
 use App\Http\Controllers\IdeaSupporterController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,9 @@ Route::prefix('ideas')->name('ideas.')->group(function (): void {
 
     Route::get('/', [IdeaController::class, 'index'])
         ->name('index');
+
+    Route::get('{idea}/repository-activity', [IdeaRepositoryEventController::class, 'index'])
+        ->name('repository-activity');
 
     Route::get('{idea}', [IdeaController::class, 'show'])
         ->name('show');

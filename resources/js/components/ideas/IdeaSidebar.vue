@@ -163,6 +163,14 @@ function removeSupport(): void {
           >
             View on GitHub
           </Button>
+          <Button
+            v-if="idea.repository || idea.repositoryActivity.isMissing || idea.repositoryActivity.events.length > 0"
+            as="a"
+            :href="idea.routes.repositoryActivity"
+            variant="ghost"
+            size="sm">
+            Activity history
+          </Button>
         </div>
       </CardHeader>
       <CardContent class="flex flex-col gap-4 text-sm">

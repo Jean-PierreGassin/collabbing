@@ -5,6 +5,7 @@ namespace App\Repositories\CodeRepositories;
 use App\Models\CodeRepository;
 use App\Models\RepositoryEvent;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -17,6 +18,13 @@ class RepositoryEventRepository
             ->latest('occurred_at')
             ->limit($limit)
             ->get();
+    }
+
+    public function paginateFor(CodeRepository $codeRepository, int $perPage = 15): LengthAwarePaginator
+    {
+        return $codeRepository->events()
+            ->latest('occurred_at')
+            ->paginate($perPage);
     }
 
     public function record(CodeRepository $codeRepository, string $type, string $summary, string $dedupeKey, Carbon $occurredAt, array $payload = []): RepositoryEvent

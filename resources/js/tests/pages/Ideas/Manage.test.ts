@@ -102,6 +102,7 @@ function idea(): Idea {
       supportersStore: '/ideas/1/supporters',
       repositoryCreate: '/ideas/1/repository',
       repositoryInvite: '/ideas/1/repository/invite',
+      repositoryActivity: '/ideas/1/repository-activity',
     },
   };
 }

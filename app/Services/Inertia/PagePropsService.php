@@ -139,6 +139,7 @@ class PagePropsService
                 'supportersStore' => route('ideas.supporters.store', $idea),
                 'repositoryCreate' => $repositoryCreateRoute,
                 'repositoryInvite' => $repositoryInviteRoute,
+                'repositoryActivity' => route('ideas.repository-activity', $idea),
             ],
         ];
     }

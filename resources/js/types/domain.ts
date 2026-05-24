@@ -83,6 +83,16 @@ export interface IdeaRepositoryActivity {
   events: RepositoryEvent[];
 }
 
+export interface RepositoryActivityArchive {
+  repository: {
+    name: string | null;
+    htmlUrl: string | null;
+    isMissing: boolean;
+    lastSyncedAtForHumans: string | null;
+  };
+  events: Paginator<RepositoryEvent>;
+}
+
 export interface Idea {
   id: number;
   title: string;
@@ -123,6 +133,7 @@ export interface Idea {
     supportersStore: string;
     repositoryCreate: string;
     repositoryInvite: string;
+    repositoryActivity: string;
   };
 }
 
