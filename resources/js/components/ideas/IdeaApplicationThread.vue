@@ -4,8 +4,9 @@ import CsrfField from '@/components/forms/CsrfField.vue';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useSessionStore } from '@/stores/session';
 import { MessageSquare } from '@lucide/vue';
-import type { IdeaApplication } from '@/types/domain';
+import type { IdeaApplication, IdeaApplicationMessage } from '@/types/domain';
 
 const props = withDefaults(defineProps<{
   application: IdeaApplication;
@@ -14,17 +15,29 @@ const props = withDefaults(defineProps<{
   title: 'Private application thread',
 });
 
+const session = useSessionStore();
 const thread = computed(() => props.application.thread);
 const messages = computed(() => thread.value?.messages ?? []);
 const csrfToken = computed(() => document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '');
 const localUnreadCount = ref(thread.value?.unreadCount ?? 0);
+const highlightedMessageIds = ref<Set<number>>(new Set());
 const hasUnread = computed(() => localUnreadCount.value > 0);
+const currentUserId = computed(() => session.user?.id ?? null);
 
 watch(
   () => thread.value?.unreadCount ?? 0,
   (count) => {
     localUnreadCount.value = count;
+    syncHighlightedMessages();
   },
+);
+
+watch(
+  messages,
+  () => {
+    syncHighlightedMessages();
+  },
+  { immediate: true },
 );
 
 onMounted(() => {
@@ -53,6 +66,62 @@ function systemLabel(type: string): string {
   }
 
   return 'Application update';
+}
+
+function syncHighlightedMessages(): void {
+  const unreadCount = thread.value?.unreadCount ?? 0;
+
+  if (unreadCount <= 0) {
+    highlightedMessageIds.value = new Set();
+
+    return;
+  }
+
+  highlightedMessageIds.value = new Set(
+    messages.value
+      .slice(-unreadCount)
+      .map((message) => message.id),
+  );
+}
+
+function isOwnMessage(message: IdeaApplicationMessage): boolean {
+  return !message.isSystem
+    && currentUserId.value !== null
+    && message.user?.id === currentUserId.value;
+}
+
+function isHighlighted(message: IdeaApplicationMessage): boolean {
+  return highlightedMessageIds.value.has(message.id);
+}
+
+function messageFrameClass(message: IdeaApplicationMessage): string {
+  if (message.isSystem) {
+    return 'mx-auto max-w-[92%]';
+  }
+
+  if (isOwnMessage(message)) {
+    return 'ml-auto max-w-[min(32rem,92%)]';
+  }
+
+  return 'mr-auto max-w-[min(32rem,92%)]';
+}
+
+function messageBubbleClass(message: IdeaApplicationMessage): string {
+  const classes = ['rounded-md border px-3 py-2'];
+
+  if (message.isSystem) {
+    classes.push('border-border bg-background/55 text-muted-foreground');
+  } else if (isOwnMessage(message)) {
+    classes.push('border-primary/35 bg-primary/12 text-foreground');
+  } else {
+    classes.push('border-border bg-card/90 text-foreground');
+  }
+
+  if (isHighlighted(message)) {
+    classes.push('ring-2 ring-primary/30');
+  }
+
+  return classes.join(' ');
 }
 
 async function markThreadRead(): Promise<void> {
@@ -115,32 +184,48 @@ async function markThreadRead(): Promise<void> {
 
     <div
       v-if="messages.length > 0"
-      class="flex flex-col gap-2">
+      class="flex flex-col gap-2"
+      role="list">
       <article
         v-for="message in messages"
         :key="message.id"
-        class="rounded-md border border-border bg-card/80 px-3 py-2">
+        :class="messageFrameClass(message)"
+        role="listitem">
         <div
-          v-if="message.isSystem"
-          class="flex flex-col gap-2">
-          <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-            <span>{{ systemLabel(message.type) }}</span>
-            <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+          :class="messageBubbleClass(message)"
+          :data-new-message="isHighlighted(message) ? 'true' : undefined">
+          <div
+            v-if="message.isSystem"
+            class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span class="font-medium text-foreground">{{ systemLabel(message.type) }}</span>
+              <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+            </div>
+            <MarkdownContent
+              v-if="message.bodyHtml"
+              :html="message.bodyHtml" />
           </div>
-          <MarkdownContent
-            v-if="message.bodyHtml"
-            :html="message.bodyHtml" />
-        </div>
-        <div
-          v-else
-          class="flex flex-col gap-2">
-          <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span class="font-medium text-foreground">{{ message.user?.name ?? 'A collaborator' }}</span>
-            <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+          <div
+            v-else
+            class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span class="font-medium text-foreground">
+                {{ isOwnMessage(message) ? 'You' : (message.user?.name ?? 'A collaborator') }}
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <Badge
+                  v-if="isHighlighted(message)"
+                  variant="default"
+                  class="py-0">
+                  New
+                </Badge>
+                <span v-if="message.occurredAtForHumans">{{ message.occurredAtForHumans }}</span>
+              </span>
+            </div>
+            <MarkdownContent
+              v-if="message.bodyHtml"
+              :html="message.bodyHtml" />
           </div>
-          <MarkdownContent
-            v-if="message.bodyHtml"
-            :html="message.bodyHtml" />
         </div>
       </article>
     </div>

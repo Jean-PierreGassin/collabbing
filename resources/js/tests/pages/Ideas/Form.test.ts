@@ -214,6 +214,7 @@ describe('Ideas/Form', () => {
     session.errors = {};
     session.oldInput = {};
     window.localStorage.clear();
+    window.history.pushState({}, '', '/ideas/create');
   });
 
   it('inserts pitch sections at the cursor without leaving the textarea', async () => {
@@ -547,6 +548,30 @@ describe('Ideas/Form', () => {
     expect(completeLabels).toContain('Choose the help you want');
     expect(completeLabels).toContain('Add a first thing someone can do');
     expect(completeLabels).toContain('Create or connect a repository');
+  });
+
+  it('moves focus from the readiness checklist to the relevant field', async () => {
+    const wrapper = mountForm();
+
+    await continueToCollaboration(wrapper);
+
+    const firstStepButton = wrapper.get('button[aria-label="Complete add a first thing someone can do"]');
+
+    await firstStepButton.trigger('click');
+    await nextTick();
+
+    expect(document.activeElement).toBe(wrapper.get<HTMLTextAreaElement>('textarea#first_contribution').element);
+  });
+
+  it('focuses direct edit links on the matching collaboration field', async () => {
+    window.history.pushState({}, '', '/ideas/7/edit#first_contribution');
+
+    const wrapper = mountForm({ idea: idea() });
+
+    await nextTick();
+    await nextTick();
+
+    expect(document.activeElement).toBe(wrapper.get<HTMLTextAreaElement>('textarea#first_contribution').element);
   });
 
   it('uses idea-specific draft keys when editing', async () => {

@@ -14,6 +14,11 @@ const inertiaPage = vi.hoisted(() => ({
     },
   },
 }));
+const session = vi.hoisted(() => ({
+  user: {
+    id: 1,
+  },
+}));
 
 vi.mock('@inertiajs/vue3', () => ({
   Link: {
@@ -21,6 +26,10 @@ vi.mock('@inertiajs/vue3', () => ({
     template: '<a :href="href"><slot /></a>',
   },
   usePage: () => inertiaPage,
+}));
+
+vi.mock('@/stores/session', () => ({
+  useSessionStore: () => session,
 }));
 
 function paginator<T>(items: T[] = []): Paginator<T> {
@@ -281,7 +290,8 @@ describe('Idea management tabs', () => {
     expect(wrapper.text()).toContain('Set where the idea is at');
     expect(wrapper.text()).toContain('Choose the help you want');
     expect(wrapper.text()).toContain('Create or connect a repository');
-    expect(wrapper.findAll('a[href="/ideas/1/edit"]').some((link) => link.text().includes('Edit'))).toBe(true);
+    expect(wrapper.findAll('a[href="/ideas/1/edit#collaboration_stage"]').some((link) => link.text().includes('Set'))).toBe(true);
+    expect(wrapper.findAll('a[href="/ideas/1/edit#help_wanted"]').some((link) => link.text().includes('Choose'))).toBe(true);
     expect(wrapper.findAll('a[href="/ideas/1/repository"]').some((link) => link.text().includes('Create'))).toBe(true);
   });
 
@@ -300,7 +310,7 @@ describe('Idea management tabs', () => {
     const checklist = wrapper.get('aside').text();
 
     expect(checklist).toContain('Collaboration readiness');
-    expect(wrapper.findAll('aside a[href="/ideas/1/edit"]')).toHaveLength(0);
+    expect(wrapper.findAll('aside a[href^="/ideas/1/edit#"]')).toHaveLength(0);
     expect(wrapper.findAll('aside a[href="/ideas/1/repository"]')).toHaveLength(0);
   });
 
@@ -338,7 +348,7 @@ describe('Idea management tabs', () => {
     expect(wrapper.find('form[action="/ideas/1/applications/3/messages"]').exists()).toBe(true);
   });
 
-  it('shows owner decision controls with private notes', () => {
+  it('shows owner decision controls with private notes', async () => {
     const wrapper = mountManage([application()], [], {
       can: permissions({
         deleteApplication: true,
@@ -350,11 +360,23 @@ describe('Idea management tabs', () => {
     expect(wrapper.get('form[action="/ideas/1/applications/3/approve"]').attributes('method')).toBe('POST');
     expect(wrapper.get('form[action="/ideas/1/applications/3/approve"] input[name="_method"]').attributes('value')).toBe('PUT');
     expect(wrapper.get('textarea[name="approval_note"]').attributes('maxlength')).toBe('1200');
-    expect(wrapper.get('details summary').text()).toContain('Decline application');
+
+    const declineButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Decline application'));
+
+    expect(declineButton).toBeDefined();
+    expect(declineButton!.attributes('aria-expanded')).toBe('false');
+    expect(wrapper.find('form[action="/ideas/1/applications/3"] textarea[name="decline_reason"]').exists()).toBe(false);
+
+    await declineButton!.trigger('click');
+
+    expect(declineButton!.attributes('aria-expanded')).toBe('true');
     expect(wrapper.get('form[action="/ideas/1/applications/3"]').attributes('method')).toBe('POST');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
     expect(wrapper.get('textarea[name="decline_reason"]').attributes('maxlength')).toBe('1200');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] button[type="submit"]').text()).toContain('Confirm decline');
+    expect(wrapper.text()).toContain('Cancel');
   });
 
   it('hides the missing notes warning when start notes are ready', () => {
@@ -428,7 +450,17 @@ describe('Idea management tabs', () => {
 
     await wrapper.get('#manage-collaborators-tab').trigger('click');
 
-    expect(wrapper.get('details summary').text()).toContain('Remove collaborator');
+    const removeButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Remove collaborator'));
+
+    expect(removeButton).toBeDefined();
+    expect(removeButton!.attributes('aria-expanded')).toBe('false');
+    expect(wrapper.find('form[action="/ideas/1/applications/3"] textarea[name="exit_reason"]').exists()).toBe(false);
+
+    await removeButton!.trigger('click');
+
+    expect(removeButton!.attributes('aria-expanded')).toBe('true');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] input[name="_method"]').attributes('value')).toBe('DELETE');
     expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
     expect(wrapper.get('form[action="/ideas/1/applications/3"] button[type="submit"]').text()).toContain('Confirm remove');

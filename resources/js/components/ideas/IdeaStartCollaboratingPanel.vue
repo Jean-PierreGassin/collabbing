@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
@@ -17,6 +17,7 @@ const props = defineProps<{
 }>();
 
 const session = useSessionStore();
+const showLeaveForm = ref(false);
 
 const helpWantedLabels = computed(() => {
   if (props.idea.collaboration.helpWantedDisplay.length === 0) {
@@ -53,22 +54,22 @@ const repositoryLabel = computed(() => {
 const registerRoute = computed(() => routeWithNext(session.routes.register));
 const loginRoute = computed(() => routeWithNext(session.routes.login));
 
-const readinessBadges = computed(() => [
+const readinessItems = computed(() => [
   {
     complete: props.idea.collaboration.readinessBadges.applicationsOpen,
-    label: props.idea.collaboration.readinessBadges.applicationsOpen ? 'Applications open' : 'Applications closed',
+    label: props.idea.collaboration.readinessBadges.applicationsOpen ? 'Open to applications' : 'Applications paused',
   },
   {
     complete: props.idea.collaboration.readinessBadges.firstStepListed,
-    label: props.idea.collaboration.readinessBadges.firstStepListed ? 'First step listed' : 'No first step yet',
+    label: props.idea.collaboration.readinessBadges.firstStepListed ? 'First step ready' : 'First step missing',
   },
   {
     complete: props.idea.collaboration.readinessBadges.repoAvailable,
-    label: props.idea.collaboration.readinessBadges.repoAvailable ? 'Repo available' : 'No repo yet',
+    label: props.idea.collaboration.readinessBadges.repoAvailable ? 'Repository ready' : 'Repository later',
   },
   {
     complete: props.idea.collaboration.readinessBadges.startNotesReady,
-    label: props.idea.collaboration.readinessBadges.startNotesReady ? 'Start notes ready' : 'Start notes pending',
+    label: props.idea.collaboration.readinessBadges.startNotesReady ? 'Private notes ready' : 'Private notes pending',
   },
 ]);
 
@@ -90,50 +91,61 @@ function confirmWithdraw(event: SubmitEvent): void {
 <template>
   <Card aria-labelledby="start-collaborating-heading">
     <CardHeader>
-      <div class="flex flex-col gap-3">
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex flex-col gap-1">
-            <h2
-              id="start-collaborating-heading"
-              class="text-lg font-semibold text-white">
-              Start Collaborating
-            </h2>
-            <p class="text-sm text-muted-foreground">
-              See what this idea needs and how to take the first useful step.
-            </p>
-          </div>
-          <Badge
-            :variant="idea.collaboration.applicationsOpen ? 'default' : 'outline'"
-            class="shrink-0">
-            {{ applicationStateLabel }}
-          </Badge>
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex flex-col gap-1">
+          <h2
+            id="start-collaborating-heading"
+            class="text-lg font-semibold text-foreground">
+            Start collaborating
+          </h2>
+          <p class="text-sm text-muted-foreground">
+            What this idea needs, what to do first, and how to join.
+          </p>
         </div>
-
-        <div class="flex flex-wrap gap-2">
-          <template
-            v-for="badge in readinessBadges"
-            :key="badge.label">
-            <span
-              class="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
-              :class="badge.complete ? 'border-primary/25 bg-primary/14 text-foreground' : 'border-border bg-background/40 text-muted-foreground'">
-              <CheckCircle2
-                v-if="badge.complete"
-                class="size-3.5 text-primary"
-                aria-hidden="true" />
-              <Circle
-                v-else
-                class="size-3.5"
-                aria-hidden="true" />
-              {{ badge.label }}
-            </span>
-          </template>
-        </div>
+        <Badge
+          :variant="idea.collaboration.applicationsOpen ? 'default' : 'outline'"
+          class="shrink-0">
+          {{ applicationStateLabel }}
+        </Badge>
       </div>
     </CardHeader>
 
     <CardContent class="flex flex-col gap-5 text-sm">
-      <dl class="grid gap-4">
-        <div class="flex flex-col gap-1.5">
+      <section class="flex flex-col gap-2 rounded-md border border-border bg-background/30 p-3">
+        <h3 class="text-xs font-medium uppercase text-muted-foreground">
+          First useful step
+        </h3>
+        <div
+          class="whitespace-pre-line text-foreground"
+          :class="{ 'text-muted-foreground': !idea.collaboration.firstContribution }">
+          <MarkdownContent
+            v-if="idea.collaboration.firstContributionHtml"
+            :html="idea.collaboration.firstContributionHtml" />
+          <span v-else>{{ firstContributionLabel }}</span>
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-2">
+        <h3 class="text-xs font-medium uppercase text-muted-foreground">
+          Help wanted
+        </h3>
+        <div class="flex flex-wrap gap-1.5">
+          <Badge
+            v-for="label in helpWantedLabels"
+            :key="label"
+            variant="secondary">
+            {{ label }}
+          </Badge>
+        </div>
+        <p
+          v-if="idea.collaboration.helpWantedNote"
+          class="text-muted-foreground">
+          {{ idea.collaboration.helpWantedNote }}
+        </p>
+      </section>
+
+      <dl class="grid gap-3 rounded-md border border-border bg-background/30 p-3 sm:grid-cols-2 lg:grid-cols-1">
+        <div class="flex flex-col gap-1">
           <dt class="text-xs font-medium uppercase text-muted-foreground">
             Stage
           </dt>
@@ -142,67 +154,61 @@ function confirmWithdraw(event: SubmitEvent): void {
           </dd>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-1">
           <dt class="text-xs font-medium uppercase text-muted-foreground">
-            Help wanted
+            Communication
           </dt>
-          <dd class="flex flex-wrap gap-1.5">
-            <Badge
-              v-for="label in helpWantedLabels"
-              :key="label"
-              variant="secondary">
-              {{ label }}
-            </Badge>
+          <dd class="text-foreground">
+            {{ idea.collaboration.communicationStyleDisplay }}
           </dd>
           <p
-            v-if="idea.collaboration.helpWantedNote"
+            v-if="idea.collaboration.communicationNote"
             class="text-muted-foreground">
-            {{ idea.collaboration.helpWantedNote }}
+            {{ idea.collaboration.communicationNote }}
           </p>
         </div>
 
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1">
           <dt class="text-xs font-medium uppercase text-muted-foreground">
-            First contribution
+            Repository
           </dt>
-          <dd
-            class="whitespace-pre-line text-foreground"
-            :class="{ 'text-muted-foreground': !idea.collaboration.firstContribution }">
-            <MarkdownContent
-              v-if="idea.collaboration.firstContributionHtml"
-              :html="idea.collaboration.firstContributionHtml" />
-            <span v-else>{{ firstContributionLabel }}</span>
+          <dd class="inline-flex items-center gap-2 text-foreground">
+            <GitBranch
+              class="size-4 text-primary"
+              aria-hidden="true" />
+            {{ repositoryLabel }}
           </dd>
         </div>
-
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <div class="flex flex-col gap-1.5">
-            <dt class="text-xs font-medium uppercase text-muted-foreground">
-              Communication
-            </dt>
-            <dd class="text-foreground">
-              {{ idea.collaboration.communicationStyleDisplay }}
-            </dd>
-            <p
-              v-if="idea.collaboration.communicationNote"
-              class="text-muted-foreground">
-              {{ idea.collaboration.communicationNote }}
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <dt class="text-xs font-medium uppercase text-muted-foreground">
-              Repository
-            </dt>
-            <dd class="inline-flex items-center gap-2 text-foreground">
-              <GitBranch
-                class="size-4 text-primary"
-                aria-hidden="true" />
-              {{ repositoryLabel }}
-            </dd>
-          </div>
-        </div>
       </dl>
+
+      <section class="flex flex-col gap-3 rounded-md border border-border bg-background/30 p-3">
+        <div class="flex flex-col gap-1">
+          <h3 class="text-xs font-medium uppercase text-muted-foreground">
+            Readiness
+          </h3>
+          <p class="text-xs leading-5 text-muted-foreground">
+            Signals that help someone understand how ready this idea is for collaboration.
+          </p>
+        </div>
+        <ul class="grid gap-2">
+          <li
+            v-for="item in readinessItems"
+            :key="item.label"
+            class="flex gap-2">
+            <CheckCircle2
+              v-if="item.complete"
+              class="mt-0.5 size-4 shrink-0 text-primary"
+              aria-hidden="true" />
+            <Circle
+              v-else
+              class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              aria-hidden="true" />
+            <span class="flex min-w-0 flex-col gap-0.5">
+              <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
+            </span>
+          </li>
+        </ul>
+      </section>
 
       <div
         v-if="!idea.collaboration.applicationsOpen && idea.collaboration.applicationsClosedNote"
@@ -228,14 +234,21 @@ function confirmWithdraw(event: SubmitEvent): void {
               aria-hidden="true" />
             Collaborating
           </span>
-          <details class="rounded-md border border-border bg-background/35 p-3">
-            <summary class="cursor-pointer text-sm font-medium text-foreground">
-              Leave collaboration
-            </summary>
+          <Button
+            v-if="!showLeaveForm"
+            type="button"
+            variant="outline"
+            size="sm"
+            @click="showLeaveForm = true">
+            Leave collaboration
+          </Button>
+          <div
+            v-else
+            class="rounded-md border border-border bg-background/35 p-3">
             <form
               :action="collaborator.routes.destroy"
               method="POST"
-              class="mt-3 flex flex-col gap-2">
+              class="flex flex-col gap-2">
               <CsrfField />
               <MethodField method="DELETE" />
               <label
@@ -256,8 +269,15 @@ function confirmWithdraw(event: SubmitEvent): void {
                 size="sm">
                 Confirm leave
               </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                @click="showLeaveForm = false">
+                Cancel
+              </Button>
             </form>
-          </details>
+          </div>
         </div>
         <div
           v-else-if="applicant"

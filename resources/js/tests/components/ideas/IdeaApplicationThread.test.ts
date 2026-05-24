@@ -3,6 +3,16 @@ import { describe, expect, it, vi } from 'vitest';
 import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import type { DomainUser, IdeaApplication } from '@/types/domain';
 
+const session = vi.hoisted(() => ({
+  user: {
+    id: 1,
+  },
+}));
+
+vi.mock('@/stores/session', () => ({
+  useSessionStore: () => session,
+}));
+
 function user(overrides: Partial<DomainUser> = {}): DomainUser {
   return {
     id: 1,
@@ -95,9 +105,47 @@ describe('IdeaApplicationThread', () => {
 
     expect(wrapper.text()).toContain('Private application thread');
     expect(wrapper.text()).toContain('Visible only to the idea owner and applicant.');
+    expect(wrapper.text()).toContain('You');
     expect(wrapper.html()).toContain('<strong>tests</strong>');
     expect(wrapper.get('form').attributes('action')).toBe('/applications/3/messages');
     expect(wrapper.get('textarea[name="body"]').attributes('maxlength')).toBe('1500');
+  });
+
+  it('distinguishes other participant messages from current user messages', () => {
+    const wrapper = mountThread(application({
+      thread: {
+        ...application().thread!,
+        messages: [
+          {
+            id: 11,
+            type: 'message',
+            body: 'Owner question.',
+            bodyHtml: '<p>Owner question.</p>',
+            isSystem: false,
+            occurredAtForHumans: '2 minutes ago',
+            user: user({
+              id: 1,
+              name: 'Owner User',
+            }),
+          },
+          {
+            id: 12,
+            type: 'message',
+            body: 'Applicant answer.',
+            bodyHtml: '<p>Applicant answer.</p>',
+            isSystem: false,
+            occurredAtForHumans: '1 minute ago',
+            user: user({
+              id: 2,
+              name: 'Applied User',
+            }),
+          },
+        ],
+      },
+    }));
+
+    expect(wrapper.text()).toContain('You');
+    expect(wrapper.text()).toContain('Applied User');
   });
 
   it('renders system messages with friendly labels', () => {
@@ -158,6 +206,7 @@ describe('IdeaApplicationThread', () => {
     }));
 
     expect(wrapper.text()).toContain('2 new');
+    expect(wrapper.find('[data-new-message="true"]').exists()).toBe(true);
 
     await vi.waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/applications/3/read-state', expect.objectContaining({
@@ -165,6 +214,8 @@ describe('IdeaApplicationThread', () => {
       }));
       expect(wrapper.text()).not.toContain('2 new');
     });
+
+    expect(wrapper.find('[data-new-message="true"]').exists()).toBe(true);
 
     vi.unstubAllGlobals();
   });

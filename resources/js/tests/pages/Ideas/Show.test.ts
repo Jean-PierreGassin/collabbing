@@ -206,8 +206,12 @@ function mountShow(
         IdeaCard: {
           template: '<article data-testid="idea-card"></article>',
         },
+        IdeaStartCollaboratingPanel: {
+          template: '<aside data-testid="mobile-start-panel"></aside>',
+        },
         IdeaSidebar: {
-          template: '<aside data-testid="idea-sidebar"></aside>',
+          props: ['showStartPanel'],
+          template: '<aside data-testid="idea-sidebar" :data-show-start-panel="String(showStartPanel)"></aside>',
         },
         MarkdownTableOfContents: true,
       },
@@ -221,6 +225,15 @@ describe('Ideas/Show', () => {
 
     expect(wrapper.get('#application-thread').text()).toContain('Your application thread');
     expect(wrapper.find('[data-testid="comments"]').exists()).toBe(true);
+  });
+
+  it('places mobile collaboration guidance before the main discussion flow', () => {
+    const wrapper = mountShow(application());
+    const gridChildren = Array.from(wrapper.get('.grid').element.children);
+
+    expect(gridChildren[0].getAttribute('data-testid')).toBe('mobile-start-panel');
+    expect(wrapper.get('[data-testid="idea-sidebar"]').attributes('data-show-start-panel')).toBe('undefined');
+    expect(wrapper.findAll('[data-testid="idea-sidebar"]')[1].attributes('data-show-start-panel')).toBe('false');
   });
 
   it('does not render a thread for public idea viewers', () => {

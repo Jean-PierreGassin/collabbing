@@ -7,12 +7,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import UserAvatar from '@/components/users/UserAvatar.vue';
 import type { Idea, IdeaApplication, IdeaSupporter } from '@/types/domain';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   idea: Idea;
   collaborator?: IdeaApplication | null;
   applicant?: IdeaApplication | null;
+  showStartPanel?: boolean;
   supporter?: IdeaSupporter | null;
-}>();
+}>(), {
+  showStartPanel: true,
+});
 
 const supportForm = useForm({});
 const localSupporter = ref<IdeaSupporter | null>(props.supporter ?? null);
@@ -89,6 +92,7 @@ function removeSupport(): void {
 <template>
   <div class="flex flex-col gap-3">
     <IdeaStartCollaboratingPanel
+      v-if="showStartPanel !== false"
       :idea="idea"
       :collaborator="collaborator"
       :applicant="applicant"

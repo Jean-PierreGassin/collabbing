@@ -189,7 +189,7 @@ function mountSidebar(props: {
 }
 
 describe('IdeaSidebar', () => {
-  it('shows Start Collaborating first with public guidance and readiness badges', () => {
+  it('shows start collaborating first with public guidance and readiness context', () => {
     session.isAuthenticated = true;
     const wrapper = mountSidebar({
       idea: idea({
@@ -223,15 +223,16 @@ describe('IdeaSidebar', () => {
 
     const headings = wrapper.findAll('h2').map((heading) => heading.text());
 
-    expect(headings[0]).toBe('Start Collaborating');
+    expect(headings[0]).toBe('Start collaborating');
     expect(wrapper.text()).toContain('Ready to build');
     expect(wrapper.text()).toContain('Frontend');
     expect(wrapper.text()).toContain('Testing');
     expect(wrapper.text()).toContain('Review the first issue.');
     expect(wrapper.text()).toContain('Applications open');
     expect(wrapper.text()).toContain('GitHub');
-    expect(wrapper.text()).toContain('Repo available');
-    expect(wrapper.text()).toContain('Start notes ready');
+    expect(wrapper.text()).toContain('Readiness');
+    expect(wrapper.text()).toContain('Repository ready');
+    expect(wrapper.text()).toContain('Private notes ready');
     expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to collaborate');
   });
 
@@ -367,7 +368,7 @@ describe('IdeaSidebar', () => {
     expect(collaboratorSidebar.text()).toContain('Collaborating');
   });
 
-  it('shows accepted collaborator start notes, approval note, and leave confirmation', () => {
+  it('shows accepted collaborator start notes, approval note, and leave confirmation', async () => {
     session.isAuthenticated = true;
     const wrapper = mountSidebar({
       idea: idea({
@@ -395,10 +396,20 @@ describe('IdeaSidebar', () => {
     expect(wrapper.text()).toContain('Private setup notes.');
     expect(wrapper.text()).toContain('Updated 2 minutes ago.');
     expect(wrapper.text()).toContain('Start with issue #1.');
-    expect(wrapper.get('details summary').text()).toContain('Leave collaboration');
+
+    const leaveButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Leave collaboration'));
+
+    expect(leaveButton).toBeDefined();
+    expect(wrapper.find('textarea[name="exit_reason"]').exists()).toBe(false);
+
+    await leaveButton!.trigger('click');
+
     expect(wrapper.get('form[action="/applications/1"] input[name="_method"]').attributes('value')).toBe('DELETE');
     expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
     expect(wrapper.get('form[action="/applications/1"] button[type="submit"]').text()).toContain('Confirm leave');
+    expect(wrapper.text()).toContain('Cancel');
   });
 
   it('shows an honest empty state when accepted collaborator notes are missing', () => {

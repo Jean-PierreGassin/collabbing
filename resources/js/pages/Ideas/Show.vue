@@ -4,6 +4,7 @@ import CommentList from '@/components/comments/CommentList.vue';
 import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
+import IdeaStartCollaboratingPanel from '@/components/ideas/IdeaStartCollaboratingPanel.vue';
 import { Button } from '@/components/ui/button';
 import MarkdownTableOfContents from '@/components/typography/MarkdownTableOfContents.vue';
 import { markdownHeadings, stripGeneratedTableOfContents } from '@/lib/markdown';
@@ -87,6 +88,13 @@ function hasPitchHeadingsClass(): string | undefined {
     </header>
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+      <IdeaStartCollaboratingPanel
+        class="lg:hidden"
+        :idea="idea"
+        :collaborator="collaborator"
+        :applicant="applicant"
+      />
+
       <div class="flex flex-col gap-4">
         <div :class="hasPitchHeadingsClass()">
           <IdeaCard
@@ -117,9 +125,19 @@ function hasPitchHeadingsClass(): string | undefined {
       </div>
 
       <IdeaSidebar
+        class="hidden lg:flex"
         :idea="idea"
         :collaborator="collaborator"
         :applicant="applicant"
+        :supporter="supporter"
+      />
+
+      <IdeaSidebar
+        class="lg:hidden"
+        :idea="idea"
+        :collaborator="collaborator"
+        :applicant="applicant"
+        :show-start-panel="false"
         :supporter="supporter"
       />
     </div>

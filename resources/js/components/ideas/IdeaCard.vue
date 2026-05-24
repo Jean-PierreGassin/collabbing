@@ -52,13 +52,13 @@ const isDescriptionExpanded = computed({
 
 const collaborationBadges = computed<CardBadge[]>(() => {
   const badges: CardBadge[] = [{
-    label: props.idea.collaboration.stageDisplay,
+    label: `Stage: ${props.idea.collaboration.stageDisplay}`,
     variant: 'default',
   }];
 
   visibleHelpAreas.value.forEach((label) => {
     badges.push({
-      label,
+      label: `Needs: ${label}`,
       variant: 'secondary',
     });
   });
@@ -72,7 +72,7 @@ const collaborationBadges = computed<CardBadge[]>(() => {
 
   if (props.idea.collaboration.firstContribution) {
     badges.push({
-      label: 'First step listed',
+      label: 'First step ready',
       variant: 'outline',
     });
   }

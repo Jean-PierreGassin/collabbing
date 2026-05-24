@@ -176,13 +176,13 @@ describe('IdeaCard', () => {
     });
     const text = wrapper.text();
 
-    expect(text).toContain('Ready to build');
-    expect(text).toContain('Frontend');
-    expect(text).toContain('Backend');
-    expect(text).toContain('Testing');
+    expect(text).toContain('Stage: Ready to build');
+    expect(text).toContain('Needs: Frontend');
+    expect(text).toContain('Needs: Backend');
+    expect(text).toContain('Needs: Testing');
     expect(text).not.toContain('Design');
     expect(text).toContain('Applications closed');
-    expect(text).toContain('First step listed');
+    expect(text).toContain('First step ready');
     expect(text).not.toContain('Review the first issue.');
   });
 
@@ -222,10 +222,10 @@ describe('IdeaCard', () => {
     });
     const text = wrapper.text();
 
-    expect(text).toContain('Actively building');
-    expect(text).toContain('Product');
-    expect(text).toContain('Research');
-    expect(text).toContain('First step listed');
+    expect(text).toContain('Stage: Actively building');
+    expect(text).toContain('Needs: Product');
+    expect(text).toContain('Needs: Research');
+    expect(text).toContain('First step ready');
     expect(text).not.toContain('Applications closed');
     expect(text).not.toContain('Map the onboarding state.');
   });

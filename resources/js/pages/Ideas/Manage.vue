@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAccessibleTabs, type AccessibleTab } from '@/lib/tabs';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Check, Circle, GitBranch, Pencil } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { SharedPageProps } from '@/types/app';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
 
@@ -22,6 +22,8 @@ const props = defineProps<{
 }>();
 
 const page = usePage<SharedPageProps>();
+const expandedDeclineForms = ref<Set<number>>(new Set());
+const expandedRemoveForms = ref<Set<number>>(new Set());
 const showRepositoryInvitePrompt = computed(() => page.props.flash.repositoryInvitePrompt && props.idea.repository);
 const showRepositoryAccessPrompt = computed(() => (
   page.props.flash.repositoryAccessPrompt || props.idea.repositoryAccessReviewNeeded === true
@@ -36,38 +38,38 @@ const repositoryInvitePromptText = computed(() => {
 });
 const readinessItems = computed(() => [
   {
-    actionHref: props.idea.routes.edit,
-    actionLabel: 'Edit',
+    actionHref: editFieldRoute('collaboration_stage'),
+    actionLabel: 'Set',
     complete: props.idea.collaboration.stage !== null,
     label: 'Set where the idea is at',
   },
   {
-    actionHref: props.idea.routes.edit,
-    actionLabel: 'Edit',
+    actionHref: editFieldRoute('help_wanted'),
+    actionLabel: 'Choose',
     complete: props.idea.collaboration.helpWanted.length > 0 || props.idea.collaboration.helpWantedNote !== null,
     label: 'Choose the help you want',
   },
   {
-    actionHref: props.idea.routes.edit,
-    actionLabel: 'Edit',
+    actionHref: editFieldRoute('first_contribution'),
+    actionLabel: 'Add',
     complete: props.idea.collaboration.firstContribution !== null,
     label: 'Add a first thing someone can do',
   },
   {
-    actionHref: props.idea.routes.edit,
-    actionLabel: 'Edit',
+    actionHref: editFieldRoute('communication_style'),
+    actionLabel: 'Choose',
     complete: props.idea.collaboration.communicationStyle !== null,
     label: 'Choose how you prefer to coordinate',
   },
   {
-    actionHref: null,
-    actionLabel: null,
+    actionHref: editFieldRoute('applications_open'),
+    actionLabel: 'Review',
     complete: true,
     label: 'Decide whether applications are open',
   },
   {
-    actionHref: props.idea.routes.edit,
-    actionLabel: 'Edit',
+    actionHref: editFieldRoute('getting_started_notes'),
+    actionLabel: 'Write',
     complete: props.idea.collaboration.gettingStartedNotesReady,
     label: 'Write private start notes for accepted collaborators',
   },
@@ -108,6 +110,42 @@ function tabVariant(tab: ManageTab): 'ghost' | 'secondary' {
   }
 
   return 'ghost';
+}
+
+function editFieldRoute(fieldId: string): string {
+  return `${props.idea.routes.edit}#${fieldId}`;
+}
+
+function isDeclineFormExpanded(applicationId: number): boolean {
+  return expandedDeclineForms.value.has(applicationId);
+}
+
+function isRemoveFormExpanded(applicationId: number): boolean {
+  return expandedRemoveForms.value.has(applicationId);
+}
+
+function toggleDeclineForm(applicationId: number): void {
+  const nextIds = new Set(expandedDeclineForms.value);
+
+  if (nextIds.has(applicationId)) {
+    nextIds.delete(applicationId);
+  } else {
+    nextIds.add(applicationId);
+  }
+
+  expandedDeclineForms.value = nextIds;
+}
+
+function toggleRemoveForm(applicationId: number): void {
+  const nextIds = new Set(expandedRemoveForms.value);
+
+  if (nextIds.has(applicationId)) {
+    nextIds.delete(applicationId);
+  } else {
+    nextIds.add(applicationId);
+  }
+
+  expandedRemoveForms.value = nextIds;
 }
 
 const {
@@ -310,13 +348,28 @@ const {
                     Submitted {{ application.createdAtForHumans }}
                   </h6>
                   <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
-                    <details
+                    <div
                       v-if="idea.can.deleteApplication"
-                      class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 md:max-w-sm">
-                      <summary class="cursor-pointer text-sm font-medium text-destructive">
+                      :class="[
+                        'w-full md:max-w-sm',
+                        isDeclineFormExpanded(application.id) ? 'rounded-md border border-destructive/25 bg-destructive/10 p-3' : '',
+                      ]">
+                      <Button
+                        type="button"
+                        :variant="isDeclineFormExpanded(application.id) ? 'destructive' : 'outline'"
+                        size="sm"
+                        :class="[
+                          'w-full',
+                          !isDeclineFormExpanded(application.id) ? 'border-destructive/35 text-destructive hover:bg-destructive/10 hover:text-destructive' : '',
+                        ]"
+                        :aria-expanded="isDeclineFormExpanded(application.id)"
+                        :aria-controls="`decline-form-${application.id}`"
+                        @click="toggleDeclineForm(application.id)">
                         Decline application
-                      </summary>
+                      </Button>
                       <form
+                        v-if="isDeclineFormExpanded(application.id)"
+                        :id="`decline-form-${application.id}`"
                         :action="application.routes.destroy"
                         method="POST"
                         class="mt-3 flex flex-col gap-2">
@@ -340,8 +393,15 @@ const {
                           size="sm">
                           Confirm decline
                         </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          @click="toggleDeclineForm(application.id)">
+                          Cancel
+                        </Button>
                       </form>
-                    </details>
+                    </div>
                     <form
                       v-if="idea.can.updateApplication"
                       :action="application.routes.approve"
@@ -405,13 +465,28 @@ const {
                   :href="collaborator.user.routes.show">
                   {{ collaborator.user.firstName }} {{ collaborator.user.lastName }}
                 </a>
-                <details
+                <div
                   v-if="idea.can.deleteApplication"
-                  class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 sm:max-w-sm">
-                  <summary class="cursor-pointer text-sm font-medium text-destructive">
+                  :class="[
+                    'w-full sm:max-w-sm',
+                    isRemoveFormExpanded(collaborator.id) ? 'rounded-md border border-destructive/25 bg-destructive/10 p-3' : '',
+                  ]">
+                  <Button
+                    type="button"
+                    :variant="isRemoveFormExpanded(collaborator.id) ? 'destructive' : 'outline'"
+                    size="sm"
+                    :class="[
+                      'w-full',
+                      !isRemoveFormExpanded(collaborator.id) ? 'border-destructive/35 text-destructive hover:bg-destructive/10 hover:text-destructive' : '',
+                    ]"
+                    :aria-expanded="isRemoveFormExpanded(collaborator.id)"
+                    :aria-controls="`remove-form-${collaborator.id}`"
+                    @click="toggleRemoveForm(collaborator.id)">
                     Remove collaborator
-                  </summary>
+                  </Button>
                   <form
+                    v-if="isRemoveFormExpanded(collaborator.id)"
+                    :id="`remove-form-${collaborator.id}`"
                     :action="collaborator.routes.destroy"
                     method="POST"
                     class="mt-3 flex flex-col gap-2">
@@ -435,8 +510,15 @@ const {
                       size="sm">
                       Confirm remove
                     </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      @click="toggleRemoveForm(collaborator.id)">
+                      Cancel
+                    </Button>
                   </form>
-                </details>
+                </div>
               </div>
             </template>
             <p v-else>

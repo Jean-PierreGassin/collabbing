@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, toRef } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, toRef } from 'vue';
 import { Check, Circle, Upload } from '@lucide/vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import FormField from '@/components/forms/FormField.vue';
@@ -21,6 +21,12 @@ import type { Idea } from '@/types/domain';
 const props = defineProps<{
   idea?: Idea;
 }>();
+
+type ReadinessItem = {
+  complete: boolean;
+  label: string;
+  targetId: string;
+};
 
 const session = useSessionStore();
 const form = ref<HTMLFormElement | null>(null);
@@ -229,34 +235,41 @@ if (props.idea) {
   submitLabel = 'Edit idea';
 }
 
-const readinessItems = computed(() => [
+const readinessItems = computed<ReadinessItem[]>(() => [
   {
     complete: formValues.collaborationStage !== '',
     label: 'Set where the idea is at',
+    targetId: 'collaboration_stage',
   },
   {
     complete: formValues.helpWanted.length > 0 || formValues.helpWantedNote.trim() !== '',
     label: 'Choose the help you want',
+    targetId: 'help_wanted',
   },
   {
     complete: formValues.firstContribution.trim() !== '',
     label: 'Add a first thing someone can do',
+    targetId: 'first_contribution',
   },
   {
     complete: formValues.communicationStyle !== '' || formValues.communicationNote.trim() !== '',
     label: 'Choose how you prefer to coordinate',
+    targetId: 'communication_style',
   },
   {
     complete: formValues.applicationsOpen !== '',
     label: 'Decide whether applications are open',
+    targetId: 'applications_open',
   },
   {
     complete: formValues.gettingStartedNotes.trim() !== '',
     label: 'Write private start notes for accepted collaborators',
+    targetId: 'getting_started_notes',
   },
   {
     complete: formValues.repositoryName.trim() !== '',
     label: 'Create or connect a repository',
+    targetId: 'repository_name',
   },
 ]);
 
@@ -305,6 +318,59 @@ function returnToBasics(): void {
   currentStep.value = 'basics';
 }
 
+function focusFormField(targetId: string): void {
+  const target = document.getElementById(targetId);
+
+  if (!target) {
+    return;
+  }
+
+  const focusTarget = target instanceof HTMLInputElement
+    || target instanceof HTMLSelectElement
+    || target instanceof HTMLTextAreaElement
+    ? target
+    : target.querySelector<HTMLElement>('input, select, textarea, button, a');
+  const prefersReducedMotion = typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motion = prefersReducedMotion ? 'auto' : 'smooth';
+
+  target.scrollIntoView?.({
+    behavior: motion,
+    block: 'center',
+  });
+  focusTarget?.focus({
+    preventScroll: true,
+  });
+}
+
+function focusReadinessItem(targetId: string): void {
+  currentStep.value = 'collaboration';
+
+  void nextTick(() => {
+    focusFormField(targetId);
+  });
+}
+
+function focusInitialHashField(): void {
+  if (!window.location.hash) {
+    return;
+  }
+
+  const targetId = decodeURIComponent(window.location.hash.slice(1));
+
+  if (!targetId) {
+    return;
+  }
+
+  if (readinessItems.value.some((item) => item.targetId === targetId)) {
+    currentStep.value = 'collaboration';
+  }
+
+  void nextTick(() => {
+    focusFormField(targetId);
+  });
+}
+
 function sanitizeRepositoryName(event: Event): void {
   const input = event.target as HTMLInputElement;
   const sanitized = input.value.replace(repositoryNameSanitizer, '');
@@ -344,6 +410,10 @@ function pasteRepositoryName(event: ClipboardEvent): void {
 function submitForm(): void {
   markSubmitting();
 }
+
+onMounted(() => {
+  focusInitialHashField();
+});
 </script>
 
 <template>
@@ -936,16 +1006,22 @@ function submitForm(): void {
                 <li
                   v-for="item in readinessItems"
                   :key="item.label"
-                  class="flex gap-2 text-sm">
-                  <Check
-                    v-if="item.complete"
-                    class="mt-0.5 size-4 shrink-0 text-primary"
-                    aria-hidden="true" />
-                  <Circle
-                    v-else
-                    class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                    aria-hidden="true" />
-                  <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
+                  class="text-sm">
+                  <button
+                    type="button"
+                    class="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-secondary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    :aria-label="`${item.complete ? 'Review' : 'Complete'} ${item.label.toLowerCase()}`"
+                    @click="focusReadinessItem(item.targetId)">
+                    <Check
+                      v-if="item.complete"
+                      class="mt-0.5 size-4 shrink-0 text-primary"
+                      aria-hidden="true" />
+                    <Circle
+                      v-else
+                      class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                      aria-hidden="true" />
+                    <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
+                  </button>
                 </li>
               </ul>
             </aside>
