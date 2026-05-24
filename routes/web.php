@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IdeaApplicationController;
+use App\Http\Controllers\IdeaApplicationMessageController;
+use App\Http\Controllers\IdeaApplicationReadStateController;
 use App\Http\Controllers\IdeaCommentController;
 use App\Http\Controllers\IdeaController;
 use App\Http\Controllers\IdeaSupporterController;
@@ -113,6 +115,12 @@ Route::scopeBindings()
 
             Route::match(['put', 'patch'], 'applications/{application}', [IdeaApplicationController::class, 'update'])
                 ->name('applications.update');
+
+            Route::post('applications/{application}/messages', [IdeaApplicationMessageController::class, 'store'])
+                ->name('applications.messages.store');
+
+            Route::put('applications/{application}/read-state', [IdeaApplicationReadStateController::class, 'update'])
+                ->name('applications.read-state.update');
 
             Route::delete('applications/{application}', [IdeaApplicationController::class, 'destroy'])
                 ->name('applications.destroy');

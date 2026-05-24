@@ -11,6 +11,16 @@ class IdeaApplicationPolicy
 {
     use HandlesAuthorization;
 
+    public function viewThread(User $user, IdeaApplication $application): bool
+    {
+        return $this->isThreadParticipant($user, $application);
+    }
+
+    public function message(User $user, IdeaApplication $application): bool
+    {
+        return $application->isPending() && $this->isThreadParticipant($user, $application);
+    }
+
     public function update(User $user, IdeaApplication $application): bool
     {
         return $application->isPending() && (int) $user->id === (int) $application->user_id;
@@ -30,5 +40,16 @@ class IdeaApplicationPolicy
     public function manage(User $user, IdeaApplication $application): bool
     {
         return (int) $user->id === (int) $application->user_id;
+    }
+
+    private function isThreadParticipant(User $user, IdeaApplication $application): bool
+    {
+        if ((int) $user->id === (int) $application->user_id) {
+            return true;
+        }
+
+        $idea = $application->idea;
+
+        return $idea instanceof Idea && (int) $user->id === (int) $idea->user_id;
     }
 }

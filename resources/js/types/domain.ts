@@ -32,11 +32,35 @@ export interface IdeaApplication {
   statusDisplay: string;
   createdAtForHumans: string;
   user: DomainUser;
+  thread: IdeaApplicationThread | null;
   routes: {
     destroy: string;
     edit: string;
     update: string;
     approve: string;
+  };
+}
+
+export interface IdeaApplicationMessage {
+  id: number;
+  type: string;
+  body: string | null;
+  bodyHtml: string | null;
+  isSystem: boolean;
+  occurredAtForHumans: string | null;
+  user: DomainUser | null;
+}
+
+export interface IdeaApplicationThread {
+  messages: IdeaApplicationMessage[];
+  unreadCount: number;
+  hasUnread: boolean;
+  canMessage: boolean;
+  isReadOnly: boolean;
+  readOnlyReason: string | null;
+  routes: {
+    read: string;
+    store: string;
   };
 }
 

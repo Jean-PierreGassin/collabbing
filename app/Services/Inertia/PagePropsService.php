@@ -4,6 +4,7 @@ namespace App\Services\Inertia;
 
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Models\IdeaApplicationMessage;
 use App\Models\IdeaComment;
 use App\Models\IdeaSupporter;
 use App\Models\RepositoryEvent;
@@ -476,6 +477,7 @@ class PagePropsService
             'statusDisplay' => $this->applicationStatusDisplay($application->status),
             'createdAtForHumans' => $application->created_at->diffForHumans(),
             'user' => $this->user($this->applicationUser($application)),
+            'thread' => $this->applicationThread($application),
             'routes' => [
                 'destroy' => route('ideas.applications.destroy', [$application->idea_id, $application]),
                 'edit' => route('ideas.applications.edit', [$application->idea_id, $application]),
@@ -483,6 +485,69 @@ class PagePropsService
                 'approve' => route('ideas.applications.approve', [$application->idea_id, $application]),
             ],
         ];
+    }
+
+    private function applicationThread(IdeaApplication $application): ?array
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof User || Gate::denies('viewThread', $application)) {
+            return null;
+        }
+
+        $unreadCount = $this->applications->unreadMessagesCount($application, $user);
+        $canMessage = Gate::allows('message', $application);
+        $messages = $this->applications
+            ->messagesFor($application)
+            ->map(fn (IdeaApplicationMessage $message): array => $this->applicationMessage($message))
+            ->values();
+
+        return [
+            'messages' => $messages,
+            'unreadCount' => $unreadCount,
+            'hasUnread' => $unreadCount > 0,
+            'canMessage' => $canMessage,
+            'isReadOnly' => ! $canMessage,
+            'readOnlyReason' => $this->applicationThreadReadOnlyReason($application, $canMessage),
+            'routes' => [
+                'read' => route('ideas.applications.read-state.update', [$application->idea_id, $application]),
+                'store' => route('ideas.applications.messages.store', [$application->idea_id, $application]),
+            ],
+        ];
+    }
+
+    private function applicationMessage(IdeaApplicationMessage $message): array
+    {
+        $message->loadMissing('user');
+        $body = $message->body;
+        $bodyHtml = null;
+
+        if ($body) {
+            $bodyHtml = (string) Markdown::convertToHtml($body);
+        }
+
+        return [
+            'id' => $message->id,
+            'type' => $message->type,
+            'body' => $body,
+            'bodyHtml' => $bodyHtml,
+            'isSystem' => $message->type !== IdeaApplicationMessage::TYPE_MESSAGE,
+            'occurredAtForHumans' => $this->dateForHumans($message->occurred_at),
+            'user' => $this->user($this->messageUser($message)),
+        ];
+    }
+
+    private function applicationThreadReadOnlyReason(IdeaApplication $application, bool $canMessage): ?string
+    {
+        if ($canMessage) {
+            return null;
+        }
+
+        if ($application->isPending()) {
+            return null;
+        }
+
+        return 'This application thread is read-only after a final decision.';
     }
 
     private function applicationContributionDisplay(?string $contributionType): string
@@ -537,6 +602,15 @@ class PagePropsService
         }
 
         return $application->user;
+    }
+
+    private function messageUser(IdeaApplicationMessage $message): ?User
+    {
+        if (! $message->user instanceof User) {
+            return null;
+        }
+
+        return $message->user;
     }
 
     public function paginator(LengthAwarePaginator $paginator, callable $mapItem): array

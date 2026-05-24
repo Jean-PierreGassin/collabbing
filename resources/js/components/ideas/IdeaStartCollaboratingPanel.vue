@@ -236,6 +236,20 @@ function confirmWithdraw(event: SubmitEvent): void {
               aria-hidden="true" />
             Application pending
           </span>
+          <a
+            v-if="applicant.thread"
+            href="#application-thread"
+            class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border bg-background/50 px-3 text-sm font-medium text-foreground hover:border-primary/50 hover:text-primary">
+            <MessageSquare
+              class="size-4 text-primary"
+              aria-hidden="true" />
+            Application thread
+            <span
+              v-if="applicant.thread.hasUnread"
+              class="rounded-md bg-primary px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
+              {{ applicant.thread.unreadCount.toLocaleString() }} new
+            </span>
+          </a>
           <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
             <Button
               as="a"

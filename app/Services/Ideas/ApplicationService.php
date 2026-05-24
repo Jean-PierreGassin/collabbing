@@ -3,13 +3,17 @@
 namespace App\Services\Ideas;
 
 use App\Data\Ideas\IdeaApplicationData;
+use App\Data\Ideas\IdeaApplicationMessageData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
+use App\Models\IdeaApplicationMessage;
 use App\Models\User;
+use App\Notifications\Ideas\IdeaApplicationThreadMessageNotification;
 use App\Notifications\Ideas\NewIdeaApplicationNotification;
 use App\Repositories\Ideas\ApplicationRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 
 class ApplicationService
@@ -35,17 +39,51 @@ class ApplicationService
 
     public function approve(IdeaApplication $application): bool
     {
-        return $this->applications->approve($application);
+        $approved = $this->applications->approve($application);
+
+        if ($approved) {
+            $this->markThreadRead($application);
+        }
+
+        return $approved;
     }
 
     public function destroy(IdeaApplication $application): bool
     {
-        return $this->applications->destroy($application);
+        $destroyed = $this->applications->destroy($application);
+
+        if ($destroyed) {
+            $this->markThreadRead($application);
+        }
+
+        return $destroyed;
     }
 
     public function withdraw(IdeaApplication $application): bool
     {
-        return $this->applications->withdraw($application);
+        $withdrawn = $this->applications->withdraw($application);
+
+        if ($withdrawn) {
+            $this->markThreadRead($application);
+        }
+
+        return $withdrawn;
+    }
+
+    public function message(IdeaApplication $application, IdeaApplicationMessageData $data): IdeaApplicationMessage
+    {
+        $user = $this->authenticatedUser();
+        $message = $this->applications->createUserMessage($application, $user, $data);
+
+        $this->applications->markThreadRead($application, $user);
+        $this->notifyThreadRecipient($application, $message, $user);
+
+        return $message;
+    }
+
+    public function markThreadRead(IdeaApplication $application): void
+    {
+        $this->applications->markThreadRead($application, $this->authenticatedUser());
     }
 
     public function getPendingApplications(Idea $idea): LengthAwarePaginator
@@ -72,5 +110,53 @@ class ApplicationService
         }
 
         return $user;
+    }
+
+    private function notifyThreadRecipient(IdeaApplication $application, IdeaApplicationMessage $message, User $sender): void
+    {
+        $application->loadMissing(['idea.user', 'user']);
+
+        $idea = $application->idea;
+
+        if (! $idea instanceof Idea) {
+            return;
+        }
+
+        $recipient = $this->threadRecipient($application, $sender);
+
+        if (! $recipient instanceof User) {
+            return;
+        }
+
+        $cacheKey = "idea-application-thread-email:{$application->id}:{$recipient->id}:{$sender->id}";
+
+        if (! Cache::add($cacheKey, true, now('UTC')->addMinutes(5))) {
+            return;
+        }
+
+        $recipient->notify(new IdeaApplicationThreadMessageNotification($idea, $application, $message));
+    }
+
+    private function threadRecipient(IdeaApplication $application, User $sender): ?User
+    {
+        $idea = $application->idea;
+
+        if (! $idea instanceof Idea) {
+            return null;
+        }
+
+        if ((int) $sender->id === (int) $idea->user_id) {
+            $applicant = $application->user;
+
+            if ($applicant instanceof User) {
+                return $applicant;
+            }
+
+            return null;
+        }
+
+        $owner = $idea->owner();
+
+        return $owner instanceof User ? $owner : null;
     }
 }

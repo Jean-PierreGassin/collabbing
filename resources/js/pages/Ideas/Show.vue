@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import CommentList from '@/components/comments/CommentList.vue';
+import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ const mentionableUsers = computed<DomainUser[]>(() => {
 const pitchContent = computed(() => stripGeneratedTableOfContents(props.idea.content));
 const pitchHeadings = computed(() => markdownHeadings(pitchContent.value));
 const pitchDescriptionId = computed(() => `idea-${props.idea.id}-description`);
+const threadApplication = computed(() => props.applicant ?? props.collaborator);
 
 function hasPitchHeadingsClass(): string | undefined {
   if (pitchHeadings.value.length > 0) {
@@ -99,6 +101,12 @@ function hasPitchHeadingsClass(): string | undefined {
             nav-label="Pitch table of contents"
           />
         </div>
+
+        <IdeaApplicationThread
+          v-if="threadApplication?.thread"
+          id="application-thread"
+          :application="threadApplication"
+          title="Your application thread" />
 
         <template v-if="idea.can.storeComment">
           <CommentList

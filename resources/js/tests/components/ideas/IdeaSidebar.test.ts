@@ -64,6 +64,7 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
       id: 2,
       username: 'applicant',
     }),
+    thread: null,
     routes: {
       destroy: '/applications/1',
       edit: '/applications/1/edit',
@@ -303,7 +304,20 @@ describe('IdeaSidebar', () => {
   it('surfaces current applicant and collaborator states as the primary action', () => {
     session.isAuthenticated = true;
     const applicantSidebar = mountSidebar({
-      applicant: application(),
+      applicant: application({
+        thread: {
+          messages: [],
+          unreadCount: 2,
+          hasUnread: true,
+          canMessage: true,
+          isReadOnly: false,
+          readOnlyReason: null,
+          routes: {
+            read: '/applications/1/read-state',
+            store: '/applications/1/messages',
+          },
+        },
+      }),
     });
     const collaboratorSidebar = mountSidebar({
       collaborator: application({
@@ -313,6 +327,8 @@ describe('IdeaSidebar', () => {
     });
 
     expect(applicantSidebar.text()).toContain('Application pending');
+    expect(applicantSidebar.text()).toContain('Application thread');
+    expect(applicantSidebar.text()).toContain('2 new');
     expect(applicantSidebar.get('a[href="/applications/1/edit"]').text()).toContain('Edit application');
     expect(applicantSidebar.find('form[action="/applications/1"]').exists()).toBe(true);
     expect(applicantSidebar.text()).toContain('Public first steps, support, and comments stay available.');
