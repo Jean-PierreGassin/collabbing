@@ -59,12 +59,14 @@ class ApplicationRepository
                 'removed_at' => Carbon::now('UTC'),
             ]);
             $messageType = IdeaApplicationMessage::TYPE_REMOVED;
+            $messageBody = $data?->exitReason;
         } elseif ($application->isPending()) {
             $application->forceFill([
                 'decline_reason' => $data?->declineReason,
                 'status' => IdeaApplication::STATUS_DECLINED,
             ]);
             $messageType = IdeaApplicationMessage::TYPE_DECLINED;
+            $messageBody = null;
         } else {
             return false;
         }
@@ -73,7 +75,27 @@ class ApplicationRepository
             return false;
         }
 
-        $this->recordSystemMessage($application, $messageType);
+        $this->recordSystemMessage($application, $messageType, $messageBody);
+
+        return true;
+    }
+
+    public function leave(IdeaApplication $application, ?IdeaApplicationDecisionData $data = null): bool
+    {
+        if (! $application->isApproved()) {
+            return false;
+        }
+
+        $application->forceFill([
+            'status' => IdeaApplication::STATUS_LEFT,
+            'left_at' => Carbon::now('UTC'),
+        ]);
+
+        if (! $application->save()) {
+            return false;
+        }
+
+        $this->recordSystemMessage($application, IdeaApplicationMessage::TYPE_LEFT, $data?->exitReason);
 
         return true;
     }
@@ -195,11 +217,26 @@ class ApplicationRepository
         return $application;
     }
 
-    private function recordSystemMessage(IdeaApplication $application, string $type): void
+    public function getLatestFinalApplicationFromUser(Idea $idea, User $user): ?IdeaApplication
+    {
+        $application = $idea->applications()
+            ->where('user_id', $user->id)
+            ->whereNotIn('status', IdeaApplication::activeStatuses())
+            ->latest()
+            ->first();
+
+        if (! $application instanceof IdeaApplication) {
+            return null;
+        }
+
+        return $application;
+    }
+
+    private function recordSystemMessage(IdeaApplication $application, string $type, ?string $body = null): void
     {
         $application->messages()->create([
             'type' => $type,
-            'body' => null,
+            'body' => $body,
             'occurred_at' => Carbon::now('UTC'),
         ]);
     }

@@ -91,6 +91,14 @@ class IdeaApplicationController extends Controller
         $user = Auth::user();
 
         if ($user instanceof User && (int) $application->user_id === (int) $user->id) {
+            if ($application->isApproved()) {
+                $this->applicationService->leave($application, $request->toData());
+
+                return redirect()
+                    ->route('ideas.show', $idea->id)
+                    ->with('status', 'You have left this collaboration.');
+            }
+
             $this->applicationService->withdraw($application);
 
             return redirect()
@@ -114,9 +122,15 @@ class IdeaApplicationController extends Controller
                 ->with('status', "$applicantName has been declined.");
         }
 
-        return redirect()
+        $redirect = redirect()
             ->back()
             ->with('status', "$applicantName has been removed from this idea.");
+
+        if ($this->hasAvailableRepository($idea)) {
+            $redirect->with('repositoryAccessPrompt', true);
+        }
+
+        return $redirect;
     }
 
     private function shouldPromptRepositoryInvite(Idea $idea): bool
@@ -128,5 +142,12 @@ class IdeaApplicationController extends Controller
         return $idea->latestCodeRepository()?->isAvailable() === true
             && $owner instanceof User
             && $owner->hasGithubToken();
+    }
+
+    private function hasAvailableRepository(Idea $idea): bool
+    {
+        $idea->loadMissing('codeRepository');
+
+        return $idea->latestCodeRepository()?->isAvailable() === true;
     }
 }

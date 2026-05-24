@@ -43,7 +43,8 @@ class IdeaApplicationPolicy
             return $application->isPending() || $application->isApproved();
         }
 
-        return $application->isPending() && (int) $user->id === (int) $application->user_id;
+        return ($application->isPending() || $application->isApproved())
+            && (int) $user->id === (int) $application->user_id;
     }
 
     public function manage(User $user, IdeaApplication $application): bool

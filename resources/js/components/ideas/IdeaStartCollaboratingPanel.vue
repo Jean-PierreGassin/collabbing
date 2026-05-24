@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
+import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -217,16 +218,46 @@ function confirmWithdraw(event: SubmitEvent): void {
             aria-hidden="true" />
           Manage collaboration
         </Button>
-        <Button
+        <div
           v-else-if="collaborator"
-          type="button"
-          size="sm"
-          disabled>
-          <CheckCircle2
-            class="size-4"
-            aria-hidden="true" />
-          Collaborating
-        </Button>
+          class="flex flex-col gap-3">
+          <span class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 text-sm font-medium text-foreground">
+            <CheckCircle2
+              class="size-4 text-primary"
+              aria-hidden="true" />
+            Collaborating
+          </span>
+          <details class="rounded-md border border-border bg-background/35 p-3">
+            <summary class="cursor-pointer text-sm font-medium text-foreground">
+              Leave collaboration
+            </summary>
+            <form
+              :action="collaborator.routes.destroy"
+              method="POST"
+              class="mt-3 flex flex-col gap-2">
+              <CsrfField />
+              <MethodField method="DELETE" />
+              <label
+                :for="`leave-reason-${collaborator.id}`"
+                class="text-xs font-medium uppercase text-muted-foreground">
+                Private reason
+              </label>
+              <textarea
+                :id="`leave-reason-${collaborator.id}`"
+                name="exit_reason"
+                class="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+                maxlength="1200"
+                placeholder="Optional note for the owner."
+              />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm">
+                Confirm leave
+              </Button>
+            </form>
+          </details>
+        </div>
         <div
           v-else-if="applicant"
           class="flex flex-col gap-2">
@@ -332,6 +363,54 @@ function confirmWithdraw(event: SubmitEvent): void {
             Support and comments remain open while applications are closed.
           </template>
         </p>
+      </div>
+
+      <div
+        v-if="collaborator"
+        class="flex flex-col gap-3 rounded-md border border-primary/25 bg-primary/10 p-3">
+        <div class="flex flex-col gap-1">
+          <h3 class="text-sm font-semibold text-foreground">
+            Your starting point
+          </h3>
+          <p class="text-xs leading-5 text-muted-foreground">
+            Private guidance appears here after approval.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-medium uppercase text-muted-foreground">
+            Shared private notes
+          </span>
+          <template v-if="idea.collaboration.gettingStartedNotesHtml">
+            <MarkdownContent :html="idea.collaboration.gettingStartedNotesHtml" />
+            <p
+              v-if="idea.collaboration.gettingStartedNotesUpdatedAtForHumans"
+              class="text-xs text-muted-foreground">
+              Updated {{ idea.collaboration.gettingStartedNotesUpdatedAtForHumans }}.
+            </p>
+          </template>
+          <p
+            v-else
+            class="text-muted-foreground">
+            The owner has not added private start notes yet.
+          </p>
+        </div>
+
+        <div
+          v-if="collaborator.approvalNoteHtml || collaborator.approvalNote"
+          class="flex flex-col gap-2 border-t border-primary/20 pt-3">
+          <span class="text-xs font-medium uppercase text-muted-foreground">
+            Approval note
+          </span>
+          <MarkdownContent
+            v-if="collaborator.approvalNoteHtml"
+            :html="collaborator.approvalNoteHtml" />
+          <p
+            v-else
+            class="whitespace-pre-line">
+            {{ collaborator.approvalNote }}
+          </p>
+        </div>
       </div>
     </CardContent>
   </Card>

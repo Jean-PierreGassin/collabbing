@@ -24,6 +24,9 @@ const props = defineProps<{
 
 const page = usePage<SharedPageProps>();
 const showRepositoryInvitePrompt = computed(() => page.props.flash.repositoryInvitePrompt && props.idea.repository);
+const showRepositoryAccessPrompt = computed(() => (
+  page.props.flash.repositoryAccessPrompt || props.idea.repositoryAccessReviewNeeded === true
+) && props.idea.repository);
 
 const manageTabs = [
   {
@@ -146,6 +149,19 @@ const {
           Invite collaborators
         </Button>
       </form>
+    </div>
+
+    <div
+      v-if="showRepositoryAccessPrompt"
+      class="flex flex-col gap-1 rounded-md border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-muted-foreground"
+      role="status"
+      aria-live="polite">
+      <p class="font-medium text-foreground">
+        Review repository access.
+      </p>
+      <p>
+        A collaborator was removed from this idea. Check repository access when you are ready.
+      </p>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
@@ -317,19 +333,38 @@ const {
                   :href="collaborator.user.routes.show">
                   {{ collaborator.user.firstName }} {{ collaborator.user.lastName }}
                 </a>
-                <form
+                <details
                   v-if="idea.can.deleteApplication"
-                  :action="collaborator.routes.destroy"
-                  method="POST">
-                  <CsrfField />
-                  <MethodField method="DELETE" />
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    size="sm">
+                  class="rounded-md border border-destructive/25 bg-destructive/10 p-3">
+                  <summary class="cursor-pointer text-sm font-medium text-destructive">
                     Remove Collaborator
-                  </Button>
-                </form>
+                  </summary>
+                  <form
+                    :action="collaborator.routes.destroy"
+                    method="POST"
+                    class="mt-3 flex flex-col gap-2">
+                    <CsrfField />
+                    <MethodField method="DELETE" />
+                    <label
+                      :for="`remove-reason-${collaborator.id}`"
+                      class="text-xs font-medium uppercase text-muted-foreground">
+                      Private reason
+                    </label>
+                    <textarea
+                      :id="`remove-reason-${collaborator.id}`"
+                      name="exit_reason"
+                      class="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+                      maxlength="1200"
+                      placeholder="Optional note for the collaborator."
+                    />
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      size="sm">
+                      Confirm remove
+                    </Button>
+                  </form>
+                </details>
               </div>
             </template>
             <p v-else>

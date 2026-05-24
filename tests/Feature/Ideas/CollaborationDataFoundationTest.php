@@ -73,6 +73,9 @@ class CollaborationDataFoundationTest extends TestCase
     {
         $owner = User::factory()->create();
         $collaborator = User::factory()->create();
+        $pendingApplicant = User::factory()->create();
+        $leftCollaborator = User::factory()->create();
+        $removedCollaborator = User::factory()->create();
         $guest = User::factory()->create();
         $idea = Idea::factory()
             ->for($owner, 'user')
@@ -87,10 +90,38 @@ class CollaborationDataFoundationTest extends TestCase
             ->create([
                 'status' => IdeaApplication::STATUS_APPROVED,
             ]);
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($pendingApplicant, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_PENDING,
+            ]);
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($leftCollaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_LEFT,
+            ]);
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($removedCollaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_REMOVED,
+            ]);
 
         $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotes']);
+        $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotesUpdatedAtForHumans']);
 
         $this->actingAs($guest);
+        $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotes']);
+
+        $this->actingAs($pendingApplicant);
+        $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotes']);
+
+        $this->actingAs($leftCollaborator);
+        $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotes']);
+
+        $this->actingAs($removedCollaborator);
         $this->assertNull(app(PagePropsService::class)->idea($idea)['collaboration']['gettingStartedNotes']);
 
         $this->actingAs($collaborator);
@@ -98,6 +129,7 @@ class CollaborationDataFoundationTest extends TestCase
 
         $this->assertSame('**Private** setup notes.', $collaboratorProps['collaboration']['gettingStartedNotes']);
         $this->assertSame("<p><strong>Private</strong> setup notes.</p>\n", $collaboratorProps['collaboration']['gettingStartedNotesHtml']);
+        $this->assertNotNull($collaboratorProps['collaboration']['gettingStartedNotesUpdatedAtForHumans']);
 
         $this->actingAs($owner);
         $ownerProps = app(PagePropsService::class)->idea($idea);

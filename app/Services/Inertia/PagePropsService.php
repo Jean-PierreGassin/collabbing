@@ -132,7 +132,9 @@ class PagePropsService
                 'gettingStartedNotesReady' => $this->hasGettingStartedNotes($idea),
                 'gettingStartedNotes' => $privateGettingStartedNotes,
                 'gettingStartedNotesHtml' => $this->privateGettingStartedNotesHtml($privateGettingStartedNotes),
-                'gettingStartedNotesUpdatedAtForHumans' => $this->dateForHumans($idea->getting_started_notes_updated_at),
+                'gettingStartedNotesUpdatedAtForHumans' => $privateGettingStartedNotes
+                    ? $this->dateForHumans($idea->getting_started_notes_updated_at)
+                    : null,
                 'readinessBadges' => [
                     'applicationsOpen' => $idea->applications_open,
                     'firstStepListed' => $this->hasFirstContribution($idea),
@@ -147,6 +149,7 @@ class PagePropsService
             'repository' => $repositoryAvailable,
             'repositoryName' => $codeRepository?->name,
             'repositoryActivity' => $this->repositoryActivity($idea),
+            'repositoryAccessReviewNeeded' => $this->repositoryAccessReviewNeeded($idea, $repositoryAvailable),
             'createdAtForHumans' => $idea->created_at->diffForHumans(),
             'user' => $this->user($owner),
             'supportersCount' => $supportersCount,
@@ -296,6 +299,18 @@ class PagePropsService
     private function hasGettingStartedNotes(Idea $idea): bool
     {
         return is_string($idea->getting_started_notes) && trim($idea->getting_started_notes) !== '';
+    }
+
+    private function repositoryAccessReviewNeeded(Idea $idea, bool $repositoryAvailable): bool
+    {
+        return Gate::allows('update', $idea)
+            && $repositoryAvailable
+            && $idea->applications()
+                ->whereIn('status', [
+                    IdeaApplication::STATUS_LEFT,
+                    IdeaApplication::STATUS_REMOVED,
+                ])
+                ->exists();
     }
 
     private function privateGettingStartedNotes(Idea $idea): ?string
@@ -522,6 +537,10 @@ class PagePropsService
     private function privateApplicationText(IdeaApplication $application, string $key): ?string
     {
         if (Gate::denies('viewThread', $application)) {
+            return null;
+        }
+
+        if ($key === 'approval_note' && ! $application->isApproved()) {
             return null;
         }
 
