@@ -6,6 +6,7 @@ use App\Data\Ideas\IdeaData;
 use App\Models\CodeRepository;
 use App\Models\Idea;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -45,7 +46,7 @@ class StoreIdea extends FormRequest
             'summary' => 'required|string|max:240',
             'tags' => 'nullable|string|max:240',
             'repository_name' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
                 'regex:/^[A-Za-z0-9_-]+$/',
@@ -55,6 +56,28 @@ class StoreIdea extends FormRequest
                     ->ignore($repository?->id),
             ],
             'communication' => 'required|max:50',
+            'collaboration_stage' => [
+                'nullable',
+                'string',
+                Rule::in(Idea::collaborationStages()),
+            ],
+            'help_wanted' => 'nullable|array|max:11',
+            'help_wanted.*' => [
+                'string',
+                Rule::in(Idea::helpAreas()),
+            ],
+            'help_wanted_note' => 'nullable|string|max:240',
+            'first_contribution' => 'nullable|string|max:1200',
+            'applications_open' => 'nullable|boolean',
+            'applications_closed_note' => 'nullable|string|max:240',
+            'communication_style' => [
+                'nullable',
+                'string',
+                Rule::in(Idea::communicationStyles()),
+            ],
+            'communication_note' => 'nullable|string|max:240',
+            'getting_started_notes' => 'nullable|string|max:10000',
+            'notify_collaborators' => 'nullable|boolean',
             'content' => 'required|max:20000',
             'status' => 'in:open,closed',
         ];
@@ -72,6 +95,9 @@ class StoreIdea extends FormRequest
             'content.max' => 'The description may not be greater than 20000 characters.',
             'repository_name.regex' => 'Repository names may only contain letters, numbers, dashes, and underscores.',
             'repository_name.unique' => 'You already have an idea using this repository name.',
+            'help_wanted.*.in' => 'Choose a valid help area.',
+            'collaboration_stage.in' => 'Choose a valid collaboration stage.',
+            'communication_style.in' => 'Choose a valid communication style.',
         ];
     }
 
@@ -107,10 +133,21 @@ class StoreIdea extends FormRequest
             tagline: $this->string('tagline')->toString(),
             summary: $this->string('summary')->toString(),
             tags: $this->tagValues(),
-            repositoryName: $this->string('repository_name')->toString(),
+            repositoryName: $this->optionalString('repository_name'),
             communication: $this->string('communication')->toString(),
             content: $this->string('content')->toString(),
-            status: $this->string('status', 'open')->toString()
+            status: $this->string('status', 'open')->toString(),
+            collaborationStage: $this->optionalString('collaboration_stage'),
+            helpWanted: $this->helpWantedValues(),
+            helpWantedNote: $this->optionalString('help_wanted_note'),
+            firstContribution: $this->optionalString('first_contribution'),
+            applicationsOpen: $this->applicationsOpenValue(),
+            applicationsClosedNote: $this->optionalString('applications_closed_note'),
+            communicationStyle: $this->optionalString('communication_style'),
+            communicationNote: $this->optionalString('communication_note'),
+            gettingStartedNotes: $this->gettingStartedNotesValue(),
+            gettingStartedNotesUpdatedAt: $this->gettingStartedNotesUpdatedAt(),
+            notifyCollaboratorsOfGettingStartedNotes: $this->boolean('notify_collaborators')
         );
     }
 
@@ -128,5 +165,110 @@ class StoreIdea extends FormRequest
             ->unique()
             ->values()
             ->all();
+    }
+
+    private function optionalString(string $key): ?string
+    {
+        if (! $this->has($key)) {
+            return $this->existingIdea()?->{$key};
+        }
+
+        $value = $this->input($key);
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = Str::of($value)->trim()->toString();
+
+        if ($value === '') {
+            return null;
+        }
+
+        return $value;
+    }
+
+    private function helpWantedValues(): array
+    {
+        if (! $this->has('help_wanted')) {
+            $helpWanted = $this->existingIdea()?->getAttributeValue('help_wanted');
+
+            return is_array($helpWanted) ? $helpWanted : [];
+        }
+
+        $helpWanted = $this->input('help_wanted');
+
+        if (! is_array($helpWanted)) {
+            return [];
+        }
+
+        return collect($helpWanted)
+            ->filter(fn (mixed $area): bool => is_string($area) && trim($area) !== '')
+            ->map(fn (string $area): string => Str::of($area)->squish()->lower()->toString())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function applicationsOpenValue(): bool
+    {
+        if (! $this->has('applications_open')) {
+            $applicationsOpen = $this->existingIdea()?->applications_open;
+
+            if (is_bool($applicationsOpen)) {
+                return $applicationsOpen;
+            }
+
+            return true;
+        }
+
+        return $this->boolean('applications_open');
+    }
+
+    private function gettingStartedNotesValue(): ?string
+    {
+        return $this->optionalString('getting_started_notes');
+    }
+
+    private function gettingStartedNotesUpdatedAt(): ?Carbon
+    {
+        $idea = $this->existingIdea();
+        $notes = $this->gettingStartedNotesValue();
+
+        if (! $this->has('getting_started_notes')) {
+            return $this->existingGettingStartedNotesUpdatedAt($idea);
+        }
+
+        if ($notes === null) {
+            return null;
+        }
+
+        if ($idea && $idea->getting_started_notes === $notes) {
+            return $this->existingGettingStartedNotesUpdatedAt($idea);
+        }
+
+        return Carbon::now('UTC');
+    }
+
+    private function existingGettingStartedNotesUpdatedAt(?Idea $idea): ?Carbon
+    {
+        $updatedAt = $idea?->getAttributeValue('getting_started_notes_updated_at');
+
+        if (! $updatedAt instanceof Carbon) {
+            return null;
+        }
+
+        return $updatedAt;
+    }
+
+    private function existingIdea(): ?Idea
+    {
+        $routeIdea = $this->route('idea');
+
+        if (! $routeIdea instanceof Idea) {
+            return null;
+        }
+
+        return $routeIdea;
     }
 }

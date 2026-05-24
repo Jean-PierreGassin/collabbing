@@ -34,8 +34,6 @@ class ProductRouteSafetyTest extends TestCase
             'supporter show' => ['ideas.supporters.show'],
             'application index' => ['ideas.applications.index'],
             'application show' => ['ideas.applications.show'],
-            'application edit' => ['ideas.applications.edit'],
-            'application update' => ['ideas.applications.update'],
         ];
     }
 
@@ -50,6 +48,9 @@ class ProductRouteSafetyTest extends TestCase
             'supporter create' => ['ideas.supporters.store', 'throttle:product-write'],
             'supporter delete' => ['ideas.supporters.destroy', 'throttle:product-write'],
             'application create' => ['ideas.applications.store', 'throttle:product-write'],
+            'application update' => ['ideas.applications.update', 'throttle:product-write'],
+            'application message create' => ['ideas.applications.messages.store', 'throttle:product-write'],
+            'application read state update' => ['ideas.applications.read-state.update', 'throttle:product-write'],
             'application delete' => ['ideas.applications.destroy', 'throttle:product-write'],
             'application approval' => ['ideas.applications.approve', 'throttle:product-write'],
             'repository create' => ['ideas.repository-create', 'throttle:integration-write'],

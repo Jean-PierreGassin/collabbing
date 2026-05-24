@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 import IdeasIndex from '@/pages/Ideas/Index.vue';
-import type { DomainUser, Idea, IdeaTag, Paginator } from '@/types/domain';
+import type { DomainUser, Idea, IdeaCollaboration, IdeaTag, Paginator } from '@/types/domain';
 
 function user(): DomainUser {
   return {
@@ -40,6 +40,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
       'workflow',
     ],
     communication: 'Slack',
+    collaboration: collaboration(),
     content: 'A focused pitch.',
     contentHtml: '<p>A focused pitch.</p>',
     status: 'open',
@@ -65,6 +66,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     user: user(),
     supportersCount: 0,
     approvedApplicationsCount: 0,
+    pendingApplicationsCount: null,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {
@@ -86,6 +88,33 @@ function idea(overrides: Partial<Idea> = {}): Idea {
       supportersStore: '/ideas/1/supporters',
       repositoryCreate: '/ideas/1/repository-create',
       repositoryInvite: '/ideas/1/repository-invite',
+    },
+    ...overrides,
+  };
+}
+
+function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollaboration {
+  return {
+    stage: null,
+    stageDisplay: 'Not decided yet',
+    helpWanted: [],
+    helpWantedDisplay: [],
+    helpWantedNote: null,
+    firstContribution: null,
+    applicationsOpen: true,
+    applicationsClosedNote: null,
+    communicationStyle: null,
+    communicationStyleDisplay: 'Not decided yet',
+    communicationNote: null,
+    gettingStartedNotesReady: false,
+    gettingStartedNotes: null,
+    gettingStartedNotesHtml: null,
+    gettingStartedNotesUpdatedAtForHumans: null,
+    readinessBadges: {
+      applicationsOpen: true,
+      firstStepListed: false,
+      repoAvailable: false,
+      startNotesReady: false,
     },
     ...overrides,
   };

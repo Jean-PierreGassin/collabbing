@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import IdeaStartCollaboratingPanel from '@/components/ideas/IdeaStartCollaboratingPanel.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import UserAvatar from '@/components/users/UserAvatar.vue';
 import type { Idea, IdeaApplication, IdeaSupporter } from '@/types/domain';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   idea: Idea;
   collaborator?: IdeaApplication | null;
   applicant?: IdeaApplication | null;
+  showStartPanel?: boolean;
   supporter?: IdeaSupporter | null;
-}>();
+}>(), {
+  showStartPanel: true,
+});
 
 const supportForm = useForm({});
 const localSupporter = ref<IdeaSupporter | null>(props.supporter ?? null);
@@ -87,36 +91,22 @@ function removeSupport(): void {
 
 <template>
   <div class="flex flex-col gap-3">
+    <IdeaStartCollaboratingPanel
+      v-if="showStartPanel !== false"
+      :idea="idea"
+      :collaborator="collaborator"
+      :applicant="applicant"
+    />
+
     <Card>
       <CardHeader>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-1">
           <h2 class="text-lg font-semibold text-white">
             Collaborators
           </h2>
-          <div v-if="collaborator || applicant || idea.can.storeApplication">
-            <Button
-              v-if="collaborator"
-              type="button"
-              size="sm"
-              disabled>
-              Collaborator
-            </Button>
-            <Button
-              v-else-if="applicant"
-              type="button"
-              size="sm"
-              disabled>
-              Application pending
-            </Button>
-            <Button
-              v-else
-              as="a"
-              :href="idea.routes.applicationsCreate"
-              variant="outline"
-              size="sm">
-              Apply to Collaborate
-            </Button>
-          </div>
+          <p class="text-sm text-muted-foreground">
+            Active collaborators on this idea.
+          </p>
         </div>
       </CardHeader>
       <CardContent>
@@ -255,7 +245,7 @@ function removeSupport(): void {
               variant="outline"
               :disabled="supportForm.processing"
               @click="removeSupport">
-              Remove Support
+              Remove support
             </Button>
             <Button
               v-else
@@ -264,7 +254,7 @@ function removeSupport(): void {
               variant="outline"
               :disabled="supportForm.processing"
               @click="supportIdea">
-              Support Idea
+              Support idea
             </Button>
             <span
               v-if="showSupportSparks"

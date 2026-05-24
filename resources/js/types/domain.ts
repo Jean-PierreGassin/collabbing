@@ -25,12 +25,45 @@ export interface IdeaApplication {
   id: number;
   content: string;
   contentHtml: string;
+  contributionType: string | null;
+  contributionTypeDisplay: string;
+  firstAction: string | null;
+  approvalNote: string | null;
+  approvalNoteHtml: string | null;
+  declineReason: string | null;
   status: string;
+  statusDisplay: string;
   createdAtForHumans: string;
   user: DomainUser;
+  thread: IdeaApplicationThread | null;
   routes: {
     destroy: string;
+    edit: string;
+    update: string;
     approve: string;
+  };
+}
+
+export interface IdeaApplicationMessage {
+  id: number;
+  type: string;
+  body: string | null;
+  bodyHtml: string | null;
+  isSystem: boolean;
+  occurredAtForHumans: string | null;
+  user: DomainUser | null;
+}
+
+export interface IdeaApplicationThread {
+  messages: IdeaApplicationMessage[];
+  unreadCount: number;
+  hasUnread: boolean;
+  canMessage: boolean;
+  isReadOnly: boolean;
+  readOnlyReason: string | null;
+  routes: {
+    read: string;
+    store: string;
   };
 }
 
@@ -58,6 +91,11 @@ export interface IdeaSupporter {
   routes: {
     destroy: string;
   };
+}
+
+export interface IdeaCollaboratorPreview {
+  id: number;
+  user: DomainUser;
 }
 
 export interface IdeaTag {
@@ -88,6 +126,33 @@ export interface IdeaRepositoryActivity {
   events: RepositoryEvent[];
 }
 
+export interface IdeaCollaborationReadinessBadges {
+  applicationsOpen: boolean;
+  firstStepListed: boolean;
+  repoAvailable: boolean;
+  startNotesReady: boolean;
+}
+
+export interface IdeaCollaboration {
+  stage: string | null;
+  stageDisplay: string;
+  helpWanted: string[];
+  helpWantedDisplay: string[];
+  helpWantedNote: string | null;
+  firstContribution: string | null;
+  firstContributionHtml?: string | null;
+  applicationsOpen: boolean;
+  applicationsClosedNote: string | null;
+  communicationStyle: string | null;
+  communicationStyleDisplay: string;
+  communicationNote: string | null;
+  gettingStartedNotesReady: boolean;
+  gettingStartedNotes: string | null;
+  gettingStartedNotesHtml: string | null;
+  gettingStartedNotesUpdatedAtForHumans: string | null;
+  readinessBadges: IdeaCollaborationReadinessBadges;
+}
+
 export interface Idea {
   id: number;
   title: string;
@@ -96,6 +161,7 @@ export interface Idea {
   summary: string;
   tags: string[];
   communication: string | null;
+  collaboration: IdeaCollaboration;
   content: string;
   contentHtml: string;
   status: string;
@@ -103,11 +169,13 @@ export interface Idea {
   repository: boolean;
   repositoryName: string | null;
   repositoryActivity: IdeaRepositoryActivity;
+  repositoryAccessReviewNeeded?: boolean;
   createdAtForHumans: string;
   user: DomainUser;
   supportersCount: number;
   approvedApplicationsCount: number;
-  collaborators: IdeaApplication[];
+  pendingApplicationsCount: number | null;
+  collaborators: IdeaCollaboratorPreview[];
   hiddenCollaboratorsCount: number;
   can: {
     update: boolean;

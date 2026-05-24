@@ -28,6 +28,8 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'status' => fn () => $session?->get('status'),
                 'errors' => fn () => $this->sessionErrors($session),
+                'repositoryInvitePrompt' => fn () => (bool) $session?->get('repositoryInvitePrompt', false),
+                'repositoryAccessPrompt' => fn () => (bool) $session?->get('repositoryAccessPrompt', false),
             ],
             'oldInput' => fn () => (object) Arr::except($session?->getOldInput() ?? [], [
                 '_method',

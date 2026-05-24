@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import CommentList from '@/components/comments/CommentList.vue';
+import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
+import IdeaCollaboratorStartPanel from '@/components/ideas/IdeaCollaboratorStartPanel.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
+import IdeaStartCollaboratingPanel from '@/components/ideas/IdeaStartCollaboratingPanel.vue';
 import { Button } from '@/components/ui/button';
 import MarkdownTableOfContents from '@/components/typography/MarkdownTableOfContents.vue';
 import { markdownHeadings, stripGeneratedTableOfContents } from '@/lib/markdown';
@@ -14,6 +17,7 @@ const props = defineProps<{
   comments: Paginator<IdeaComment>;
   collaborator: IdeaApplication | null;
   applicant: IdeaApplication | null;
+  historicalApplication: IdeaApplication | null;
   supporter: IdeaSupporter | null;
 }>();
 
@@ -40,6 +44,7 @@ const mentionableUsers = computed<DomainUser[]>(() => {
 const pitchContent = computed(() => stripGeneratedTableOfContents(props.idea.content));
 const pitchHeadings = computed(() => markdownHeadings(pitchContent.value));
 const pitchDescriptionId = computed(() => `idea-${props.idea.id}-description`);
+const threadApplication = computed(() => props.applicant ?? props.collaborator ?? props.historicalApplication);
 
 function hasPitchHeadingsClass(): string | undefined {
   if (pitchHeadings.value.length > 0) {
@@ -55,7 +60,7 @@ function hasPitchHeadingsClass(): string | undefined {
     <header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex min-w-0 flex-col gap-1">
         <h1 class="text-2xl font-semibold leading-tight text-white">
-          Idea - {{ idea.titleDisplay }}
+          {{ idea.titleDisplay }}
         </h1>
       </div>
       <div
@@ -100,18 +105,46 @@ function hasPitchHeadingsClass(): string | undefined {
           />
         </div>
 
-        <template v-if="idea.can.storeComment">
-          <CommentList
-            :comments="comments"
-            :comments-store="idea.routes.commentsStore"
-            :mentionable-users="mentionableUsers" />
-        </template>
+        <IdeaStartCollaboratingPanel
+          class="lg:hidden"
+          :idea="idea"
+          :collaborator="collaborator"
+          :applicant="applicant"
+        />
+
+        <IdeaCollaboratorStartPanel
+          v-if="collaborator"
+          :idea="idea"
+          :collaborator="collaborator"
+        />
+
+        <IdeaApplicationThread
+          v-if="threadApplication?.thread"
+          id="application-thread"
+          :application="threadApplication"
+          title="Your application thread" />
+
+        <CommentList
+          :can-store-comment="idea.can.storeComment"
+          :comments="comments"
+          :comments-store="idea.routes.commentsStore"
+          :mentionable-users="mentionableUsers" />
       </div>
 
       <IdeaSidebar
+        class="hidden lg:flex"
         :idea="idea"
         :collaborator="collaborator"
         :applicant="applicant"
+        :supporter="supporter"
+      />
+
+      <IdeaSidebar
+        class="lg:hidden"
+        :idea="idea"
+        :collaborator="collaborator"
+        :applicant="applicant"
+        :show-start-panel="false"
         :supporter="supporter"
       />
     </div>

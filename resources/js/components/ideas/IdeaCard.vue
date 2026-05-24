@@ -44,6 +44,47 @@ const isDescriptionExpanded = computed({
   set: (value: boolean) => emit('update:pitchExpanded', value),
 });
 
+const applicationStatusLabel = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'Applications open';
+  }
+
+  return 'Applications closed';
+});
+
+const applicationStatusVariant = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'default';
+  }
+
+  return 'outline';
+});
+
+const applicationStatusClass = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'border-primary/70 bg-primary text-primary-foreground shadow-lg shadow-primary/40 ring-2 ring-primary/25 motion-safe:animate-pulse';
+  }
+
+  return 'text-muted-foreground';
+});
+
+const helpWantedSummary = computed(() => {
+  const labels = props.idea.collaboration.helpWantedDisplay;
+
+  if (labels.length === 0) {
+    return 'Open to figuring it out';
+  }
+
+  const visible = labels.slice(0, 2);
+  const hiddenCount = labels.length - visible.length;
+
+  if (hiddenCount === 0) {
+    return visible.join(', ');
+  }
+
+  return `${visible.join(', ')} +${hiddenCount}`;
+});
+
 const collaboratorsLabel = computed(() => {
   const count = props.idea.approvedApplicationsCount;
   let noun = 'collaborators';
@@ -61,6 +102,17 @@ const supportersLabel = computed(() => {
 
   if (count === 1) {
     noun = 'supporter';
+  }
+
+  return `${count.toLocaleString()} ${noun}`;
+});
+
+const pendingApplicationsLabel = computed(() => {
+  const count = props.idea.pendingApplicationsCount ?? 0;
+  let noun = 'pending applications';
+
+  if (count === 1) {
+    noun = 'pending application';
   }
 
   return `${count.toLocaleString()} ${noun}`;
@@ -118,14 +170,6 @@ const cardActionsClass = computed(() => {
   }
 
   return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-6 py-4';
-});
-
-const statusBadgeVariant = computed(() => {
-  if (props.idea.status === 'open') {
-    return 'default';
-  }
-
-  return 'secondary';
 });
 
 const pitchToggleLabel = computed(() => {
@@ -227,6 +271,14 @@ const pitchChevronClass = computed(() => {
             aria-hidden="true" />
           {{ collaboratorsLabel }}
         </span>
+        <span
+          v-if="idea.can.update && idea.pendingApplicationsCount"
+          class="inline-flex items-center gap-1.5">
+          <MessageSquare
+            class="size-3.5 text-primary"
+            aria-hidden="true" />
+          {{ pendingApplicationsLabel }}
+        </span>
       </div>
     </div>
 
@@ -283,17 +335,19 @@ const pitchChevronClass = computed(() => {
       </div>
 
       <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div class="flex min-w-0 flex-wrap gap-1.5">
-          <Badge
-            v-for="tag in idea.tags"
-            :key="tag"
-            variant="secondary"
-            class="text-xs">
-            {{ tag }}
-          </Badge>
-          <span
-            v-if="idea.tags.length === 0"
-            class="text-sm text-muted-foreground">No tags yet.</span>
+        <div class="flex min-w-0 flex-col gap-2">
+          <div class="flex min-w-0 flex-wrap gap-1.5">
+            <Badge
+              v-for="tag in idea.tags"
+              :key="tag"
+              variant="secondary"
+              class="text-xs">
+              {{ tag }}
+            </Badge>
+            <span
+              v-if="idea.tags.length === 0"
+              class="text-sm text-muted-foreground">No tags yet.</span>
+          </div>
         </div>
 
         <div class="flex shrink-0 flex-wrap items-center gap-3 text-xs text-muted-foreground sm:justify-end">
@@ -311,6 +365,15 @@ const pitchChevronClass = computed(() => {
             <strong class="font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
             collaborators
           </span>
+          <span
+            v-if="idea.can.update && idea.pendingApplicationsCount"
+            class="inline-flex items-center gap-1.5">
+            <MessageSquare
+              class="size-3.5 text-primary"
+              aria-hidden="true" />
+            <strong class="font-semibold text-white">{{ idea.pendingApplicationsCount.toLocaleString() }}</strong>
+            pending
+          </span>
         </div>
       </div>
     </div>
@@ -318,7 +381,7 @@ const pitchChevronClass = computed(() => {
     <CardHeader
       v-else
       :class="headerClass">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex min-w-0 items-start justify-between gap-3">
         <div class="flex min-w-0 flex-col gap-2">
           <div
             v-if="featured"
@@ -349,22 +412,47 @@ const pitchChevronClass = computed(() => {
             {{ idea.createdAtForHumans }}
           </p>
         </div>
-
-        <div
-          v-if="idea.can.update || single"
-          class="pointer-events-auto relative z-20 flex shrink-0 flex-wrap items-center gap-2">
-          <Badge
-            :variant="statusBadgeVariant"
-            class="w-fit">
-            {{ idea.statusDisplay }}
-          </Badge>
-        </div>
+        <Badge
+          :variant="applicationStatusVariant"
+          :class="[
+            'shrink-0',
+            applicationStatusClass,
+          ]"
+          :aria-label="`Application status: ${applicationStatusLabel}`">
+          {{ applicationStatusLabel }}
+        </Badge>
       </div>
     </CardHeader>
 
     <CardContent
       v-if="single"
       class="flex flex-col gap-5">
+      <section
+        class="border-b border-border pb-4"
+        aria-label="Project context">
+        <h2 class="mb-3 text-sm font-semibold text-white">
+          Project context
+        </h2>
+        <dl class="grid gap-3 text-sm sm:grid-cols-2">
+          <div class="min-w-0">
+            <dt class="text-xs font-medium uppercase text-muted-foreground">
+              Stage
+            </dt>
+            <dd class="truncate text-foreground">
+              {{ idea.collaboration.stageDisplay }}
+            </dd>
+          </div>
+          <div class="min-w-0">
+            <dt class="text-xs font-medium uppercase text-muted-foreground">
+              Help
+            </dt>
+            <dd class="truncate text-foreground">
+              {{ helpWantedSummary }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
       <section
         class="flex flex-col gap-2"
         aria-label="Idea summary">
@@ -467,6 +555,17 @@ const pitchChevronClass = computed(() => {
           aria-hidden="true" />
         {{ collaboratorsLabel }}
       </span>
+      <template v-if="idea.can.update && idea.pendingApplicationsCount">
+        <span
+          class="text-border"
+          aria-hidden="true">/</span>
+        <span class="inline-flex items-center gap-2">
+          <MessageSquare
+            class="size-4 text-primary"
+            aria-hidden="true" />
+          {{ pendingApplicationsLabel }}
+        </span>
+      </template>
     </div>
 
     <div

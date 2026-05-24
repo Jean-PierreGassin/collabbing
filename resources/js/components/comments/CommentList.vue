@@ -5,11 +5,14 @@ import CommentThread from '@/components/comments/CommentThread.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import type { DomainUser, IdeaComment, Paginator } from '@/types/domain';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
+  canStoreComment?: boolean;
   comments: Paginator<IdeaComment>;
   commentsStore: string;
   mentionableUsers: DomainUser[];
-}>();
+}>(), {
+  canStoreComment: false,
+});
 
 function commentsPanelClass(): string | undefined {
   if (props.comments.items.length === 0) {
@@ -38,6 +41,7 @@ function commentsPanelClass(): string | undefined {
         />
       </div>
       <CommentComposer
+        v-if="canStoreComment"
         :action="commentsStore"
         label="Comment"
         hide-label

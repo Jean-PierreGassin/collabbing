@@ -1,5 +1,5 @@
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import type { Slots, VNode } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { Ref, Slots, VNode } from 'vue';
 
 export type SelectOption = {
   label: string;
@@ -22,10 +22,22 @@ function optionFromNode(node: VNode): SelectOption {
   };
 }
 
-export function useFormSelect(id: string, slots: Slots) {
+function optionsFromNode(node: VNode): SelectOption[] {
+  if (node.type === 'option') {
+    return [optionFromNode(node)];
+  }
+
+  if (Array.isArray(node.children)) {
+    return node.children.flatMap((child) => optionsFromNode(child as VNode));
+  }
+
+  return [];
+}
+
+export function useFormSelect(id: string, slots: Slots, modelValue?: Ref<string | undefined>) {
   const isOpen = ref(false);
   const activeIndex = ref(0);
-  const selectedValue = ref('');
+  const selectedValue = ref(modelValue?.value ?? '');
   const selectRoot = ref<HTMLElement | null>(null);
   const listbox = ref<HTMLElement | null>(null);
   const popoverStyle = ref<Record<string, string>>({});
@@ -34,8 +46,7 @@ export function useFormSelect(id: string, slots: Slots) {
 
   const options = computed<SelectOption[]>(() => {
     return (slots.default?.() ?? [])
-      .filter((node) => node.type === 'option')
-      .map((node) => optionFromNode(node));
+      .flatMap((node) => optionsFromNode(node));
   });
 
   const defaultSelectedOption = computed(() => {
@@ -72,6 +83,11 @@ export function useFormSelect(id: string, slots: Slots) {
 
   function selectOption(option: SelectOption): void {
     selectedValue.value = option.value;
+
+    if (modelValue) {
+      modelValue.value = option.value;
+    }
+
     closeSelect();
   }
 
@@ -165,6 +181,15 @@ export function useFormSelect(id: string, slots: Slots) {
     document.addEventListener('scroll', positionPopover, true);
     window.addEventListener('resize', positionPopover);
   });
+
+  watch(
+    () => modelValue?.value,
+    (value) => {
+      if (typeof value === 'string' && value !== selectedValue.value) {
+        selectedValue.value = value;
+      }
+    },
+  );
 
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleDocumentClick);

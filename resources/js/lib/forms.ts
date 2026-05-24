@@ -38,6 +38,20 @@ export function oldInputString(name: string, fallback: string | null | undefined
   return fallback ?? '';
 }
 
+export function oldInputStringArray(name: string, fallback: string[] = []): string[] {
+  const value = oldInput(name);
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string');
+  }
+
+  if (typeof value === 'string' && value !== '') {
+    return [value];
+  }
+
+  return fallback;
+}
+
 export function oldInputBoolean(name: string, fallback = false): boolean {
   const value = oldInput(name);
 

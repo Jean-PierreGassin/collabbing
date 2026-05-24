@@ -49,7 +49,7 @@ class User extends Authenticatable
 
     public function collaborations(): HasMany
     {
-        return $this->applications()->where('status', 'approved');
+        return $this->applications()->where('status', IdeaApplication::STATUS_APPROVED);
     }
 
     public function applications(): HasMany

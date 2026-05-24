@@ -3,11 +3,15 @@ import { useSlots } from 'vue';
 import { Check, ChevronDown } from '@lucide/vue';
 import { useFormSelect } from '@/composables/useFormSelect';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   id: string;
   name: string;
-}>();
+  required?: boolean;
+}>(), {
+  required: false,
+});
 
+const modelValue = defineModel<string>();
 const slots = useSlots();
 
 const {
@@ -23,17 +27,43 @@ const {
   selectedLabel,
   selectedValue,
   toggleSelect,
-} = useFormSelect(props.id, slots);
+} = useFormSelect(props.id, slots, modelValue);
+
+function selectNativeOption(event: Event): void {
+  if (!(event.target instanceof HTMLSelectElement)) {
+    return;
+  }
+
+  const target = event.target;
+  const option = options.value.find((candidate) => candidate.value === target.value);
+
+  if (! option) {
+    return;
+  }
+
+  selectOption(option);
+}
 </script>
 
 <template>
   <span
     ref="selectRoot"
     class="relative inline-flex min-w-36">
-    <input
-      type="hidden"
+    <select
+      class="sr-only"
       :name="name"
-      :value="selectedValue">
+      :value="selectedValue"
+      :required="required"
+      :tabindex="-1"
+      aria-hidden="true"
+      @change="selectNativeOption">
+      <option
+        v-for="option in options"
+        :key="option.value"
+        :value="option.value">
+        {{ option.label }}
+      </option>
+    </select>
     <button
       :id="id"
       type="button"

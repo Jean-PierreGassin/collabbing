@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
-import type { DomainUser, Idea } from '@/types/domain';
+import type { DomainUser, Idea, IdeaCollaboration } from '@/types/domain';
 
 function user(): DomainUser {
   return {
@@ -40,6 +40,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
       'workflow',
     ],
     communication: 'Slack',
+    collaboration: collaboration(),
     content: 'A focused pitch.',
     contentHtml: '<p>A focused pitch.</p>',
     status: 'open',
@@ -65,6 +66,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     user: user(),
     supportersCount: 42,
     approvedApplicationsCount: 7,
+    pendingApplicationsCount: null,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {
@@ -91,6 +93,33 @@ function idea(overrides: Partial<Idea> = {}): Idea {
   };
 }
 
+function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollaboration {
+  return {
+    stage: null,
+    stageDisplay: 'Not decided yet',
+    helpWanted: [],
+    helpWantedDisplay: [],
+    helpWantedNote: null,
+    firstContribution: null,
+    applicationsOpen: true,
+    applicationsClosedNote: null,
+    communicationStyle: null,
+    communicationStyleDisplay: 'Not decided yet',
+    communicationNote: null,
+    gettingStartedNotesReady: false,
+    gettingStartedNotes: null,
+    gettingStartedNotesHtml: null,
+    gettingStartedNotesUpdatedAtForHumans: null,
+    readinessBadges: {
+      applicationsOpen: true,
+      firstStepListed: false,
+      repoAvailable: false,
+      startNotesReady: false,
+    },
+    ...overrides,
+  };
+}
+
 function mountCard(variant: 'compact' | 'detailed', overrides: Partial<Idea> = {}) {
   return mount(IdeaCard, {
     props: {
@@ -102,6 +131,27 @@ function mountCard(variant: 'compact' | 'detailed', overrides: Partial<Idea> = {
         Link: {
           props: ['href'],
           template: '<a :href="href"><slot /></a>',
+        },
+      },
+    },
+  });
+}
+
+function mountSingle(overrides: Partial<Idea> = {}) {
+  return mount(IdeaCard, {
+    props: {
+      idea: idea(overrides),
+      single: true,
+    },
+    global: {
+      stubs: {
+        Link: {
+          props: ['href'],
+          template: '<a :href="href"><slot /></a>',
+        },
+        MarkdownContent: {
+          props: ['html'],
+          template: '<div v-html="html" />',
         },
       },
     },
@@ -124,6 +174,42 @@ describe('IdeaCard', () => {
     expect(text).not.toContain('Repository');
   });
 
+  it('keeps collaboration badges off compact cards', () => {
+    const wrapper = mountCard('compact', {
+      collaboration: collaboration({
+        stage: 'ready_to_build',
+        stageDisplay: 'Ready to build',
+        helpWanted: [
+          'frontend',
+          'backend',
+          'testing',
+          'design',
+        ],
+        helpWantedDisplay: [
+          'Frontend',
+          'Backend',
+          'Testing',
+          'Design',
+        ],
+        firstContribution: 'Review the first issue.',
+        applicationsOpen: false,
+      }),
+    });
+    const text = wrapper.text();
+
+    expect(text).not.toContain('Collaboration');
+    expect(text).not.toContain('Ready to build');
+    expect(text).not.toContain('Frontend');
+    expect(text).not.toContain('Backend');
+    expect(text).not.toContain('Testing');
+    expect(text).not.toContain('Design');
+    expect(text).not.toContain('Applications closed');
+    expect(text).not.toContain('First step listed');
+    expect(text).not.toContain('Stage:');
+    expect(text).not.toContain('Needs:');
+    expect(text).not.toContain('Review the first issue.');
+  });
+
   it('renders detailed cards as slim rows without summary or labels', () => {
     const wrapper = mountCard('detailed');
     const text = wrapper.text();
@@ -139,6 +225,83 @@ describe('IdeaCard', () => {
     expect(text).toContain('7');
     expect(text).toContain('collaborators');
     expect(wrapper.findAll('a[href="/ideas/1"]')).toHaveLength(1);
+  });
+
+  it('keeps collaboration badges off detailed cards', () => {
+    const wrapper = mountCard('detailed', {
+      collaboration: collaboration({
+        stage: 'actively_building',
+        stageDisplay: 'Actively building',
+        helpWanted: [
+          'product',
+          'research',
+        ],
+        helpWantedDisplay: [
+          'Product',
+          'Research',
+        ],
+        firstContribution: 'Map the onboarding state.',
+        applicationsOpen: true,
+      }),
+    });
+    const text = wrapper.text();
+
+    expect(text).not.toContain('Collaboration');
+    expect(text).not.toContain('Actively building');
+    expect(text).not.toContain('Product');
+    expect(text).not.toContain('Research');
+    expect(text).not.toContain('First step listed');
+    expect(text).not.toContain('Stage:');
+    expect(text).not.toContain('Needs:');
+    expect(text).not.toContain('Applications closed');
+    expect(text).not.toContain('Map the onboarding state.');
+  });
+
+  it('shows application status instead of generic idea status on the full card', () => {
+    const wrapper = mountSingle({
+      collaboration: collaboration({
+        helpWantedDisplay: ['Frontend'],
+      }),
+      status: 'open',
+      statusDisplay: 'Open',
+    });
+
+    const applicationStatus = wrapper.get('[aria-label="Application status: Applications open"]');
+
+    expect(applicationStatus.text()).toBe('Applications open');
+    expect(applicationStatus.classes()).toContain('bg-primary');
+    expect(applicationStatus.classes()).toContain('motion-safe:animate-pulse');
+    expect(wrapper.text()).not.toContain('Status');
+  });
+
+  it('formats compact project context above the full card summary', () => {
+    const wrapper = mountSingle({
+      collaboration: collaboration({
+        stage: 'ready_to_build',
+        stageDisplay: 'Ready to build',
+        helpWantedDisplay: [
+          'Frontend',
+          'Backend',
+          'Testing',
+        ],
+        firstContribution: 'Review the first issue.',
+        applicationsOpen: false,
+      }),
+    });
+    const context = wrapper.get('[aria-label="Project context"]').text();
+    const summary = wrapper.get('[aria-label="Idea summary"]').text();
+    const fullText = wrapper.text();
+
+    expect(wrapper.get('[aria-label="Application status: Applications closed"]').text()).toBe('Applications closed');
+    expect(fullText.indexOf('Project context')).toBeLessThan(fullText.indexOf('Summary'));
+    expect(context).toContain('Stage');
+    expect(context).toContain('Ready to build');
+    expect(context).toContain('Help');
+    expect(context).toContain('Frontend, Backend +1');
+    expect(context).not.toContain('First useful step');
+    expect(context).not.toContain('Repository');
+    expect(summary).toContain('A summary that belongs on the full idea page.');
+    expect(wrapper.text()).not.toContain('Review the first issue.');
   });
 
   it('keeps card body layers pass-through so cards remain clickable', () => {
@@ -169,5 +332,21 @@ describe('IdeaCard', () => {
     expect(detailed.findAll('a[href="/ideas/1/dashboard"]')).toHaveLength(1);
     expect(compact.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
     expect(detailed.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
+  });
+
+  it('shows pending application counts only to owners', () => {
+    const publicCard = mountCard('compact', {
+      pendingApplicationsCount: null,
+    });
+    const ownerCard = mountCard('compact', {
+      pendingApplicationsCount: 2,
+      can: {
+        ...idea().can,
+        update: true,
+      },
+    });
+
+    expect(publicCard.text()).not.toContain('pending');
+    expect(ownerCard.text()).toContain('2 pending applications');
   });
 });

@@ -55,6 +55,53 @@ class NestedResourceAuthorizationTest extends TestCase
         $this->assertModelExists($application);
     }
 
+    public function testApplicantCannotEditAnApplicationThroughAnotherIdea(): void
+    {
+        $applicant = User::factory()->create();
+        $ownedIdea = Idea::factory()->for(User::factory(), 'user')->create();
+        $otherIdea = Idea::factory()->for(User::factory(), 'user')->create();
+        $application = IdeaApplication::factory()
+            ->for($otherIdea, 'idea')
+            ->for($applicant, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_PENDING,
+            ]);
+
+        $response = $this
+            ->actingAs($applicant)
+            ->get(route('ideas.applications.edit', [$ownedIdea, $application]));
+
+        $response->assertNotFound();
+    }
+
+    public function testApplicantCannotUpdateAnApplicationThroughAnotherIdea(): void
+    {
+        $applicant = User::factory()->create();
+        $ownedIdea = Idea::factory()->for(User::factory(), 'user')->create();
+        $otherIdea = Idea::factory()->for(User::factory(), 'user')->create();
+        $application = IdeaApplication::factory()
+            ->for($otherIdea, 'idea')
+            ->for($applicant, 'user')
+            ->create([
+                'first_action' => 'Original action.',
+                'status' => IdeaApplication::STATUS_PENDING,
+            ]);
+
+        $response = $this
+            ->actingAs($applicant)
+            ->put(route('ideas.applications.update', [$ownedIdea, $application]), [
+                'contribution_type' => Idea::HELP_TESTING,
+                'first_action' => 'Tampered action.',
+                'content' => 'Tampered context.',
+            ]);
+
+        $response->assertNotFound();
+        $this->assertDatabaseHas('idea_applications', [
+            'id' => $application->id,
+            'first_action' => 'Original action.',
+        ]);
+    }
+
     public function testCommentOwnerCannotEditACommentThroughAnotherIdea(): void
     {
         $commenter = User::factory()->create();

@@ -182,7 +182,15 @@ export function useFormFieldControl(options: FormFieldControlOptions) {
   }
 
   function shouldSkipValidator(nextControl: FormControlElement, enforceRequired: boolean): boolean {
-    return !enforceRequired && nextControl.validity.valueMissing;
+    if (nextControl.value.trim() !== '') {
+      return false;
+    }
+
+    if (! nextControl.required) {
+      return true;
+    }
+
+    return ! enforceRequired && nextControl.validity.valueMissing;
   }
 
   function setSpark(): void {

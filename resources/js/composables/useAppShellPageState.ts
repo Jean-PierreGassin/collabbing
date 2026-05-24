@@ -41,31 +41,31 @@ export function useAppShellPageState() {
       };
     }
 
-    let ideaFormTitle = 'Share an Idea';
-    let ideaManageTitle = 'Manage Idea';
-    let userFormTitle = 'Create Profile';
+    let ideaFormTitle = 'Share an idea';
+    let ideaManageTitle = 'Manage idea';
+    let userFormTitle = 'Create profile';
 
     if (idea) {
-      ideaFormTitle = 'Edit Idea';
+      ideaFormTitle = 'Edit idea';
       ideaManageTitle = `Manage ${idea.titleDisplay}`;
     }
 
     if (user) {
-      userFormTitle = 'Edit Profile';
+      userFormTitle = 'Edit profile';
     }
 
     const titles: Record<string, string> = {
       'Auth/Login': 'Login',
-      'Auth/PasswordEmail': 'Reset Password',
-      'Auth/PasswordReset': 'Choose a New Password',
+      'Auth/PasswordEmail': 'Reset password',
+      'Auth/PasswordReset': 'Choose a new password',
       'Auth/Register': 'Register',
       'Comments/Form': 'Comment',
       Contact: 'Contact',
       Dashboard: 'Dashboard',
-      Error: 'Page Error',
+      Error: 'Page error',
       Feedback: 'Feedback',
       Home: 'Collabbing',
-      'Ideas/Apply': 'Apply to Collaborate',
+      'Ideas/Apply': 'Apply to collaborate',
       'Ideas/Form': ideaFormTitle,
       'Ideas/Index': 'Ideas',
       'Ideas/Manage': ideaManageTitle,

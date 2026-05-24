@@ -5,8 +5,12 @@ namespace Tests\Feature\Ideas;
 use App\Models\CodeRepository;
 use App\Models\ConnectedAccount;
 use App\Models\Idea;
+use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Notifications\Ideas\GettingStartedNotesUpdatedNotification;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -34,6 +38,68 @@ class IdeaValidationTest extends TestCase
             'status' => CodeRepository::STATUS_PLANNED,
             'name' => 'useful-collaboration-tool',
         ]);
+    }
+
+    public function testIdeaCanBeCreatedWithCollaborationSetup(): void
+    {
+        $user = User::factory()->create();
+
+        $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload([
+                'collaboration_stage' => Idea::COLLABORATION_STAGE_READY_TO_BUILD,
+                'help_wanted' => [
+                    Idea::HELP_FRONTEND,
+                    Idea::HELP_BACKEND,
+                ],
+                'help_wanted_note' => 'Pairing across frontend and backend would help.',
+                'first_contribution' => 'Open a small pull request for the onboarding copy.',
+                'applications_open' => false,
+                'applications_closed_note' => 'Reviewing existing interest before reopening.',
+                'communication_style' => Idea::COMMUNICATION_STYLE_GITHUB,
+                'communication_note' => 'Issues and pull requests first.',
+                'getting_started_notes' => 'Private accepted-collaborator context.',
+            ]))
+            ->assertRedirect();
+
+        $idea = Idea::query()->where('title', 'A useful collaboration tool')->firstOrFail();
+
+        $this->assertSame(Idea::COLLABORATION_STAGE_READY_TO_BUILD, $idea->collaboration_stage);
+        $this->assertSame([Idea::HELP_FRONTEND, Idea::HELP_BACKEND], $idea->help_wanted);
+        $this->assertFalse($idea->applications_open);
+        $this->assertSame(Idea::COMMUNICATION_STYLE_GITHUB, $idea->communication_style);
+        $this->assertSame('Private accepted-collaborator context.', $idea->getting_started_notes);
+        $this->assertNotNull($idea->getting_started_notes_updated_at);
+    }
+
+    public function testIdeaCanBeCreatedWithUndecidedCollaborationDetails(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->post(route('ideas.store'), $this->ideaPayload([
+                'collaboration_stage' => null,
+                'help_wanted' => [],
+                'help_wanted_note' => null,
+                'first_contribution' => null,
+                'applications_open' => true,
+                'applications_closed_note' => null,
+                'communication_style' => null,
+                'communication_note' => null,
+                'getting_started_notes' => null,
+                'repository_name' => null,
+            ]));
+
+        $idea = Idea::query()->where('title', 'A useful collaboration tool')->firstOrFail();
+        $idea->load('codeRepository');
+
+        $response->assertRedirect(route('ideas.show', $idea));
+        $this->assertNull($idea->collaboration_stage);
+        $this->assertSame([], $idea->help_wanted);
+        $this->assertTrue($idea->applications_open);
+        $this->assertNull($idea->getting_started_notes_updated_at);
+        $this->assertNull($idea->latestCodeRepository()?->name);
     }
 
     public function testIdeaCanBeEdited(): void
@@ -70,6 +136,209 @@ class IdeaValidationTest extends TestCase
             'provider' => CodeRepository::PROVIDER_GITHUB,
             'name' => 'updated-collaboration-tool',
         ]);
+    }
+
+    public function testIdeaCollaborationSetupCanBeEdited(): void
+    {
+        $user = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($user, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'collaboration_stage' => Idea::COLLABORATION_STAGE_ROUGH_IDEA,
+                'help_wanted' => [Idea::HELP_PRODUCT],
+                'getting_started_notes' => 'Original notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'updated-collaboration-tool',
+                'collaboration_stage' => Idea::COLLABORATION_STAGE_ACTIVELY_BUILDING,
+                'help_wanted' => [
+                    Idea::HELP_DESIGN,
+                    Idea::HELP_TESTING,
+                ],
+                'help_wanted_note' => 'Design critique and regression tests.',
+                'first_contribution' => 'Start by reviewing the empty state.',
+                'applications_open' => false,
+                'applications_closed_note' => 'Temporarily paused.',
+                'communication_style' => Idea::COMMUNICATION_STYLE_DISCORD,
+                'communication_note' => 'Async check-ins.',
+                'getting_started_notes' => 'Updated private notes.',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        $updatedIdea = $idea->fresh();
+
+        $this->assertSame(Idea::COLLABORATION_STAGE_ACTIVELY_BUILDING, $updatedIdea->collaboration_stage);
+        $this->assertSame([Idea::HELP_DESIGN, Idea::HELP_TESTING], $updatedIdea->help_wanted);
+        $this->assertFalse($updatedIdea->applications_open);
+        $this->assertSame('Updated private notes.', $updatedIdea->getting_started_notes);
+
+        $updatedAt = $updatedIdea->getAttributeValue('getting_started_notes_updated_at');
+
+        $this->assertInstanceOf(Carbon::class, $updatedAt);
+        $this->assertTrue($updatedAt->greaterThan(Carbon::parse('2026-05-20 00:00:00', 'UTC')));
+        $this->assertDatabaseHas('code_repositories', [
+            'idea_id' => $idea->id,
+            'name' => 'updated-collaboration-tool',
+        ]);
+    }
+
+    public function testCollaboratorsCanBeNotifiedWhenPrivateNotesChange(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $collaborator = User::factory()->create();
+        $pendingApplicant = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($collaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($pendingApplicant, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_PENDING,
+            ]);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'original-repository',
+                'getting_started_notes' => 'Updated private notes.',
+                'notify_collaborators' => '1',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        Notification::assertSentTo($collaborator, GettingStartedNotesUpdatedNotification::class);
+        Notification::assertNotSentTo($pendingApplicant, GettingStartedNotesUpdatedNotification::class);
+    }
+
+    public function testPrivateNotesNotificationIsSkippedWhenNotesDoNotChange(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $collaborator = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($collaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'original-repository',
+                'getting_started_notes' => 'Original private notes.',
+                'notify_collaborators' => '1',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        Notification::assertNothingSent();
+    }
+
+    public function testCollaboratorsCanBeNotifiedWhenPrivateNotesAreCleared(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $collaborator = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => Carbon::parse('2026-05-20 00:00:00', 'UTC'),
+            ]);
+
+        IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($collaborator, 'user')
+            ->create([
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+
+        $this
+            ->actingAs($owner)
+            ->put(route('ideas.update', $idea), $this->ideaPayload([
+                'repository_name' => 'original-repository',
+                'getting_started_notes' => '',
+                'notify_collaborators' => '1',
+            ]))
+            ->assertRedirect(route('ideas.show', $idea));
+
+        Notification::assertSentTo($collaborator, GettingStartedNotesUpdatedNotification::class);
+    }
+
+    public function testEditingPreservesOmittedCollaborationFields(): void
+    {
+        $user = User::factory()->create();
+        $timestamp = Carbon::parse('2026-05-20 00:00:00', 'UTC');
+        $idea = Idea::factory()
+            ->for($user, 'user')
+            ->withCodeRepository('original-repository')
+            ->create([
+                'collaboration_stage' => Idea::COLLABORATION_STAGE_NEEDS_SHAPING,
+                'help_wanted' => [Idea::HELP_WRITING],
+                'help_wanted_note' => 'Copy help.',
+                'first_contribution' => 'Review the pitch.',
+                'applications_open' => false,
+                'applications_closed_note' => 'Closed for review.',
+                'communication_style' => Idea::COMMUNICATION_STYLE_SLACK,
+                'communication_note' => 'Async first.',
+                'getting_started_notes' => 'Original private notes.',
+                'getting_started_notes_updated_at' => $timestamp,
+            ]);
+
+        $this
+            ->actingAs($user)
+            ->put(route('ideas.update', $idea), [
+                'title' => 'An updated collaboration tool',
+                'tagline' => 'A sharper card tagline for the update.',
+                'summary' => 'A better summary for the updated collaboration tool.',
+                'tags' => 'design, launch',
+                'repository_name' => 'updated-collaboration-tool',
+                'communication' => 'Slack',
+                'content' => 'A focused pitch for a useful collaboration tool.',
+                'status' => 'open',
+            ])
+            ->assertRedirect(route('ideas.show', $idea));
+
+        $updatedIdea = $idea->fresh();
+
+        $this->assertSame(Idea::COLLABORATION_STAGE_NEEDS_SHAPING, $updatedIdea->collaboration_stage);
+        $this->assertSame([Idea::HELP_WRITING], $updatedIdea->help_wanted);
+        $this->assertFalse($updatedIdea->applications_open);
+        $this->assertSame('Original private notes.', $updatedIdea->getting_started_notes);
+
+        $updatedAt = $updatedIdea->getAttributeValue('getting_started_notes_updated_at');
+
+        $this->assertInstanceOf(Carbon::class, $updatedAt);
+        $this->assertTrue($updatedAt->equalTo($timestamp));
     }
 
     #[DataProvider('invalidIdeaPayloads')]
@@ -154,6 +423,42 @@ class IdeaValidationTest extends TestCase
             'too many tags' => [
                 ['tags' => 'one,two,three,four,five,six,seven,eight,nine'],
                 'tags',
+            ],
+            'invalid collaboration stage' => [
+                ['collaboration_stage' => 'planning'],
+                'collaboration_stage',
+            ],
+            'invalid help wanted area' => [
+                ['help_wanted' => ['frontend', 'finance']],
+                'help_wanted.1',
+            ],
+            'too many help wanted areas' => [
+                ['help_wanted' => array_fill(0, 12, Idea::HELP_FRONTEND)],
+                'help_wanted',
+            ],
+            'invalid communication style' => [
+                ['communication_style' => 'sms'],
+                'communication_style',
+            ],
+            'long help note' => [
+                ['help_wanted_note' => str_repeat('a', 241)],
+                'help_wanted_note',
+            ],
+            'long first contribution' => [
+                ['first_contribution' => str_repeat('a', 1201)],
+                'first_contribution',
+            ],
+            'long applications closed note' => [
+                ['applications_closed_note' => str_repeat('a', 241)],
+                'applications_closed_note',
+            ],
+            'long communication note' => [
+                ['communication_note' => str_repeat('a', 241)],
+                'communication_note',
+            ],
+            'long getting started notes' => [
+                ['getting_started_notes' => str_repeat('a', 10001)],
+                'getting_started_notes',
             ],
         ];
     }
