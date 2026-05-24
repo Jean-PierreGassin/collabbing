@@ -102,6 +102,17 @@ const supportersLabel = computed(() => {
   return `${count.toLocaleString()} ${noun}`;
 });
 
+const pendingApplicationsLabel = computed(() => {
+  const count = props.idea.pendingApplicationsCount ?? 0;
+  let noun = 'pending applications';
+
+  if (count === 1) {
+    noun = 'pending application';
+  }
+
+  return `${count.toLocaleString()} ${noun}`;
+});
+
 const cardClasses = computed(() => {
   const classes = [];
 
@@ -273,6 +284,14 @@ const pitchChevronClass = computed(() => {
             aria-hidden="true" />
           {{ collaboratorsLabel }}
         </span>
+        <span
+          v-if="idea.can.update && idea.pendingApplicationsCount"
+          class="inline-flex items-center gap-1.5">
+          <MessageSquare
+            class="size-3.5 text-primary"
+            aria-hidden="true" />
+          {{ pendingApplicationsLabel }}
+        </span>
       </div>
     </div>
 
@@ -367,6 +386,15 @@ const pitchChevronClass = computed(() => {
               aria-hidden="true" />
             <strong class="font-semibold text-white">{{ idea.approvedApplicationsCount.toLocaleString() }}</strong>
             collaborators
+          </span>
+          <span
+            v-if="idea.can.update && idea.pendingApplicationsCount"
+            class="inline-flex items-center gap-1.5">
+            <MessageSquare
+              class="size-3.5 text-primary"
+              aria-hidden="true" />
+            <strong class="font-semibold text-white">{{ idea.pendingApplicationsCount.toLocaleString() }}</strong>
+            pending
           </span>
         </div>
       </div>
@@ -542,6 +570,17 @@ const pitchChevronClass = computed(() => {
           aria-hidden="true" />
         {{ collaboratorsLabel }}
       </span>
+      <template v-if="idea.can.update && idea.pendingApplicationsCount">
+        <span
+          class="text-border"
+          aria-hidden="true">/</span>
+        <span class="inline-flex items-center gap-2">
+          <MessageSquare
+            class="size-4 text-primary"
+            aria-hidden="true" />
+          {{ pendingApplicationsLabel }}
+        </span>
+      </template>
     </div>
 
     <div

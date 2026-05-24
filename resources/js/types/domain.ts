@@ -34,6 +34,8 @@ export interface IdeaApplication {
   user: DomainUser;
   routes: {
     destroy: string;
+    edit: string;
+    update: string;
     approve: string;
   };
 }
@@ -138,6 +140,7 @@ export interface Idea {
   user: DomainUser;
   supportersCount: number;
   approvedApplicationsCount: number;
+  pendingApplicationsCount: number | null;
   collaborators: IdeaApplication[];
   hiddenCollaboratorsCount: number;
   can: {

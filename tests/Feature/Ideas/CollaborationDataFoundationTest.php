@@ -120,6 +120,8 @@ class CollaborationDataFoundationTest extends TestCase
         $this
             ->actingAs($applicant)
             ->post(route('ideas.applications.store', $idea), [
+                'contribution_type' => Idea::HELP_FEEDBACK,
+                'first_action' => 'Review the first pass.',
                 'content' => 'I can help with a first pass.',
             ])
             ->assertForbidden();
@@ -193,6 +195,8 @@ class CollaborationDataFoundationTest extends TestCase
         $this
             ->actingAs($applicant)
             ->post(route('ideas.applications.store', $idea), [
+                'contribution_type' => Idea::HELP_TESTING,
+                'first_action' => 'Review the first public step.',
                 'content' => 'I can apply again after a final state.',
             ])
             ->assertRedirect(route('ideas.show', $idea));

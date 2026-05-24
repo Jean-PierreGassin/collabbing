@@ -66,6 +66,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     user: user(),
     supportersCount: 0,
     approvedApplicationsCount: 0,
+    pendingApplicationsCount: null,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {

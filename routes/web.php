@@ -92,6 +92,9 @@ Route::scopeBindings()
         Route::get('applications/create', [IdeaApplicationController::class, 'create'])
             ->name('applications.create');
 
+        Route::get('applications/{application}/edit', [IdeaApplicationController::class, 'edit'])
+            ->name('applications.edit');
+
         Route::middleware('throttle:product-write')->group(function (): void {
             Route::post('comments', [IdeaCommentController::class, 'store'])
                 ->name('comments.store');
@@ -108,10 +111,13 @@ Route::scopeBindings()
             Route::post('applications', [IdeaApplicationController::class, 'store'])
                 ->name('applications.store');
 
+            Route::match(['put', 'patch'], 'applications/{application}', [IdeaApplicationController::class, 'update'])
+                ->name('applications.update');
+
             Route::delete('applications/{application}', [IdeaApplicationController::class, 'destroy'])
                 ->name('applications.destroy');
 
-            Route::put('applications/{application}', [IdeaApplicationController::class, 'approveApplication'])
+            Route::put('applications/{application}/approve', [IdeaApplicationController::class, 'approveApplication'])
                 ->name('applications.approve');
         });
     });

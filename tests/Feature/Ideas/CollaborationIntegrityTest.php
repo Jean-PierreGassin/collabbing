@@ -71,6 +71,8 @@ class CollaborationIntegrityTest extends TestCase
 
         $this->actingAs($applicant)
             ->post(route('ideas.applications.store', $idea), [
+                'contribution_type' => Idea::HELP_FRONTEND,
+                'first_action' => 'Review the first issue.',
                 'content' => 'I would like to collaborate on this idea.',
             ])
             ->assertForbidden();
@@ -92,6 +94,8 @@ class CollaborationIntegrityTest extends TestCase
 
         $this->actingAs($applicant)
             ->post(route('ideas.applications.store', $idea), [
+                'contribution_type' => Idea::HELP_FEEDBACK,
+                'first_action' => 'Review the updated pitch.',
                 'content' => 'I have revised my proposal and can help.',
             ])
             ->assertRedirect(route('ideas.show', $idea));
@@ -112,6 +116,8 @@ class CollaborationIntegrityTest extends TestCase
 
         $this->actingAs($applicant)
             ->post(route('ideas.applications.store', $idea), [
+                'contribution_type' => Idea::HELP_BACKEND,
+                'first_action' => 'Review the API shape.',
                 'content' => 'I would like to collaborate on this idea.',
             ])
             ->assertRedirect(route('ideas.show', $idea));

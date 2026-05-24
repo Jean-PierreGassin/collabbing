@@ -6,6 +6,7 @@ use App\Data\Ideas\IdeaApplicationData;
 use App\Models\Idea;
 use App\Models\IdeaApplication;
 use App\Models\User;
+use App\Notifications\Ideas\NewIdeaApplicationNotification;
 use App\Repositories\Ideas\ApplicationRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +19,18 @@ class ApplicationService
     public function create(Idea $idea, IdeaApplicationData $data): bool
     {
         $application = $this->applications->create($idea, $this->authenticatedUser(), $data);
+        $owner = $idea->owner();
+
+        if ($owner instanceof User) {
+            $owner->notify(new NewIdeaApplicationNotification($idea, $application));
+        }
 
         return $application->exists;
+    }
+
+    public function update(IdeaApplication $application, IdeaApplicationData $data): bool
+    {
+        return $this->applications->update($application, $data);
     }
 
     public function approve(IdeaApplication $application): bool
@@ -30,6 +41,11 @@ class ApplicationService
     public function destroy(IdeaApplication $application): bool
     {
         return $this->applications->destroy($application);
+    }
+
+    public function withdraw(IdeaApplication $application): bool
+    {
+        return $this->applications->withdraw($application);
     }
 
     public function getPendingApplications(Idea $idea): LengthAwarePaginator

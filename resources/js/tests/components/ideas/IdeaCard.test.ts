@@ -66,6 +66,7 @@ function idea(overrides: Partial<Idea> = {}): Idea {
     user: user(),
     supportersCount: 42,
     approvedApplicationsCount: 7,
+    pendingApplicationsCount: null,
     collaborators: [],
     hiddenCollaboratorsCount: 0,
     can: {
@@ -257,5 +258,21 @@ describe('IdeaCard', () => {
     expect(detailed.findAll('a[href="/ideas/1/dashboard"]')).toHaveLength(1);
     expect(compact.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
     expect(detailed.get('a[href="/ideas/1/dashboard"]').text()).toContain('Manage');
+  });
+
+  it('shows pending application counts only to owners', () => {
+    const publicCard = mountCard('compact', {
+      pendingApplicationsCount: null,
+    });
+    const ownerCard = mountCard('compact', {
+      pendingApplicationsCount: 2,
+      can: {
+        ...idea().can,
+        update: true,
+      },
+    });
+
+    expect(publicCard.text()).not.toContain('pending');
+    expect(ownerCard.text()).toContain('2 pending applications');
   });
 });

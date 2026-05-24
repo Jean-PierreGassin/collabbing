@@ -13,22 +13,22 @@ class IdeaApplicationPolicy
 
     public function update(User $user, IdeaApplication $application): bool
     {
-        $idea = $application->idea;
-
-        if ($idea instanceof Idea && $user->id === $idea->user_id) {
-            return true;
-        }
-
-        return $user->id === $application->user_id;
+        return $application->isPending() && (int) $user->id === (int) $application->user_id;
     }
 
     public function delete(User $user, IdeaApplication $application): bool
     {
-        return $user->id === $application->user_id;
+        $idea = $application->idea;
+
+        if ($idea instanceof Idea && (int) $user->id === (int) $idea->user_id) {
+            return true;
+        }
+
+        return $application->isPending() && (int) $user->id === (int) $application->user_id;
     }
 
     public function manage(User $user, IdeaApplication $application): bool
     {
-        return $user->id === $application->user_id;
+        return (int) $user->id === (int) $application->user_id;
     }
 }
