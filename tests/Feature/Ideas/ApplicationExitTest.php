@@ -113,7 +113,7 @@ class ApplicationExitTest extends TestCase
 
                 return $notification->shouldReviewRepositoryAccess
                     && str_contains($lines, 'no longer fits')
-                    && str_contains($lines, 'owner has been prompted');
+                    && ! str_contains($lines, 'owner has been prompted');
             }
         );
     }

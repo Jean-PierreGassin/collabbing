@@ -235,6 +235,20 @@ describe('IdeaSidebar', () => {
     expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to Collaborate');
   });
 
+  it('renders first contribution links through sanitized markdown', () => {
+    session.isAuthenticated = true;
+    const wrapper = mountSidebar({
+      idea: idea({
+        collaboration: collaboration({
+          firstContribution: 'Review [issue #1](https://example.com/issues/1).',
+          firstContributionHtml: '<p>Review <a href="https://example.com/issues/1">issue #1</a>.</p>',
+        }),
+      }),
+    });
+
+    expect(wrapper.get('a[href="https://example.com/issues/1"]').text()).toBe('issue #1');
+  });
+
   it('offers guests sign-in and register actions without hiding public guidance', () => {
     session.isAuthenticated = false;
     const wrapper = mountSidebar({

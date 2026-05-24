@@ -124,6 +124,7 @@ class PagePropsService
                 'helpWantedDisplay' => $this->helpWantedDisplay($idea),
                 'helpWantedNote' => $idea->help_wanted_note,
                 'firstContribution' => $idea->first_contribution,
+                'firstContributionHtml' => $this->nullableMarkdown($idea->first_contribution),
                 'applicationsOpen' => $idea->applications_open,
                 'applicationsClosedNote' => $idea->applications_closed_note,
                 'communicationStyle' => $idea->communication_style,
@@ -155,7 +156,7 @@ class PagePropsService
             'supportersCount' => $supportersCount,
             'approvedApplicationsCount' => $approvedApplicationsCount,
             'pendingApplicationsCount' => $pendingApplicationsCount,
-            'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->application($application))->values(),
+            'collaborators' => $collaborators->map(fn (IdeaApplication $application) => $this->publicCollaborator($application))->values(),
             'hiddenCollaboratorsCount' => max(0, $approvedApplicationsCount - $collaborators->count()),
             'can' => [
                 'update' => $canUpdate,
@@ -505,6 +506,16 @@ class PagePropsService
         ];
     }
 
+    private function publicCollaborator(IdeaApplication $application): array
+    {
+        $application->loadMissing('user');
+
+        return [
+            'id' => $application->id,
+            'user' => $this->user($this->applicationUser($application)),
+        ];
+    }
+
     private function applicationThread(IdeaApplication $application): ?array
     {
         $user = Auth::user();
@@ -558,6 +569,15 @@ class PagePropsService
         $value = $this->privateApplicationText($application, $key);
 
         if ($value === null) {
+            return null;
+        }
+
+        return (string) Markdown::convertToHtml($value);
+    }
+
+    private function nullableMarkdown(?string $value): ?string
+    {
+        if (! is_string($value) || trim($value) === '') {
             return null;
         }
 

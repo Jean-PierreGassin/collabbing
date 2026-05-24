@@ -109,12 +109,11 @@ function hasPitchHeadingsClass(): string | undefined {
           :application="threadApplication"
           title="Your application thread" />
 
-        <template v-if="idea.can.storeComment">
-          <CommentList
-            :comments="comments"
-            :comments-store="idea.routes.commentsStore"
-            :mentionable-users="mentionableUsers" />
-        </template>
+        <CommentList
+          :can-store-comment="idea.can.storeComment"
+          :comments="comments"
+          :comments-store="idea.routes.commentsStore"
+          :mentionable-users="mentionableUsers" />
       </div>
 
       <IdeaSidebar

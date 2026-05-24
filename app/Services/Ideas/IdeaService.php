@@ -88,7 +88,6 @@ class IdeaService
     private function shouldNotifyGettingStartedNotes(Idea $idea, IdeaData $data): bool
     {
         return $data->notifyCollaboratorsOfGettingStartedNotes
-            && $data->gettingStartedNotes !== null
             && $idea->getting_started_notes !== $data->gettingStartedNotes;
     }
 
