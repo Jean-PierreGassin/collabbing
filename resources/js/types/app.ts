@@ -21,6 +21,7 @@ export interface AppRoutes {
 export interface AppFlash {
   status: string | null;
   errors: string[];
+  repositoryInvitePrompt: boolean;
 }
 
 export type OldInputValue = boolean | number | string | string[] | null;

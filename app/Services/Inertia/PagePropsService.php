@@ -473,6 +473,9 @@ class PagePropsService
             'contributionType' => $application->contribution_type,
             'contributionTypeDisplay' => $this->applicationContributionDisplay($application->contribution_type),
             'firstAction' => $application->first_action,
+            'approvalNote' => $this->privateApplicationText($application, 'approval_note'),
+            'approvalNoteHtml' => $this->privateApplicationTextHtml($application, 'approval_note'),
+            'declineReason' => $this->privateApplicationText($application, 'decline_reason'),
             'status' => $application->status,
             'statusDisplay' => $this->applicationStatusDisplay($application->status),
             'createdAtForHumans' => $application->created_at->diffForHumans(),
@@ -514,6 +517,32 @@ class PagePropsService
                 'store' => route('ideas.applications.messages.store', [$application->idea_id, $application]),
             ],
         ];
+    }
+
+    private function privateApplicationText(IdeaApplication $application, string $key): ?string
+    {
+        if (Gate::denies('viewThread', $application)) {
+            return null;
+        }
+
+        $value = $application->getAttributeValue($key);
+
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        return $value;
+    }
+
+    private function privateApplicationTextHtml(IdeaApplication $application, string $key): ?string
+    {
+        $value = $this->privateApplicationText($application, $key);
+
+        if ($value === null) {
+            return null;
+        }
+
+        return (string) Markdown::convertToHtml($value);
     }
 
     private function applicationMessage(IdeaApplicationMessage $message): array

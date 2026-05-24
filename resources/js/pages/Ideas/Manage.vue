@@ -8,17 +8,22 @@ import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAccessibleTabs, type AccessibleTab } from '@/lib/tabs';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { GitBranch, Pencil } from '@lucide/vue';
+import { computed } from 'vue';
+import type { SharedPageProps } from '@/types/app';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
 
 type ManageTab = 'applications' | 'collaborators';
 
-defineProps<{
+const props = defineProps<{
   idea: Idea;
   applications: Paginator<IdeaApplication>;
   collaborators: Paginator<IdeaApplication>;
 }>();
+
+const page = usePage<SharedPageProps>();
+const showRepositoryInvitePrompt = computed(() => page.props.flash.repositoryInvitePrompt && props.idea.repository);
 
 const manageTabs = [
   {
@@ -120,6 +125,29 @@ const {
       </div>
     </header>
 
+    <div
+      v-if="showRepositoryInvitePrompt"
+      class="flex flex-col gap-3 rounded-md border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
+      role="status"
+      aria-live="polite">
+      <p>
+        Repository is connected. Invite approved collaborators when you are ready.
+      </p>
+      <form
+        :action="idea.routes.repositoryInvite"
+        method="POST">
+        <CsrfField />
+        <Button
+          type="submit"
+          size="sm">
+          <GitBranch
+            class="size-4"
+            aria-hidden="true" />
+          Invite collaborators
+        </Button>
+      </form>
+    </div>
+
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
       <div class="flex flex-col gap-4">
         <div
@@ -194,25 +222,62 @@ const {
                     Submitted {{ application.createdAtForHumans }}
                   </h6>
                   <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
-                    <form
+                    <details
                       v-if="idea.can.deleteApplication"
-                      :action="application.routes.destroy"
-                      method="POST">
-                      <CsrfField />
-                      <MethodField method="DELETE" />
-                      <Button
-                        type="submit"
-                        variant="destructive"
-                        size="sm">
+                      class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 md:max-w-sm">
+                      <summary class="cursor-pointer text-sm font-medium text-destructive">
                         Decline Application
-                      </Button>
-                    </form>
+                      </summary>
+                      <form
+                        :action="application.routes.destroy"
+                        method="POST"
+                        class="mt-3 flex flex-col gap-2">
+                        <CsrfField />
+                        <MethodField method="DELETE" />
+                        <label
+                          :for="`decline-reason-${application.id}`"
+                          class="text-xs font-medium uppercase text-muted-foreground">
+                          Private reason
+                        </label>
+                        <textarea
+                          :id="`decline-reason-${application.id}`"
+                          name="decline_reason"
+                          class="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+                          maxlength="1200"
+                          placeholder="Optional note for the applicant."
+                        />
+                        <Button
+                          type="submit"
+                          variant="destructive"
+                          size="sm">
+                          Confirm decline
+                        </Button>
+                      </form>
+                    </details>
                     <form
                       v-if="idea.can.updateApplication"
                       :action="application.routes.approve"
-                      method="POST">
+                      method="POST"
+                      class="ml-auto flex w-full flex-col gap-2 md:max-w-sm">
                       <CsrfField />
                       <MethodField method="PUT" />
+                      <div
+                        v-if="!idea.collaboration.gettingStartedNotesReady"
+                        class="rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-muted-foreground">
+                        Private start notes are missing. You can approve now and add an optional collaborator note below.
+                      </div>
+                      <label
+                        :for="`approval-note-${application.id}`"
+                        class="text-xs font-medium uppercase text-muted-foreground">
+                        Approval note
+                      </label>
+                      <textarea
+                        :id="`approval-note-${application.id}`"
+                        name="approval_note"
+                        class="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40"
+                        maxlength="1200"
+                        placeholder="Optional private note for this collaborator."
+                      />
                       <Button
                         type="submit"
                         variant="success"

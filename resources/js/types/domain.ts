@@ -28,6 +28,9 @@ export interface IdeaApplication {
   contributionType: string | null;
   contributionTypeDisplay: string;
   firstAction: string | null;
+  approvalNote: string | null;
+  approvalNoteHtml: string | null;
+  declineReason: string | null;
   status: string;
   statusDisplay: string;
   createdAtForHumans: string;
