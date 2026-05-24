@@ -37,14 +37,17 @@ class IdeaPropsRenderingTest extends TestCase
         $this->assertSame('Existing title', $props['summary']);
     }
 
-    public function testIdeaPropsRenderFirstContributionLinks(): void
+    public function testIdeaPropsRenderFirstContributionLinksAndLineBreaksOnly(): void
     {
         $idea = $this->makeIdeaWithRelations('# Existing title');
-        $idea->first_contribution = 'Review [issue #1](https://example.com/issues/1).';
+        $idea->first_contribution = "Review [issue #1](https://example.com/issues/1).\nThen **do not** render rich markdown.";
 
         $props = app(PagePropsService::class)->idea($idea);
 
         $this->assertStringContainsString('<a href="https://example.com/issues/1">issue #1</a>', $props['collaboration']['firstContributionHtml']);
+        $this->assertStringContainsString('<br>', $props['collaboration']['firstContributionHtml']);
+        $this->assertStringContainsString('**do not**', $props['collaboration']['firstContributionHtml']);
+        $this->assertStringNotContainsString('<strong>', $props['collaboration']['firstContributionHtml']);
     }
 
     public function testIdeaCardTaglineDoesNotFallBackToSummary(): void
@@ -135,6 +138,31 @@ class IdeaPropsRenderingTest extends TestCase
         $props = app(PagePropsService::class)->application($application);
 
         $this->assertSame("<ul>\n<li>Can build APIs</li>\n</ul>\n", $props['contentHtml']);
+    }
+
+    public function testApprovalNoteRendersLinksAndLineBreaksOnly(): void
+    {
+        $owner = User::factory()->create();
+        $applicant = User::factory()->create();
+        $idea = Idea::factory()
+            ->for($owner, 'user')
+            ->create();
+        $application = IdeaApplication::factory()
+            ->for($idea, 'idea')
+            ->for($applicant, 'user')
+            ->create([
+                'approval_note' => "Start with [issue #1](https://example.com/issues/1).\n**No bold** please.",
+                'status' => IdeaApplication::STATUS_APPROVED,
+            ]);
+
+        $this->actingAs($owner);
+
+        $props = app(PagePropsService::class)->application($application);
+
+        $this->assertStringContainsString('<a href="https://example.com/issues/1">issue #1</a>', $props['approvalNoteHtml']);
+        $this->assertStringContainsString('<br>', $props['approvalNoteHtml']);
+        $this->assertStringContainsString('**No bold**', $props['approvalNoteHtml']);
+        $this->assertStringNotContainsString('<strong>', $props['approvalNoteHtml']);
     }
 
     public function testPublicCollaboratorPropsDoNotExposeApplicationDetails(): void

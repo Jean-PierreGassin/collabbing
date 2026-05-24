@@ -124,7 +124,7 @@ class PagePropsService
                 'helpWantedDisplay' => $this->helpWantedDisplay($idea),
                 'helpWantedNote' => $idea->help_wanted_note,
                 'firstContribution' => $idea->first_contribution,
-                'firstContributionHtml' => $this->nullableMarkdown($idea->first_contribution),
+                'firstContributionHtml' => $this->linksAndLineBreaksHtml($idea->first_contribution),
                 'applicationsOpen' => $idea->applications_open,
                 'applicationsClosedNote' => $idea->applications_closed_note,
                 'communicationStyle' => $idea->communication_style,
@@ -490,7 +490,7 @@ class PagePropsService
             'contributionTypeDisplay' => $this->applicationContributionDisplay($application->contribution_type),
             'firstAction' => $application->first_action,
             'approvalNote' => $this->privateApplicationText($application, 'approval_note'),
-            'approvalNoteHtml' => $this->privateApplicationTextHtml($application, 'approval_note'),
+            'approvalNoteHtml' => $this->privateApplicationLimitedHtml($application, 'approval_note'),
             'declineReason' => $this->privateApplicationText($application, 'decline_reason'),
             'status' => $application->status,
             'statusDisplay' => $this->applicationStatusDisplay($application->status),
@@ -564,24 +564,43 @@ class PagePropsService
         return $value;
     }
 
-    private function privateApplicationTextHtml(IdeaApplication $application, string $key): ?string
+    private function privateApplicationLimitedHtml(IdeaApplication $application, string $key): ?string
     {
-        $value = $this->privateApplicationText($application, $key);
-
-        if ($value === null) {
-            return null;
-        }
-
-        return (string) Markdown::convertToHtml($value);
+        return $this->linksAndLineBreaksHtml($this->privateApplicationText($application, $key));
     }
 
-    private function nullableMarkdown(?string $value): ?string
+    private function linksAndLineBreaksHtml(?string $value): ?string
     {
         if (! is_string($value) || trim($value) === '') {
             return null;
         }
 
-        return (string) Markdown::convertToHtml($value);
+        $links = [];
+        $html = e($value);
+        $html = preg_replace_callback(
+            '/\[([^\]\r\n]+)\]\((https?:\/\/[^)\s]+)\)/',
+            function (array $matches) use (&$links): string {
+                $placeholder = sprintf("\x1A%d\x1A", count($links));
+                $links[$placeholder] = sprintf('<a href="%s">%s</a>', $matches[2], $matches[1]);
+
+                return $placeholder;
+            },
+            $html
+        ) ?? $html;
+        $html = preg_replace_callback(
+            '/(?<![="])(https?:\/\/[^\s<]+)/',
+            function (array $matches) use (&$links): string {
+                $placeholder = sprintf("\x1A%d\x1A", count($links));
+                $links[$placeholder] = sprintf('<a href="%s">%s</a>', $matches[1], $matches[1]);
+
+                return $placeholder;
+            },
+            $html
+        ) ?? $html;
+
+        $html = strtr($html, $links);
+
+        return '<p>'.nl2br($html, false)."</p>\n";
     }
 
     private function applicationMessage(IdeaApplicationMessage $message): array
