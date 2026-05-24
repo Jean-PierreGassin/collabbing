@@ -149,6 +149,7 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
       id: 2,
       username: 'applicant',
     }),
+    thread: null,
     routes: {
       destroy: '/ideas/1/applications/3',
       edit: '/ideas/1/applications/3/edit',

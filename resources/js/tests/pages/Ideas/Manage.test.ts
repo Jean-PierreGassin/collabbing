@@ -126,6 +126,7 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
       lastName: 'User',
       name: 'Applied User',
     }),
+    thread: null,
     routes: {
       destroy: '/ideas/1/applications/3',
       edit: '/ideas/1/applications/3/edit',
@@ -133,6 +134,32 @@ function application(overrides: Partial<IdeaApplication> = {}): IdeaApplication 
       approve: '/ideas/1/applications/3/approve',
     },
     ...overrides,
+  };
+}
+
+function applicationThread(): NonNullable<IdeaApplication['thread']> {
+  return {
+    messages: [{
+      id: 5,
+      type: 'message',
+      body: 'Could you clarify the testing scope?',
+      bodyHtml: '<p>Could you clarify the testing scope?</p>',
+      isSystem: false,
+      occurredAtForHumans: '2 minutes ago',
+      user: user({
+        id: 2,
+        name: 'Applied User',
+      }),
+    }],
+    unreadCount: 1,
+    hasUnread: true,
+    canMessage: true,
+    isReadOnly: false,
+    readOnlyReason: null,
+    routes: {
+      read: '/ideas/1/applications/3/read-state',
+      store: '/ideas/1/applications/3/messages',
+    },
   };
 }
 
@@ -237,6 +264,17 @@ describe('Idea management tabs', () => {
     expect(wrapper.text()).toContain('Write the first regression test.');
     expect(wrapper.text()).toContain('I can help with useful tests.');
     expect(wrapper.text()).toContain('Submitted 5 minutes ago');
+  });
+
+  it('shows application threads on review cards', () => {
+    const wrapper = mountManage([application({
+      thread: applicationThread(),
+    })]);
+
+    expect(wrapper.text()).toContain('Application thread');
+    expect(wrapper.text()).toContain('Could you clarify the testing scope?');
+    expect(wrapper.text()).toContain('1 new');
+    expect(wrapper.find('form[action="/ideas/1/applications/3/messages"]').exists()).toBe(true);
   });
 
   it('preserves the collaborator tab intent from the query string', () => {

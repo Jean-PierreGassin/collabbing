@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CsrfField from '@/components/forms/CsrfField.vue';
 import MethodField from '@/components/forms/MethodField.vue';
+import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import MarkdownContent from '@/components/typography/MarkdownContent.vue';
@@ -185,6 +186,10 @@ const {
                     </div>
                   </dl>
                   <MarkdownContent :html="application.contentHtml" />
+                  <IdeaApplicationThread
+                    v-if="application.thread"
+                    :application="application"
+                    title="Application thread" />
                   <h6 class="text-right text-sm text-muted-foreground">
                     Submitted {{ application.createdAtForHumans }}
                   </h6>
