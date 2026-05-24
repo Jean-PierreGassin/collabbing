@@ -875,7 +875,7 @@ function submitForm(): void {
               <FormField
                 id="repository_name"
                 label="Repository name"
-                help="Use up to 100 letters, numbers, dashes, or underscores."
+                help="Optional. Use up to 100 letters, numbers, dashes, or underscores."
                 :validator="repositoryNameValidator">
                 <template #default="{ invalid, describedBy, feedbackClass }">
                   <input
@@ -895,7 +895,6 @@ function submitForm(): void {
                     spellcheck="false"
                     :aria-invalid="invalid || undefined"
                     :aria-describedby="describedBy"
-                    :required="isCollaborationStep"
                     @beforeinput="blockInvalidRepositoryNameInput"
                     @input="sanitizeRepositoryName"
                     @paste="pasteRepositoryName">

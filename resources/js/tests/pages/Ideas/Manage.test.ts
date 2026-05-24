@@ -273,6 +273,40 @@ describe('Idea management tabs', () => {
     expect(panel.attributes('aria-labelledby')).toBe('manage-applications-tab');
   });
 
+  it('shows the owner readiness checklist on the manage page', () => {
+    const wrapper = mountManage([], [], {
+      user: user({
+        hasGithubToken: true,
+      }),
+    });
+
+    expect(wrapper.text()).toContain('Collaboration readiness');
+    expect(wrapper.text()).toContain('Set where the idea is at');
+    expect(wrapper.text()).toContain('Choose the help you want');
+    expect(wrapper.text()).toContain('Create or connect a repository');
+    expect(wrapper.findAll('a[href="/ideas/1/edit"]').some((link) => link.text().includes('Edit'))).toBe(true);
+    expect(wrapper.findAll('a[href="/ideas/1/repository"]').some((link) => link.text().includes('Create'))).toBe(true);
+  });
+
+  it('marks completed readiness items without action links', () => {
+    const wrapper = mountManage([], [], {
+      repository: true,
+      collaboration: collaboration({
+        stage: 'ready_to_build',
+        helpWanted: ['frontend'],
+        firstContribution: 'Review the first issue.',
+        communicationStyle: 'github',
+        gettingStartedNotesReady: true,
+      }),
+    });
+
+    const checklist = wrapper.get('aside').text();
+
+    expect(checklist).toContain('Collaboration readiness');
+    expect(wrapper.findAll('aside a[href="/ideas/1/edit"]')).toHaveLength(0);
+    expect(wrapper.findAll('aside a[href="/ideas/1/repository"]')).toHaveLength(0);
+  });
+
   it('switches panels when a tab is clicked', async () => {
     const wrapper = mountManage();
 
@@ -358,7 +392,7 @@ describe('Idea management tabs', () => {
     });
 
     expect(wrapper.text()).toContain('Review repository access.');
-    expect(wrapper.text()).toContain('access when you are ready');
+    expect(wrapper.text()).toContain('left or was removed');
   });
 
   it('uses a confirm step with private reason when removing collaborators', async () => {

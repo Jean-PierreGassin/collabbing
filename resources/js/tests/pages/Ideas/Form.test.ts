@@ -342,6 +342,14 @@ describe('Ideas/Form', () => {
     expect(data.get('repository_name')).toBe('useful-create-idea');
   });
 
+  it('does not require repository setup before publishing', async () => {
+    const wrapper = mountForm();
+
+    await continueToCollaboration(wrapper);
+
+    expect(wrapper.get<HTMLInputElement>('input#repository_name').attributes('required')).toBeUndefined();
+  });
+
   it('does not clear the local draft when moving between create steps', async () => {
     const wrapper = mountForm();
 

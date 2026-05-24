@@ -93,6 +93,11 @@ export interface IdeaSupporter {
   };
 }
 
+export interface IdeaCollaboratorPreview {
+  id: number;
+  user: DomainUser;
+}
+
 export interface IdeaTag {
   name: string;
   count: number;
@@ -135,6 +140,7 @@ export interface IdeaCollaboration {
   helpWantedDisplay: string[];
   helpWantedNote: string | null;
   firstContribution: string | null;
+  firstContributionHtml?: string | null;
   applicationsOpen: boolean;
   applicationsClosedNote: string | null;
   communicationStyle: string | null;
@@ -169,7 +175,7 @@ export interface Idea {
   supportersCount: number;
   approvedApplicationsCount: number;
   pendingApplicationsCount: number | null;
-  collaborators: IdeaApplication[];
+  collaborators: IdeaCollaboratorPreview[];
   hiddenCollaboratorsCount: number;
   can: {
     update: boolean;

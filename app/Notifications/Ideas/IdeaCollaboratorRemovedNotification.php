@@ -32,10 +32,6 @@ class IdeaCollaboratorRemovedNotification extends Notification
             $message->line("Reason: {$this->reason}");
         }
 
-        if ($this->shouldReviewRepositoryAccess) {
-            $message->line('The idea has a connected repository. The owner has been prompted to review repository access.');
-        }
-
         return $message->action('Open idea', route('ideas.show', $this->idea));
     }
 }

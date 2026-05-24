@@ -11,7 +11,7 @@ final readonly class IdeaData
         public string $tagline,
         public string $summary,
         public array $tags,
-        public string $repositoryName,
+        public ?string $repositoryName,
         public string $communication,
         public string $content,
         public string $status,

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAccessibleTabs, type AccessibleTab } from '@/lib/tabs';
 import { Link, usePage } from '@inertiajs/vue3';
-import { GitBranch, Pencil } from '@lucide/vue';
+import { Check, Circle, GitBranch, Pencil } from '@lucide/vue';
 import { computed } from 'vue';
 import type { SharedPageProps } from '@/types/app';
 import type { Idea, IdeaApplication, Paginator } from '@/types/domain';
@@ -27,6 +27,50 @@ const showRepositoryInvitePrompt = computed(() => page.props.flash.repositoryInv
 const showRepositoryAccessPrompt = computed(() => (
   page.props.flash.repositoryAccessPrompt || props.idea.repositoryAccessReviewNeeded === true
 ) && props.idea.repository);
+const readinessItems = computed(() => [
+  {
+    actionHref: props.idea.routes.edit,
+    actionLabel: 'Edit',
+    complete: props.idea.collaboration.stage !== null,
+    label: 'Set where the idea is at',
+  },
+  {
+    actionHref: props.idea.routes.edit,
+    actionLabel: 'Edit',
+    complete: props.idea.collaboration.helpWanted.length > 0 || props.idea.collaboration.helpWantedNote !== null,
+    label: 'Choose the help you want',
+  },
+  {
+    actionHref: props.idea.routes.edit,
+    actionLabel: 'Edit',
+    complete: props.idea.collaboration.firstContribution !== null,
+    label: 'Add a first thing someone can do',
+  },
+  {
+    actionHref: props.idea.routes.edit,
+    actionLabel: 'Edit',
+    complete: props.idea.collaboration.communicationStyle !== null,
+    label: 'Choose how you prefer to coordinate',
+  },
+  {
+    actionHref: null,
+    actionLabel: null,
+    complete: true,
+    label: 'Decide whether applications are open',
+  },
+  {
+    actionHref: props.idea.routes.edit,
+    actionLabel: 'Edit',
+    complete: props.idea.collaboration.gettingStartedNotesReady,
+    label: 'Write private start notes for accepted collaborators',
+  },
+  {
+    actionHref: props.idea.routes.repositoryCreate,
+    actionLabel: props.idea.user.hasGithubToken ? 'Create' : 'Connect',
+    complete: props.idea.repository,
+    label: 'Create or connect a repository',
+  },
+]);
 
 const manageTabs = [
   {
@@ -160,7 +204,7 @@ const {
         Review repository access.
       </p>
       <p>
-        A collaborator was removed from this idea. Check repository access when you are ready.
+        A collaborator left or was removed from this idea. Check repository access when you are ready.
       </p>
     </div>
 
@@ -327,7 +371,7 @@ const {
               <div
                 v-for="collaborator in collaborators.items"
                 :key="collaborator.id"
-                class="flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3">
+                class="flex flex-col items-stretch gap-4 rounded-md border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <a
                   class="text-primary hover:underline"
                   :href="collaborator.user.routes.show">
@@ -335,7 +379,7 @@ const {
                 </a>
                 <details
                   v-if="idea.can.deleteApplication"
-                  class="rounded-md border border-destructive/25 bg-destructive/10 p-3">
+                  class="w-full rounded-md border border-destructive/25 bg-destructive/10 p-3 sm:max-w-sm">
                   <summary class="cursor-pointer text-sm font-medium text-destructive">
                     Remove Collaborator
                   </summary>
@@ -379,6 +423,46 @@ const {
       </div>
 
       <aside class="flex flex-col gap-3">
+        <Card>
+          <CardHeader>
+            <div class="flex flex-col gap-1">
+              <h2 class="text-lg font-semibold text-white">
+                Collaboration readiness
+              </h2>
+              <p class="text-sm text-muted-foreground">
+                Keep the collaboration path clear before people apply.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul class="flex flex-col gap-3">
+              <li
+                v-for="item in readinessItems"
+                :key="item.label"
+                class="flex items-start justify-between gap-3 text-sm">
+                <span class="flex min-w-0 gap-2">
+                  <Check
+                    v-if="item.complete"
+                    class="mt-0.5 size-4 shrink-0 text-primary"
+                    aria-hidden="true" />
+                  <Circle
+                    v-else
+                    class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true" />
+                  <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
+                </span>
+                <Button
+                  v-if="!item.complete && item.actionHref"
+                  as="a"
+                  :href="item.actionHref"
+                  variant="outline"
+                  size="sm">
+                  {{ item.actionLabel }}
+                </Button>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
         <IdeaSidebar :idea="idea" />
       </aside>
     </div>

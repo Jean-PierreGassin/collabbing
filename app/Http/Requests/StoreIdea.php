@@ -46,7 +46,7 @@ class StoreIdea extends FormRequest
             'summary' => 'required|string|max:240',
             'tags' => 'nullable|string|max:240',
             'repository_name' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
                 'regex:/^[A-Za-z0-9_-]+$/',
@@ -133,7 +133,7 @@ class StoreIdea extends FormRequest
             tagline: $this->string('tagline')->toString(),
             summary: $this->string('summary')->toString(),
             tags: $this->tagValues(),
-            repositoryName: $this->string('repository_name')->toString(),
+            repositoryName: $this->optionalString('repository_name'),
             communication: $this->string('communication')->toString(),
             content: $this->string('content')->toString(),
             status: $this->string('status', 'open')->toString(),

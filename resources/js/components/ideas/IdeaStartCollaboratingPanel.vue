@@ -168,7 +168,10 @@ function confirmWithdraw(event: SubmitEvent): void {
           <dd
             class="whitespace-pre-line text-foreground"
             :class="{ 'text-muted-foreground': !idea.collaboration.firstContribution }">
-            {{ firstContributionLabel }}
+            <MarkdownContent
+              v-if="idea.collaboration.firstContributionHtml"
+              :html="idea.collaboration.firstContributionHtml" />
+            <span v-else>{{ firstContributionLabel }}</span>
           </dd>
         </div>
 

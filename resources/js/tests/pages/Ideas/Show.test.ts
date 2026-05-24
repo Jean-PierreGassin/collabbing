@@ -74,7 +74,7 @@ function collaboration(overrides: Partial<IdeaCollaboration> = {}): IdeaCollabor
   };
 }
 
-function idea(): Idea {
+function idea(overrides: Partial<Idea> = {}): Idea {
   return {
     id: 1,
     title: 'Useful idea',
@@ -133,6 +133,7 @@ function idea(): Idea {
       repositoryCreate: '/ideas/1/repository-create',
       repositoryInvite: '/ideas/1/repository-invite',
     },
+    ...overrides,
   };
 }
 
@@ -175,10 +176,14 @@ function application(): IdeaApplication {
   };
 }
 
-function mountShow(applicant: IdeaApplication | null = null, historicalApplication: IdeaApplication | null = null) {
+function mountShow(
+  applicant: IdeaApplication | null = null,
+  historicalApplication: IdeaApplication | null = null,
+  ideaOverrides: Partial<Idea> = {},
+) {
   return mount(Show, {
     props: {
-      idea: idea(),
+      idea: idea(ideaOverrides),
       comments: paginator<IdeaComment>(),
       collaborator: null,
       applicant,
@@ -188,7 +193,8 @@ function mountShow(applicant: IdeaApplication | null = null, historicalApplicati
     global: {
       stubs: {
         CommentList: {
-          template: '<section data-testid="comments"></section>',
+          props: ['canStoreComment'],
+          template: '<section data-testid="comments">{{ canStoreComment ? "can comment" : "read only comments" }}</section>',
         },
         IdeaApplicationThread: {
           props: [
@@ -221,6 +227,17 @@ describe('Ideas/Show', () => {
     const wrapper = mountShow();
 
     expect(wrapper.find('#application-thread').exists()).toBe(false);
+  });
+
+  it('keeps public comments visible when the viewer cannot comment', () => {
+    const wrapper = mountShow(null, null, {
+      can: {
+        ...idea().can,
+        storeComment: false,
+      },
+    });
+
+    expect(wrapper.get('[data-testid="comments"]').text()).toContain('read only comments');
   });
 
   it('renders historical application threads read only', () => {

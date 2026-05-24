@@ -26,7 +26,7 @@ class RepositoryService
         $owner = $idea->owner();
         $codeRepository = $idea->latestCodeRepository();
 
-        if (! $owner || ! $codeRepository) {
+        if (! $owner || ! $codeRepository || ! $codeRepository->name) {
             throw new RuntimeException('Repository settings are missing.');
         }
 
