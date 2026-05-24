@@ -46,7 +46,10 @@ class IdeaRepositorySyncTest extends TestCase
         $this->assertNotNull($codeRepository->missing_at);
         $this->assertNotNull($codeRepository->synced_at);
         $this->assertNull($codeRepository->sync_due_at);
-        $this->assertTrue($codeRepository->events()->where('type', 'repository_missing')->exists());
+        $this->assertTrue($codeRepository->events()
+            ->where('type', 'repository_missing')
+            ->where('summary', 'Repository is no longer available from the code host.')
+            ->exists());
     }
 
     public function testRepositorySnapshotStoresLatestGithubActivity(): void
@@ -93,7 +96,10 @@ class IdeaRepositorySyncTest extends TestCase
             now()->addMinutes(720)
         ));
         $this->assertSame(1, $codeRepository->events()->where('type', 'repository_commit')->count());
-        $this->assertSame(1, $codeRepository->events()->where('type', 'repository_synced')->count());
+        $this->assertSame(1, $codeRepository->events()
+            ->where('type', 'repository_synced')
+            ->where('summary', 'Repository sync connected to the code host.')
+            ->count());
     }
 
     public function testRepositorySyncJobOnlyProcessesDueRepositoriesInASmallBatch(): void
