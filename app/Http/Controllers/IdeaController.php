@@ -32,13 +32,15 @@ class IdeaController extends Controller
     {
         $searchResults = null;
         $keyword = $request->searchTerm();
+        $tag = $request->tag();
 
-        if ($keyword) {
-            $searchResults = $this->ideaService->search($keyword);
-            $searchResults->appends(['search' => $keyword]);
+        if ($keyword || $tag) {
+            $searchResults = $this->ideaService->browseOpen($keyword, $tag);
+            $searchResults->appends($this->searchAppends($keyword, $tag));
         }
 
         $trendingIdeas = $this->ideaService->getTrending();
+        $popularTags = $this->ideaService->getPopularTags();
 
         $ideas = $this->ideaService->getOpenRecent();
         $searchResultsProps = null;
@@ -49,10 +51,27 @@ class IdeaController extends Controller
 
         return Inertia::render('Ideas/Index', [
             'keyword' => $keyword,
+            'selectedTag' => $tag,
+            'popularTags' => $popularTags,
             'searchResults' => $searchResultsProps,
             'trendingIdeas' => $trendingIdeas->map(fn (Idea $idea) => $this->pageProps->idea($idea))->values(),
             'ideas' => $this->pageProps->paginator($ideas, fn (Idea $idea) => $this->pageProps->idea($idea)),
         ]);
+    }
+
+    private function searchAppends(?string $keyword, ?string $tag): array
+    {
+        $appends = [];
+
+        if ($keyword) {
+            $appends['search'] = $keyword;
+        }
+
+        if ($tag) {
+            $appends['tag'] = $tag;
+        }
+
+        return $appends;
     }
 
     public function dashboard(Idea $idea): Response

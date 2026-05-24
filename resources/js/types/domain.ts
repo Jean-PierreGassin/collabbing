@@ -60,6 +60,11 @@ export interface IdeaSupporter {
   };
 }
 
+export interface IdeaTag {
+  name: string;
+  count: number;
+}
+
 export interface RepositoryEvent {
   id: number;
   type: string;

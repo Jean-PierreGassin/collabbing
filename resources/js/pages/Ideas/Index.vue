@@ -3,11 +3,13 @@ import { computed, ref } from 'vue';
 import IdeaList from '@/components/ideas/IdeaList.vue';
 import PaginationLinks from '@/components/pagination/PaginationLinks.vue';
 import { Button } from '@/components/ui/button';
-import { Flame, LayoutGrid, ListFilter, Rows3, SearchX } from '@lucide/vue';
-import type { Idea, Paginator } from '@/types/domain';
+import { Flame, LayoutGrid, ListFilter, Rows3, SearchX, Tag, X } from '@lucide/vue';
+import type { Idea, IdeaTag, Paginator } from '@/types/domain';
 
 const props = defineProps<{
   keyword: string | null;
+  selectedTag: string | null;
+  popularTags: IdeaTag[];
   searchResults: Paginator<Idea> | null;
   trendingIdeas: Idea[];
   ideas: Paginator<Idea>;
@@ -20,6 +22,50 @@ const trendingIdeaIds = computed(() => new Set(props.trendingIdeas.map((idea) =>
 const recentIdeas = computed(() => props.ideas.items.filter((idea) => !trendingIdeaIds.value.has(idea.id)));
 const viewMode = ref<IdeaViewMode>(storedIdeaViewMode());
 const ideaListVariant = computed(() => viewMode.value);
+const hasActiveFilters = computed(() => props.keyword !== null || props.selectedTag !== null);
+const resultsHeading = computed(() => {
+  if (props.keyword && props.selectedTag) {
+    return `Results for "${props.keyword}" tagged ${props.selectedTag}`;
+  }
+
+  if (props.keyword) {
+    return `Results for "${props.keyword}"`;
+  }
+
+  return `Ideas tagged ${props.selectedTag}`;
+});
+const resultsDescription = computed(() => {
+  if (props.keyword && props.selectedTag) {
+    return 'Open ideas matching your search and selected tag, newest first.';
+  }
+
+  if (props.selectedTag) {
+    return 'Open ideas using this tag, newest first.';
+  }
+
+  return 'Open ideas matching your search, newest first.';
+});
+const emptyResultsMessage = computed(() => {
+  if (props.keyword && props.selectedTag) {
+    return `No ideas matched "${props.keyword}" with ${props.selectedTag}.`;
+  }
+
+  if (props.keyword) {
+    return `No ideas matched "${props.keyword}".`;
+  }
+
+  return `No ideas are tagged ${props.selectedTag} yet.`;
+});
+const clearTagUrl = computed(() => {
+  if (! props.keyword) {
+    return '/ideas';
+  }
+
+  const params = new URLSearchParams();
+  params.set('search', props.keyword);
+
+  return `/ideas?${params.toString()}`;
+});
 
 function storedIdeaViewMode(): IdeaViewMode {
   if (typeof window === 'undefined') {
@@ -51,6 +97,26 @@ function viewButtonVariant(mode: IdeaViewMode): 'secondary' | 'ghost' {
   return 'ghost';
 }
 
+function tagUrl(tag: string): string {
+  const params = new URLSearchParams();
+
+  if (props.keyword) {
+    params.set('search', props.keyword);
+  }
+
+  params.set('tag', tag);
+
+  return `/ideas?${params.toString()}`;
+}
+
+function tagButtonVariant(tag: string): 'secondary' | 'outline' {
+  if (props.selectedTag === tag) {
+    return 'secondary';
+  }
+
+  return 'outline';
+}
+
 function scrollToSection(id: string): void {
   document.getElementById(id)?.scrollIntoView({
     behavior: 'smooth',
@@ -73,7 +139,7 @@ function scrollToSection(id: string): void {
           class="flex w-full flex-wrap gap-2 sm:w-auto"
           aria-label="Idea discovery sections">
           <Button
-            v-if="searchResults"
+            v-if="hasActiveFilters"
             type="button"
             variant="ghost"
             size="sm"
@@ -140,6 +206,43 @@ function scrollToSection(id: string): void {
           </Button>
         </div>
       </div>
+
+      <div
+        v-if="popularTags.length > 0"
+        class="flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
+          <Tag
+            class="size-3.5"
+            aria-hidden="true" />
+          Browse by tag
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <Button
+            v-for="tag in popularTags"
+            :key="tag.name"
+            as="a"
+            :href="tagUrl(tag.name)"
+            :variant="tagButtonVariant(tag.name)"
+            size="sm"
+            :aria-current="selectedTag === tag.name ? 'true' : undefined">
+            {{ tag.name }}
+            <span class="text-xs text-muted-foreground">
+              {{ tag.count.toLocaleString() }}
+            </span>
+          </Button>
+          <Button
+            v-if="selectedTag"
+            as="a"
+            :href="clearTagUrl"
+            variant="ghost"
+            size="sm">
+            <X
+              class="size-4"
+              aria-hidden="true" />
+            Clear tag
+          </Button>
+        </div>
+      </div>
     </div>
 
     <div
@@ -148,10 +251,10 @@ function scrollToSection(id: string): void {
       class="flex scroll-mt-24 flex-col gap-4">
       <div class="flex flex-col gap-1">
         <h2 class="text-xl font-semibold text-white">
-          Results for "{{ keyword }}"
+          {{ resultsHeading }}
         </h2>
         <p class="text-sm text-muted-foreground">
-          Open ideas matching your search, newest first.
+          {{ resultsDescription }}
         </p>
       </div>
       <IdeaList
@@ -162,7 +265,7 @@ function scrollToSection(id: string): void {
         v-else
         class="flex flex-col gap-4 rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
         <p>
-          No ideas matched "{{ keyword }}".
+          {{ emptyResultsMessage }}
         </p>
         <div class="flex flex-wrap gap-2">
           <Button

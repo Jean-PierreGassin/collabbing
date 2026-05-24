@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 import IdeasIndex from '@/pages/Ideas/Index.vue';
-import type { DomainUser, Idea, Paginator } from '@/types/domain';
+import type { DomainUser, Idea, IdeaTag, Paginator } from '@/types/domain';
 
 function user(): DomainUser {
   return {
@@ -103,6 +103,8 @@ function paginator(items: Idea[]): Paginator<Idea> {
 
 function mountIndex(props: {
   keyword?: string | null;
+  selectedTag?: string | null;
+  popularTags?: IdeaTag[];
   searchResults?: Paginator<Idea> | null;
   trendingIdeas?: Idea[];
   ideas?: Paginator<Idea>;
@@ -110,6 +112,8 @@ function mountIndex(props: {
   return mount(IdeasIndex, {
     props: {
       keyword: null,
+      selectedTag: null,
+      popularTags: [],
       searchResults: null,
       trendingIdeas: [],
       ideas: paginator([]),
@@ -191,5 +195,43 @@ describe('Ideas/Index', () => {
     expect(wrapper.text()).toContain('No ideas matched "nothing".');
     expect(wrapper.get('a[href="/ideas"]').text()).toContain('Clear search');
     expect(wrapper.get('a[href="/ideas/create"]').text()).toContain('Share an idea');
+  });
+
+  it('renders popular tags as filter links', () => {
+    const wrapper = mountIndex({
+      keyword: 'review',
+      popularTags: [
+        { name: 'design', count: 3 },
+        { name: 'workflow', count: 1 },
+      ],
+    });
+
+    const tagLinks = wrapper
+      .findAll('a')
+      .filter((link) => link.attributes('href')?.includes('tag='));
+
+    expect(wrapper.text()).toContain('Browse by tag');
+    expect(tagLinks[0].attributes('href')).toBe('/ideas?search=review&tag=design');
+    expect(tagLinks[0].text()).toContain('design');
+    expect(tagLinks[0].text()).toContain('3');
+    expect(tagLinks[1].attributes('href')).toBe('/ideas?search=review&tag=workflow');
+    expect(tagLinks[1].text()).toContain('workflow');
+  });
+
+  it('shows active tag results and keeps the search when clearing the tag', () => {
+    const wrapper = mountIndex({
+      keyword: 'review',
+      selectedTag: 'design',
+      popularTags: [
+        { name: 'design', count: 3 },
+      ],
+      searchResults: paginator([idea({ id: 3 })]),
+    });
+
+    expect(wrapper.text()).toContain('Results for "review" tagged design');
+    expect(wrapper.text()).toContain('Open ideas matching your search and selected tag');
+    expect(wrapper.get('a[aria-current="true"]').text()).toContain('design');
+    expect(wrapper.get('a[href="/ideas?search=review"]').text()).toContain('Clear tag');
+    expect(wrapper.find('[data-list]')?.text()).toBe('3');
   });
 });
