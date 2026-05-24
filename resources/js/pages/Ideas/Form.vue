@@ -39,7 +39,7 @@ const repositoryNameSanitizer = /[^A-Za-z0-9_-]/g;
 const titleValidator = maxLengthValidator(100, 'a title');
 const taglineValidator = maxLengthValidator(60, 'a tagline');
 const helpWantedNoteValidator = maxLengthValidator(240, 'a help note');
-const firstContributionValidator = maxLengthValidator(1200, 'a first contribution');
+const firstContributionValidator = maxLengthValidator(1200, 'a first useful step');
 const applicationsClosedNoteValidator = maxLengthValidator(240, 'an applications note');
 const communicationNoteValidator = maxLengthValidator(240, 'a communication note');
 const gettingStartedNotesValidator = maxLengthValidator(10000, 'getting-started notes');
@@ -54,11 +54,11 @@ const isBasicsStep = computed(() => isEditing.value || currentStep.value === 'ba
 const isCollaborationStep = computed(() => isEditing.value || currentStep.value === 'collaboration');
 const applicationStatusOptions = [
   {
-    label: 'Applications open',
+    label: 'Open',
     value: '1',
   },
   {
-    label: 'Applications closed',
+    label: 'Closed',
     value: '0',
   },
 ];
@@ -248,7 +248,7 @@ const readinessItems = computed<ReadinessItem[]>(() => [
   },
   {
     complete: formValues.firstContribution.trim() !== '',
-    label: 'Add a first thing someone can do',
+    label: 'List a first useful step',
     targetId: 'first_contribution',
   },
   {
@@ -780,7 +780,8 @@ onMounted(() => {
                 <div class="grid gap-4 md:grid-cols-2">
                   <FormField
                     id="collaboration_stage"
-                    label="Collaboration stage">
+                    label="Collaboration stage"
+                    tooltip="Where the idea sits right now, from rough concept through live project. This helps applicants judge how much shaping is still needed.">
                     <template #default="{ describedBy, feedbackClass }">
                       <FormSelect
                         id="collaboration_stage"
@@ -800,7 +801,8 @@ onMounted(() => {
 
                   <FormField
                     id="applications_open"
-                    label="Applications">
+                    label="Applications"
+                    tooltip="Open means people can apply to collaborate. Closed keeps support and comments available without accepting new applications.">
                     <template #default="{ describedBy, feedbackClass }">
                       <FormSelect
                         id="applications_open"
@@ -856,6 +858,7 @@ onMounted(() => {
                 <FormField
                   id="help_wanted"
                   label="Help wanted"
+                  tooltip="The areas where outside help would be useful now. Applicants can still describe a different contribution."
                   help="Choose the areas where help would be useful. People can still apply with other contribution types.">
                   <template #default="{ describedBy }">
                     <div
@@ -901,7 +904,8 @@ onMounted(() => {
 
                 <FormField
                   id="first_contribution"
-                  label="First contribution"
+                  label="First useful step"
+                  tooltip="A small public starting point that shows someone what they could do first before they apply."
                   help="Public prompt with links and line breaks. Keep it small and concrete."
                   :validator="firstContributionValidator">
                   <template #default="{ invalid, describedBy, feedbackClass }">
@@ -934,7 +938,8 @@ onMounted(() => {
                 <div class="grid gap-4 md:grid-cols-2">
                   <FormField
                     id="communication_style"
-                    label="Communication style">
+                    label="Communication style"
+                    tooltip="How you expect collaborators to coordinate after they join, such as issues, chat, or async updates.">
                     <template #default="{ describedBy, feedbackClass }">
                       <FormSelect
                         id="communication_style"
@@ -978,6 +983,7 @@ onMounted(() => {
                 <FormField
                   id="repository_name"
                   label="Repository name"
+                  tooltip="Optional project repository to create or connect so collaborators have a concrete workspace."
                   help="Optional. Use up to 100 letters, numbers, dashes, or underscores."
                   :validator="repositoryNameValidator">
                   <template #default="{ invalid, describedBy, feedbackClass }">
@@ -1018,6 +1024,7 @@ onMounted(() => {
                 <FormField
                   id="getting_started_notes"
                   label="Private start notes"
+                  tooltip="Private setup notes shown only to accepted collaborators and the owner after approval."
                   help="Visible only to accepted collaborators and the owner. Markdown is supported."
                   :validator="gettingStartedNotesValidator">
                   <template #default="{ invalid, describedBy, feedbackClass }">
@@ -1041,7 +1048,7 @@ onMounted(() => {
             <aside class="flex h-fit flex-col gap-3 rounded-md border border-border bg-background/35 p-4">
               <div class="flex flex-col gap-1">
                 <h2 class="text-sm font-semibold text-foreground">
-                  Collaboration readiness
+                  Idea Checklist
                 </h2>
                 <p class="text-sm text-muted-foreground">
                   Missing items can stay honest while the idea is still taking shape.
@@ -1051,22 +1058,25 @@ onMounted(() => {
                 <li
                   v-for="item in readinessItems"
                   :key="item.label"
-                  class="text-sm">
-                  <button
-                    type="button"
-                    class="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-secondary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                    :aria-label="`${item.complete ? 'Review' : 'Complete'} ${item.label.toLowerCase()}`"
-                    @click="focusReadinessItem(item.targetId)">
-                    <Check
-                      v-if="item.complete"
-                      class="mt-0.5 size-4 shrink-0 text-primary"
-                      aria-hidden="true" />
-                    <Circle
-                      v-else
-                      class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                      aria-hidden="true" />
-                    <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
-                  </button>
+                  class="flex items-start gap-2 text-sm">
+                  <Check
+                    v-if="item.complete"
+                    class="mt-0.5 size-4 shrink-0 text-primary"
+                    aria-hidden="true" />
+                  <Circle
+                    v-else
+                    class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true" />
+                  <span
+                    v-if="item.complete"
+                    class="text-foreground">{{ item.label }}</span>
+                  <a
+                    v-else
+                    :href="`#${item.targetId}`"
+                    class="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    @click.prevent="focusReadinessItem(item.targetId)">
+                    {{ item.label }}
+                  </a>
                 </li>
               </ul>
             </aside>

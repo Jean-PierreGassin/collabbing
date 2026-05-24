@@ -39,43 +39,36 @@ const repositoryInvitePromptText = computed(() => {
 const readinessItems = computed(() => [
   {
     actionHref: editFieldRoute('collaboration_stage'),
-    actionLabel: 'Set',
     complete: props.idea.collaboration.stage !== null,
     label: 'Set where the idea is at',
   },
   {
     actionHref: editFieldRoute('help_wanted'),
-    actionLabel: 'Choose',
     complete: props.idea.collaboration.helpWanted.length > 0 || props.idea.collaboration.helpWantedNote !== null,
     label: 'Choose the help you want',
   },
   {
     actionHref: editFieldRoute('first_contribution'),
-    actionLabel: 'Add',
     complete: props.idea.collaboration.firstContribution !== null,
-    label: 'Add a first thing someone can do',
+    label: 'List a first useful step',
   },
   {
     actionHref: editFieldRoute('communication_style'),
-    actionLabel: 'Choose',
     complete: props.idea.collaboration.communicationStyle !== null,
     label: 'Choose how you prefer to coordinate',
   },
   {
     actionHref: editFieldRoute('applications_open'),
-    actionLabel: 'Review',
     complete: true,
     label: 'Decide whether applications are open',
   },
   {
     actionHref: editFieldRoute('getting_started_notes'),
-    actionLabel: 'Write',
     complete: props.idea.collaboration.gettingStartedNotesReady,
     label: 'Write private start notes for accepted collaborators',
   },
   {
     actionHref: props.idea.routes.repositoryCreate,
-    actionLabel: props.idea.user.hasGithubToken ? 'Create' : 'Connect',
     complete: props.idea.repository,
     label: 'Create or connect a repository',
   },
@@ -347,11 +340,11 @@ const {
                   <h6 class="text-right text-sm text-muted-foreground">
                     Submitted {{ application.createdAtForHumans }}
                   </h6>
-                  <div class="flex flex-wrap justify-between gap-3 border-t border-border pt-4">
+                  <div class="grid gap-4 border-t border-border pt-4 lg:grid-cols-2 lg:items-start">
                     <div
                       v-if="idea.can.deleteApplication"
                       :class="[
-                        'w-full md:max-w-sm',
+                        'w-full min-w-0',
                         isDeclineFormExpanded(application.id) ? 'rounded-md border border-destructive/25 bg-destructive/10 p-3' : '',
                       ]">
                       <Button
@@ -406,7 +399,7 @@ const {
                       v-if="idea.can.updateApplication"
                       :action="application.routes.approve"
                       method="POST"
-                      class="ml-auto flex w-full flex-col gap-2 md:max-w-sm">
+                      class="flex w-full min-w-0 flex-col gap-2">
                       <CsrfField />
                       <MethodField method="PUT" />
                       <div
@@ -537,7 +530,7 @@ const {
           <CardHeader>
             <div class="flex flex-col gap-1">
               <h2 class="text-lg font-semibold text-white">
-                Collaboration readiness
+                Idea Checklist
               </h2>
               <p class="text-sm text-muted-foreground">
                 Keep the collaboration path clear before people apply.
@@ -549,26 +542,24 @@ const {
               <li
                 v-for="item in readinessItems"
                 :key="item.label"
-                class="flex items-start justify-between gap-3 text-sm">
-                <span class="flex min-w-0 gap-2">
-                  <Check
-                    v-if="item.complete"
-                    class="mt-0.5 size-4 shrink-0 text-primary"
-                    aria-hidden="true" />
-                  <Circle
-                    v-else
-                    class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                    aria-hidden="true" />
-                  <span :class="item.complete ? 'text-foreground' : 'text-muted-foreground'">{{ item.label }}</span>
-                </span>
-                <Button
+                class="flex items-start gap-2 text-sm">
+                <Check
+                  v-if="item.complete"
+                  class="mt-0.5 size-4 shrink-0 text-primary"
+                  aria-hidden="true" />
+                <Circle
+                  v-else
+                  class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true" />
+                <span
+                  v-if="item.complete"
+                  class="text-foreground">{{ item.label }}</span>
+                <a
                   v-if="!item.complete && item.actionHref"
-                  as="a"
                   :href="item.actionHref"
-                  variant="outline"
-                  size="sm">
-                  {{ item.actionLabel }}
-                </Button>
+                  class="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
+                  {{ item.label }}
+                </a>
               </li>
             </ul>
           </CardContent>

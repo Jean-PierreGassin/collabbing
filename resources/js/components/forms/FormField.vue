@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CircleAlert, Info, TriangleAlert, X } from '@lucide/vue';
+import { InfoTooltip } from '@/components/ui/tooltip';
 import { useFormFieldControl } from '@/composables/useFormFieldControl';
 import type { FieldValidator } from '@/lib/formValidation';
 
@@ -10,12 +11,14 @@ const props = withDefaults(defineProps<{
   label: string;
   hideLabel?: boolean;
   help?: string;
+  tooltip?: string;
   validator?: FieldValidator;
 }>(), {
   errorKey: undefined,
   externalErrors: () => [],
   hideLabel: false,
   help: undefined,
+  tooltip: undefined,
   validator: undefined,
 });
 
@@ -54,9 +57,16 @@ const {
   <div
     ref="field"
     class="relative flex flex-col gap-2">
-    <label
-      :for="id"
-      :class="labelClass">{{ label }}</label>
+    <div class="flex items-center gap-1.5">
+      <label
+        :for="id"
+        :class="labelClass">{{ label }}</label>
+      <InfoTooltip
+        v-if="tooltip && !hideLabel"
+        :id="`${id}-tooltip`"
+        :label="tooltip"
+        align="start" />
+    </div>
     <slot
       :invalid="invalid"
       :valid="valid"

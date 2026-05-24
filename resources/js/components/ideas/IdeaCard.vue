@@ -9,12 +9,6 @@ import { ChevronDown, GitBranch, MessageSquare, Sparkles, Users } from '@lucide/
 import { useCollapsiblePanelTransition } from '@/composables/useCollapsiblePanelTransition';
 import type { Idea } from '@/types/domain';
 
-type CardBadge = {
-  ariaLabel: string;
-  label: string;
-  variant: 'default' | 'outline' | 'secondary';
-};
-
 const props = withDefaults(defineProps<{
   idea: Idea;
   featured?: boolean;
@@ -45,44 +39,42 @@ const {
 const isCompact = computed(() => props.variant === 'compact' && ! props.single);
 const isDetailed = computed(() => props.variant === 'detailed' && ! props.single);
 const descriptionId = computed(() => `idea-${props.idea.id}-description`);
-const visibleHelpAreas = computed(() => props.idea.collaboration.helpWantedDisplay.slice(0, 3));
 const isDescriptionExpanded = computed({
   get: () => props.pitchExpanded,
   set: (value: boolean) => emit('update:pitchExpanded', value),
 });
 
-const collaborationBadges = computed<CardBadge[]>(() => {
-  const badges: CardBadge[] = [{
-    ariaLabel: `Stage: ${props.idea.collaboration.stageDisplay}`,
-    label: props.idea.collaboration.stageDisplay,
-    variant: 'outline',
-  }];
-
-  visibleHelpAreas.value.forEach((label) => {
-    badges.push({
-      ariaLabel: `Help wanted: ${label}`,
-      label,
-      variant: 'secondary',
-    });
-  });
-
-  if (! props.idea.collaboration.applicationsOpen) {
-    badges.push({
-      ariaLabel: 'Applications closed',
-      label: 'Applications closed',
-      variant: 'outline',
-    });
+const applicationStatusLabel = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'Applications open';
   }
 
-  if (props.idea.collaboration.firstContribution) {
-    badges.push({
-      ariaLabel: 'First step listed',
-      label: 'First step listed',
-      variant: 'outline',
-    });
+  return 'Applications closed';
+});
+
+const applicationStatusVariant = computed(() => {
+  if (props.idea.collaboration.applicationsOpen) {
+    return 'secondary';
   }
 
-  return badges;
+  return 'outline';
+});
+
+const helpWantedSummary = computed(() => {
+  const labels = props.idea.collaboration.helpWantedDisplay;
+
+  if (labels.length === 0) {
+    return 'Open to figuring it out';
+  }
+
+  const visible = labels.slice(0, 2);
+  const hiddenCount = labels.length - visible.length;
+
+  if (hiddenCount === 0) {
+    return visible.join(', ');
+  }
+
+  return `${visible.join(', ')} +${hiddenCount}`;
 });
 
 const collaboratorsLabel = computed(() => {
@@ -258,24 +250,6 @@ const pitchChevronClass = computed(() => {
         </Badge>
       </div>
 
-      <div
-        class="pointer-events-none flex flex-col gap-1"
-        aria-label="Collaboration summary">
-        <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
-          Collaboration
-        </span>
-        <div class="flex flex-wrap gap-1.5">
-          <Badge
-            v-for="badge in collaborationBadges"
-            :key="`${badge.ariaLabel}-${badge.variant}`"
-            :variant="badge.variant"
-            :aria-label="badge.ariaLabel"
-            class="text-xs">
-            {{ badge.label }}
-          </Badge>
-        </div>
-      </div>
-
       <div class="pointer-events-none mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border pt-2.5 text-xs text-muted-foreground">
         <span class="inline-flex items-center gap-1.5">
           <Users
@@ -366,23 +340,6 @@ const pitchChevronClass = computed(() => {
               v-if="idea.tags.length === 0"
               class="text-sm text-muted-foreground">No tags yet.</span>
           </div>
-          <div
-            class="flex min-w-0 flex-col gap-1"
-            aria-label="Collaboration summary">
-            <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
-              Collaboration
-            </span>
-            <div class="flex min-w-0 flex-wrap gap-1.5">
-              <Badge
-                v-for="badge in collaborationBadges"
-                :key="`${badge.ariaLabel}-${badge.variant}`"
-                :variant="badge.variant"
-                :aria-label="badge.ariaLabel"
-                class="text-xs">
-                {{ badge.label }}
-              </Badge>
-            </div>
-          </div>
         </div>
 
         <div class="flex shrink-0 flex-wrap items-center gap-3 text-xs text-muted-foreground sm:justify-end">
@@ -416,41 +373,75 @@ const pitchChevronClass = computed(() => {
     <CardHeader
       v-else
       :class="headerClass">
-      <div class="flex min-w-0 flex-col gap-2">
-        <div
-          v-if="featured"
-          class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
-          <Sparkles
-            class="size-3.5"
-            aria-hidden="true" />
-          Trending
+      <div class="flex min-w-0 items-start justify-between gap-3">
+        <div class="flex min-w-0 flex-col gap-2">
+          <div
+            v-if="featured"
+            class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
+            <Sparkles
+              class="size-3.5"
+              aria-hidden="true" />
+            Trending
+          </div>
+          <template v-if="single && !hideTitle">
+            <h1 class="text-2xl font-semibold leading-tight text-white">
+              {{ idea.titleDisplay }}
+            </h1>
+          </template>
+          <CardTitle
+            v-else-if="!single"
+            class="leading-tight">
+            <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
+          </CardTitle>
+          <p class="text-xs text-muted-foreground">
+            by
+            <Link
+              class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
+              :href="idea.user.routes.show">
+              @{{ idea.user.username }}
+            </Link>
+            <span aria-hidden="true"> · </span>
+            {{ idea.createdAtForHumans }}
+          </p>
         </div>
-        <template v-if="single && !hideTitle">
-          <h1 class="text-2xl font-semibold leading-tight text-white">
-            {{ idea.titleDisplay }}
-          </h1>
-        </template>
-        <CardTitle
-          v-else-if="!single"
-          class="leading-tight">
-          <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
-        </CardTitle>
-        <p class="text-xs text-muted-foreground">
-          by
-          <Link
-            class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
-            :href="idea.user.routes.show">
-            @{{ idea.user.username }}
-          </Link>
-          <span aria-hidden="true"> · </span>
-          {{ idea.createdAtForHumans }}
-        </p>
+        <Badge
+          :variant="applicationStatusVariant"
+          class="shrink-0"
+          :aria-label="`Application status: ${applicationStatusLabel}`">
+          {{ applicationStatusLabel }}
+        </Badge>
       </div>
     </CardHeader>
 
     <CardContent
       v-if="single"
       class="flex flex-col gap-5">
+      <section
+        class="border-b border-border pb-4"
+        aria-label="Project context">
+        <h2 class="mb-3 text-sm font-semibold text-white">
+          Project context
+        </h2>
+        <dl class="grid gap-3 text-sm sm:grid-cols-2">
+          <div class="min-w-0">
+            <dt class="text-xs font-medium uppercase text-muted-foreground">
+              Stage
+            </dt>
+            <dd class="truncate text-foreground">
+              {{ idea.collaboration.stageDisplay }}
+            </dd>
+          </div>
+          <div class="min-w-0">
+            <dt class="text-xs font-medium uppercase text-muted-foreground">
+              Help
+            </dt>
+            <dd class="truncate text-foreground">
+              {{ helpWantedSummary }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
       <section
         class="flex flex-col gap-2"
         aria-label="Idea summary">
@@ -470,23 +461,6 @@ const pitchChevronClass = computed(() => {
             class="text-xs">
             {{ tag }}
           </Badge>
-        </div>
-        <div
-          class="flex flex-col gap-1.5 pt-1"
-          aria-label="Collaboration summary">
-          <span class="text-xs font-medium uppercase text-muted-foreground">
-            Collaboration
-          </span>
-          <div class="flex flex-wrap gap-2">
-            <Badge
-              v-for="badge in collaborationBadges"
-              :key="`${badge.ariaLabel}-${badge.variant}`"
-              :variant="badge.variant"
-              :aria-label="badge.ariaLabel"
-              class="text-xs">
-              {{ badge.label }}
-            </Badge>
-          </div>
         </div>
       </section>
 
@@ -549,23 +523,6 @@ const pitchChevronClass = computed(() => {
           class="text-xs">
           {{ tag }}
         </Badge>
-      </div>
-      <div
-        class="flex flex-col gap-1"
-        aria-label="Collaboration summary">
-        <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
-          Collaboration
-        </span>
-        <div class="flex flex-wrap gap-1.5">
-          <Badge
-            v-for="badge in collaborationBadges"
-            :key="`${badge.ariaLabel}-${badge.variant}`"
-            :variant="badge.variant"
-            :aria-label="badge.ariaLabel"
-            class="text-xs">
-            {{ badge.label }}
-          </Badge>
-        </div>
       </div>
     </CardContent>
 

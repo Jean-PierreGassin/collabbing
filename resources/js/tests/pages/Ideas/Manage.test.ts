@@ -286,13 +286,14 @@ describe('Idea management tabs', () => {
       }),
     });
 
-    expect(wrapper.text()).toContain('Collaboration readiness');
+    expect(wrapper.text()).toContain('Idea Checklist');
     expect(wrapper.text()).toContain('Set where the idea is at');
     expect(wrapper.text()).toContain('Choose the help you want');
     expect(wrapper.text()).toContain('Create or connect a repository');
-    expect(wrapper.findAll('a[href="/ideas/1/edit#collaboration_stage"]').some((link) => link.text().includes('Set'))).toBe(true);
-    expect(wrapper.findAll('a[href="/ideas/1/edit#help_wanted"]').some((link) => link.text().includes('Choose'))).toBe(true);
-    expect(wrapper.findAll('a[href="/ideas/1/repository"]').some((link) => link.text().includes('Create'))).toBe(true);
+    expect(wrapper.findAll('aside button')).toHaveLength(0);
+    expect(wrapper.get('a[href="/ideas/1/edit#collaboration_stage"]').text()).toBe('Set where the idea is at');
+    expect(wrapper.get('a[href="/ideas/1/edit#help_wanted"]').text()).toBe('Choose the help you want');
+    expect(wrapper.get('a[href="/ideas/1/repository"]').text()).toBe('Create or connect a repository');
   });
 
   it('marks completed readiness items without action links', () => {
@@ -309,7 +310,7 @@ describe('Idea management tabs', () => {
 
     const checklist = wrapper.get('aside').text();
 
-    expect(checklist).toContain('Collaboration readiness');
+    expect(checklist).toContain('Idea Checklist');
     expect(wrapper.findAll('aside a[href^="/ideas/1/edit#"]')).toHaveLength(0);
     expect(wrapper.findAll('aside a[href="/ideas/1/repository"]')).toHaveLength(0);
   });

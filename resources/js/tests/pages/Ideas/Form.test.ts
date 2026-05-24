@@ -530,9 +530,17 @@ describe('Ideas/Form', () => {
     await continueToCollaboration(wrapper);
 
     const checklist = () => wrapper.get('aside').text();
+    const applicationOptions = wrapper
+      .findAll('select[name="applications_open"] option')
+      .map((option) => option.text());
 
-    expect(checklist()).toContain('Collaboration readiness');
+    expect(checklist()).toContain('Idea Checklist');
     expect(checklist()).toContain('Set where the idea is at');
+    expect(applicationOptions).toEqual([
+      'Open',
+      'Closed',
+    ]);
+    expect(wrapper.find('button[aria-label="A small public starting point that shows someone what they could do first before they apply."]').exists()).toBe(true);
 
     await selectCombobox('collaboration_stage', 'Ready to build');
     await wrapper.get<HTMLInputElement>('input[value="frontend"]').setValue(true);
@@ -546,18 +554,20 @@ describe('Ideas/Form', () => {
 
     expect(completeLabels).toContain('Set where the idea is at');
     expect(completeLabels).toContain('Choose the help you want');
-    expect(completeLabels).toContain('Add a first thing someone can do');
+    expect(completeLabels).toContain('List a first useful step');
     expect(completeLabels).toContain('Create or connect a repository');
   });
 
-  it('moves focus from the readiness checklist to the relevant field', async () => {
+  it('moves focus from an incomplete checklist link to the relevant field', async () => {
     const wrapper = mountForm();
 
     await continueToCollaboration(wrapper);
 
-    const firstStepButton = wrapper.get('button[aria-label="Complete add a first thing someone can do"]');
+    const firstStepLink = wrapper.get('aside a[href="#first_contribution"]');
 
-    await firstStepButton.trigger('click');
+    expect(firstStepLink.text()).toBe('List a first useful step');
+
+    await firstStepLink.trigger('click');
     await nextTick();
 
     expect(document.activeElement).toBe(wrapper.get<HTMLTextAreaElement>('textarea#first_contribution').element);

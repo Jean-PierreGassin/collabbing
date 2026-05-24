@@ -224,15 +224,16 @@ describe('IdeaSidebar', () => {
     const headings = wrapper.findAll('h2').map((heading) => heading.text());
 
     expect(headings[0]).toBe('Start collaborating');
-    expect(wrapper.text()).toContain('Ready to build');
+    expect(wrapper.text()).not.toContain('Ready to build');
     expect(wrapper.text()).toContain('Frontend');
     expect(wrapper.text()).toContain('Testing');
     expect(wrapper.text()).toContain('Review the first issue.');
     expect(wrapper.text()).toContain('Applications open');
     expect(wrapper.text()).toContain('GitHub');
     expect(wrapper.text()).toContain('Readiness signals');
-    expect(wrapper.text()).toContain('Repo available');
+    expect(wrapper.text()).toContain('Repo connected');
     expect(wrapper.text()).toContain('Start notes ready');
+    expect(wrapper.find('button[aria-label="A small public starting point so someone can understand the first useful action before they apply."]').exists()).toBe(true);
     expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to collaborate');
   });
 
@@ -267,7 +268,7 @@ describe('IdeaSidebar', () => {
       }),
     });
 
-    expect(wrapper.text()).toContain('Needs shaping');
+    expect(wrapper.text()).not.toContain('Needs shaping');
     expect(wrapper.get('a[href="/register?next=%2Fideas%2F1"]').text()).toContain('Register');
     expect(wrapper.get('a[href="/login?next=%2Fideas%2F1"]').text()).toContain('Sign in');
     expect(wrapper.text()).toContain('Sign in to apply, support, or comment.');
@@ -320,7 +321,7 @@ describe('IdeaSidebar', () => {
     expect(wrapper.text()).not.toContain('Register to apply');
   });
 
-  it('shows owner state without duplicating the manage action inside the panel', () => {
+  it('does not show owner-only action chrome inside the public sidebar', () => {
     session.isAuthenticated = true;
     const wrapper = mountSidebar({
       idea: idea({
@@ -331,7 +332,8 @@ describe('IdeaSidebar', () => {
       }),
     });
 
-    expect(wrapper.text()).toContain('You own this idea');
+    expect(wrapper.text()).not.toContain('You own this idea');
+    expect(wrapper.text()).not.toContain('Owner controls live on the manage page');
     expect(wrapper.find('a[href="/ideas/1/dashboard"]').exists()).toBe(false);
   });
 

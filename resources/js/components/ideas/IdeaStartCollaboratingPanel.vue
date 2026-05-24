@@ -6,6 +6,7 @@ import MarkdownContent from '@/components/typography/MarkdownContent.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { InfoTooltip } from '@/components/ui/tooltip';
 import { useSessionStore } from '@/stores/session';
 import { CheckCircle2, Circle, GitBranch, Lock, MessageSquare, UserPlus } from '@lucide/vue';
 import type { Idea, IdeaApplication } from '@/types/domain';
@@ -55,19 +56,19 @@ const registerActionLabel = computed(() => {
 const readinessBadges = computed(() => [
   {
     complete: props.idea.collaboration.readinessBadges.applicationsOpen,
-    label: props.idea.collaboration.readinessBadges.applicationsOpen ? 'Applications open' : 'Applications closed',
+    label: 'Applications open',
   },
   {
     complete: props.idea.collaboration.readinessBadges.firstStepListed,
-    label: props.idea.collaboration.readinessBadges.firstStepListed ? 'First step listed' : 'First step not listed',
+    label: 'First step listed',
   },
   {
     complete: props.idea.collaboration.readinessBadges.repoAvailable,
-    label: props.idea.collaboration.readinessBadges.repoAvailable ? 'Repo available' : 'No repo yet',
+    label: 'Repo connected',
   },
   {
     complete: props.idea.collaboration.readinessBadges.startNotesReady,
-    label: props.idea.collaboration.readinessBadges.startNotesReady ? 'Start notes ready' : 'Start notes not ready',
+    label: 'Start notes ready',
   },
 ]);
 
@@ -103,18 +104,11 @@ function confirmWithdraw(event: SubmitEvent): void {
 
     <CardContent class="flex flex-col gap-4 text-sm">
       <section
+        v-if="!idea.can.update"
         class="flex flex-col gap-2 rounded-md border border-primary/20 bg-primary/10 p-3"
         aria-label="Collaboration action">
-        <span
-          v-if="idea.can.update"
-          class="inline-flex w-fit items-center gap-2 rounded-md border border-primary/25 bg-background/45 px-2.5 py-1.5 text-sm font-medium text-foreground">
-          <GitBranch
-            class="size-4"
-            aria-hidden="true" />
-          You own this idea
-        </span>
         <div
-          v-else-if="collaborator"
+          v-if="collaborator"
           class="flex flex-col gap-3">
           <span class="inline-flex w-fit items-center gap-2 rounded-md border border-primary/25 bg-background/45 px-2.5 py-1.5 text-sm font-medium text-foreground">
             <CheckCircle2
@@ -217,10 +211,7 @@ function confirmWithdraw(event: SubmitEvent): void {
         </span>
 
         <p class="text-xs leading-5 text-muted-foreground">
-          <template v-if="idea.can.update">
-            Owner controls live on the manage page; this panel shows what others see.
-          </template>
-          <template v-else-if="collaborator">
+          <template v-if="collaborator">
             Your private starting point is part of the main idea flow below.
           </template>
           <template v-else-if="applicant">
@@ -241,10 +232,18 @@ function confirmWithdraw(event: SubmitEvent): void {
         </p>
       </section>
 
-      <section class="flex flex-col gap-3 border-t border-border pt-4">
+      <section
+        :class="[
+          'flex flex-col gap-3',
+          idea.can.update ? '' : 'border-t border-border pt-4',
+        ]">
         <div class="flex flex-col gap-1">
-          <h3 class="text-xs font-medium uppercase text-muted-foreground">
+          <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
             What help is needed
+            <InfoTooltip
+              id="sidebar-help-wanted-tooltip"
+              label="The contribution areas the owner is most interested in right now. Applicants can still propose other useful work."
+              align="end" />
           </h3>
           <div class="flex flex-wrap gap-1.5">
             <Badge
@@ -262,8 +261,12 @@ function confirmWithdraw(event: SubmitEvent): void {
         </div>
 
         <div class="flex flex-col gap-1">
-          <h3 class="text-xs font-medium uppercase text-muted-foreground">
+          <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
             First useful step
+            <InfoTooltip
+              id="sidebar-first-useful-step-tooltip"
+              label="A small public starting point so someone can understand the first useful action before they apply."
+              align="end" />
           </h3>
           <div
             class="whitespace-pre-line text-foreground"
@@ -277,19 +280,14 @@ function confirmWithdraw(event: SubmitEvent): void {
       </section>
 
       <section class="flex flex-col gap-3 border-t border-border pt-4">
-        <h3 class="text-xs font-medium uppercase text-muted-foreground">
+        <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
           Project context
+          <InfoTooltip
+            id="sidebar-project-context-tooltip"
+            label="Public context about coordination style and repository access so applicants can decide whether it fits them."
+            align="end" />
         </h3>
         <dl class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-          <div class="flex flex-col gap-1">
-            <dt class="text-xs font-medium text-muted-foreground">
-              Stage
-            </dt>
-            <dd class="text-foreground">
-              {{ idea.collaboration.stageDisplay }}
-            </dd>
-          </div>
-
           <div class="flex flex-col gap-1">
             <dt class="text-xs font-medium text-muted-foreground">
               Communication
@@ -319,8 +317,12 @@ function confirmWithdraw(event: SubmitEvent): void {
       </section>
 
       <section class="flex flex-col gap-2 border-t border-border pt-4">
-        <h3 class="text-xs font-medium uppercase text-muted-foreground">
+        <h3 class="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground">
           Readiness signals
+          <InfoTooltip
+            id="sidebar-readiness-signals-tooltip"
+            label="A quick checklist of the public and private setup pieces that make collaboration easier to start."
+            align="end" />
         </h3>
         <div
           class="flex flex-wrap gap-1.5"
