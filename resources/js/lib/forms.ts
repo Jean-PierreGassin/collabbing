@@ -18,6 +18,12 @@ function oldInput(name: string): OldInputValue | undefined {
   return session.oldInput[name];
 }
 
+export function hasOldInput(names: string[]): boolean {
+  const session = useSessionStore();
+
+  return names.some((name) => Object.prototype.hasOwnProperty.call(session.oldInput, name));
+}
+
 export function oldInputString(name: string, fallback: string | null | undefined = ''): string {
   const value = oldInput(name);
 
