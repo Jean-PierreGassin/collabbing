@@ -10,6 +10,7 @@ import { useCollapsiblePanelTransition } from '@/composables/useCollapsiblePanel
 import type { Idea } from '@/types/domain';
 
 type CardBadge = {
+  ariaLabel: string;
   label: string;
   variant: 'default' | 'outline' | 'secondary';
 };
@@ -52,19 +53,22 @@ const isDescriptionExpanded = computed({
 
 const collaborationBadges = computed<CardBadge[]>(() => {
   const badges: CardBadge[] = [{
-    label: `Stage: ${props.idea.collaboration.stageDisplay}`,
-    variant: 'default',
+    ariaLabel: `Stage: ${props.idea.collaboration.stageDisplay}`,
+    label: props.idea.collaboration.stageDisplay,
+    variant: 'outline',
   }];
 
   visibleHelpAreas.value.forEach((label) => {
     badges.push({
-      label: `Needs: ${label}`,
+      ariaLabel: `Help wanted: ${label}`,
+      label,
       variant: 'secondary',
     });
   });
 
   if (! props.idea.collaboration.applicationsOpen) {
     badges.push({
+      ariaLabel: 'Applications closed',
       label: 'Applications closed',
       variant: 'outline',
     });
@@ -72,7 +76,8 @@ const collaborationBadges = computed<CardBadge[]>(() => {
 
   if (props.idea.collaboration.firstContribution) {
     badges.push({
-      label: 'First step ready',
+      ariaLabel: 'First step listed',
+      label: 'First step listed',
       variant: 'outline',
     });
   }
@@ -167,14 +172,6 @@ const cardActionsClass = computed(() => {
   return 'relative z-20 flex flex-col gap-3 border-t border-border bg-background/18 px-6 py-4';
 });
 
-const statusBadgeVariant = computed(() => {
-  if (props.idea.status === 'open') {
-    return 'default';
-  }
-
-  return 'secondary';
-});
-
 const pitchToggleLabel = computed(() => {
   if (isDescriptionExpanded.value) {
     return 'Hide Pitch';
@@ -261,14 +258,22 @@ const pitchChevronClass = computed(() => {
         </Badge>
       </div>
 
-      <div class="pointer-events-none flex flex-wrap gap-1.5">
-        <Badge
-          v-for="badge in collaborationBadges"
-          :key="`${badge.label}-${badge.variant}`"
-          :variant="badge.variant"
-          class="text-xs">
-          {{ badge.label }}
-        </Badge>
+      <div
+        class="pointer-events-none flex flex-col gap-1"
+        aria-label="Collaboration summary">
+        <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
+          Collaboration
+        </span>
+        <div class="flex flex-wrap gap-1.5">
+          <Badge
+            v-for="badge in collaborationBadges"
+            :key="`${badge.ariaLabel}-${badge.variant}`"
+            :variant="badge.variant"
+            :aria-label="badge.ariaLabel"
+            class="text-xs">
+            {{ badge.label }}
+          </Badge>
+        </div>
       </div>
 
       <div class="pointer-events-none mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border pt-2.5 text-xs text-muted-foreground">
@@ -361,14 +366,22 @@ const pitchChevronClass = computed(() => {
               v-if="idea.tags.length === 0"
               class="text-sm text-muted-foreground">No tags yet.</span>
           </div>
-          <div class="flex min-w-0 flex-wrap gap-1.5">
-            <Badge
-              v-for="badge in collaborationBadges"
-              :key="`${badge.label}-${badge.variant}`"
-              :variant="badge.variant"
-              class="text-xs">
-              {{ badge.label }}
-            </Badge>
+          <div
+            class="flex min-w-0 flex-col gap-1"
+            aria-label="Collaboration summary">
+            <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
+              Collaboration
+            </span>
+            <div class="flex min-w-0 flex-wrap gap-1.5">
+              <Badge
+                v-for="badge in collaborationBadges"
+                :key="`${badge.ariaLabel}-${badge.variant}`"
+                :variant="badge.variant"
+                :aria-label="badge.ariaLabel"
+                class="text-xs">
+                {{ badge.label }}
+              </Badge>
+            </div>
           </div>
         </div>
 
@@ -403,47 +416,35 @@ const pitchChevronClass = computed(() => {
     <CardHeader
       v-else
       :class="headerClass">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex min-w-0 flex-col gap-2">
-          <div
-            v-if="featured"
-            class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
-            <Sparkles
-              class="size-3.5"
-              aria-hidden="true" />
-            Trending
-          </div>
-          <template v-if="single && !hideTitle">
-            <h1 class="text-2xl font-semibold leading-tight text-white">
-              {{ idea.titleDisplay }}
-            </h1>
-          </template>
-          <CardTitle
-            v-else-if="!single"
-            class="leading-tight">
-            <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
-          </CardTitle>
-          <p class="text-xs text-muted-foreground">
-            by
-            <Link
-              class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
-              :href="idea.user.routes.show">
-              @{{ idea.user.username }}
-            </Link>
-            <span aria-hidden="true"> · </span>
-            {{ idea.createdAtForHumans }}
-          </p>
-        </div>
-
+      <div class="flex min-w-0 flex-col gap-2">
         <div
-          v-if="idea.can.update || single"
-          class="pointer-events-auto relative z-20 flex shrink-0 flex-wrap items-center gap-2">
-          <Badge
-            :variant="statusBadgeVariant"
-            class="w-fit">
-            {{ idea.statusDisplay }}
-          </Badge>
+          v-if="featured"
+          class="flex items-center gap-2 text-xs font-medium uppercase text-primary">
+          <Sparkles
+            class="size-3.5"
+            aria-hidden="true" />
+          Trending
         </div>
+        <template v-if="single && !hideTitle">
+          <h1 class="text-2xl font-semibold leading-tight text-white">
+            {{ idea.titleDisplay }}
+          </h1>
+        </template>
+        <CardTitle
+          v-else-if="!single"
+          class="leading-tight">
+          <span class="text-white transition-colors group-hover:text-primary">{{ idea.titleDisplay }}</span>
+        </CardTitle>
+        <p class="text-xs text-muted-foreground">
+          by
+          <Link
+            class="pointer-events-auto relative z-20 font-medium text-primary hover:underline"
+            :href="idea.user.routes.show">
+            @{{ idea.user.username }}
+          </Link>
+          <span aria-hidden="true"> · </span>
+          {{ idea.createdAtForHumans }}
+        </p>
       </div>
     </CardHeader>
 
@@ -470,14 +471,22 @@ const pitchChevronClass = computed(() => {
             {{ tag }}
           </Badge>
         </div>
-        <div class="flex flex-wrap gap-2 pt-1">
-          <Badge
-            v-for="badge in collaborationBadges"
-            :key="`${badge.label}-${badge.variant}`"
-            :variant="badge.variant"
-            class="text-xs">
-            {{ badge.label }}
-          </Badge>
+        <div
+          class="flex flex-col gap-1.5 pt-1"
+          aria-label="Collaboration summary">
+          <span class="text-xs font-medium uppercase text-muted-foreground">
+            Collaboration
+          </span>
+          <div class="flex flex-wrap gap-2">
+            <Badge
+              v-for="badge in collaborationBadges"
+              :key="`${badge.ariaLabel}-${badge.variant}`"
+              :variant="badge.variant"
+              :aria-label="badge.ariaLabel"
+              class="text-xs">
+              {{ badge.label }}
+            </Badge>
+          </div>
         </div>
       </section>
 
@@ -541,14 +550,22 @@ const pitchChevronClass = computed(() => {
           {{ tag }}
         </Badge>
       </div>
-      <div class="flex flex-wrap gap-1.5">
-        <Badge
-          v-for="badge in collaborationBadges"
-          :key="`${badge.label}-${badge.variant}`"
-          :variant="badge.variant"
-          class="text-xs">
-          {{ badge.label }}
-        </Badge>
+      <div
+        class="flex flex-col gap-1"
+        aria-label="Collaboration summary">
+        <span class="text-[0.7rem] font-medium uppercase text-muted-foreground">
+          Collaboration
+        </span>
+        <div class="flex flex-wrap gap-1.5">
+          <Badge
+            v-for="badge in collaborationBadges"
+            :key="`${badge.ariaLabel}-${badge.variant}`"
+            :variant="badge.variant"
+            :aria-label="badge.ariaLabel"
+            class="text-xs">
+            {{ badge.label }}
+          </Badge>
+        </div>
       </div>
     </CardContent>
 

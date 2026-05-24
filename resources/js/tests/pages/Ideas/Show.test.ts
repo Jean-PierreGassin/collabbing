@@ -206,6 +206,9 @@ function mountShow(
         IdeaCard: {
           template: '<article data-testid="idea-card"></article>',
         },
+        IdeaCollaboratorStartPanel: {
+          template: '<section data-testid="collaborator-start"></section>',
+        },
         IdeaStartCollaboratingPanel: {
           template: '<aside data-testid="mobile-start-panel"></aside>',
         },
@@ -227,11 +230,12 @@ describe('Ideas/Show', () => {
     expect(wrapper.find('[data-testid="comments"]').exists()).toBe(true);
   });
 
-  it('places mobile collaboration guidance before the main discussion flow', () => {
+  it('places mobile collaboration guidance after the pitch and before private discussion', () => {
     const wrapper = mountShow(application());
-    const gridChildren = Array.from(wrapper.get('.grid').element.children);
+    const mobileStartPanel = wrapper.get('[data-testid="mobile-start-panel"]').element;
 
-    expect(gridChildren[0].getAttribute('data-testid')).toBe('mobile-start-panel');
+    expect(mobileStartPanel.previousElementSibling?.querySelector('[data-testid="idea-card"]')).not.toBeNull();
+    expect(mobileStartPanel.nextElementSibling?.getAttribute('id')).toBe('application-thread');
     expect(wrapper.get('[data-testid="idea-sidebar"]').attributes('data-show-start-panel')).toBe('undefined');
     expect(wrapper.findAll('[data-testid="idea-sidebar"]')[1].attributes('data-show-start-panel')).toBe('false');
   });

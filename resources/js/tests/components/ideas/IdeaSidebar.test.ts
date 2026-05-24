@@ -230,9 +230,9 @@ describe('IdeaSidebar', () => {
     expect(wrapper.text()).toContain('Review the first issue.');
     expect(wrapper.text()).toContain('Applications open');
     expect(wrapper.text()).toContain('GitHub');
-    expect(wrapper.text()).toContain('Readiness');
-    expect(wrapper.text()).toContain('Repository ready');
-    expect(wrapper.text()).toContain('Private notes ready');
+    expect(wrapper.text()).toContain('Readiness signals');
+    expect(wrapper.text()).toContain('Repo available');
+    expect(wrapper.text()).toContain('Start notes ready');
     expect(wrapper.get('a[href="/ideas/1/applications/create"]').text()).toContain('Apply to collaborate');
   });
 
@@ -317,6 +317,7 @@ describe('IdeaSidebar', () => {
 
     expect(wrapper.text()).toContain('Sign in to support or comment while applications are closed.');
     expect(wrapper.text()).not.toContain('Sign in to apply, support, or comment.');
+    expect(wrapper.text()).not.toContain('Register to apply');
   });
 
   it('shows owner state without duplicating the manage action inside the panel', () => {
@@ -366,9 +367,10 @@ describe('IdeaSidebar', () => {
     expect(applicantSidebar.find('form[action="/applications/1"]').exists()).toBe(true);
     expect(applicantSidebar.text()).toContain('Public first steps, support, and comments stay available.');
     expect(collaboratorSidebar.text()).toContain('Collaborating');
+    expect(collaboratorSidebar.get('a[href="#collaborator-start"]').text()).toContain('View start notes');
   });
 
-  it('shows accepted collaborator start notes, approval note, and leave confirmation', async () => {
+  it('keeps accepted collaborator private notes out of the public sidebar', () => {
     session.isAuthenticated = true;
     const wrapper = mountSidebar({
       idea: idea({
@@ -392,36 +394,11 @@ describe('IdeaSidebar', () => {
       }),
     });
 
-    expect(wrapper.text()).toContain('Your starting point');
-    expect(wrapper.text()).toContain('Private setup notes.');
-    expect(wrapper.text()).toContain('Updated 2 minutes ago.');
-    expect(wrapper.text()).toContain('Start with issue #1.');
-
-    const leaveButton = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Leave collaboration'));
-
-    expect(leaveButton).toBeDefined();
-    expect(wrapper.find('textarea[name="exit_reason"]').exists()).toBe(false);
-
-    await leaveButton!.trigger('click');
-
-    expect(wrapper.get('form[action="/applications/1"] input[name="_method"]').attributes('value')).toBe('DELETE');
-    expect(wrapper.get('textarea[name="exit_reason"]').attributes('maxlength')).toBe('1200');
-    expect(wrapper.get('form[action="/applications/1"] button[type="submit"]').text()).toContain('Confirm leave');
-    expect(wrapper.text()).toContain('Cancel');
-  });
-
-  it('shows an honest empty state when accepted collaborator notes are missing', () => {
-    session.isAuthenticated = true;
-    const wrapper = mountSidebar({
-      collaborator: application({
-        status: 'approved',
-        statusDisplay: 'Collaborating',
-      }),
-    });
-
-    expect(wrapper.text()).toContain('The owner has not added private start notes yet.');
+    expect(wrapper.text()).toContain('Collaborating');
+    expect(wrapper.text()).toContain('View start notes');
+    expect(wrapper.text()).not.toContain('Your starting point');
+    expect(wrapper.text()).not.toContain('Private setup notes.');
+    expect(wrapper.text()).not.toContain('Start with issue #1.');
     expect(wrapper.text()).not.toContain('Approval note');
   });
 });

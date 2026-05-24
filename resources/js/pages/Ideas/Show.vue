@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import CommentList from '@/components/comments/CommentList.vue';
 import IdeaApplicationThread from '@/components/ideas/IdeaApplicationThread.vue';
 import IdeaCard from '@/components/ideas/IdeaCard.vue';
+import IdeaCollaboratorStartPanel from '@/components/ideas/IdeaCollaboratorStartPanel.vue';
 import IdeaSidebar from '@/components/ideas/IdeaSidebar.vue';
 import IdeaStartCollaboratingPanel from '@/components/ideas/IdeaStartCollaboratingPanel.vue';
 import { Button } from '@/components/ui/button';
@@ -88,13 +89,6 @@ function hasPitchHeadingsClass(): string | undefined {
     </header>
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-      <IdeaStartCollaboratingPanel
-        class="lg:hidden"
-        :idea="idea"
-        :collaborator="collaborator"
-        :applicant="applicant"
-      />
-
       <div class="flex flex-col gap-4">
         <div :class="hasPitchHeadingsClass()">
           <IdeaCard
@@ -110,6 +104,19 @@ function hasPitchHeadingsClass(): string | undefined {
             nav-label="Pitch table of contents"
           />
         </div>
+
+        <IdeaStartCollaboratingPanel
+          class="lg:hidden"
+          :idea="idea"
+          :collaborator="collaborator"
+          :applicant="applicant"
+        />
+
+        <IdeaCollaboratorStartPanel
+          v-if="collaborator"
+          :idea="idea"
+          :collaborator="collaborator"
+        />
 
         <IdeaApplicationThread
           v-if="threadApplication?.thread"

@@ -767,230 +767,275 @@ onMounted(() => {
                 </p>
               </div>
 
-              <div class="grid gap-4 md:grid-cols-2">
-                <FormField
-                  id="collaboration_stage"
-                  label="Collaboration stage">
-                  <template #default="{ describedBy, feedbackClass }">
-                    <FormSelect
-                      id="collaboration_stage"
-                      v-model="formValues.collaborationStage"
-                      name="collaboration_stage"
-                      :class="feedbackClass"
-                      :aria-describedby="describedBy">
-                      <option
-                        v-for="option in collaborationStageOptions"
-                        :key="option.value"
-                        :value="option.value">
-                        {{ option.label }}
-                      </option>
-                    </FormSelect>
-                  </template>
-                </FormField>
+              <section class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1">
+                  <h3 class="text-sm font-semibold text-foreground">
+                    Availability
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    Set whether people can apply and how ready the idea is.
+                  </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    id="collaboration_stage"
+                    label="Collaboration stage">
+                    <template #default="{ describedBy, feedbackClass }">
+                      <FormSelect
+                        id="collaboration_stage"
+                        v-model="formValues.collaborationStage"
+                        name="collaboration_stage"
+                        :class="feedbackClass"
+                        :aria-describedby="describedBy">
+                        <option
+                          v-for="option in collaborationStageOptions"
+                          :key="option.value"
+                          :value="option.value">
+                          {{ option.label }}
+                        </option>
+                      </FormSelect>
+                    </template>
+                  </FormField>
+
+                  <FormField
+                    id="applications_open"
+                    label="Applications">
+                    <template #default="{ describedBy, feedbackClass }">
+                      <FormSelect
+                        id="applications_open"
+                        v-model="formValues.applicationsOpen"
+                        name="applications_open"
+                        :class="feedbackClass"
+                        :aria-describedby="describedBy">
+                        <option
+                          v-for="option in applicationStatusOptions"
+                          :key="option.value"
+                          :value="option.value">
+                          {{ option.label }}
+                        </option>
+                      </FormSelect>
+                    </template>
+                  </FormField>
+                </div>
 
                 <FormField
-                  id="applications_open"
-                  label="Applications">
-                  <template #default="{ describedBy, feedbackClass }">
-                    <FormSelect
-                      id="applications_open"
-                      v-model="formValues.applicationsOpen"
-                      name="applications_open"
-                      :class="feedbackClass"
-                      :aria-describedby="describedBy">
-                      <option
-                        v-for="option in applicationStatusOptions"
-                        :key="option.value"
-                        :value="option.value">
-                        {{ option.label }}
-                      </option>
-                    </FormSelect>
-                  </template>
-                </FormField>
-              </div>
-
-              <FormField
-                id="help_wanted"
-                label="Help wanted"
-                help="Choose the areas where help would be useful. People can still apply with other contribution types.">
-                <template #default="{ describedBy }">
-                  <div
-                    id="help_wanted"
-                    class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
-                    :aria-describedby="describedBy">
-                    <label
-                      v-for="option in helpAreaOptions"
-                      :key="option.value"
-                      class="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-input bg-background/70 px-3 py-2 text-sm transition-colors hover:border-primary/50 hover:bg-secondary/70">
-                      <input
-                        v-model="formValues.helpWanted"
-                        type="checkbox"
-                        name="help_wanted[]"
-                        :value="option.value"
-                        class="size-4 rounded border-input text-primary focus:ring-ring">
-                      <span>{{ option.label }}</span>
-                    </label>
-                  </div>
-                </template>
-              </FormField>
-
-              <FormField
-                id="help_wanted_note"
-                label="Help note"
-                help="Short plain text for anything the selected areas do not explain."
-                :validator="helpWantedNoteValidator">
-                <template #default="{ invalid, describedBy, feedbackClass }">
-                  <textarea
-                    id="help_wanted_note"
-                    v-model="formValues.helpWantedNote"
-                    name="help_wanted_note"
-                    :class="[
-                      'min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                      feedbackClass,
-                    ]"
-                    placeholder="A second pair of eyes on scope and launch copy would help."
-                    maxlength="240"
-                    :aria-invalid="invalid || undefined"
-                    :aria-describedby="describedBy" />
-                </template>
-              </FormField>
-
-              <FormField
-                id="first_contribution"
-                label="First contribution"
-                help="Public prompt with links and line breaks. Keep it small and concrete."
-                :validator="firstContributionValidator">
-                <template #default="{ invalid, describedBy, feedbackClass }">
-                  <textarea
-                    id="first_contribution"
-                    v-model="formValues.firstContribution"
-                    name="first_contribution"
-                    :class="[
-                      'min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                      feedbackClass,
-                    ]"
-                    placeholder="Pick one small issue from the README and suggest the first pull request."
-                    maxlength="1200"
-                    :aria-invalid="invalid || undefined"
-                    :aria-describedby="describedBy" />
-                </template>
-              </FormField>
-
-              <div class="grid gap-4 md:grid-cols-2">
-                <FormField
-                  id="communication_style"
-                  label="Communication style">
-                  <template #default="{ describedBy, feedbackClass }">
-                    <FormSelect
-                      id="communication_style"
-                      v-model="formValues.communicationStyle"
-                      name="communication_style"
-                      :class="feedbackClass"
-                      :aria-describedby="describedBy">
-                      <option
-                        v-for="option in communicationStyleOptions"
-                        :key="option.value"
-                        :value="option.value">
-                        {{ option.label }}
-                      </option>
-                    </FormSelect>
-                  </template>
-                </FormField>
-
-                <FormField
-                  id="communication_note"
-                  label="Coordination note"
-                  help="Do not include private contact details here."
-                  :validator="communicationNoteValidator">
+                  v-if="formValues.applicationsOpen === '0'"
+                  id="applications_closed_note"
+                  label="Closed applications note"
+                  help="Optional public note shown while applications are closed."
+                  :validator="applicationsClosedNoteValidator">
                   <template #default="{ invalid, describedBy, feedbackClass }">
                     <input
-                      id="communication_note"
-                      v-model="formValues.communicationNote"
-                      name="communication_note"
+                      id="applications_closed_note"
+                      v-model="formValues.applicationsClosedNote"
+                      name="applications_closed_note"
                       type="text"
                       :class="[
                         'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
                         feedbackClass,
                       ]"
-                      placeholder="Async updates are easiest."
+                      placeholder="Applications are paused while we review current interest."
                       maxlength="240"
                       :aria-invalid="invalid || undefined"
                       :aria-describedby="describedBy">
                   </template>
                 </FormField>
-              </div>
+              </section>
 
-              <FormField
-                id="applications_closed_note"
-                label="Closed applications note"
-                help="Optional public note shown only when applications are closed."
-                :validator="applicationsClosedNoteValidator">
-                <template #default="{ invalid, describedBy, feedbackClass }">
-                  <input
-                    id="applications_closed_note"
-                    v-model="formValues.applicationsClosedNote"
-                    name="applications_closed_note"
-                    type="text"
-                    :class="[
-                      'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                      feedbackClass,
-                    ]"
-                    placeholder="Applications are paused while we review current interest."
-                    maxlength="240"
-                    :aria-invalid="invalid || undefined"
-                    :aria-describedby="describedBy">
-                </template>
-              </FormField>
+              <section class="flex flex-col gap-4 border-t border-border pt-5">
+                <div class="flex flex-col gap-1">
+                  <h3 class="text-sm font-semibold text-foreground">
+                    How someone can help
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    Make the public page answer what help is useful and what to do first.
+                  </p>
+                </div>
 
-              <FormField
-                id="repository_name"
-                label="Repository name"
-                help="Optional. Use up to 100 letters, numbers, dashes, or underscores."
-                :validator="repositoryNameValidator">
-                <template #default="{ invalid, describedBy, feedbackClass }">
-                  <input
-                    id="repository_name"
-                    v-model="formValues.repositoryName"
-                    name="repository_name"
-                    type="text"
-                    :class="[
-                      'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                      feedbackClass,
-                    ]"
-                    placeholder="design-review-matchmaker"
-                    maxlength="100"
-                    :pattern="repositoryNamePattern"
-                    autocomplete="off"
-                    autocapitalize="none"
-                    spellcheck="false"
-                    :aria-invalid="invalid || undefined"
-                    :aria-describedby="describedBy"
-                    @beforeinput="blockInvalidRepositoryNameInput"
-                    @input="sanitizeRepositoryName"
-                    @paste="pasteRepositoryName">
-                </template>
-              </FormField>
+                <FormField
+                  id="help_wanted"
+                  label="Help wanted"
+                  help="Choose the areas where help would be useful. People can still apply with other contribution types.">
+                  <template #default="{ describedBy }">
+                    <div
+                      id="help_wanted"
+                      class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+                      :aria-describedby="describedBy">
+                      <label
+                        v-for="option in helpAreaOptions"
+                        :key="option.value"
+                        class="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-input bg-background/70 px-3 py-2 text-sm transition-colors hover:border-primary/50 hover:bg-secondary/70">
+                        <input
+                          v-model="formValues.helpWanted"
+                          type="checkbox"
+                          name="help_wanted[]"
+                          :value="option.value"
+                          class="size-4 rounded border-input text-primary focus:ring-ring">
+                        <span>{{ option.label }}</span>
+                      </label>
+                    </div>
+                  </template>
+                </FormField>
 
-              <FormField
-                id="getting_started_notes"
-                label="Private start notes"
-                help="Visible only to accepted collaborators and the owner. Markdown is supported."
-                :validator="gettingStartedNotesValidator">
-                <template #default="{ invalid, describedBy, feedbackClass }">
-                  <textarea
-                    id="getting_started_notes"
-                    v-model="formValues.gettingStartedNotes"
-                    name="getting_started_notes"
-                    :class="[
-                      'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
-                      feedbackClass,
-                    ]"
-                    placeholder="Share private setup links, contact details, or first-week context after approval."
-                    maxlength="10000"
-                    :aria-invalid="invalid || undefined"
-                    :aria-describedby="describedBy" />
-                </template>
-              </FormField>
+                <FormField
+                  id="help_wanted_note"
+                  label="Help note"
+                  help="Short plain text for anything the selected areas do not explain."
+                  :validator="helpWantedNoteValidator">
+                  <template #default="{ invalid, describedBy, feedbackClass }">
+                    <textarea
+                      id="help_wanted_note"
+                      v-model="formValues.helpWantedNote"
+                      name="help_wanted_note"
+                      :class="[
+                        'min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                        feedbackClass,
+                      ]"
+                      placeholder="A second pair of eyes on scope and launch copy would help."
+                      maxlength="240"
+                      :aria-invalid="invalid || undefined"
+                      :aria-describedby="describedBy" />
+                  </template>
+                </FormField>
+
+                <FormField
+                  id="first_contribution"
+                  label="First contribution"
+                  help="Public prompt with links and line breaks. Keep it small and concrete."
+                  :validator="firstContributionValidator">
+                  <template #default="{ invalid, describedBy, feedbackClass }">
+                    <textarea
+                      id="first_contribution"
+                      v-model="formValues.firstContribution"
+                      name="first_contribution"
+                      :class="[
+                        'min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                        feedbackClass,
+                      ]"
+                      placeholder="Pick one small issue from the README and suggest the first pull request."
+                      maxlength="1200"
+                      :aria-invalid="invalid || undefined"
+                      :aria-describedby="describedBy" />
+                  </template>
+                </FormField>
+              </section>
+
+              <section class="flex flex-col gap-4 border-t border-border pt-5">
+                <div class="flex flex-col gap-1">
+                  <h3 class="text-sm font-semibold text-foreground">
+                    Coordination
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    Set the public coordination preference and optional repository.
+                  </p>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    id="communication_style"
+                    label="Communication style">
+                    <template #default="{ describedBy, feedbackClass }">
+                      <FormSelect
+                        id="communication_style"
+                        v-model="formValues.communicationStyle"
+                        name="communication_style"
+                        :class="feedbackClass"
+                        :aria-describedby="describedBy">
+                        <option
+                          v-for="option in communicationStyleOptions"
+                          :key="option.value"
+                          :value="option.value">
+                          {{ option.label }}
+                        </option>
+                      </FormSelect>
+                    </template>
+                  </FormField>
+
+                  <FormField
+                    id="communication_note"
+                    label="Coordination note"
+                    help="Do not include private contact details here."
+                    :validator="communicationNoteValidator">
+                    <template #default="{ invalid, describedBy, feedbackClass }">
+                      <input
+                        id="communication_note"
+                        v-model="formValues.communicationNote"
+                        name="communication_note"
+                        type="text"
+                        :class="[
+                          'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                          feedbackClass,
+                        ]"
+                        placeholder="Async updates are easiest."
+                        maxlength="240"
+                        :aria-invalid="invalid || undefined"
+                        :aria-describedby="describedBy">
+                    </template>
+                  </FormField>
+                </div>
+
+                <FormField
+                  id="repository_name"
+                  label="Repository name"
+                  help="Optional. Use up to 100 letters, numbers, dashes, or underscores."
+                  :validator="repositoryNameValidator">
+                  <template #default="{ invalid, describedBy, feedbackClass }">
+                    <input
+                      id="repository_name"
+                      v-model="formValues.repositoryName"
+                      name="repository_name"
+                      type="text"
+                      :class="[
+                        'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                        feedbackClass,
+                      ]"
+                      placeholder="design-review-matchmaker"
+                      maxlength="100"
+                      :pattern="repositoryNamePattern"
+                      autocomplete="off"
+                      autocapitalize="none"
+                      spellcheck="false"
+                      :aria-invalid="invalid || undefined"
+                      :aria-describedby="describedBy"
+                      @beforeinput="blockInvalidRepositoryNameInput"
+                      @input="sanitizeRepositoryName"
+                      @paste="pasteRepositoryName">
+                  </template>
+                </FormField>
+              </section>
+
+              <section class="flex flex-col gap-4 border-t border-border pt-5">
+                <div class="flex flex-col gap-1">
+                  <h3 class="text-sm font-semibold text-foreground">
+                    After approval
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    Add private context that only accepted collaborators and the owner can see.
+                  </p>
+                </div>
+
+                <FormField
+                  id="getting_started_notes"
+                  label="Private start notes"
+                  help="Visible only to accepted collaborators and the owner. Markdown is supported."
+                  :validator="gettingStartedNotesValidator">
+                  <template #default="{ invalid, describedBy, feedbackClass }">
+                    <textarea
+                      id="getting_started_notes"
+                      v-model="formValues.gettingStartedNotes"
+                      name="getting_started_notes"
+                      :class="[
+                        'min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40',
+                        feedbackClass,
+                      ]"
+                      placeholder="Share private setup links, contact details, or first-week context after approval."
+                      maxlength="10000"
+                      :aria-invalid="invalid || undefined"
+                      :aria-describedby="describedBy" />
+                  </template>
+                </FormField>
+              </section>
             </div>
 
             <aside class="flex h-fit flex-col gap-3 rounded-md border border-border bg-background/35 p-4">

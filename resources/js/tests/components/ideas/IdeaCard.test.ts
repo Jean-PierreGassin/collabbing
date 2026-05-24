@@ -137,6 +137,27 @@ function mountCard(variant: 'compact' | 'detailed', overrides: Partial<Idea> = {
   });
 }
 
+function mountSingle(overrides: Partial<Idea> = {}) {
+  return mount(IdeaCard, {
+    props: {
+      idea: idea(overrides),
+      single: true,
+    },
+    global: {
+      stubs: {
+        Link: {
+          props: ['href'],
+          template: '<a :href="href"><slot /></a>',
+        },
+        MarkdownContent: {
+          props: ['html'],
+          template: '<div v-html="html" />',
+        },
+      },
+    },
+  });
+}
+
 function occurrences(text: string, needle: string): number {
   return text.split(needle).length - 1;
 }
@@ -176,13 +197,16 @@ describe('IdeaCard', () => {
     });
     const text = wrapper.text();
 
-    expect(text).toContain('Stage: Ready to build');
-    expect(text).toContain('Needs: Frontend');
-    expect(text).toContain('Needs: Backend');
-    expect(text).toContain('Needs: Testing');
+    expect(text).toContain('Collaboration');
+    expect(text).toContain('Ready to build');
+    expect(text).toContain('Frontend');
+    expect(text).toContain('Backend');
+    expect(text).toContain('Testing');
     expect(text).not.toContain('Design');
     expect(text).toContain('Applications closed');
-    expect(text).toContain('First step ready');
+    expect(text).toContain('First step listed');
+    expect(text).not.toContain('Stage:');
+    expect(text).not.toContain('Needs:');
     expect(text).not.toContain('Review the first issue.');
   });
 
@@ -222,12 +246,25 @@ describe('IdeaCard', () => {
     });
     const text = wrapper.text();
 
-    expect(text).toContain('Stage: Actively building');
-    expect(text).toContain('Needs: Product');
-    expect(text).toContain('Needs: Research');
-    expect(text).toContain('First step ready');
+    expect(text).toContain('Collaboration');
+    expect(text).toContain('Actively building');
+    expect(text).toContain('Product');
+    expect(text).toContain('Research');
+    expect(text).toContain('First step listed');
+    expect(text).not.toContain('Stage:');
+    expect(text).not.toContain('Needs:');
     expect(text).not.toContain('Applications closed');
     expect(text).not.toContain('Map the onboarding state.');
+  });
+
+  it('keeps generic idea status off public cards', () => {
+    const wrapper = mountSingle({
+      status: 'open',
+      statusDisplay: 'Open',
+    });
+
+    expect(wrapper.text()).not.toContain('Open');
+    expect(wrapper.text()).toContain('Collaboration');
   });
 
   it('keeps card body layers pass-through so cards remain clickable', () => {
