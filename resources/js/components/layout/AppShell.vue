@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronDown, LayoutDashboard, LogOut, Menu, Pencil, Plus, Search, UserCircle, X } from '@lucide/vue';
+import { ChevronDown, LayoutDashboard, Lightbulb, LogOut, Menu, Pencil, Plus, Search, UserCircle, X } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import CsrfField from '@/components/forms/CsrfField.vue';
 import AppFooter from '@/components/layout/AppFooter.vue';
@@ -9,9 +9,11 @@ import FlashMessages from '@/components/layout/FlashMessages.vue';
 import ThemeModeToggle from '@/components/layout/ThemeModeToggle.vue';
 import BreadcrumbBar from '@/components/navigation/BreadcrumbBar.vue';
 import { useAppShellPageState } from '@/composables/useAppShellPageState';
+import { useSharedPage } from '@/lib/page';
 import { useSessionStore } from '@/stores/session';
 
 const session = useSessionStore();
+const page = useSharedPage();
 
 const isMobileMenuOpen = ref(false);
 const isMobileSearchOpen = ref(false);
@@ -42,6 +44,35 @@ const brandLabel = computed(() => {
   }
 
   return 'Collabbing home';
+});
+
+const accountInitials = computed(() => {
+  const nameParts = session.user?.name
+    .trim()
+    .split(/\s+/)
+    .filter((part) => part.length > 0) ?? [];
+
+  if (nameParts.length === 0) {
+    return 'ME';
+  }
+
+  if (nameParts.length === 1) {
+    return nameParts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+});
+
+const showDesktopSearch = computed(() => {
+  if (!session.isAuthenticated) {
+    return true;
+  }
+
+  if (currentSearchTerm.value !== '') {
+    return true;
+  }
+
+  return page.component !== 'Dashboard' && page.component !== 'Ideas/Index';
 });
 
 const mobileSearchLabel = computed(() => {
@@ -213,18 +244,31 @@ watch(
               Collabbing
             </Link>
             <Transition name="chrome-swap">
-              <Button
+              <nav
                 v-if="session.isAuthenticated"
-                :as="Link"
-                :href="session.routes.dashboard"
-                variant="ghost"
-                size="sm"
-                class="hidden lg:inline-flex">
-                <LayoutDashboard
-                  class="size-4"
-                  aria-hidden="true" />
-                Dashboard
-              </Button>
+                aria-label="Primary workspace navigation"
+                class="hidden items-center gap-1 lg:flex">
+                <Button
+                  :as="Link"
+                  :href="session.routes.ideas"
+                  variant="ghost"
+                  size="sm">
+                  <Lightbulb
+                    class="size-4"
+                    aria-hidden="true" />
+                  Ideas
+                </Button>
+                <Button
+                  :as="Link"
+                  :href="session.routes.dashboard"
+                  variant="ghost"
+                  size="sm">
+                  <LayoutDashboard
+                    class="size-4"
+                    aria-hidden="true" />
+                  Dashboard
+                </Button>
+              </nav>
             </Transition>
           </div>
 
@@ -267,6 +311,7 @@ watch(
 
         <div class="hidden w-full flex-col gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center lg:justify-end">
           <form
+            v-if="showDesktopSearch"
             :class="[
               'relative flex h-10 items-center justify-end overflow-hidden transition-[width] duration-200 ease-out',
               isDesktopSearchOpen ? 'w-72 xl:w-80' : 'w-10',
@@ -358,26 +403,27 @@ watch(
             </nav>
           </Transition>
 
-          <ThemeModeToggle class="hidden lg:inline-flex" />
-
           <Transition name="chrome-swap">
             <div
               v-if="session.isAuthenticated"
               class="flex min-w-0 items-center justify-end gap-2">
               <div
                 ref="accountMenu"
-                class="relative max-w-56">
+                class="relative">
                 <Button
                   variant="outline"
                   type="button"
-                  class="w-full"
+                  class="h-10 px-3"
                   :aria-expanded="isAccountMenuOpen"
                   aria-controls="account-menu"
+                  :aria-label="`Open account menu for ${session.user?.name ?? 'your account'}`"
                   @click.stop="toggleAccountMenu"
                 >
-                  <span class="truncate">{{ session.user?.name }}</span>
+                  <span class="text-xs font-semibold tracking-wide">
+                    {{ accountInitials }}
+                  </span>
                   <ChevronDown
-                    class="size-4"
+                    class="size-3"
                     aria-hidden="true" />
                 </Button>
                 <Transition name="mobile-panel">
@@ -387,6 +433,11 @@ watch(
                     class="absolute right-0 top-full z-[60] mt-2 flex w-72 flex-col gap-2 rounded-md border border-border bg-popover p-2 text-sm shadow-xl shadow-black/25"
                     @click.stop
                   >
+                    <div class="min-w-0 px-2 pb-1 pt-1">
+                      <p class="truncate text-sm font-medium text-foreground">
+                        {{ session.user?.name }}
+                      </p>
+                    </div>
                     <Button
                       :as="Link"
                       :href="session.user?.routes.show ?? session.routes.dashboard"
@@ -465,56 +516,85 @@ watch(
             v-if="isMobileMenuOpen"
             id="mobile-navigation"
             class="mt-3 border-t border-border pt-3 lg:hidden">
-            <nav
+            <div
               v-if="session.isAuthenticated"
-              aria-label="Mobile workspace navigation"
-              class="grid gap-2">
-              <Button
-                :as="Link"
-                :href="session.routes.ideas"
-                variant="ghost"
-                class="h-11 justify-start"
-                @click="closeMobileNavigation">
-                Ideas
-              </Button>
-              <Button
-                :as="Link"
-                :href="session.routes.dashboard"
-                variant="ghost"
-                class="h-11 justify-start"
-                @click="closeMobileNavigation">
-                Dashboard
-              </Button>
-              <Button
-                :as="Link"
-                :href="session.routes.ideasCreate"
-                class="h-11 justify-start"
-                @click="closeMobileNavigation">
-                <Plus
-                  class="size-4"
-                  aria-hidden="true" />
-                Create an Idea
-              </Button>
-              <Button
-                :as="Link"
-                :href="session.user?.routes.show ?? session.routes.dashboard"
-                variant="outline"
-                class="h-11 justify-start"
-                @click="closeMobileNavigation">
-                <span class="truncate">{{ session.user?.name }}</span>
-              </Button>
-              <Button
-                :as="Link"
-                :href="session.user?.routes.edit ?? session.routes.dashboard"
-                variant="ghost"
-                class="h-11 justify-start"
-                @click="closeMobileNavigation">
-                <Pencil
-                  class="size-4"
-                  aria-hidden="true" />
-                Edit profile
-              </Button>
-            </nav>
+              class="grid gap-4">
+              <nav
+                aria-label="Mobile workspace navigation"
+                class="grid gap-1">
+                <p class="px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Navigate
+                </p>
+                <Button
+                  :as="Link"
+                  :href="session.routes.ideas"
+                  variant="ghost"
+                  class="h-11 justify-start"
+                  @click="closeMobileNavigation">
+                  <Lightbulb
+                    class="size-4"
+                    aria-hidden="true" />
+                  Ideas
+                </Button>
+                <Button
+                  :as="Link"
+                  :href="session.routes.dashboard"
+                  variant="ghost"
+                  class="h-11 justify-start"
+                  @click="closeMobileNavigation">
+                  <LayoutDashboard
+                    class="size-4"
+                    aria-hidden="true" />
+                  Dashboard
+                </Button>
+              </nav>
+
+              <div class="grid gap-1">
+                <p class="px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Create
+                </p>
+                <Button
+                  :as="Link"
+                  :href="session.routes.ideasCreate"
+                  class="h-11 justify-start"
+                  @click="closeMobileNavigation">
+                  <Plus
+                    class="size-4"
+                    aria-hidden="true" />
+                  Create an Idea
+                </Button>
+              </div>
+
+              <nav
+                aria-label="Mobile account navigation"
+                class="grid gap-1">
+                <p class="px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Account
+                </p>
+                <Button
+                  :as="Link"
+                  :href="session.user?.routes.show ?? session.routes.dashboard"
+                  variant="outline"
+                  class="h-11 justify-start"
+                  @click="closeMobileNavigation">
+                  <UserCircle
+                    class="size-4"
+                    aria-hidden="true" />
+                  <span class="truncate">{{ session.user?.name }}</span>
+                </Button>
+                <Button
+                  :as="Link"
+                  :href="session.user?.routes.edit ?? session.routes.dashboard"
+                  variant="ghost"
+                  class="h-11 justify-start"
+                  @click="closeMobileNavigation">
+                  <Pencil
+                    class="size-4"
+                    aria-hidden="true" />
+                  Edit profile
+                </Button>
+              </nav>
+            </div>
             <nav
               v-else
               aria-label="Mobile main navigation"
@@ -547,7 +627,7 @@ watch(
               v-if="session.isAuthenticated"
               :action="session.routes.logout"
               method="POST"
-              class="mt-2">
+              class="mt-4">
               <CsrfField />
               <Button
                 type="submit"
@@ -560,6 +640,11 @@ watch(
               </Button>
             </form>
             <div class="mt-3 border-t border-border pt-3">
+              <p
+                v-if="session.isAuthenticated"
+                class="mb-2 px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Preferences
+              </p>
               <ThemeModeToggle
                 show-labels
                 class="w-full" />
